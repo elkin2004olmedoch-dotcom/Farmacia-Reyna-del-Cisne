@@ -41,7 +41,7 @@ button, input { font: inherit; }
 .contact-popover a { display: block; margin-top: 10px; color: var(--navy); font-weight: 700; }
 .menu-toggle, .menu-button, .mobile-nav { display: none; }
 
-.hero { position: relative; display: grid; grid-template-columns: 1.05fr .95fr; gap: 80px; align-items: center; min-height: 770px; padding-top: 74px; padding-bottom: 84px; }
+.hero { position: relative; display: grid; grid-template-columns: 1.05fr .95fr; gap: 72px; align-items: center; min-height: 770px; padding-top: 78px; padding-bottom: 84px; }
 .hero-grid { position: absolute; inset: 0 0 auto; z-index: 0; height: 550px; opacity: .75; background-image: linear-gradient(#dce3ef 1px, transparent 1px), linear-gradient(90deg, #dce3ef 1px, transparent 1px); background-size: 36px 36px; mask-image: linear-gradient(to bottom, #000, transparent 90%); pointer-events: none; }
 .hero-copy, .hero-card-wrap { position: relative; z-index: 1; }
 .eyebrow { margin: 0; color: var(--navy); font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; }
@@ -50,9 +50,31 @@ button, input { font: inherit; }
 .pill span { width: 8px; height: 8px; border-radius: 50%; background: var(--navy); }
 h1, h2, h3, p { margin-top: 0; }
 h1, h2, h3 { font-family: var(--serif); }
-.hero h1 { max-width: 680px; margin: 36px 0 0; font-size: clamp(58px, 8vw, 118px); line-height: .9; letter-spacing: -.075em; }
-.hero h1 em { font-style: normal; text-decoration: underline; text-decoration-thickness: 5px; text-underline-offset: 9px; }
-.hero-description { max-width: 540px; margin: 34px 0 0; color: var(--muted); font-size: 18px; line-height: 1.8; }
+.hero h1 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 860px;
+  margin: 28px 0 0;
+  font-size: clamp(76px, 10vw, 220px);
+  line-height: .72;
+  letter-spacing: -.09em;
+}
+.hero h1 .headline-line {
+  display: block;
+}
+.hero h1 .headline-line-bottom {
+  margin-top: 8px;
+}
+.hero h1 em {
+  display: inline-block;
+  margin-left: 0.08em;
+  padding-bottom: 10px;
+  font-style: normal;
+  border-bottom: 5px solid var(--navy);
+  text-decoration: none;
+}
+.hero-description { max-width: 540px; margin: 28px 0 0; color: var(--muted); font-size: 18px; line-height: 1.8; }
 .button-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
 .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 24px; border-radius: 999px; font-size: 14px; font-weight: 700; transition: transform .25s ease, box-shadow .25s ease, background .25s ease; }
 .button:hover { transform: translateY(-3px); }
