@@ -1,0 +1,4 @@
+Farmacia Reyna del Cisne - página creada únicamente con HTML y CSS
+
+Abre index.html para ver la página.
+Puedes compartir esta carpeta o subirla a un hosting de páginas estáticas.
