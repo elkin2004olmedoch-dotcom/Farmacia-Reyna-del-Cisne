@@ -217,15 +217,17 @@ h1, h2, h3 { font-family: var(--serif); letter-spacing: -.04em; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 20px;
-  border-radius: 999px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   color: var(--white);
   background: #25d366;
   box-shadow: 0 18px 35px rgb(37 211 102 / 35%);
-  font-size: 13px;
+  font-size: 28px;
   font-weight: 700;
 }
 .floating-whatsapp:hover { filter: brightness(1.04); }
+.wa-icon { display: inline-block; transform: translateY(-1px); }
 
 @media (min-width: 681px) {
   .header-inner { column-gap: 18px; }
