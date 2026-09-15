@@ -227,7 +227,12 @@ h1, h2, h3 { font-family: var(--serif); letter-spacing: -.04em; }
   font-weight: 700;
 }
 .floating-whatsapp:hover { filter: brightness(1.04); }
-.wa-icon { display: inline-block; transform: translateY(-1px); }
+.wa-icon {
+  display: block;
+  width: 34px;
+  height: 34px;
+  color: var(--white);
+}
 
 @media (min-width: 681px) {
   .header-inner { column-gap: 18px; }
