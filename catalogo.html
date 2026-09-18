@@ -31,32 +31,44 @@
       <input class="tab-input" type="radio" name="product-tab" id="tab-bebe">
 
       <main class="catalog-main section-wrap max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="catalog-hero">
+        <section class="catalog-banner">
           <div>
-            <p class="eyebrow pill"><span></span>Compra con calma</p>
-            <h1>Encuentra lo que necesitas <em>para cuidarte.</em></h1>
-            <p>Explora nuestra selección y consulta por WhatsApp la disponibilidad de cada producto.</p>
-            <div class="catalog-trust">
-              <span><b>04</b> categorías útiles</span>
-              <span><b>100%</b> atención cercana</span>
+            <p class="eyebrow">Selección Reyna del Cisne</p>
+            <h1>Cuida de ti, <em>a tu manera.</em></h1>
+            <p>Productos esenciales, atención cercana y opciones pensadas para tu día a día.</p>
+          </div>
+          <span class="catalog-banner-mark">✚</span>
+        </section>
+        <div class="catalog-search-wide">⌕ <span>¿Qué producto estás buscando?</span></div>
+        <div class="catalog-layout">
+          <aside class="catalog-sidebar">
+            <div class="catalog-sidebar-title">Categorías <span>⌃</span></div>
+            <div class="catalog-side-links">
+              <label for="tab-todos">Todos los productos <b>04</b></label>
+              <label for="tab-bienestar">Bienestar <b>02</b></label>
+              <label for="tab-cuidado">Cuidado personal <b>01</b></label>
+              <label for="tab-bebe">Mamá y bebé <b>01</b></label>
             </div>
-          </div>
-          <label class="cart-trigger" for="cart-toggle">🛒 Ver carrito</label>
-        </div>
-        <div class="catalog-toolbar flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div class="catalog-search">⌕ <span>Buscar productos</span></div>
-          <div class="product-tabs" role="tablist" aria-label="Categorías de productos">
-            <label for="tab-todos" role="tab">Todos</label>
-            <label for="tab-bienestar" role="tab">Bienestar</label>
-            <label for="tab-cuidado" role="tab">Cuidado personal</label>
-            <label for="tab-bebe" role="tab">Mamá y bebé</label>
-          </div>
-        </div>
-        <div class="catalog-meta">
-          <span><strong>4</strong> productos seleccionados para ti</span>
-          <span class="catalog-sort">Ordenar: <strong>Recomendados</strong> <b>⌄</b></span>
-        </div>
-        <div class="catalog-grid grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="catalog-sidebar-title">Filtrar por <span>⌃</span></div>
+            <p class="catalog-filter-note">Compra con calma</p>
+            <p>Consulta disponibilidad y recomendaciones directamente con nuestra farmacia.</p>
+            <label class="catalog-side-contact" for="cart-toggle">Abrir carrito ↗</label>
+          </aside>
+          <section class="catalog-results">
+            <div class="catalog-toolbar flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div class="product-tabs" role="tablist" aria-label="Categorías de productos">
+                <label for="tab-todos" role="tab">Todos</label>
+                <label for="tab-bienestar" role="tab">Bienestar</label>
+                <label for="tab-cuidado" role="tab">Cuidado personal</label>
+                <label for="tab-bebe" role="tab">Mamá y bebé</label>
+              </div>
+              <span class="catalog-sort">Ordenar: <strong>Recomendados</strong> <b>⌄</b></span>
+            </div>
+            <div class="catalog-meta">
+              <span><strong>04</strong> productos seleccionados para ti</span>
+              <span>Disponibilidad por WhatsApp</span>
+            </div>
+            <div class="catalog-grid grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <article class="catalog-card catalog-card--bienestar catalog-card--vitaminas rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
             <div class="catalog-photo-wrap"><img class="catalog-photo" src="https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=700&q=80" alt="Frasco de vitaminas diarias"><span class="catalog-badge">Recomendado</span></div>
             <span class="catalog-tag">Bienestar</span><span class="catalog-icon">✚</span>
@@ -81,6 +93,8 @@
             <h2>Botiquín básico</h2><p>Lo esencial para tener a mano.</p><strong>$18,90</strong>
             <label class="catalog-add" for="product-botiquin">Añadir al carrito +</label>
           </article>
+            </div>
+          </section>
         </div>
       </main>
 
