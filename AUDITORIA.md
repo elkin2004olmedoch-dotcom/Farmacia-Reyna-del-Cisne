@@ -1,9 +1,26 @@
 # Auditoria del sitio web
 
 **Proyecto:** Farmacia Reyna del Cisne  
-**Fecha:** 15 de septiembre de 2026  
+**Fecha:** 18 de septiembre de 2026  
 **Alcance:** `index.html`, `styles.css`, recursos locales y enlaces principales  
-**Resultado:** Aprobado con observaciones de contenido y despliegue
+**Resultado:** Aprobado con observaciones de contenido, framework y despliegue
+
+## Actualización de esta auditoría
+
+### Mejoras implementadas
+
+- Se integró Bootstrap 5.3.3 mediante CDN, manteniendo `styles.css` como la capa visual principal.
+- Se aplicó el Bootstrap Grid System en el hero, las categorías de servicios, promociones y ubicación.
+- Las columnas ahora responden con `col-lg`, `col-md`, `col-sm` y `col-xl`, mejorando la adaptación entre móvil, tablet y escritorio.
+- Se conservaron los estilos propios, colores, tipografías, tarjetas y componentes de la marca.
+- Se evitó incorporar un segundo framework: el proyecto usa Bootstrap como único framework externo.
+
+### Pendiente de mejorar
+
+- La integración depende del CDN de jsDelivr; para producción se puede alojar Bootstrap localmente o confirmar la política de dependencias externas.
+- Aún deben reemplazarse los datos de contacto, dirección y horario de muestra por los datos definitivos.
+- Conviene probar el sitio en dispositivos reales y validar los enlaces de WhatsApp, teléfono y mapa.
+- Las imágenes remotas de Unsplash deberían sustituirse por fotografías autorizadas de la farmacia.
 
 ## Resumen
 
