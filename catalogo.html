@@ -29,6 +29,13 @@
       <input class="tab-input" type="radio" name="product-tab" id="tab-bienestar">
       <input class="tab-input" type="radio" name="product-tab" id="tab-cuidado">
       <input class="tab-input" type="radio" name="product-tab" id="tab-bebe">
+      <input class="filter-input" type="radio" name="price-filter" id="price-all" checked>
+      <input class="filter-input" type="radio" name="price-filter" id="price-under-10">
+      <input class="filter-input" type="radio" name="price-filter" id="price-10-15">
+      <input class="filter-input" type="radio" name="price-filter" id="price-over-15">
+      <input class="sort-input" type="radio" name="product-sort" id="sort-recommended" checked>
+      <input class="sort-input" type="radio" name="product-sort" id="sort-low">
+      <input class="sort-input" type="radio" name="product-sort" id="sort-high">
 
       <main class="catalog-main section-wrap max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <section class="catalog-banner">
@@ -39,7 +46,18 @@
           </div>
           <span class="catalog-banner-mark">✚</span>
         </section>
-        <div class="catalog-search-wide">⌕ <span>¿Qué producto estás buscando?</span></div>
+        <div class="catalog-search-wide" role="search">
+          <span class="catalog-search-icon" aria-hidden="true">⌕</span>
+          <label class="sr-only" for="catalog-search">Buscar productos</label>
+          <input id="catalog-search" type="search" list="catalog-suggestions" placeholder="¿Qué producto estás buscando?">
+          <datalist id="catalog-suggestions">
+            <option value="Vitaminas diarias">
+            <option value="Protector solar">
+            <option value="Cuidado del bebé">
+            <option value="Botiquín básico">
+          </datalist>
+          <span class="catalog-search-hint">Elige una sugerencia</span>
+        </div>
         <div class="catalog-layout">
           <aside class="catalog-sidebar">
             <div class="catalog-sidebar-title">Categorías <span>⌃</span></div>
@@ -50,6 +68,18 @@
               <label for="tab-bebe">Mamá y bebé <b>01</b></label>
             </div>
             <div class="catalog-sidebar-title">Filtrar por <span>⌃</span></div>
+            <details class="catalog-filter-group" open>
+              <summary>Precio</summary>
+              <label for="price-all">Todos los precios</label>
+              <label for="price-under-10">Menos de $10</label>
+              <label for="price-10-15">$10 a $15</label>
+              <label for="price-over-15">Más de $15</label>
+            </details>
+            <details class="catalog-filter-group">
+              <summary>Disponibilidad</summary>
+              <p class="filter-available">✓ Todos los productos están disponibles para consulta por WhatsApp.</p>
+            </details>
+            <label class="catalog-clear-filters" for="price-all">Mostrar todos los precios</label>
             <p class="catalog-filter-note">Compra con calma</p>
             <p>Consulta disponibilidad y recomendaciones directamente con nuestra farmacia.</p>
             <label class="catalog-side-contact" for="cart-toggle">Abrir carrito ↗</label>
@@ -62,32 +92,39 @@
                 <label for="tab-cuidado" role="tab">Cuidado personal</label>
                 <label for="tab-bebe" role="tab">Mamá y bebé</label>
               </div>
-              <span class="catalog-sort">Ordenar: <strong>Recomendados</strong> <b>⌄</b></span>
+              <details class="catalog-sort">
+                <summary>Ordenar: <strong class="sort-current sort-current--recommended">Recomendados</strong><strong class="sort-current sort-current--low">Precio: menor a mayor</strong><strong class="sort-current sort-current--high">Precio: mayor a menor</strong> <b>⌄</b></summary>
+                <div class="catalog-sort-options">
+                  <label for="sort-recommended">Recomendados</label>
+                  <label for="sort-low">Precio: menor a mayor</label>
+                  <label for="sort-high">Precio: mayor a menor</label>
+                </div>
+              </details>
             </div>
             <div class="catalog-meta">
-              <span><strong>04</strong> productos seleccionados para ti</span>
+              <span><strong>Productos</strong> seleccionados para ti</span>
               <span>Disponibilidad por WhatsApp</span>
             </div>
             <div class="catalog-grid grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          <article class="catalog-card catalog-card--bienestar catalog-card--vitaminas rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
+          <article class="catalog-card catalog-card--bienestar catalog-card--vitaminas price-mid price-sort-mid rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
             <div class="catalog-photo-wrap"><img class="catalog-photo" src="https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=700&q=80" alt="Frasco de vitaminas diarias"><span class="catalog-badge">Recomendado</span></div>
             <span class="catalog-tag">Bienestar</span><span class="catalog-icon">✚</span>
             <h2>Vitaminas diarias</h2><p>Apoyo para tu rutina y energía.</p><strong>$12,50</strong>
             <label class="catalog-add" for="product-vitaminas">Añadir al carrito +</label>
           </article>
-          <article class="catalog-card catalog-card--cuidado catalog-card--solar rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
+          <article class="catalog-card catalog-card--cuidado catalog-card--solar price-under-10 price-sort-low rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
             <div class="catalog-photo-wrap"><img class="catalog-photo" src="https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=700&q=80" alt="Protector solar para cuidado de la piel"><span class="catalog-badge catalog-badge--sun">Favorito</span></div>
             <span class="catalog-tag">Cuidado personal</span><span class="catalog-icon">✦</span>
             <h2>Protector solar</h2><p>Protección diaria para tu piel.</p><strong>$9,75</strong>
             <label class="catalog-add" for="product-solar">Añadir al carrito +</label>
           </article>
-          <article class="catalog-card catalog-card--bebe catalog-card--bebe-product rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
+          <article class="catalog-card catalog-card--bebe catalog-card--bebe-product price-mid price-sort-high rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
             <div class="catalog-photo-wrap"><img class="catalog-photo" src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=700&q=80" alt="Productos suaves para mamá y bebé"><span class="catalog-badge">Nuevo</span></div>
             <span class="catalog-tag">Mamá y bebé</span><span class="catalog-icon">♡</span>
             <h2>Cuidado del bebé</h2><p>Productos suaves para cada etapa.</p><strong>$15,00</strong>
             <label class="catalog-add" for="product-bebe">Añadir al carrito +</label>
           </article>
-          <article class="catalog-card catalog-card--bienestar catalog-card--botiquin rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
+          <article class="catalog-card catalog-card--bienestar catalog-card--botiquin price-over-15 price-sort-high rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
             <div class="catalog-photo-wrap"><img class="catalog-photo" src="https://images.unsplash.com/photo-1603398938378-e54eab446dde?auto=format&fit=crop&w=700&q=80" alt="Botiquín básico de primeros auxilios"><span class="catalog-badge catalog-badge--sun">Esencial</span></div>
             <span class="catalog-tag">Bienestar</span><span class="catalog-icon">✓</span>
             <h2>Botiquín básico</h2><p>Lo esencial para tener a mano.</p><strong>$18,90</strong>

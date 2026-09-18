@@ -136,7 +136,8 @@ h1, h2, h3 { font-family: var(--serif); letter-spacing: -.02em; }
 .products { padding-bottom: 82px; }
 .cart-trigger { display: inline-flex; align-items: center; gap: 8px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 999px; color: var(--navy); background: var(--white); font-size: 13px; font-weight: 700; cursor: pointer; }
 .cart-trigger span { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 50%; color: var(--white); background: var(--coral); font-size: 11px; }
-.tab-input, .cart-toggle, .product-selection { position: absolute; opacity: 0; pointer-events: none; }
+.tab-input, .cart-toggle, .product-selection, .filter-input, .sort-input { position: absolute; opacity: 0; pointer-events: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .product-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 34px; }
 .product-tabs label { padding: 10px 15px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--white); font-size: 13px; font-weight: 700; cursor: pointer; }
 .product-tabs label:hover { border-color: var(--coral); color: var(--navy); }
@@ -170,6 +171,21 @@ body:has(#product-botiquin:checked) .catalog-card--botiquin .catalog-add::after 
 body:has(#tab-bienestar:checked) .catalog-grid .catalog-card:not(.catalog-card--bienestar),
 body:has(#tab-cuidado:checked) .catalog-grid .catalog-card:not(.catalog-card--cuidado),
 body:has(#tab-bebe:checked) .catalog-grid .catalog-card:not(.catalog-card--bebe) { display: none; }
+body:has(#price-under-10:checked) .catalog-grid .catalog-card:not(.price-under-10),
+body:has(#price-10-15:checked) .catalog-grid .catalog-card:not(.price-mid),
+body:has(#price-over-15:checked) .catalog-grid .catalog-card:not(.price-over-15) { display: none; }
+.catalog-card--vitaminas { order: 1; }
+.catalog-card--solar { order: 2; }
+.catalog-card--bebe-product { order: 3; }
+.catalog-card--botiquin { order: 4; }
+body:has(#sort-low:checked) .catalog-card--solar { order: 1; }
+body:has(#sort-low:checked) .catalog-card--vitaminas { order: 2; }
+body:has(#sort-low:checked) .catalog-card--bebe-product { order: 3; }
+body:has(#sort-low:checked) .catalog-card--botiquin { order: 4; }
+body:has(#sort-high:checked) .catalog-card--botiquin { order: 1; }
+body:has(#sort-high:checked) .catalog-card--bebe-product { order: 2; }
+body:has(#sort-high:checked) .catalog-card--vitaminas { order: 3; }
+body:has(#sort-high:checked) .catalog-card--solar { order: 4; }
 .cart-backdrop, .cart-panel { position: fixed; z-index: 60; visibility: hidden; opacity: 0; transition: opacity .25s ease, visibility .25s ease, transform .25s ease; }
 .cart-backdrop { inset: 0; background: rgba(16, 56, 71, .46); }
 .cart-panel { top: 0; right: 0; display: flex; width: min(420px, 100%); height: 100%; flex-direction: column; padding: 30px; transform: translateX(100%); background: var(--cream); box-shadow: -18px 0 45px rgba(23, 50, 77, .16); }
@@ -239,7 +255,11 @@ body:has(#product-botiquin:checked) .cart-count::after { content: ' productos'; 
 .catalog-banner h1 em { color: var(--coral); font-style: normal; }
 .catalog-banner p:not(.eyebrow) { max-width: 470px; margin: 18px 0 0; color: var(--muted); line-height: 1.6; }
 .catalog-banner-mark { display: grid; width: 150px; height: 150px; place-items: center; border: 12px solid rgb(255 255 255 / 75%); border-radius: 50%; color: var(--white); background: var(--coral); font-size: 76px; transform: rotate(-8deg); box-shadow: 18px 18px 0 rgb(23 74 91 / 12%); }
-.catalog-search-wide { display: flex; align-items: center; gap: 12px; margin-top: 28px; padding: 17px 20px; border: 1px solid var(--line); border-radius: 14px; color: var(--muted); background: var(--white); box-shadow: 0 8px 22px rgb(23 50 77 / 5%); font-size: 14px; }
+.catalog-search-wide { display: flex; align-items: center; gap: 12px; margin-top: 28px; padding: 10px 14px 10px 20px; border: 1px solid var(--line); border-radius: 14px; color: var(--muted); background: var(--white); box-shadow: 0 8px 22px rgb(23 50 77 / 5%); font-size: 14px; }
+.catalog-search-icon { color: var(--coral); font-size: 24px; line-height: 1; }
+.catalog-search-wide input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--navy); background: transparent; }
+.catalog-search-wide input::placeholder { color: var(--muted); }
+.catalog-search-hint { flex: 0 0 auto; color: var(--coral); font-size: 11px; font-weight: 700; }
 .catalog-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; margin-top: 30px; }
 .catalog-sidebar { align-self: start; padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: var(--white); }
 .catalog-sidebar-title { display: flex; justify-content: space-between; padding: 8px 0 14px; border-bottom: 1px solid var(--line); color: var(--navy); font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
@@ -250,6 +270,15 @@ body:has(#product-botiquin:checked) .cart-count::after { content: ' productos'; 
 .catalog-side-links label:hover { color: var(--coral); }
 .catalog-side-links b { color: var(--navy); font-size: 11px; }
 .catalog-sidebar p { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.catalog-filter-group { border-bottom: 1px solid var(--line); }
+.catalog-filter-group summary { display: flex; justify-content: space-between; padding: 15px 0 10px; color: var(--navy); font-size: 12px; font-weight: 700; cursor: pointer; list-style: none; }
+.catalog-filter-group summary::-webkit-details-marker { display: none; }
+.catalog-filter-group summary::after { content: '+'; color: var(--coral); font-size: 17px; }
+.catalog-filter-group[open] summary::after { content: '−'; }
+.catalog-filter-group label { display: block; padding: 6px 0; color: var(--muted); font-size: 12px; cursor: pointer; }
+.catalog-filter-group label:hover, .catalog-filter-group label:has(input:checked) { color: var(--coral); }
+.filter-available { margin: 0 0 13px; }
+.catalog-clear-filters { display: block; margin-top: 17px; color: var(--coral); font-size: 11px; font-weight: 700; text-decoration: underline; cursor: pointer; }
 .catalog-filter-note { margin: 20px 0 0; color: var(--coral) !important; font-size: 13px !important; font-weight: 700; }
 .catalog-side-contact { display: block; margin-top: 20px; padding: 11px; border-radius: 10px; color: var(--white); background: var(--navy); text-align: center; font-size: 12px; font-weight: 700; cursor: pointer; }
 .catalog-results { min-width: 0; }
@@ -266,8 +295,17 @@ body:has(#product-botiquin:checked) .cart-count::after { content: ' productos'; 
 .catalog-toolbar + .catalog-grid { margin-top: 28px; }
 .catalog-meta { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 20px; color: var(--muted); font-size: 12px; }
 .catalog-meta strong { color: var(--navy); }
-.catalog-sort { padding: 9px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--white); }
-.catalog-sort b { margin-left: 6px; color: var(--coral); font-size: 15px; }
+.catalog-sort { position: relative; min-width: 190px; padding: 0; border: 1px solid var(--line); border-radius: 999px; background: var(--white); }
+.catalog-sort summary { padding: 9px 12px; color: var(--muted); font-size: 12px; cursor: pointer; list-style: none; }
+.catalog-sort summary::-webkit-details-marker { display: none; }
+.catalog-sort summary b { margin-left: 6px; color: var(--coral); font-size: 15px; }
+.catalog-sort-options { position: absolute; top: calc(100% + 7px); right: 0; z-index: 5; display: grid; min-width: 210px; padding: 7px; border: 1px solid var(--line); border-radius: 13px; background: var(--white); box-shadow: 0 14px 30px rgb(23 50 77 / 14%); }
+.catalog-sort-options label { padding: 9px 10px; border-radius: 8px; color: var(--muted); font-size: 12px; cursor: pointer; }
+.catalog-sort-options label:hover { color: var(--navy); background: var(--teal-soft); }
+.sort-current { display: none; color: var(--navy); }
+body:has(#sort-recommended:checked) .sort-current--recommended,
+body:has(#sort-low:checked) .sort-current--low,
+body:has(#sort-high:checked) .sort-current--high { display: inline; }
 .catalog-page .catalog-card { min-height: 390px; padding: 18px; }
 .catalog-page .catalog-card h2 { margin: 18px 0 6px; font-family: var(--serif); font-size: 27px; letter-spacing: -.04em; }
 .catalog-home-link { color: var(--navy); font-size: 14px; font-weight: 700; }
