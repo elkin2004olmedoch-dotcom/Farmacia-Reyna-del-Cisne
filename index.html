@@ -60,6 +60,11 @@
         </div>
       </header>
 
+      <input class="product-selection" type="checkbox" id="product-vitaminas">
+      <input class="product-selection" type="checkbox" id="product-solar">
+      <input class="product-selection" type="checkbox" id="product-bebe">
+      <input class="product-selection" type="checkbox" id="product-botiquin">
+
       <main>
         <section class="hero section-wrap" id="inicio">
           <div class="hero-grid" aria-hidden="true"></div>
@@ -151,7 +156,7 @@
               <p class="eyebrow">Catálogo rápido</p>
               <h2>Elige lo que necesitas para cuidarte.</h2>
             </div>
-            <label class="cart-trigger" for="cart-toggle">🛒 Ver carrito <span>2</span></label>
+            <label class="cart-trigger" for="cart-toggle">🛒 Ver carrito</label>
           </div>
           <input class="tab-input" type="radio" name="product-tab" id="tab-todos" checked>
           <input class="tab-input" type="radio" name="product-tab" id="tab-bienestar">
@@ -164,25 +169,29 @@
             <label for="tab-bebe" role="tab">Mamá y bebé</label>
           </div>
           <div class="catalog-grid">
-            <article class="catalog-card catalog-card--bienestar">
+            <article class="catalog-card catalog-card--bienestar catalog-card--vitaminas">
+              <img class="catalog-photo" src="https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=700&q=80" alt="Frasco de vitaminas diarias">
               <span class="catalog-tag">Bienestar</span><span class="catalog-icon">✚</span>
               <h3>Vitaminas diarias</h3><p>Apoyo para tu rutina y energía.</p><strong>$12,50</strong>
-              <label class="catalog-add" for="cart-toggle">Añadir al carrito +</label>
+              <label class="catalog-add" for="product-vitaminas">Añadir al carrito +</label>
             </article>
-            <article class="catalog-card catalog-card--cuidado">
+            <article class="catalog-card catalog-card--cuidado catalog-card--solar">
+              <img class="catalog-photo" src="https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=700&q=80" alt="Protector solar para cuidado de la piel">
               <span class="catalog-tag">Cuidado personal</span><span class="catalog-icon">✦</span>
               <h3>Protector solar</h3><p>Protección diaria para tu piel.</p><strong>$9,75</strong>
-              <label class="catalog-add" for="cart-toggle">Añadir al carrito +</label>
+              <label class="catalog-add" for="product-solar">Añadir al carrito +</label>
             </article>
-            <article class="catalog-card catalog-card--bebe">
+            <article class="catalog-card catalog-card--bebe catalog-card--bebe-product">
+              <img class="catalog-photo" src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=700&q=80" alt="Productos suaves para mamá y bebé">
               <span class="catalog-tag">Mamá y bebé</span><span class="catalog-icon">♡</span>
               <h3>Cuidado del bebé</h3><p>Productos suaves para cada etapa.</p><strong>$15,00</strong>
-              <label class="catalog-add" for="cart-toggle">Añadir al carrito +</label>
+              <label class="catalog-add" for="product-bebe">Añadir al carrito +</label>
             </article>
-            <article class="catalog-card catalog-card--bienestar">
+            <article class="catalog-card catalog-card--bienestar catalog-card--botiquin">
+              <img class="catalog-photo" src="https://images.unsplash.com/photo-1603398938378-e54eab446dde?auto=format&fit=crop&w=700&q=80" alt="Botiquín básico de primeros auxilios">
               <span class="catalog-tag">Bienestar</span><span class="catalog-icon">✓</span>
               <h3>Botiquín básico</h3><p>Lo esencial para tener a mano.</p><strong>$18,90</strong>
-              <label class="catalog-add" for="cart-toggle">Añadir al carrito +</label>
+              <label class="catalog-add" for="product-botiquin">Añadir al carrito +</label>
             </article>
           </div>
         </section>
@@ -273,8 +282,11 @@
       <label class="cart-backdrop" for="cart-toggle" aria-label="Cerrar carrito"></label>
       <aside class="cart-panel" aria-label="Carrito de compras">
         <div class="cart-header"><div><p class="eyebrow">Tu selección</p><h2>Carrito</h2></div><label for="cart-toggle" class="cart-close" aria-label="Cerrar carrito">×</label></div>
-        <div class="cart-item"><span class="catalog-icon">✚</span><span><strong>Vitaminas diarias</strong><small>1 unidad</small></span><b>$12,50</b></div>
-        <div class="cart-item"><span class="catalog-icon">✦</span><span><strong>Protector solar</strong><small>1 unidad</small></span><b>$9,75</b></div>
+        <p class="cart-empty">Todavía no has agregado productos. Elige una tarjeta del catálogo para verla aquí.</p>
+        <div class="cart-item cart-item--vitaminas"><span class="catalog-icon">✚</span><span><strong>Vitaminas diarias</strong><small>1 unidad</small></span><b>$12,50</b></div>
+        <div class="cart-item cart-item--solar"><span class="catalog-icon">✦</span><span><strong>Protector solar</strong><small>1 unidad</small></span><b>$9,75</b></div>
+        <div class="cart-item cart-item--bebe"><span class="catalog-icon">♡</span><span><strong>Cuidado del bebé</strong><small>1 unidad</small></span><b>$15,00</b></div>
+        <div class="cart-item cart-item--botiquin"><span class="catalog-icon">✓</span><span><strong>Botiquín básico</strong><small>1 unidad</small></span><b>$18,90</b></div>
         <div class="cart-total"><span>Total estimado</span><strong>$22,25</strong></div>
         <p class="cart-note">Este catálogo es una demostración. Confirma disponibilidad y compra por WhatsApp.</p>
         <a class="button button-primary" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20consultar%20por%20los%20productos%20de%20mi%20carrito." target="_blank" rel="noreferrer">Confirmar por WhatsApp ↗</a>
