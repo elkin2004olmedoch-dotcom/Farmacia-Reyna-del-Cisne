@@ -144,7 +144,7 @@ body:has(#tab-todos:checked) .product-tabs label[for="tab-todos"],
 body:has(#tab-bienestar:checked) .product-tabs label[for="tab-bienestar"],
 body:has(#tab-cuidado:checked) .product-tabs label[for="tab-cuidado"],
 body:has(#tab-bebe:checked) .product-tabs label[for="tab-bebe"] { border-color: var(--navy); color: var(--white); background: var(--navy); }
-.catalog-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; }
+.catalog-grid { margin-top: 24px; }
 .catalog-card { display: flex; min-height: 270px; flex-direction: column; align-items: flex-start; padding: 16px; border: 1px solid var(--line); border-radius: 22px; background: var(--white); box-shadow: 0 10px 30px rgba(23, 50, 77, .05); transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
 .catalog-card:hover { transform: translateY(-4px); border-color: var(--coral); }
 .catalog-photo { display: block; width: 100%; height: 148px; margin-bottom: 18px; border-radius: 16px; object-fit: cover; }
@@ -244,7 +244,7 @@ body:has(#product-botiquin:checked) .cart-count::after { content: ' productos'; 
 .catalog-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 60px; padding: 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--white); }
 .catalog-search { display: flex; min-width: 230px; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; color: var(--muted); background: var(--soft); font-size: 14px; }
 .catalog-toolbar .product-tabs { margin: 0; }
-.catalog-toolbar + .catalog-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 28px; }
+.catalog-toolbar + .catalog-grid { margin-top: 28px; }
 .catalog-page .catalog-card { min-height: 390px; padding: 18px; }
 .catalog-page .catalog-card h2 { margin: 18px 0 6px; font-family: var(--serif); font-size: 27px; letter-spacing: -.04em; }
 .catalog-home-link { color: var(--navy); font-size: 14px; font-weight: 700; }
@@ -414,7 +414,6 @@ body:has(#product-botiquin:checked) .cart-count::after { content: ' productos'; 
   .products .cart-trigger { margin-top: 24px; }
   .product-tabs { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
   .product-tabs label { flex: 0 0 auto; }
-  .catalog-grid { grid-template-columns: 1fr; }
   .catalog-card { min-height: 235px; }
   .catalog-photo { height: 190px; }
   .catalog-main { padding-top: 44px; padding-bottom: 80px; }
@@ -424,7 +423,6 @@ body:has(#product-botiquin:checked) .cart-count::after { content: ' productos'; 
   .catalog-toolbar { display: block; margin-top: 36px; }
   .catalog-search { width: 100%; }
   .catalog-toolbar .product-tabs { margin-top: 12px; }
-  .catalog-toolbar + .catalog-grid { grid-template-columns: 1fr; }
   .catalog-page .catalog-card { min-height: 0; }
   .catalog-home-link { font-size: 12px; }
   .category-card { min-height: 0; }
