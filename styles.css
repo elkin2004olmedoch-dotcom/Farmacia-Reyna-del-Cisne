@@ -185,6 +185,51 @@ body:has(#product-botiquin:checked) .cart-item--botiquin { display: flex; }
 body:has(#product-vitaminas:checked, #product-solar:checked, #product-bebe:checked, #product-botiquin:checked) .cart-empty { display: none; }
 .cart-item > span:nth-child(2) { flex: 1; }.cart-item strong, .cart-item small { display: block; }.cart-item small { margin-top: 4px; color: var(--muted); font-size: 12px; }.cart-item b { color: var(--navy); }
 .cart-total { display: flex; justify-content: space-between; margin-top: auto; padding: 20px 0; border-top: 2px solid var(--navy); }.cart-total strong { color: var(--navy); font-size: 20px; }.cart-note { color: var(--muted); font-size: 12px; line-height: 1.5; }.cart-panel .button { width: 100%; }
+.cart-count { color: var(--coral) !important; }
+.whatsapp-orders { position: relative; }
+.order-link { display: none; }
+.order-link--default { display: inline-flex; }
+body:has(#product-vitaminas:checked) .order-link--default,
+body:has(#product-solar:checked) .order-link--default,
+body:has(#product-bebe:checked) .order-link--default,
+body:has(#product-botiquin:checked) .order-link--default { display: none; }
+body:has(#product-vitaminas:checked):not(:has(#product-solar:checked)):not(:has(#product-bebe:checked)):not(:has(#product-botiquin:checked)) .order-link--vitaminas,
+body:has(#product-solar:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-bebe:checked)):not(:has(#product-botiquin:checked)) .order-link--solar,
+body:has(#product-bebe:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-solar:checked)):not(:has(#product-botiquin:checked)) .order-link--bebe,
+body:has(#product-botiquin:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-solar:checked)):not(:has(#product-bebe:checked)) .order-link--botiquin,
+body:has(#product-vitaminas:checked):has(#product-solar:checked):not(:has(#product-bebe:checked)):not(:has(#product-botiquin:checked)) .order-link--vitaminas-solar,
+body:has(#product-vitaminas:checked):has(#product-bebe:checked):not(:has(#product-solar:checked)):not(:has(#product-botiquin:checked)) .order-link--vitaminas-bebe,
+body:has(#product-vitaminas:checked):has(#product-botiquin:checked):not(:has(#product-solar:checked)):not(:has(#product-bebe:checked)) .order-link--vitaminas-botiquin,
+body:has(#product-solar:checked):has(#product-bebe:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-botiquin:checked)) .order-link--solar-bebe,
+body:has(#product-solar:checked):has(#product-botiquin:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-bebe:checked)) .order-link--solar-botiquin,
+body:has(#product-bebe:checked):has(#product-botiquin:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-solar:checked)) .order-link--bebe-botiquin,
+body:has(#product-vitaminas:checked):has(#product-solar:checked):has(#product-bebe:checked):not(:has(#product-botiquin:checked)) .order-link--vitaminas-solar-bebe,
+body:has(#product-vitaminas:checked):has(#product-solar:checked):has(#product-botiquin:checked):not(:has(#product-bebe:checked)) .order-link--vitaminas-solar-botiquin,
+body:has(#product-vitaminas:checked):has(#product-bebe:checked):has(#product-botiquin:checked):not(:has(#product-solar:checked)) .order-link--vitaminas-bebe-botiquin,
+body:has(#product-solar:checked):has(#product-bebe:checked):has(#product-botiquin:checked):not(:has(#product-vitaminas:checked)) .order-link--solar-bebe-botiquin,
+body:has(#product-vitaminas:checked):has(#product-solar:checked):has(#product-bebe:checked):has(#product-botiquin:checked) .order-link--all { display: inline-flex; }
+body:has(#product-vitaminas:checked) .cart-count::after { content: ' '; }
+body:has(#product-vitaminas:checked):not(:has(#product-solar:checked)):not(:has(#product-bebe:checked)):not(:has(#product-botiquin:checked)) .cart-count::before { content: '1'; }
+body:has(#product-solar:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-bebe:checked)):not(:has(#product-botiquin:checked)) .cart-count::before,
+body:has(#product-bebe:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-solar:checked)):not(:has(#product-botiquin:checked)) .cart-count::before,
+body:has(#product-botiquin:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-solar:checked)):not(:has(#product-bebe:checked)) .cart-count::before { content: '1'; }
+body:has(#product-vitaminas:checked):has(#product-solar:checked):not(:has(#product-bebe:checked)):not(:has(#product-botiquin:checked)) .cart-count::before,
+body:has(#product-vitaminas:checked):has(#product-bebe:checked):not(:has(#product-solar:checked)):not(:has(#product-botiquin:checked)) .cart-count::before,
+body:has(#product-vitaminas:checked):has(#product-botiquin:checked):not(:has(#product-solar:checked)):not(:has(#product-bebe:checked)) .cart-count::before,
+body:has(#product-solar:checked):has(#product-bebe:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-botiquin:checked)) .cart-count::before,
+body:has(#product-solar:checked):has(#product-botiquin:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-bebe:checked)) .cart-count::before,
+body:has(#product-bebe:checked):has(#product-botiquin:checked):not(:has(#product-vitaminas:checked)):not(:has(#product-solar:checked)) .cart-count::before { content: '2'; }
+body:has(#product-vitaminas:checked):has(#product-solar:checked):has(#product-bebe:checked):not(:has(#product-botiquin:checked)) .cart-count::before,
+body:has(#product-vitaminas:checked):has(#product-solar:checked):has(#product-botiquin:checked):not(:has(#product-bebe:checked)) .cart-count::before,
+body:has(#product-vitaminas:checked):has(#product-bebe:checked):has(#product-botiquin:checked):not(:has(#product-solar:checked)) .cart-count::before,
+body:has(#product-solar:checked):has(#product-bebe:checked):has(#product-botiquin:checked):not(:has(#product-vitaminas:checked)) .cart-count::before { content: '3'; }
+body:has(#product-vitaminas:checked):has(#product-solar:checked):has(#product-bebe:checked):has(#product-botiquin:checked) .cart-count::before { content: '4'; }
+.cart-count { font-size: 0; }
+.cart-count::after { content: '0 productos'; font-size: 20px; }
+body:has(#product-vitaminas:checked) .cart-count::after,
+body:has(#product-solar:checked) .cart-count::after,
+body:has(#product-bebe:checked) .cart-count::after,
+body:has(#product-botiquin:checked) .cart-count::after { content: ' productos'; font-size: 20px; }
 .catalog-main { padding-top: 72px; padding-bottom: 120px; }
 .catalog-hero { display: flex; align-items: end; justify-content: space-between; gap: 32px; }
 .catalog-hero h1 { max-width: 780px; margin: 22px 0 0; font-size: clamp(48px, 7vw, 92px); line-height: .92; }
