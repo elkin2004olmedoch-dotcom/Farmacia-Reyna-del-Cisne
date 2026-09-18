@@ -31,6 +31,7 @@
 
           <nav class="main-nav" aria-label="Navegación principal">
             <a href="#servicios">Qué encuentras</a>
+            <a href="#productos">Productos</a>
             <a href="#promos">Para tu día a día</a>
             <a href="#ubicacion">Visítanos</a>
             <a href="#contacto">Contacto</a>
@@ -51,7 +52,8 @@
 
           <nav class="mobile-nav" aria-label="Menú móvil">
             <a href="#servicios">Qué encuentras</a>
-            <a href="#promos">Para tu día a día</a>
+          <a href="#productos">Productos</a>
+          <a href="#promos">Para tu día a día</a>
             <a href="#ubicacion">Visítanos</a>
             <a href="#contacto">Contacto</a>
           </nav>
@@ -143,6 +145,48 @@
           </div>
         </section>
 
+        <section class="products section-wrap" id="productos">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Catálogo rápido</p>
+              <h2>Elige lo que necesitas para cuidarte.</h2>
+            </div>
+            <label class="cart-trigger" for="cart-toggle">🛒 Ver carrito <span>2</span></label>
+          </div>
+          <input class="tab-input" type="radio" name="product-tab" id="tab-todos" checked>
+          <input class="tab-input" type="radio" name="product-tab" id="tab-bienestar">
+          <input class="tab-input" type="radio" name="product-tab" id="tab-cuidado">
+          <input class="tab-input" type="radio" name="product-tab" id="tab-bebe">
+          <div class="product-tabs" role="tablist" aria-label="Categorías de productos">
+            <label for="tab-todos" role="tab">Todos</label>
+            <label for="tab-bienestar" role="tab">Bienestar</label>
+            <label for="tab-cuidado" role="tab">Cuidado personal</label>
+            <label for="tab-bebe" role="tab">Mamá y bebé</label>
+          </div>
+          <div class="catalog-grid">
+            <article class="catalog-card catalog-card--bienestar">
+              <span class="catalog-tag">Bienestar</span><span class="catalog-icon">✚</span>
+              <h3>Vitaminas diarias</h3><p>Apoyo para tu rutina y energía.</p><strong>$12,50</strong>
+              <label class="catalog-add" for="cart-toggle">Añadir al carrito +</label>
+            </article>
+            <article class="catalog-card catalog-card--cuidado">
+              <span class="catalog-tag">Cuidado personal</span><span class="catalog-icon">✦</span>
+              <h3>Protector solar</h3><p>Protección diaria para tu piel.</p><strong>$9,75</strong>
+              <label class="catalog-add" for="cart-toggle">Añadir al carrito +</label>
+            </article>
+            <article class="catalog-card catalog-card--bebe">
+              <span class="catalog-tag">Mamá y bebé</span><span class="catalog-icon">♡</span>
+              <h3>Cuidado del bebé</h3><p>Productos suaves para cada etapa.</p><strong>$15,00</strong>
+              <label class="catalog-add" for="cart-toggle">Añadir al carrito +</label>
+            </article>
+            <article class="catalog-card catalog-card--bienestar">
+              <span class="catalog-tag">Bienestar</span><span class="catalog-icon">✓</span>
+              <h3>Botiquín básico</h3><p>Lo esencial para tener a mano.</p><strong>$18,90</strong>
+              <label class="catalog-add" for="cart-toggle">Añadir al carrito +</label>
+            </article>
+          </div>
+        </section>
+
         <section class="promos" id="promos">
           <div class="promo-inner section-wrap row align-items-center g-5">
             <div class="promo-copy col-lg-6">
@@ -224,6 +268,17 @@
           </div>
         </section>
       </main>
+
+      <input class="cart-toggle" type="checkbox" id="cart-toggle">
+      <label class="cart-backdrop" for="cart-toggle" aria-label="Cerrar carrito"></label>
+      <aside class="cart-panel" aria-label="Carrito de compras">
+        <div class="cart-header"><div><p class="eyebrow">Tu selección</p><h2>Carrito</h2></div><label for="cart-toggle" class="cart-close" aria-label="Cerrar carrito">×</label></div>
+        <div class="cart-item"><span class="catalog-icon">✚</span><span><strong>Vitaminas diarias</strong><small>1 unidad</small></span><b>$12,50</b></div>
+        <div class="cart-item"><span class="catalog-icon">✦</span><span><strong>Protector solar</strong><small>1 unidad</small></span><b>$9,75</b></div>
+        <div class="cart-total"><span>Total estimado</span><strong>$22,25</strong></div>
+        <p class="cart-note">Este catálogo es una demostración. Confirma disponibilidad y compra por WhatsApp.</p>
+        <a class="button button-primary" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20consultar%20por%20los%20productos%20de%20mi%20carrito." target="_blank" rel="noreferrer">Confirmar por WhatsApp ↗</a>
+      </aside>
 
       <footer class="site-footer">
         <div class="footer-inner section-wrap">
