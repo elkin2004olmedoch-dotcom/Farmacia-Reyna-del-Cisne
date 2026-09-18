@@ -137,10 +137,10 @@ h1, h2, h3 { font-family: var(--serif); letter-spacing: -.02em; }
 .product-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 34px; }
 .product-tabs label { padding: 10px 15px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--white); font-size: 13px; font-weight: 700; cursor: pointer; }
 .product-tabs label:hover { border-color: var(--coral); color: var(--navy); }
-#tab-todos:checked ~ .product-tabs label[for="tab-todos"],
-#tab-bienestar:checked ~ .product-tabs label[for="tab-bienestar"],
-#tab-cuidado:checked ~ .product-tabs label[for="tab-cuidado"],
-#tab-bebe:checked ~ .product-tabs label[for="tab-bebe"] { border-color: var(--navy); color: var(--white); background: var(--navy); }
+body:has(#tab-todos:checked) .product-tabs label[for="tab-todos"],
+body:has(#tab-bienestar:checked) .product-tabs label[for="tab-bienestar"],
+body:has(#tab-cuidado:checked) .product-tabs label[for="tab-cuidado"],
+body:has(#tab-bebe:checked) .product-tabs label[for="tab-bebe"] { border-color: var(--navy); color: var(--white); background: var(--navy); }
 .catalog-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; }
 .catalog-card { display: flex; min-height: 270px; flex-direction: column; align-items: flex-start; padding: 16px; border: 1px solid var(--line); border-radius: 22px; background: var(--white); box-shadow: 0 10px 30px rgba(23, 50, 77, .05); transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
 .catalog-card:hover { transform: translateY(-4px); border-color: var(--coral); }
@@ -164,9 +164,9 @@ body:has(#product-vitaminas:checked) .catalog-card--vitaminas .catalog-add::afte
 body:has(#product-solar:checked) .catalog-card--solar .catalog-add::after,
 body:has(#product-bebe:checked) .catalog-card--bebe-product .catalog-add::after,
 body:has(#product-botiquin:checked) .catalog-card--botiquin .catalog-add::after { content: ' ✓'; }
-#tab-bienestar:checked ~ .catalog-grid .catalog-card:not(.catalog-card--bienestar),
-#tab-cuidado:checked ~ .catalog-grid .catalog-card:not(.catalog-card--cuidado),
-#tab-bebe:checked ~ .catalog-grid .catalog-card:not(.catalog-card--bebe) { display: none; }
+body:has(#tab-bienestar:checked) .catalog-grid .catalog-card:not(.catalog-card--bienestar),
+body:has(#tab-cuidado:checked) .catalog-grid .catalog-card:not(.catalog-card--cuidado),
+body:has(#tab-bebe:checked) .catalog-grid .catalog-card:not(.catalog-card--bebe) { display: none; }
 .cart-backdrop, .cart-panel { position: fixed; z-index: 60; visibility: hidden; opacity: 0; transition: opacity .25s ease, visibility .25s ease, transform .25s ease; }
 .cart-backdrop { inset: 0; background: rgba(16, 56, 71, .46); }
 .cart-panel { top: 0; right: 0; display: flex; width: min(420px, 100%); height: 100%; flex-direction: column; padding: 30px; transform: translateX(100%); background: var(--cream); box-shadow: -18px 0 45px rgba(23, 50, 77, .16); }
@@ -185,6 +185,17 @@ body:has(#product-botiquin:checked) .cart-item--botiquin { display: flex; }
 body:has(#product-vitaminas:checked, #product-solar:checked, #product-bebe:checked, #product-botiquin:checked) .cart-empty { display: none; }
 .cart-item > span:nth-child(2) { flex: 1; }.cart-item strong, .cart-item small { display: block; }.cart-item small { margin-top: 4px; color: var(--muted); font-size: 12px; }.cart-item b { color: var(--navy); }
 .cart-total { display: flex; justify-content: space-between; margin-top: auto; padding: 20px 0; border-top: 2px solid var(--navy); }.cart-total strong { color: var(--navy); font-size: 20px; }.cart-note { color: var(--muted); font-size: 12px; line-height: 1.5; }.cart-panel .button { width: 100%; }
+.catalog-main { padding-top: 72px; padding-bottom: 120px; }
+.catalog-hero { display: flex; align-items: end; justify-content: space-between; gap: 32px; }
+.catalog-hero h1 { max-width: 720px; margin: 22px 0 0; font-size: clamp(48px, 7vw, 92px); line-height: .92; }
+.catalog-hero p:not(.eyebrow) { max-width: 520px; margin: 26px 0 0; color: var(--muted); line-height: 1.7; }
+.catalog-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 60px; padding: 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--white); }
+.catalog-search { display: flex; min-width: 230px; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; color: var(--muted); background: var(--soft); font-size: 14px; }
+.catalog-toolbar .product-tabs { margin: 0; }
+.catalog-toolbar + .catalog-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 28px; }
+.catalog-page .catalog-card { min-height: 390px; padding: 18px; }
+.catalog-page .catalog-card h2 { margin: 18px 0 6px; font-family: var(--serif); font-size: 27px; letter-spacing: -.04em; }
+.catalog-home-link { color: var(--navy); font-size: 14px; font-weight: 700; }
 
 .promos { color: var(--white); background: var(--navy); }.promo-inner { --bs-gutter-x: clamp(1.5rem, 6vw, 5rem); --bs-gutter-y: 2.5rem; padding-top: 82px; padding-bottom: 82px; }.promo-copy h2 { max-width: 600px; margin: 17px 0 0; color: var(--white); font-size: clamp(44px, 10vw, 76px); line-height: .92; letter-spacing: -.065em; }.promo-copy > p:not(.eyebrow) { max-width: 430px; margin: 27px 0 0; color: rgb(255 255 255 / 72%); line-height: 1.7; }.promo-copy .button { margin-top: 30px; }.product-grid { --bs-gutter-x: 1rem; --bs-gutter-y: 1rem; align-items: center; }
 .product-card {
@@ -344,6 +355,16 @@ body:has(#product-vitaminas:checked, #product-solar:checked, #product-bebe:check
   .catalog-grid { grid-template-columns: 1fr; }
   .catalog-card { min-height: 235px; }
   .catalog-photo { height: 190px; }
+  .catalog-main { padding-top: 44px; padding-bottom: 80px; }
+  .catalog-hero { display: block; }
+  .catalog-hero h1 { font-size: clamp(48px, 14vw, 70px); }
+  .catalog-hero .cart-trigger { margin-top: 24px; }
+  .catalog-toolbar { display: block; margin-top: 36px; }
+  .catalog-search { width: 100%; }
+  .catalog-toolbar .product-tabs { margin-top: 12px; }
+  .catalog-toolbar + .catalog-grid { grid-template-columns: 1fr; }
+  .catalog-page .catalog-card { min-height: 0; }
+  .catalog-home-link { font-size: 12px; }
   .category-card { min-height: 0; }
   .service-photo { height: 170px; }
   .product-card-offset { margin-top: 0; }
