@@ -105,32 +105,7 @@
               <span><strong>Productos</strong> seleccionados para ti</span>
               <span>Disponibilidad por WhatsApp</span>
             </div>
-            <div class="catalog-grid grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          <article class="catalog-card catalog-card--bienestar catalog-card--vitaminas price-mid price-sort-mid rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
-            <div class="catalog-photo-wrap"><img class="catalog-photo" src="https://images.unsplash.com/photo-1471864190281-a93a3070b6de?auto=format&fit=crop&w=700&q=80" alt="Frasco de vitaminas diarias"><span class="catalog-badge">Recomendado</span></div>
-            <span class="catalog-tag">Bienestar</span><span class="catalog-icon">✚</span>
-            <h2>Vitaminas diarias</h2><p>Apoyo para tu rutina y energía.</p><strong>$12,50</strong>
-            <label class="catalog-add" for="product-vitaminas">Añadir al carrito +</label>
-          </article>
-          <article class="catalog-card catalog-card--cuidado catalog-card--solar price-under-10 price-sort-low rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
-            <div class="catalog-photo-wrap"><img class="catalog-photo" src="https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?auto=format&fit=crop&w=700&q=80" alt="Protector solar para cuidado de la piel"><span class="catalog-badge catalog-badge--sun">Favorito</span></div>
-            <span class="catalog-tag">Cuidado personal</span><span class="catalog-icon">✦</span>
-            <h2>Protector solar</h2><p>Protección diaria para tu piel.</p><strong>$9,75</strong>
-            <label class="catalog-add" for="product-solar">Añadir al carrito +</label>
-          </article>
-          <article class="catalog-card catalog-card--bebe catalog-card--bebe-product price-mid price-sort-high rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
-            <div class="catalog-photo-wrap"><img class="catalog-photo" src="https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=700&q=80" alt="Productos suaves para mamá y bebé"><span class="catalog-badge">Nuevo</span></div>
-            <span class="catalog-tag">Mamá y bebé</span><span class="catalog-icon">♡</span>
-            <h2>Cuidado del bebé</h2><p>Productos suaves para cada etapa.</p><strong>$15,00</strong>
-            <label class="catalog-add" for="product-bebe">Añadir al carrito +</label>
-          </article>
-          <article class="catalog-card catalog-card--bienestar catalog-card--botiquin price-over-15 price-sort-high rounded-3xl shadow-sm transition duration-300 hover:-translate-y-1">
-            <div class="catalog-photo-wrap"><img class="catalog-photo" src="https://images.unsplash.com/photo-1603398938378-e54eab446dde?auto=format&fit=crop&w=700&q=80" alt="Botiquín básico de primeros auxilios"><span class="catalog-badge catalog-badge--sun">Esencial</span></div>
-            <span class="catalog-tag">Bienestar</span><span class="catalog-icon">✓</span>
-            <h2>Botiquín básico</h2><p>Lo esencial para tener a mano.</p><strong>$18,90</strong>
-            <label class="catalog-add" for="product-botiquin">Añadir al carrito +</label>
-          </article>
-            </div>
+            <div id="catalog-grid" class="catalog-grid grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4"></div>
           </section>
         </div>
       </main>
@@ -139,32 +114,15 @@
       <label class="cart-backdrop" for="cart-toggle" aria-label="Cerrar carrito"></label>
       <aside class="cart-panel rounded-l-3xl" aria-label="Carrito de compras">
         <div class="cart-header"><div><p class="eyebrow">Tu selección</p><h2>Carrito</h2></div><label for="cart-toggle" class="cart-close" aria-label="Cerrar carrito">×</label></div>
-        <p class="cart-empty">Todavía no has agregado productos.</p>
-        <div class="cart-item cart-item--vitaminas"><span class="catalog-icon">✚</span><span><strong>Vitaminas diarias</strong><small>1 unidad</small></span><b>$12,50</b></div>
-        <div class="cart-item cart-item--solar"><span class="catalog-icon">✦</span><span><strong>Protector solar</strong><small>1 unidad</small></span><b>$9,75</b></div>
-        <div class="cart-item cart-item--bebe"><span class="catalog-icon">♡</span><span><strong>Cuidado del bebé</strong><small>1 unidad</small></span><b>$15,00</b></div>
-        <div class="cart-item cart-item--botiquin"><span class="catalog-icon">✓</span><span><strong>Botiquín básico</strong><small>1 unidad</small></span><b>$18,90</b></div>
-        <div class="cart-total"><span>Tu selección</span><strong class="cart-count" aria-live="polite"></strong></div>
+        <p id="cart-empty" class="cart-empty">Todavía no has agregado productos.</p>
+        <div id="cart-items"></div>
+        <div class="cart-total"><span>Tu selección</span><strong id="cart-summary" class="cart-count" aria-live="polite">0 productos</strong><span id="cart-total" class="cart-total-amount">$0,00</span></div>
         <p class="cart-note">Revisa tu selección y envíanos el pedido. Confirmaremos disponibilidad y el total final por WhatsApp.</p>
         <div class="whatsapp-orders">
-          <a class="button button-primary order-link order-link--default" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20consultar%20por%20productos%20de%20la%20Farmacia%20Reyna%20del%20Cisne." target="_blank" rel="noreferrer">Elegir productos ↗</a>
-          <a class="button button-primary order-link order-link--vitaminas" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Vitaminas%20diarias%20%28%2412%2C50%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--solar" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Protector%20solar%20%28%249%2C75%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--bebe" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Cuidado%20del%20beb%C3%A9%20%28%2415%2C00%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--botiquin" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Botiqu%C3%ADn%20b%C3%A1sico%20%28%2418%2C90%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--vitaminas-solar" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Vitaminas%20diarias%20%28%2412%2C50%29%20y%20Protector%20solar%20%28%249%2C75%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--vitaminas-bebe" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Vitaminas%20diarias%20%28%2412%2C50%29%20y%20Cuidado%20del%20beb%C3%A9%20%28%2415%2C00%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--vitaminas-botiquin" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Vitaminas%20diarias%20%28%2412%2C50%29%20y%20Botiqu%C3%ADn%20b%C3%A1sico%20%28%2418%2C90%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--solar-bebe" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Protector%20solar%20%28%249%2C75%29%20y%20Cuidado%20del%20beb%C3%A9%20%28%2415%2C00%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--solar-botiquin" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Protector%20solar%20%28%249%2C75%29%20y%20Botiqu%C3%ADn%20b%C3%A1sico%20%28%2418%2C90%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--bebe-botiquin" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Cuidado%20del%20beb%C3%A9%20%28%2415%2C00%29%20y%20Botiqu%C3%ADn%20b%C3%A1sico%20%28%2418%2C90%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--vitaminas-solar-bebe" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Vitaminas%20diarias%20%28%2412%2C50%29%2C%20Protector%20solar%20%28%249%2C75%29%20y%20Cuidado%20del%20beb%C3%A9%20%28%2415%2C00%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--vitaminas-solar-botiquin" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Vitaminas%20diarias%20%28%2412%2C50%29%2C%20Protector%20solar%20%28%249%2C75%29%20y%20Botiqu%C3%ADn%20b%C3%A1sico%20%28%2418%2C90%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--vitaminas-bebe-botiquin" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Vitaminas%20diarias%20%28%2412%2C50%29%2C%20Cuidado%20del%20beb%C3%A9%20%28%2415%2C00%29%20y%20Botiqu%C3%ADn%20b%C3%A1sico%20%28%2418%2C90%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--solar-bebe-botiquin" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Protector%20solar%20%28%249%2C75%29%2C%20Cuidado%20del%20beb%C3%A9%20%28%2415%2C00%29%20y%20Botiqu%C3%ADn%20b%C3%A1sico%20%28%2418%2C90%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
-          <a class="button button-primary order-link order-link--all" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20pedir%3A%20Vitaminas%20diarias%20%28%2412%2C50%29%2C%20Protector%20solar%20%28%249%2C75%29%2C%20Cuidado%20del%20beb%C3%A9%20%28%2415%2C00%29%20y%20Botiqu%C3%ADn%20b%C3%A1sico%20%28%2418%2C90%29.%20Por%20favor%2C%20confirmen%20disponibilidad." target="_blank" rel="noreferrer">Enviar pedido por WhatsApp ↗</a>
+          <a id="whatsapp-order-link" class="button button-primary" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20consultar%20por%20productos%20de%20la%20Farmacia%20Reyna%20del%20Cisne." target="_blank" rel="noreferrer">Elegir productos ↗</a>
         </div>
       </aside>
     </div>
+  <script src="catalogo.js"></script>
   </body>
 </html>
