@@ -240,6 +240,25 @@ function syncFiltersFromInputs() {
   state.sort = sortInput ? sortInput.id.replace('sort-', '') : 'recommended';
 }
 
+function setRadioGroupValue(name, id) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach((input) => {
+    input.checked = input.id === id;
+  });
+}
+
+function setInputValueByTarget(targetId) {
+  const target = document.getElementById(targetId);
+  if (!target) return;
+
+  if (target.type === 'radio') {
+    setRadioGroupValue(target.name, target.id);
+  } else if (target.type === 'checkbox') {
+    target.checked = !target.checked;
+  }
+
+  target.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
 function attachEvents() {
   document.querySelectorAll('input[name="product-tab"]').forEach((input) => {
     input.addEventListener('change', () => {
@@ -259,6 +278,27 @@ function attachEvents() {
     input.addEventListener('change', () => {
       syncFiltersFromInputs();
       renderProducts();
+    });
+  });
+
+  document.querySelectorAll('[data-target]').forEach((control) => {
+    control.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const { target } = control.dataset;
+      if (!target) return;
+
+      if (target === 'cart-toggle') {
+        const cartToggle = document.getElementById('cart-toggle');
+        if (cartToggle) {
+          cartToggle.checked = !cartToggle.checked;
+          cartToggle.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        return;
+      }
+
+      setInputValueByTarget(target);
     });
   });
 

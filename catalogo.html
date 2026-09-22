@@ -62,42 +62,42 @@
           <aside class="catalog-sidebar">
             <div class="catalog-sidebar-title">Categorías <span>⌃</span></div>
             <div class="catalog-side-links">
-              <label for="tab-todos">Todos los productos <b>04</b></label>
-              <label for="tab-bienestar">Bienestar <b>02</b></label>
-              <label for="tab-cuidado">Cuidado personal <b>01</b></label>
-              <label for="tab-bebe">Mamá y bebé <b>01</b></label>
+              <button type="button" class="catalog-side-toggle" data-target="tab-todos">Todos los productos <b>04</b></button>
+              <button type="button" class="catalog-side-toggle" data-target="tab-bienestar">Bienestar <b>02</b></button>
+              <button type="button" class="catalog-side-toggle" data-target="tab-cuidado">Cuidado personal <b>01</b></button>
+              <button type="button" class="catalog-side-toggle" data-target="tab-bebe">Mamá y bebé <b>01</b></button>
             </div>
             <div class="catalog-sidebar-title">Filtrar por <span>⌃</span></div>
             <details class="catalog-filter-group" open>
               <summary>Precio</summary>
-              <label for="price-all">Todos los precios</label>
-              <label for="price-under-10">Menos de $10</label>
-              <label for="price-10-15">$10 a $15</label>
-              <label for="price-over-15">Más de $15</label>
+              <button type="button" class="catalog-price-option" data-target="price-all">Todos los precios</button>
+              <button type="button" class="catalog-price-option" data-target="price-under-10">Menos de $10</button>
+              <button type="button" class="catalog-price-option" data-target="price-10-15">$10 a $15</button>
+              <button type="button" class="catalog-price-option" data-target="price-over-15">Más de $15</button>
             </details>
             <details class="catalog-filter-group">
               <summary>Disponibilidad</summary>
               <p class="filter-available">✓ Todos los productos están disponibles para consulta por WhatsApp.</p>
             </details>
-            <label class="catalog-clear-filters" for="price-all">Mostrar todos los precios</label>
+            <button type="button" class="catalog-clear-filters" data-target="price-all">Mostrar todos los precios</button>
             <p class="catalog-filter-note">Compra con calma</p>
             <p>Consulta disponibilidad y recomendaciones directamente con nuestra farmacia.</p>
-            <label class="catalog-side-contact" for="cart-toggle">Abrir carrito ↗</label>
+            <button type="button" class="catalog-side-contact" data-target="cart-toggle">Abrir carrito ↗</button>
           </aside>
           <section class="catalog-results">
             <div class="catalog-toolbar flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div class="product-tabs" role="tablist" aria-label="Categorías de productos">
-                <label for="tab-todos" role="tab">Todos</label>
-                <label for="tab-bienestar" role="tab">Bienestar</label>
-                <label for="tab-cuidado" role="tab">Cuidado personal</label>
-                <label for="tab-bebe" role="tab">Mamá y bebé</label>
+                <button type="button" class="catalog-tab-button" data-target="tab-todos" role="tab" aria-selected="true">Todos</button>
+                <button type="button" class="catalog-tab-button" data-target="tab-bienestar" role="tab" aria-selected="false">Bienestar</button>
+                <button type="button" class="catalog-tab-button" data-target="tab-cuidado" role="tab" aria-selected="false">Cuidado personal</button>
+                <button type="button" class="catalog-tab-button" data-target="tab-bebe" role="tab" aria-selected="false">Mamá y bebé</button>
               </div>
               <details class="catalog-sort">
                 <summary>Ordenar: <strong class="sort-current sort-current--recommended">Recomendados</strong><strong class="sort-current sort-current--low">Precio: menor a mayor</strong><strong class="sort-current sort-current--high">Precio: mayor a menor</strong> <b>⌄</b></summary>
                 <div class="catalog-sort-options">
-                  <label for="sort-recommended">Recomendados</label>
-                  <label for="sort-low">Precio: menor a mayor</label>
-                  <label for="sort-high">Precio: mayor a menor</label>
+                  <button type="button" class="catalog-sort-option" data-target="sort-recommended">Recomendados</button>
+                  <button type="button" class="catalog-sort-option" data-target="sort-low">Precio: menor a mayor</button>
+                  <button type="button" class="catalog-sort-option" data-target="sort-high">Precio: mayor a menor</button>
                 </div>
               </details>
             </div>
