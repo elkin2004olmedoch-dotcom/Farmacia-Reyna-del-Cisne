@@ -5,39 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Catálogo | Farmacia Reyna del Cisne</title>
     <meta name="description" content="Consulta productos de bienestar, cuidado personal y mamá y bebé en Farmacia Reyna del Cisne.">
-    <link rel="icon" type="image/png" href="logo-reyna-del-cisne.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="assets/images/logo-reyna-del-cisne.png">
+    <link rel="stylesheet" href="assets/styles.css">
   </head>
   <body class="catalog-page">
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <div class="site-shell">
       <div class="top-banner">Catálogo demostrativo · consulta disponibilidad por WhatsApp</div>
       <header class="site-header">
         <div class="header-inner">
           <a class="brand" href="index.html" aria-label="Volver al inicio">
-            <img src="logo-reyna-del-cisne.png" alt="Farmacia Reyna del Cisne">
+            <img src="assets/images/logo-reyna-del-cisne.png" alt="Farmacia Reyna del Cisne">
           </a>
-          <a class="catalog-home-link" href="index.html">← Volver al inicio</a>
+          <nav class="catalog-header-actions" aria-label="Navegación del catálogo"><a class="catalog-home-link" href="index.html">Inicio</a><button type="button" class="cart-trigger" data-open-cart aria-haspopup="dialog" aria-controls="cart-dialog">Carrito <span data-cart-count>0</span></button></nav>
         </div>
       </header>
 
-      <input class="product-selection" type="checkbox" id="product-vitaminas" tabindex="-1" aria-hidden="true">
-      <input class="product-selection" type="checkbox" id="product-solar" tabindex="-1" aria-hidden="true">
-      <input class="product-selection" type="checkbox" id="product-bebe" tabindex="-1" aria-hidden="true">
-      <input class="product-selection" type="checkbox" id="product-botiquin" tabindex="-1" aria-hidden="true">
-      <input class="tab-input" type="radio" name="product-tab" id="tab-todos" checked tabindex="-1" aria-hidden="true">
-      <input class="tab-input" type="radio" name="product-tab" id="tab-bienestar" tabindex="-1" aria-hidden="true">
-      <input class="tab-input" type="radio" name="product-tab" id="tab-cuidado" tabindex="-1" aria-hidden="true">
-      <input class="tab-input" type="radio" name="product-tab" id="tab-bebe" tabindex="-1" aria-hidden="true">
-      <input class="filter-input" type="radio" name="price-filter" id="price-all" checked tabindex="-1" aria-hidden="true">
-      <input class="filter-input" type="radio" name="price-filter" id="price-under-10" tabindex="-1" aria-hidden="true">
-      <input class="filter-input" type="radio" name="price-filter" id="price-10-15" tabindex="-1" aria-hidden="true">
-      <input class="filter-input" type="radio" name="price-filter" id="price-over-15" tabindex="-1" aria-hidden="true">
-      <input class="sort-input" type="radio" name="product-sort" id="sort-recommended" checked tabindex="-1" aria-hidden="true">
-      <input class="sort-input" type="radio" name="product-sort" id="sort-low" tabindex="-1" aria-hidden="true">
-      <input class="sort-input" type="radio" name="product-sort" id="sort-high" tabindex="-1" aria-hidden="true">
-
-      <main class="catalog-main section-wrap max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main id="contenido" tabindex="-1" class="catalog-main section-wrap ">
         <section class="catalog-banner">
           <div>
             <p class="eyebrow">Selección Reyna del Cisne</p>
@@ -62,57 +46,51 @@
           <aside class="catalog-sidebar">
             <div class="catalog-sidebar-title">Categorías <span>⌃</span></div>
             <div class="catalog-side-links">
-              <button type="button" class="catalog-side-toggle" data-target="tab-todos">Todos los productos <b>04</b></button>
-              <button type="button" class="catalog-side-toggle" data-target="tab-bienestar">Bienestar <b>02</b></button>
-              <button type="button" class="catalog-side-toggle" data-target="tab-cuidado">Cuidado personal <b>01</b></button>
-              <button type="button" class="catalog-side-toggle" data-target="tab-bebe">Mamá y bebé <b>01</b></button>
+              <button type="button" class="catalog-side-toggle" data-category="todos">Todos los productos <b>04</b></button>
+              <button type="button" class="catalog-side-toggle" data-category="bienestar">Bienestar <b>02</b></button>
+              <button type="button" class="catalog-side-toggle" data-category="cuidado">Cuidado personal <b>01</b></button>
+              <button type="button" class="catalog-side-toggle" data-category="bebe">Mamá y bebé <b>01</b></button>
             </div>
             <div class="catalog-sidebar-title">Filtrar por <span>⌃</span></div>
             <details class="catalog-filter-group" open>
               <summary>Precio</summary>
-              <button type="button" class="catalog-price-option" data-target="price-all">Todos los precios</button>
-              <button type="button" class="catalog-price-option" data-target="price-under-10">Menos de $10</button>
-              <button type="button" class="catalog-price-option" data-target="price-10-15">$10 a $15</button>
-              <button type="button" class="catalog-price-option" data-target="price-over-15">Más de $15</button>
+              <button type="button" class="catalog-price-option" data-price="all">Todos los precios</button>
+              <button type="button" class="catalog-price-option" data-price="under10">Menos de $10</button>
+              <button type="button" class="catalog-price-option" data-price="10-15">$10 a $15</button>
+              <button type="button" class="catalog-price-option" data-price="over15">Más de $15</button>
             </details>
             <details class="catalog-filter-group">
               <summary>Disponibilidad</summary>
               <p class="filter-available">✓ Todos los productos están disponibles para consulta por WhatsApp.</p>
             </details>
-            <button type="button" class="catalog-clear-filters" data-target="price-all">Mostrar todos los precios</button>
+            <button type="button" class="catalog-clear-filters" id="catalog-clear">Restablecer filtros</button>
             <p class="catalog-filter-note">Compra con calma</p>
             <p>Consulta disponibilidad y recomendaciones directamente con nuestra farmacia.</p>
-            <button type="button" class="catalog-side-contact" data-target="cart-toggle">Abrir carrito ↗</button>
+            <button type="button" class="catalog-side-contact" data-open-cart aria-haspopup="dialog" aria-controls="cart-dialog">Abrir carrito ↗</button>
           </aside>
           <section class="catalog-results">
-            <div class="catalog-toolbar flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="catalog-toolbar">
               <div class="product-tabs" role="tablist" aria-label="Categorías de productos">
-                <button type="button" class="catalog-tab-button" data-target="tab-todos" role="tab" aria-selected="true">Todos</button>
-                <button type="button" class="catalog-tab-button" data-target="tab-bienestar" role="tab" aria-selected="false">Bienestar</button>
-                <button type="button" class="catalog-tab-button" data-target="tab-cuidado" role="tab" aria-selected="false">Cuidado personal</button>
-                <button type="button" class="catalog-tab-button" data-target="tab-bebe" role="tab" aria-selected="false">Mamá y bebé</button>
+                <button type="button" class="catalog-tab-button" id="filter-todos" data-category="todos" role="tab" aria-selected="true" aria-controls="catalog-grid" tabindex="0">Todos</button>
+                <button type="button" class="catalog-tab-button" id="filter-bienestar" data-category="bienestar" role="tab" aria-selected="false" aria-controls="catalog-grid" tabindex="-1">Bienestar</button>
+                <button type="button" class="catalog-tab-button" id="filter-cuidado" data-category="cuidado" role="tab" aria-selected="false" aria-controls="catalog-grid" tabindex="-1">Cuidado personal</button>
+                <button type="button" class="catalog-tab-button" id="filter-bebe" data-category="bebe" role="tab" aria-selected="false" aria-controls="catalog-grid" tabindex="-1">Mamá y bebé</button>
               </div>
-              <details class="catalog-sort">
-                <summary>Ordenar: <strong class="sort-current sort-current--recommended">Recomendados</strong><strong class="sort-current sort-current--low">Precio: menor a mayor</strong><strong class="sort-current sort-current--high">Precio: mayor a menor</strong> <b>⌄</b></summary>
-                <div class="catalog-sort-options">
-                  <button type="button" class="catalog-sort-option" data-target="sort-recommended">Recomendados</button>
-                  <button type="button" class="catalog-sort-option" data-target="sort-low">Precio: menor a mayor</button>
-                  <button type="button" class="catalog-sort-option" data-target="sort-high">Precio: mayor a menor</button>
-                </div>
-              </details>
+              <div class="catalog-order"><label for="catalog-sort">Ordenar productos</label><select id="catalog-sort"><option value="recommended">Recomendados</option><option value="low">Precio: menor a mayor</option><option value="high">Precio: mayor a menor</option></select></div>
             </div>
             <div class="catalog-meta">
-              <span><strong>Productos</strong> seleccionados para ti</span>
+              <span id="catalog-result-count" role="status">Cargando productos…</span>
               <span>Disponibilidad por WhatsApp</span>
             </div>
-            <div id="catalog-grid" class="catalog-grid grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4"></div>
+            <p id="catalog-loading">Cargando el catálogo…</p><div id="catalog-grid" class="catalog-grid" role="tabpanel" aria-labelledby="filter-todos" tabindex="0"></div><p class="sr-only" id="catalog-status" role="status" aria-live="polite" aria-atomic="true"></p><p id="storage-warning" class="storage-warning" role="status" hidden>El navegador bloqueó el almacenamiento; el carrito funcionará en modo temporal.</p>
           </section>
         </div>
+        <noscript><p class="noscript-note">Activa JavaScript para utilizar el catálogo, el carrito y el formulario.</p></noscript>
       </main>
 
       <footer class="site-footer">
         <div class="footer-inner section-wrap">
-          <div class="footer-brand"><a href="index.html#inicio" aria-label="Farmacia Reyna del Cisne, volver al inicio"><img src="logo-reyna-del-cisne.png" alt="Farmacia Reyna del Cisne"></a><p>Tu salud más cerca,<br>con el cuidado de siempre.</p></div>
+          <div class="footer-brand"><a href="index.html#inicio" aria-label="Farmacia Reyna del Cisne, volver al inicio"><img src="assets/images/logo-reyna-del-cisne.png" alt="Farmacia Reyna del Cisne"></a><p>Tu salud más cerca,<br>con el cuidado de siempre.</p></div>
           <div class="footer-hours"><h3>Horarios de atención</h3><dl class="footer-schedule"><div><dt>Lun — Sáb</dt><dd>08:00 — 19:00</dd></div></dl><a class="footer-note" href="index.html#contacto">Consulta otros horarios</a></div>
           <div class="footer-visit"><h3>Visítanos</h3><p>Farmacia Reyna del Cisne<br>Encuentra nuestra ubicación en el mapa.</p><a class="footer-map-link" href="https://maps.app.goo.gl/KFX83WH8SSXwYfL46" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Ver en el mapa ↗</span></a></div>
           <div class="footer-contact"><h3>Escríbenos</h3><nav class="social-links" aria-label="Redes sociales y WhatsApp">
@@ -124,19 +102,31 @@
         <div class="footer-bottom section-wrap"><span>© 2026 Farmacia Reyna del Cisne</span><span><a href="index.html#inicio">Inicio</a> · <a href="catalogo.html">Productos</a> · <a href="index.html#contacto">Contacto</a></span></div>
       </footer>
 
-      <input class="cart-toggle" type="checkbox" id="cart-toggle">
-      <label class="cart-backdrop" for="cart-toggle" aria-label="Cerrar carrito"></label>
-      <aside class="cart-panel rounded-l-3xl" aria-label="Carrito de compras">
-        <div class="cart-header"><div><p class="eyebrow">Tu selección</p><h2>Carrito</h2></div><label for="cart-toggle" class="cart-close" aria-label="Cerrar carrito">×</label></div>
+      <dialog class="cart-panel" id="cart-dialog" aria-labelledby="cart-title" aria-describedby="cart-note">
+        <div class="cart-header"><div><p class="eyebrow">Tu selección</p><h2 id="cart-title">Carrito</h2></div><button type="button" class="cart-close" data-close-cart aria-label="Cerrar carrito" autofocus>×</button></div>
         <p id="cart-empty" class="cart-empty">Todavía no has agregado productos.</p>
         <div id="cart-items"></div>
-        <div class="cart-total"><span>Tu selección</span><strong id="cart-summary" class="cart-count" aria-live="polite">0 productos</strong><span id="cart-total" class="cart-total-amount">$0,00</span></div>
-        <p class="cart-note">Revisa tu selección y envíanos el pedido. Confirmaremos disponibilidad y el total final por WhatsApp.</p>
-        <div class="whatsapp-orders">
-          <a id="whatsapp-order-link" class="button button-primary" href="https://wa.me/593979275988?text=Hola%2C%20quiero%20consultar%20por%20productos%20de%20la%20Farmacia%20Reyna%20del%20Cisne." target="_blank" rel="noreferrer">Elegir productos ↗</a>
+        <p id="cart-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+        <div class="cart-footer">
+          <p id="cart-summary" class="cart-summary">0 unidades</p>
+          <dl class="cart-totals"><div><dt>Subtotal</dt><dd id="cart-subtotal">$0,00</dd></div><div class="cart-grand-total"><dt>Total estimado</dt><dd id="cart-total">$0,00</dd></div></dl>
+          <p class="cart-updated">Última actualización: <time id="cart-updated">Sin cambios</time></p>
+          <p id="cart-note" class="cart-note">Sin recargos en esta demostración. Confirmaremos disponibilidad, entrega y precio final por WhatsApp.</p>
+          <a id="whatsapp-order-link" class="button button-primary" href="https://wa.me/593979275988" target="_blank" rel="noopener noreferrer" hidden>Consultar pedido por WhatsApp ↗</a>
+          <button type="button" id="cart-clear" class="cart-clear" disabled>Vaciar carrito</button>
         </div>
-      </aside>
+      </dialog>
+      <template id="product-card-template">
+        <article class="catalog-card"><div class="catalog-photo-wrap"><img class="catalog-photo" loading="lazy" width="700" height="500" alt=""><span class="catalog-badge"></span></div><span class="catalog-tag"></span><span class="catalog-icon" aria-hidden="true"></span><h2></h2><p></p><strong class="catalog-price"></strong><button type="button" class="catalog-add"></button></article>
+      </template>
     </div>
-  <script src="catalogo.js"></script>
+    <script defer src="data/productos-local.js"></script>
+    <script defer src="js/storage.js"></script>
+    <script defer src="js/cart.js"></script>
+    <script defer src="js/repo.js"></script>
+    <script defer src="js/view.js"></script>
+    <script defer src="js/validation.js"></script>
+    <script defer src="js/form.js"></script>
+    <script defer src="js/app.js"></script>
   </body>
 </html>

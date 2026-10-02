@@ -2,3 +2,6 @@
 Thumbs.db
 __pycache__/
 *.log
+.publish/
+.playwright-mcp/
+entrega/

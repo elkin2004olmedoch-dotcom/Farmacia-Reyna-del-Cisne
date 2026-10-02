@@ -1,0 +1,54 @@
+[
+  {
+    "id": "vitaminas",
+    "name": "Vitaminas diarias",
+    "category": "bienestar",
+    "description": "Apoyo para tu rutina y energía.",
+    "price": 12.5,
+    "badge": "Recomendado",
+    "badgeClass": "catalog-badge",
+    "icon": "✚",
+    "tag": "Bienestar",
+    "image": "assets/images/producto-vitaminas.jpg",
+    "alt": "Frasco de vitaminas diarias"
+  },
+  {
+    "id": "solar",
+    "name": "Protector solar",
+    "category": "cuidado",
+    "description": "Protección diaria para tu piel.",
+    "price": 9.75,
+    "badge": "Favorito",
+    "badgeClass": "catalog-badge catalog-badge--sun",
+    "icon": "✦",
+    "tag": "Cuidado personal",
+    "image": "assets/images/producto-solar.jpg",
+    "alt": "Protector solar para cuidado de la piel"
+  },
+  {
+    "id": "bebe",
+    "name": "Cuidado del bebé",
+    "category": "bebe",
+    "description": "Productos suaves para cada etapa.",
+    "price": 15,
+    "badge": "Nuevo",
+    "badgeClass": "catalog-badge",
+    "icon": "♡",
+    "tag": "Mamá y bebé",
+    "image": "assets/images/producto-bebe.jpg",
+    "alt": "Productos suaves para mamá y bebé"
+  },
+  {
+    "id": "botiquin",
+    "name": "Botiquín básico",
+    "category": "bienestar",
+    "description": "Lo esencial para tener a mano.",
+    "price": 18.9,
+    "badge": "Esencial",
+    "badgeClass": "catalog-badge catalog-badge--sun",
+    "icon": "✓",
+    "tag": "Bienestar",
+    "image": "assets/images/producto-botiquin.jpg",
+    "alt": "Botiquín básico de primeros auxilios"
+  }
+]
