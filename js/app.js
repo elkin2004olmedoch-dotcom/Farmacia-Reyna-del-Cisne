@@ -116,7 +116,8 @@
       const next = action === 'remove' ? app.cart.remove(state.items, id)
         : action === 'decrease' ? app.cart.update(state.items, id, state.items[id] - 1, state.products)
           : app.cart.add(state.items, id, state.products);
-      saveChange(next, `${product.name}: ${next[id] || 0} unidades en el carrito.`);
+      const units = next[id] || 0;
+      saveChange(next, `${product.name}: ${units} ${units === 1 ? 'unidad' : 'unidades'} en el carrito.`);
     } catch (error) { announce(error.message); }
   });
 
