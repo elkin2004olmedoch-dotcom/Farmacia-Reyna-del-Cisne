@@ -20,18 +20,28 @@
       image.alt = product.alt;
       card.querySelector('.catalog-badge').textContent = product.badge || 'Selección';
       card.querySelector('.catalog-tag').textContent = product.tag || product.category;
-      card.querySelector('.catalog-icon').textContent = product.icon || '✚';
-      card.querySelector('h2').textContent = product.name;
+      const title = card.querySelector('h3');
+      title.textContent = product.name;
+      title.id = `product-name-${product.id}`;
+      card.setAttribute('aria-labelledby', title.id);
       card.querySelector('p').textContent = product.description;
       card.querySelector('.catalog-price').textContent = money(Math.round(product.price * 100));
       const button = card.querySelector('button');
       button.dataset.productId = product.id;
-      button.textContent = items[product.id] ? `Añadir otra unidad (${items[product.id]}) +` : 'Añadir al carrito +';
-      button.setAttribute('aria-label', `Añadir ${product.name} al carrito`);
+      button.textContent = items[product.id] ? 'Añadir otra unidad +' : 'Añadir al carrito +';
+      button.setAttribute('aria-label', `${items[product.id] ? 'Añadir otra unidad' : 'Añadir al carrito'}: ${product.name}`);
       button.disabled = items[product.id] >= global.Farmacia.cart.MAX_QUANTITY;
+      if (button.disabled) button.textContent = 'Límite de 99 unidades';
+      card.querySelector('.product-cart-note').textContent = items[product.id] ? `${items[product.id]} ${items[product.id] === 1 ? 'unidad en tu carrito' : 'unidades en tu carrito'}` : '';
       fragment.append(card);
     }
-    if (!products.length) fragment.append(node('p', 'catalog-empty-state', 'No encontramos productos con esos filtros.'));
+    if (!products.length) {
+      const empty = node('div', 'catalog-empty-state');
+      const reset = node('button', 'button button-outline', 'Mostrar todos los productos');
+      reset.type = 'button'; reset.id = 'empty-reset';
+      empty.append(node('h3', '', 'No encontramos ese producto'), node('p', '', 'Prueba con otro nombre o restablece los filtros.'), reset);
+      fragment.append(empty);
+    }
     grid.replaceChildren(fragment);
     document.getElementById('catalog-result-count').textContent = `${products.length} ${products.length === 1 ? 'producto' : 'productos'}`;
   }
@@ -51,6 +61,10 @@
     const fragment = document.createDocumentFragment();
     for (const { product, quantity, amountCents } of totals.lines) {
       const article = node('article', 'cart-item');
+      article.dataset.cartItemId = product.id;
+      const thumbnail = node('img', 'cart-thumbnail');
+      Object.assign(thumbnail, { src: product.image, alt: '', width: 64, height: 64 });
+      const content = node('div', 'cart-item-content');
       const heading = node('h3', '', product.name);
       heading.id = `cart-name-${product.id}`;
       article.setAttribute('aria-labelledby', heading.id);
@@ -68,11 +82,14 @@
       minus.disabled = quantity <= 1;
       const plus = cartButton('increase', product, '+');
       plus.disabled = quantity >= 99;
-      controls.append(label, minus, input, plus, node('strong', 'cart-line-price', money(amountCents)));
+      const linePrice = node('strong', 'cart-line-price');
+      linePrice.append(node('span', 'sr-only', 'Importe de este producto: '), document.createTextNode(money(amountCents)));
+      controls.append(label, minus, input, plus, linePrice);
       const error = node('p', 'field-error');
       error.id = `quantity-error-${product.id}`;
       error.hidden = true;
-      article.append(top, node('p', 'cart-unit-price', `${money(Math.round(product.price * 100))} por unidad`), controls, error);
+      content.append(top, node('p', 'cart-unit-price', `${money(Math.round(product.price * 100))} por unidad`), controls, error);
+      article.append(thumbnail, content);
       fragment.append(article);
     }
     container.replaceChildren(fragment);
@@ -81,6 +98,12 @@
     document.querySelectorAll('[data-cart-count]').forEach((element) => { element.textContent = totals.units; });
     document.getElementById('cart-subtotal').textContent = money(totals.subtotalCents);
     document.getElementById('cart-total').textContent = money(totals.totalCents);
+    document.getElementById('cart-dock-summary').textContent = totals.units ? `${totals.units} ${totals.units === 1 ? 'unidad en tu carrito' : 'unidades en tu carrito'}` : 'Tu carrito está vacío';
+    document.getElementById('cart-dock-total').textContent = money(totals.totalCents);
+    document.querySelectorAll('[data-open-cart]').forEach((button) => {
+      const label = button.closest('#cart-dock') ? 'Ver carrito' : 'Carrito';
+      button.setAttribute('aria-label', `${label}, ${totals.units} ${totals.units === 1 ? 'unidad' : 'unidades'}, total estimado ${money(totals.totalCents)}`);
+    });
     const time = document.getElementById('cart-updated');
     if (updatedAt && Number.isFinite(Date.parse(updatedAt))) {
       time.dateTime = updatedAt;
@@ -88,9 +111,11 @@
     } else { time.removeAttribute('datetime'); time.textContent = 'Sin cambios'; }
     const order = document.getElementById('whatsapp-order-link');
     order.hidden = !totals.units;
+    order.setAttribute('aria-label', `Consultar pedido por WhatsApp, total estimado ${money(totals.totalCents)} (se abre en una pestaña nueva)`);
     const lines = totals.lines.map(({ product, quantity, amountCents }) => `${quantity} × ${product.name}: ${money(amountCents)}`);
     order.href = `https://wa.me/593979275988?text=${encodeURIComponent('Hola, quisiera consultar este pedido:\n' + lines.join('\n') + '\nTotal estimado: ' + money(totals.totalCents) + '. Por favor, confirmen disponibilidad y precio final.')}`;
     document.getElementById('cart-clear').disabled = !totals.units;
+    document.getElementById('cart-continue').textContent = totals.units ? 'Seguir viendo productos' : 'Explorar productos';
   }
 
   (global.Farmacia ||= {}).view = { money, renderProducts, renderCart };

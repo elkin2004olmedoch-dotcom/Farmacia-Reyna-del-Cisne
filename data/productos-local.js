@@ -11,7 +11,7 @@
     "icon": "✚",
     "tag": "Bienestar",
     "image": "assets/images/producto-vitaminas.jpg",
-    "alt": "Frasco de vitaminas diarias"
+    "alt": "Comprimidos y cápsulas de colores, imagen de referencia de vitaminas"
   },
   {
     "id": "solar",
@@ -24,7 +24,7 @@
     "icon": "✦",
     "tag": "Cuidado personal",
     "image": "assets/images/producto-solar.jpg",
-    "alt": "Protector solar para cuidado de la piel"
+    "alt": "Envases de cuidado de la piel, imagen de referencia de protector solar"
   },
   {
     "id": "bebe",
@@ -37,7 +37,7 @@
     "icon": "♡",
     "tag": "Mamá y bebé",
     "image": "assets/images/producto-bebe.jpg",
-    "alt": "Productos suaves para mamá y bebé"
+    "alt": "Niña jugando, imagen de referencia de cuidado infantil"
   },
   {
     "id": "botiquin",
@@ -50,6 +50,6 @@
     "icon": "✓",
     "tag": "Bienestar",
     "image": "assets/images/producto-botiquin.jpg",
-    "alt": "Botiquín básico de primeros auxilios"
+    "alt": "Material de primeros auxilios y un estetoscopio"
   }
 ];

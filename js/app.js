@@ -23,10 +23,12 @@
   const status = document.getElementById('catalog-status');
   const search = document.getElementById('catalog-search');
   const normalize = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  let announcementTimer;
   const announce = (message) => {
+    global.clearTimeout(announcementTimer);
     const target = dialog.open ? document.getElementById('cart-status') : status;
     target.textContent = '';
-    global.setTimeout(() => { target.textContent = message; }, 20);
+    announcementTimer = global.setTimeout(() => { target.textContent = message; }, 100);
   };
 
   function visibleProducts() {
@@ -44,14 +46,24 @@
   function render() {
     const active = document.activeElement;
     const focusKey = active?.dataset.focusKey;
+    const oldItems = [...dialog.querySelectorAll('.cart-item')];
+    const itemIndex = oldItems.indexOf(active?.closest('.cart-item'));
     const productId = !dialog.open ? active?.dataset.productId : null;
     app.view.renderProducts(visibleProducts(), state.items);
     app.view.renderCart(app.cart.totals(state.items, state.products), state.updatedAt);
     if (focusKey) {
       const next = dialog.querySelector(`[data-focus-key="${focusKey}"]`);
       if (next && !next.disabled) next.focus();
-      else dialog.querySelector('.cart-close').focus();
-    } else if (productId) document.querySelector(`.catalog-add[data-product-id="${productId}"]`)?.focus();
+      else {
+        const remaining = [...dialog.querySelectorAll('.cart-item')];
+        const nearby = remaining[Math.min(Math.max(itemIndex, 0), remaining.length - 1)];
+        (nearby?.querySelector('.quantity-input') || document.getElementById('cart-continue')).focus();
+      }
+    } else if (dialog.open && active?.id === 'cart-clear' && !Object.keys(state.items).length) document.getElementById('cart-continue').focus();
+    else if (productId) {
+      const button = document.querySelector(`.catalog-add[data-product-id="${productId}"]`);
+      (button?.disabled ? button.closest('article').querySelector('h3') : button)?.focus();
+    }
   }
 
   function saveChange(nextItems, message) {
@@ -62,7 +74,8 @@
     warning.hidden = result.saved;
     warning.textContent = result.saved ? '' : 'El navegador bloqueó el almacenamiento. Puedes comprar, pero el carrito no se conservará al cerrar esta página.';
     render();
-    announce(message);
+    const total = app.view.money(app.cart.totals(state.items, state.products).totalCents);
+    announce(`${message} Total estimado: ${total}.`);
   }
 
   function filtersChanged(announceResults = true) {
@@ -74,7 +87,7 @@
         if (selected) document.getElementById('catalog-grid').setAttribute('aria-labelledby', button.id);
       } else button.setAttribute('aria-pressed', String(selected));
     });
-    document.querySelectorAll('[data-price]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.price === state.priceRange)));
+    document.getElementById('catalog-price').value = state.priceRange;
     document.getElementById('catalog-sort').value = state.sort;
     app.storage.saveFilters({ query: state.query, category: state.category, priceRange: state.priceRange, sort: state.sort });
     app.storage.saveSort(state.sort);
@@ -88,10 +101,11 @@
     const button = event.target.closest('button');
     if (!button) return;
     if (button.dataset.category) { state.category = button.dataset.category; filtersChanged(); return; }
-    if (button.dataset.price) { state.priceRange = button.dataset.price; filtersChanged(); return; }
-    if (button.id === 'catalog-clear') {
+    if (button.id === 'catalog-clear' || button.id === 'empty-reset') {
       Object.assign(state, { query: '', category: 'todos', priceRange: 'all', sort: 'recommended' });
-      search.value = ''; filtersChanged(); return;
+      search.value = ''; filtersChanged();
+      if (button.id === 'empty-reset') search.focus();
+      return;
     }
     if (button.id === 'cart-clear') { saveChange({}, 'Carrito vaciado.'); return; }
     const id = button.dataset.productId;
@@ -120,6 +134,7 @@
     }
   });
   search.addEventListener('input', () => { state.query = search.value; filtersChanged(); });
+  document.getElementById('catalog-price').addEventListener('change', (event) => { state.priceRange = event.target.value; filtersChanged(); });
   document.getElementById('catalog-sort').addEventListener('change', (event) => { state.sort = event.target.value; filtersChanged(); });
   document.querySelector('[role="tablist"]').addEventListener('keydown', (event) => {
     const tabs = [...document.querySelectorAll('[role="tab"]')];

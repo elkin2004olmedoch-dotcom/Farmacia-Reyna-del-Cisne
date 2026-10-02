@@ -117,7 +117,7 @@ h1, h2, h3 { font-family: var(--serif); letter-spacing: -.02em; }
 .trust-line { display: flex; align-items: center; gap: 13px; margin-top: 39px; color: var(--muted); font-size: 12px; font-weight: 700; }
 .avatars { display: flex; }
 .avatars b { display: grid; width: 31px; height: 31px; margin-left: -5px; place-items: center; border: 2px solid var(--white); border-radius: 50%; color: var(--white); background: var(--navy); font-size: 9px; }
-.avatars b:first-child { margin-left: 0; }.avatars b:nth-child(2) { background: #6980a8; }.avatars b:nth-child(3) { background: #a5b2c9; }
+.avatars b:first-child { margin-left: 0; }.avatars b:nth-child(2) { background: #456088; }.avatars b:nth-child(3) { color: var(--navy); background: #dff0e9; }
 
 .hero-card-wrap { width: min(100%, 540px); margin: auto; }
 .hero-card-shadow { position: absolute; inset: 14px -12px -12px 14px; border-radius: 30px; background: var(--coral); }

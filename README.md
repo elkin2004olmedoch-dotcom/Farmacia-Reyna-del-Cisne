@@ -19,6 +19,7 @@ index.html                 Portada y formulario
 catalogo.html              Catálogo y diálogo del carrito
 assets/
   styles.css               Diseño responsive con Flexbox y Grid
+  accesibilidad.css        Controles, contraste y recorrido de compra
   images/                  Logo y fotografías locales
   fonts/                   Fuentes locales
   vendor/                  Bootstrap Grid y estilos de fuentes
@@ -60,6 +61,10 @@ La selección antigua se migra a cantidades. Datos corruptos o productos retirad
 ## Accesibilidad
 
 HTML semántico, enlace para saltar al contenido, textos alternativos, foco visible y controles nativos. El carrito usa `dialog`: mantiene el foco dentro, se cierra con Escape y devuelve el foco al botón de apertura. Las categorías admiten flechas, Inicio y Fin. Los errores usan `aria-invalid` y `aria-describedby`; cambios y resultados se anuncian con regiones live. El menú móvil utiliza `aria-expanded` y se respeta movimiento reducido.
+
+El catálogo reúne búsqueda, precio y orden arriba; las tarjetas indican las unidades añadidas y un resumen permite abrir el carrito. Al quitar un producto, el foco pasa al siguiente; al vaciarlo, pasa a **Explorar productos**. Los errores del formulario enlazan con cada campo. Usa Tab/Mayús+Tab para recorrer controles y Enter/Espacio para activar botones.
+
+Se comprobaron el árbol de accesibilidad del navegador, teclado, anchos de 320 a 1440 píxeles y axe-core 4.10.3 en portada, formulario y carrito. No se ha realizado una sesión real con NVDA/JAWS/VoiceOver ni con usuarios ciegos; las pruebas automáticas no son una certificación de accesibilidad universal. El mapa externo requiere una revisión independiente; existe un enlace directo como alternativa.
 
 ## Pruebas y publicación
 

@@ -1,0 +1,52 @@
+async (page) => {
+  const check = (condition, message) => { if (!condition) throw new Error(message); };
+  const context = await page.context().browser().newContext({ viewport: { width: 1280, height: 900 } });
+  const p = await context.newPage();
+  const errors = [];
+  p.on('pageerror', error => errors.push(error.message));
+  try {
+    await p.goto('http://127.0.0.1:4173/catalogo.html');
+    await p.locator('.catalog-add').first().waitFor();
+    await p.locator('.catalog-add').first().focus();
+    await p.keyboard.press('Enter');
+    await p.waitForFunction(() => document.getElementById('catalog-status').textContent.includes('Vitaminas'));
+    const feedback = await p.locator('#catalog-status').boundingBox();
+    check(feedback.width > 100 && feedback.height > 20, 'La confirmación al añadir debe ser visible además de anunciada.');
+    check((await p.locator('#catalog-status').innerText()).includes('$12,50'), 'La confirmación debe incluir el nuevo total.');
+    await p.locator('.catalog-add').nth(1).click();
+    await p.locator('#cart-dock [data-open-cart]').click();
+    check(await p.locator('#cart-dialog').evaluate(el => el.open), 'El carrito debe abrir como diálogo.');
+    await p.keyboard.press('Tab');
+    check(await p.evaluate(() => document.activeElement.closest('#cart-dialog') !== null), 'El foco debe permanecer en el carrito.');
+    await p.locator('[data-cart-action="remove"]').first().click();
+    check(await p.evaluate(() => document.activeElement.matches('[data-quantity-id="solar"]')), 'Al quitar un producto, el foco debe pasar al siguiente producto.');
+    await p.locator('[data-cart-action="remove"]').first().click();
+    check(await p.locator('#cart-continue').evaluate(el => document.activeElement === el), 'Al vaciar el carrito, el foco debe permitir continuar explorando.');
+    await p.keyboard.press('Escape');
+    check(await p.locator('#cart-dock [data-open-cart]').evaluate(el => document.activeElement === el), 'Escape debe devolver el foco al botón que abrió el carrito.');
+    await p.locator('#catalog-price').selectOption('under10');
+    check(await p.locator('.catalog-add').count() === 1, 'El filtro de precio debe mostrar solo el protector solar.');
+    await p.locator('#catalog-search').fill('inexistente');
+    check(await p.locator('.catalog-add').count() === 0, 'Una búsqueda sin coincidencias debe mostrar un estado vacío.');
+    await p.locator('#empty-reset').click();
+    check(await p.locator('.catalog-add').count() === 4, 'La recuperación debe restablecer todos los filtros.');
+    check(await p.locator('#catalog-search').evaluate(el => document.activeElement === el), 'Al restablecer desde el estado vacío, el foco debe volver a la búsqueda.');
+    await p.locator('#filter-todos').focus();
+    await p.keyboard.press('ArrowRight');
+    check(await p.locator('#filter-bienestar').getAttribute('aria-selected') === 'true', 'Las categorías deben poder cambiarse con las flechas.');
+    await p.goto('http://127.0.0.1:4173/index.html');
+    await p.locator('#contact-form button[type="submit"]').click();
+    check(await p.locator('#form-status a').count() === 4, 'El resumen de errores debe enlazar con los cuatro campos.');
+    await p.locator('#form-status a[href="#contact-email"]').click();
+    check(await p.locator('#contact-email').evaluate(el => document.activeElement === el), 'El enlace del error debe enfocar el campo correspondiente.');
+    await p.locator('#contact-name').fill('María Pérez');
+    await p.locator('#contact-email').fill('maria@example.com');
+    await p.locator('#contact-phone').fill('+593 979275988');
+    await p.locator('#contact-message').fill('Quiero consultar la disponibilidad del protector solar.');
+    await p.locator('#contact-form button[type="submit"]').click();
+    check(await p.locator('#contact-whatsapp').isVisible(), 'Una consulta válida debe permitir abrir WhatsApp.');
+    check(await p.locator('#contact-whatsapp').evaluate(el => document.activeElement === el), 'La consulta válida debe enfocar el siguiente paso.');
+    check(errors.length === 0, 'No debe haber errores de JavaScript: ' + errors.join(', '));
+    return { result: 'PASS', comprobaciones: 'Confirmación visible, total, teclado, foco, filtros, recuperación y errores accesibles.' };
+  } finally { await context.close(); }
+}

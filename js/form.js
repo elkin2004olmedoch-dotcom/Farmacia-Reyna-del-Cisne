@@ -10,7 +10,7 @@
       const input = form.elements.namedItem(key);
       const error = document.getElementById(`contact-${key}-error`);
       input.setAttribute('aria-invalid', message ? 'true' : 'false');
-      error.textContent = message || '';
+      error.textContent = message ? `Error: ${message}` : '';
       error.hidden = !message;
     }
     form.addEventListener('input', (event) => {
@@ -26,7 +26,18 @@
       const keys = Object.keys(errors);
       if (keys.length) {
         success.hidden = true;
-        status.textContent = `Revisa ${keys.length} ${keys.length === 1 ? 'campo señalado' : 'campos señalados'}.`;
+        const heading = document.createElement('p');
+        heading.textContent = `Revisa ${keys.length} ${keys.length === 1 ? 'campo' : 'campos'} para continuar:`;
+        const list = document.createElement('ul');
+        keys.forEach((key) => {
+          const item = document.createElement('li');
+          const link = document.createElement('a');
+          link.href = `#contact-${key}`;
+          link.textContent = errors[key];
+          link.addEventListener('click', (click) => { click.preventDefault(); form.elements.namedItem(key).focus(); });
+          item.append(link); list.append(item);
+        });
+        status.replaceChildren(heading, list);
         form.elements.namedItem(keys[0]).focus();
         return;
       }
