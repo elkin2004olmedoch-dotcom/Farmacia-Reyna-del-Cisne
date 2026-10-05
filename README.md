@@ -62,13 +62,15 @@ La selección antigua se migra a cantidades. Datos corruptos o productos retirad
 
 HTML semántico, enlace para saltar al contenido, textos alternativos, foco visible y controles nativos. El carrito usa `dialog`: mantiene el foco dentro, se cierra con Escape y devuelve el foco al botón de apertura. Las categorías admiten flechas, Inicio y Fin. Los errores usan `aria-invalid` y `aria-describedby`; cambios y resultados se anuncian con regiones live. El menú móvil utiliza `aria-expanded` y se respeta movimiento reducido.
 
-El catálogo reúne búsqueda, precio y orden arriba; las tarjetas indican las unidades añadidas y un resumen permite abrir el carrito. Al quitar un producto, el foco pasa al siguiente; al vaciarlo, pasa a **Explorar productos**. Los errores del formulario enlazan con cada campo. Usa Tab/Mayús+Tab para recorrer controles y Enter/Espacio para activar botones.
+El catálogo reúne búsqueda, precio y orden arriba; las tarjetas indican las unidades añadidas y un resumen permite abrir el carrito. El botón de la cabecera muestra solo el icono y el contador, con un nombre accesible para lectores de pantalla. Quitar un producto abre una confirmación: **Cancelar** o Escape conserva el producto y devuelve el foco a **Quitar**; **Sí, quitar** lo elimina y pasa el foco al siguiente producto. Al eliminar el último, el foco pasa a **Explorar productos**. Los errores del formulario enlazan con cada campo. Usa Tab/Mayús+Tab para recorrer controles y Enter/Espacio para activar botones.
 
 Se comprobaron el árbol de accesibilidad del navegador, teclado, anchos de 320 a 1440 píxeles y axe-core 4.10.3 en portada, formulario y carrito. No se ha realizado una sesión real con NVDA/JAWS/VoiceOver ni con usuarios ciegos; las pruebas automáticas no son una certificación de accesibilidad universal. El mapa externo requiere una revisión independiente; existe un enlace directo como alternativa.
 
 ## Pruebas y publicación
 
 Con Node.js: `node --test tests/*.test.cjs`. No requiere instalar paquetes.
+
+Las pruebas `tests/accesibilidad.browser.cjs` y `tests/teclado.browser.cjs` son funciones para ejecutar con Playwright sobre un servidor local en el puerto 4173. La segunda recorre catálogo, confirmación, cantidades, filtros, menú móvil, preguntas frecuentes y formulario usando solo teclado, en anchos de 1280 y 375 píxeles.
 
 GitHub Pages publica la rama `main`. Para Neocities, sube `index.html`, `catalogo.html`, `robots.txt` y las carpetas `assets`, `data` y `js` conservando las rutas. No subas el ZIP como sustituto de los archivos de la web.
 
