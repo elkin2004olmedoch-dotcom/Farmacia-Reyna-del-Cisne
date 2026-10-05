@@ -145,6 +145,7 @@ h1, h2, h3 { font-family: var(--serif); letter-spacing: -.02em; }
 .products { padding-bottom: 82px; }
 .cart-trigger { display: inline-flex; align-items: center; gap: 8px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 999px; color: var(--navy); background: var(--white); font-size: 13px; font-weight: 700; cursor: pointer; }
 .cart-trigger span { display: grid; width: 22px; height: 22px; place-items: center; border-radius: 50%; color: var(--white); background: var(--navy); font-size: 11px; }
+.cart-icon { width: 21px; height: 21px; flex: 0 0 auto; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .product-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 34px; }
 .catalog-grid { margin-top: 24px; }
@@ -494,6 +495,14 @@ dialog.cart-panel { position: fixed; inset: 0 0 0 auto; z-index: 70; width: min(
 dialog.cart-panel:not([open]) { display: none; }
 dialog.cart-panel[open] { display: flex; flex-direction: column; }
 dialog.cart-panel::backdrop { background: rgb(3 27 67 / 55%); }
+dialog.cart-remove-dialog { width: min(420px, calc(100% - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 28px; border: 1px solid var(--line); border-radius: 24px; color: var(--ink); background: var(--cream); text-align: center; box-shadow: 0 24px 70px rgb(3 27 67 / 25%); overflow-y: auto; }
+dialog.cart-remove-dialog::backdrop { background: rgb(3 27 67 / 60%); }
+.cart-remove-icon { display: grid; place-items: center; width: 56px; height: 56px; margin: 0 auto 18px; border-radius: 50%; color: #9c392b; background: #fbe9e3; }
+.cart-remove-icon svg { width: 26px; height: 26px; }
+.cart-remove-dialog h2 { margin: 0 0 12px; color: var(--navy); font-size: 30px; }
+.cart-remove-dialog p { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
+.cart-remove-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.cart-remove-actions .button { flex: 1 1 130px; min-height: 48px; padding: 12px 16px; }
 body:has(dialog[open]) { overflow: hidden; }
 .cart-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 18px; }
 .cart-header h2 { margin: 8px 0 0; font-size: 44px; }

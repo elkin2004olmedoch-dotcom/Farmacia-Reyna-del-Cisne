@@ -20,6 +20,8 @@
 
   const state = { products: [], items: {}, query: '', category: 'todos', priceRange: 'all', sort: app.storage.readSort(), updatedAt: null };
   const dialog = document.getElementById('cart-dialog');
+  const removeDialog = document.getElementById('cart-remove-dialog');
+  let pendingRemoval = null;
   const status = document.getElementById('catalog-status');
   const search = document.getElementById('catalog-search');
   const normalize = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -113,12 +115,32 @@
     const product = state.products.find((item) => item.id === id);
     try {
       const action = button.dataset.cartAction;
-      const next = action === 'remove' ? app.cart.remove(state.items, id)
-        : action === 'decrease' ? app.cart.update(state.items, id, state.items[id] - 1, state.products)
+      if (action === 'remove') {
+        pendingRemoval = { id, trigger: button, name: product.name };
+        document.getElementById('cart-remove-description').textContent = `¿Estás seguro de que quieres quitar «${product.name}» de tu carrito?`;
+        removeDialog.showModal();
+        return;
+      }
+      const next = action === 'decrease' ? app.cart.update(state.items, id, state.items[id] - 1, state.products)
           : app.cart.add(state.items, id, state.products);
       const units = next[id] || 0;
       saveChange(next, `${product.name}: ${units} ${units === 1 ? 'unidad' : 'unidades'} en el carrito.`);
     } catch (error) { announce(error.message); }
+  });
+
+  document.getElementById('cart-remove-cancel').addEventListener('click', () => removeDialog.close());
+  removeDialog.addEventListener('close', () => {
+    if (!pendingRemoval) return;
+    pendingRemoval.trigger.focus();
+    pendingRemoval = null;
+  });
+  document.getElementById('cart-remove-confirm').addEventListener('click', () => {
+    if (!pendingRemoval) return;
+    const { id, trigger, name } = pendingRemoval;
+    pendingRemoval = null;
+    removeDialog.close();
+    trigger.focus();
+    saveChange(app.cart.remove(state.items, id), `${name} se quitó del carrito.`);
   });
 
   dialog.addEventListener('click', (event) => { if (event.target.closest('[data-close-cart]')) dialog.close(); });

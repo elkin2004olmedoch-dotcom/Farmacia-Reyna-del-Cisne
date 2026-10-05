@@ -13,12 +13,11 @@
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
     <div class="site-shell">
       <header class="site-header">
-      <div class="top-banner">Catálogo demostrativo · consulta disponibilidad por WhatsApp</div>
         <div class="header-inner">
           <a class="brand" href="index.html" aria-label="Volver al inicio">
             <img src="assets/images/logo-reyna-del-cisne.png" alt="Farmacia Reyna del Cisne">
           </a>
-          <nav class="catalog-header-actions" aria-label="Navegación del catálogo"><a class="catalog-home-link" href="index.html">Inicio</a><button type="button" class="cart-trigger" data-open-cart aria-haspopup="dialog" aria-controls="cart-dialog">Carrito <span data-cart-count>0</span></button></nav>
+          <nav class="catalog-header-actions" aria-label="Navegación del catálogo"><a class="catalog-home-link" href="index.html">Inicio</a><button type="button" class="cart-trigger" data-open-cart aria-haspopup="dialog" aria-controls="cart-dialog"><svg class="cart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3h2l2.4 11.4a2 2 0 0 0 2 1.6H18a2 2 0 0 0 2-1.6L21 7H6"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg>Carrito <span data-cart-count>0</span></button></nav>
         </div>
       </header>
 
@@ -37,7 +36,7 @@
           <li><span aria-hidden="true">3</span><div><strong>Consulta por WhatsApp</strong><small>Confirmamos precio y disponibilidad.</small></div></li>
         </ol>
         <section class="catalog-results" aria-labelledby="catalog-title">
-          <div class="catalog-section-heading"><h2 id="catalog-title">Encuentra lo que necesitas</h2><p>Precios en dólares · productos de demostración</p></div>
+          <div class="catalog-section-heading"><h2 id="catalog-title">Encuentra lo que necesitas</h2><p>Precios en dólares</p></div>
         <div class="catalog-filters">
         <div class="catalog-search-field" role="search">
           <label for="catalog-search">Buscar un producto</label>
@@ -97,10 +96,19 @@
           <p id="cart-summary" class="cart-summary">0 unidades</p>
           <dl class="cart-totals"><div><dt>Subtotal</dt><dd id="cart-subtotal">$0,00</dd></div><div class="cart-grand-total"><dt>Total estimado</dt><dd id="cart-total">$0,00</dd></div></dl>
           <p class="cart-updated">Última actualización: <time id="cart-updated">Sin cambios</time></p>
-          <p id="cart-note" class="cart-note">Sin recargos en esta demostración. Confirmaremos disponibilidad, entrega y precio final por WhatsApp.</p>
+          <p id="cart-note" class="cart-note">Confirmaremos disponibilidad, entrega y precio final por WhatsApp.</p>
           <a id="whatsapp-order-link" class="button button-primary" href="https://wa.me/593979275988" target="_blank" rel="noopener noreferrer" hidden>Consultar pedido por WhatsApp ↗</a>
           <button type="button" id="cart-clear" class="cart-clear" disabled>Vaciar carrito</button>
           <button type="button" id="cart-continue" class="cart-continue" data-close-cart>Seguir viendo productos</button>
+        </div>
+      </dialog>
+      <dialog class="cart-remove-dialog" id="cart-remove-dialog" aria-labelledby="cart-remove-title" aria-describedby="cart-remove-description">
+        <div class="cart-remove-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M9 6V4h6v2M5 6l1 14h12l1-14M10 10v6M14 10v6"/></svg></div>
+        <h2 id="cart-remove-title">¿Quitar del carrito?</h2>
+        <p id="cart-remove-description"></p>
+        <div class="cart-remove-actions">
+          <button type="button" id="cart-remove-cancel" class="button button-outline" autofocus>Cancelar</button>
+          <button type="button" id="cart-remove-confirm" class="button button-primary">Sí, quitar</button>
         </div>
       </dialog>
       <template id="product-card-template">
