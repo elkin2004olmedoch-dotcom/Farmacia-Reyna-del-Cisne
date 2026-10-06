@@ -45,6 +45,42 @@ test('calcula importes en centavos y no concatena precios ni acumula errores dec
   assert.equal(cart.totals({}, products).totalCents, 0);
 });
 
+test('exporta la selección como JSON legible con cantidades, importes y fechas', () => {
+  const items = { a: 3, b: 1 };
+  const updatedAt = '2026-10-06T03:42:55.029Z';
+  const exportedAt = '2026-10-06T03:43:00.000Z';
+  const data = cart.exportData(items, products, updatedAt, exportedAt);
+  assert.deepEqual(JSON.parse(JSON.stringify(data)), {
+    version: 1,
+    farmacia: 'Farmacia Reina del Cisne',
+    moneda: 'USD',
+    fechaExportacion: exportedAt,
+    ultimaActualizacion: updatedAt,
+    productos: [
+      { id: 'a', nombre: 'Producto A', cantidad: 3, precioUnitario: 12.5, subtotal: 37.5 },
+      { id: 'b', nombre: 'Producto B', cantidad: 1, precioUnitario: 9.75, subtotal: 9.75 },
+    ],
+    unidades: 4,
+    subtotal: 47.25,
+    total: 47.25,
+  });
+  assert.deepEqual(items, { a: 3, b: 1 });
+});
+
+test('la exportación refleja cambios de cantidad y eliminación sin incluir productos retirados', () => {
+  let items = cart.update({ a: 3, b: 1, retirado: 8 }, 'b', 2, products);
+  items = cart.remove(items, 'a');
+  const data = cart.exportData(items, products, null, '2026-10-06T03:43:00.000Z');
+  assert.deepEqual(data.productos, [{ id: 'b', nombre: 'Producto B', cantidad: 2, precioUnitario: 9.75, subtotal: 19.5 }]);
+  assert.equal(data.total, 19.5);
+  assert.equal(data.unidades, 2);
+  assert.equal(data.ultimaActualizacion, null);
+  const empty = cart.exportData({}, products);
+  assert.deepEqual(empty.productos, []);
+  assert.equal(empty.total, 0);
+  assert.ok(Number.isFinite(Date.parse(empty.fechaExportacion)));
+});
+
 test('validación acepta nombres con tildes y datos válidos', () => {
   assert.deepEqual(validation.validate({ name: 'José María', email: 'jose@example.com', phone: '+593 97 927 5988', message: 'Quiero consultar por un producto.' }), {});
 });

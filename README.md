@@ -9,6 +9,7 @@ Sitio estático del Reto 1: catálogo y carrito con cantidades, filtros, subtota
 3. Entra en **Productos**, añade artículos y abre **Carrito**.
 4. Cambia cantidades, elimina productos y recarga para comprobar la persistencia.
 5. En la portada, completa **Prepara tu consulta**. Una consulta válida habilita el enlace para enviarla por WhatsApp.
+6. Al añadir productos, cambiar cantidades, confirmar una eliminación o vaciar el carrito, el navegador descarga automáticamente `carrito-reina-del-cisne.json`. Puedes abrir el archivo en VS Code o en un editor de texto para mostrar la selección.
 
 No necesita instalación, servidor dinámico ni backend. Imágenes, estilos, fuentes y scripts están incluidos. WhatsApp, redes y Google Maps necesitan Internet.
 
@@ -55,6 +56,8 @@ En HTTP/HTTPS, `repo.js` carga `data/productos.json` con `fetch`. Al abrir el HT
 
 El carrito admite de 1 a 99 unidades por producto. Calcula importes en centavos para evitar errores decimales. Subtotal y total coinciden porque la demostración no añade recargos; la farmacia confirma el importe final.
 
+La descarga JSON refleja el carrito en el momento de cada cambio. Contiene identificador y nombre de cada producto, cantidad, precio unitario, subtotal por producto, unidades, subtotal y total en USD, fecha de exportación y última actualización. Se genera en el navegador con `JSON.stringify`, `Blob` y una URL temporal; no necesita backend ni botón de descarga. Vaciar el carrito genera una lista vacía con total cero. Recargar, filtrar o cancelar una eliminación conserva la selección sin generar otra descarga. El archivo se guarda en la ubicación elegida por el navegador, no dentro de `data/`; la configuración del navegador controla las descargas múltiples.
+
 ## Persistencia
 
 | Mecanismo | Información guardada |
@@ -79,6 +82,8 @@ Se comprobaron el árbol de accesibilidad del navegador, teclado, anchos de 320 
 Con Node.js: `node --test tests/*.test.cjs`. No requiere instalar paquetes.
 
 Las pruebas `tests/accesibilidad.browser.cjs` y `tests/teclado.browser.cjs` son funciones para ejecutar con Playwright sobre un servidor local en el puerto 4173. La segunda recorre catálogo, confirmación, cantidades, filtros, menú móvil, preguntas frecuentes y formulario usando solo teclado, en anchos de 1280 y 375 píxeles.
+
+`tests/dialogo.browser.cjs` comprueba que cancelar y reabrir la confirmación conserve el producto pendiente incluso si llega un evento `close` atrasado.
 
 GitHub Pages publica la rama `main`. Para Neocities, sube `index.html`, `catalogo.html`, `robots.txt` y las carpetas `assets`, `data` y `js` conservando las rutas. No subas el ZIP como sustituto de los archivos de la web.
 

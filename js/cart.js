@@ -46,7 +46,28 @@
     return { lines, units: lines.reduce((sum, line) => sum + line.quantity, 0), subtotalCents, totalCents: subtotalCents };
   }
 
-  const api = { MAX_QUANTITY, add, update, remove, normalizeStored, totals };
+  function exportData(items, products, updatedAt = null, exportedAt = new Date().toISOString()) {
+    const summary = totals(items, products);
+    return {
+      version: 1,
+      farmacia: 'Farmacia Reina del Cisne',
+      moneda: 'USD',
+      fechaExportacion: exportedAt,
+      ultimaActualizacion: updatedAt,
+      productos: summary.lines.map(({ product, quantity, amountCents }) => ({
+        id: product.id,
+        nombre: product.name,
+        cantidad: quantity,
+        precioUnitario: Math.round(product.price * 100) / 100,
+        subtotal: amountCents / 100,
+      })),
+      unidades: summary.units,
+      subtotal: summary.subtotalCents / 100,
+      total: summary.totalCents / 100,
+    };
+  }
+
+  const api = { MAX_QUANTITY, add, update, remove, normalizeStored, totals, exportData };
   (global.Farmacia ||= {}).cart = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(globalThis);

@@ -77,7 +77,31 @@
     warning.textContent = result.saved ? '' : 'El navegador bloqueó el almacenamiento. Puedes comprar, pero el carrito no se conservará al cerrar esta página.';
     render();
     const total = app.view.money(app.cart.totals(state.items, state.products).totalCents);
-    announce(`${message} Total estimado: ${total}.`);
+    let downloadMessage;
+    try {
+      downloadCart();
+      downloadMessage = ' Archivo JSON preparado para descargar.';
+    } catch (_) {
+      downloadMessage = ' El carrito se actualizó, pero no se pudo preparar su archivo JSON.';
+    }
+    announce(`${message} Total estimado: ${total}.${downloadMessage}`);
+  }
+
+  function downloadCart() {
+    const data = app.cart.exportData(state.items, state.products, state.updatedAt);
+    const blob = new Blob([JSON.stringify(data, null, 2) + '\n'], { type: 'application/json;charset=utf-8' });
+    const url = global.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'carrito-reina-del-cisne.json';
+    link.hidden = true;
+    dialog.append(link);
+    try {
+      link.click();
+    } finally {
+      link.remove();
+      global.setTimeout(() => global.URL.revokeObjectURL(url), 1000);
+    }
   }
 
   function filtersChanged(announceResults = true) {
@@ -130,7 +154,8 @@
 
   document.getElementById('cart-remove-cancel').addEventListener('click', () => removeDialog.close());
   removeDialog.addEventListener('close', () => {
-    if (!pendingRemoval) return;
+    // Ignora un close anterior que se entregue tras reabrir la confirmación.
+    if (removeDialog.open || !pendingRemoval) return;
     pendingRemoval.trigger.focus();
     pendingRemoval = null;
   });
