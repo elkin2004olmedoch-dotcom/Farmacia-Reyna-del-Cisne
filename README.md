@@ -1,4 +1,4 @@
-# Farmacia Reyna del Cisne
+# Farmacia Reina del Cisne
 
 Sitio estático del Reto 1: catálogo y carrito con cantidades, filtros, subtotal, total, persistencia y formulario accesible. Los productos y precios son de demostración; el pedido se consulta por WhatsApp.
 
@@ -36,7 +36,15 @@ js/
   form.js                  Errores accesibles y consulta
 scripts/build-data.cjs      Genera la copia local del JSON
 tests/                     Pruebas con Node.js
-AUDITORIA.md                Verificación breve
+AUDITORIA.md                01: estructura HTML e index
+AUDITORIA-02-*.md           02: CSS y diseño responsive
+AUDITORIA-03-*.md           03: catálogo, JavaScript y JSON
+AUDITORIA-04-*.md           04: búsqueda, filtros y orden
+AUDITORIA-05-*.md           05: carrito y cálculos
+AUDITORIA-06-*.md           06: persistencia e IndexedDB
+AUDITORIA-07-*.md           07: formulario y WhatsApp
+AUDITORIA-08-*.md           08: accesibilidad y teclado
+AUDITORIA-09-*.md           09: pruebas, recursos y publicación
 ```
 
 ## Explicación técnica
@@ -76,4 +84,4 @@ GitHub Pages publica la rama `main`. Para Neocities, sube `index.html`, `catalog
 
 Sitios: [Neocities](https://proyecto01.neocities.org/) y [GitHub Pages](https://elkin2004olmedoch-dotcom.github.io/Farmacia-Reyna-del-Cisne/).
 
-Bootstrap Grid 5.3.3 (MIT), DM Sans y Fraunces (Google Fonts); fotografías de referencia de Unsplash y logo proporcionado para el proyecto.
+Bootstrap Grid 5.3.3 (MIT), DM Sans y Fraunces (Google Fonts); fotografías generales de Unsplash. Logo, fotografía de la fachada e imágenes de Eucerin y Pigeon proporcionados para el proyecto. La paleta combina fondos crema, tarjetas blancas y detalles rojos; el pie utiliza rojo vino con textos y logo en crema, sin recuadro alrededor del PNG transparente.

@@ -1,6 +1,6 @@
 # Agentes locales del proyecto
 
-Esta carpeta guarda definiciones locales de agentes para trabajar con el proyecto de Farmacia Reyna del Cisne.
+Esta carpeta guarda definiciones locales de agentes para trabajar con el proyecto de Farmacia Reina del Cisne.
 
 ## Archivos
 
@@ -15,7 +15,7 @@ Puedes abrir cualquiera de estos archivos y copiar el prompt base en la herramie
 
 ## Objetivo del proyecto
 
-Este sitio es una landing page para Farmacia Reyna del Cisne, con HTML/CSS y contenido estático.
+Este sitio es una landing page para Farmacia Reina del Cisne, con HTML/CSS y contenido estático.
 
 ## Recomendación
 

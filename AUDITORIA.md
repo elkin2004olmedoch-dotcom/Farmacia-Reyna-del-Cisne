@@ -1,26 +1,36 @@
-# Auditoría breve — Reto 1
+# Auditoría 01 — Estructura HTML e index
 
-Fecha: 2 de octubre de 2026. Proyecto: Farmacia Reyna del Cisne.
+**Fecha:** 5 de octubre de 2026.
+**Alcance:** `index.html`, `catalogo.html` y organización de los scripts.
 
-## Comprobado
+## Cambios realizados
 
-- HTML semántico y carpetas `assets`, `data`, `js`.
-- Productos desde JSON, tarjetas reutilizables y recursos locales.
-- Carrito: añadir, quitar, cambiar cantidades, vaciar, subtotal y total.
-- Persistencia: localStorage, sessionStorage, IndexedDB y cookie; fecha de actualización y migración del carrito anterior.
-- Formulario con regex, mensajes accesibles y consulta por WhatsApp.
-- Diálogo con teclado/Escape, foco al quitar/vaciar, filtros nativos y errores enlazados; confirmación visible y anunciada.
-- 11 pruebas automatizadas aprobadas; carrito, recarga, teclado y formulario verificados en navegador.
-- Sin desbordamiento horizontal en anchos de 320, 390, 768, 1024 y 1440 píxeles.
-- Axe 4.10.3: sin infracciones automáticas detectadas en los estados revisados; árbol de accesibilidad comprobado.
-- Apertura directa `file://` sin Internet: catálogo, imágenes y carrito funcionan.
-- Neocities publicado: portada, JSON, 4 productos, carrito persistente e imágenes comprobados sin errores de JavaScript.
+- Se organizó la portada en presentación, servicios, ubicación, preguntas frecuentes y formulario de contacto.
+- `index.html` es el archivo principal que abre el sitio; `catalogo.html` contiene los productos, filtros y carrito.
+- Se utilizó HTML5 con idioma español, codificación UTF-8 y etiqueta viewport para adaptar la página al dispositivo.
+- La estructura emplea `header`, `nav`, `main`, `section` y `footer`, con títulos y enlaces que identifican cada sección.
+- Los scripts se cargan con `defer`: esperan a que se analice el HTML y conservan su orden de ejecución.
+- El código comparte funciones mediante `globalThis.Farmacia`; cada archivo encapsula sus variables en una función.
+- Se reemplazó la fotografía de las manos en la portada por la fachada real proporcionada para el proyecto.
 
-## Observaciones importantes
+## Errores
 
-- Productos, precios y horarios de demostración. Instagram y Facebook abren las páginas generales, según lo solicitado.
-- WhatsApp y mapa necesitan Internet. El formulario prepara el mensaje; no lo envía automáticamente.
-- Regenerar `productos-local.js` al cambiar el JSON.
-- Pendiente: prueba real con lectores de pantalla y usuarios ciegos; mapa externo fuera de la comprobación automática.
+- La comprobación de recursos locales no detectó rutas faltantes en los archivos revisados.
+- El catálogo dinámico, el carrito y la validación personalizada necesitan JavaScript habilitado.
+- La aplicación comprueba si existe la cuadrícula del catálogo antes de inicializarla, evitando buscarla en la portada.
+- La página es estática: el formulario no envía información a un servidor propio ni existe un sistema de pagos.
 
-Las auditorías anteriores se consolidaron aquí para evitar información repetida o desactualizada.
+## Resultado
+
+- El visitante entra por `index.html` y accede al catálogo mediante la navegación del sitio.
+- La separación de páginas permite presentar la farmacia y organizar la compra sin concentrar todo en la portada.
+- Los archivos JavaScript clásicos permiten usar la copia local del catálogo al abrir los HTML desde una carpeta.
+- La nueva fachada conserva su proporción completa y el texto queda debajo para no ocultar los letreros.
+- Para la defensa: usamos `index.html` como entrada; su nombre no significa que exista un índice de base de datos.
+
+## Lo que falta
+
+- Confirmar con la farmacia los horarios, dirección, teléfono y vigencia de la información comercial publicada.
+- Revisar los enlaces de navegación después de subir los archivos al alojamiento definitivo.
+- Si se requiere una venta real, definir un backend para pedidos, inventario y pagos; actualmente no están implementados.
+- Conservar las rutas relativas al mover el proyecto para que CSS, JavaScript e imágenes sigan cargando.

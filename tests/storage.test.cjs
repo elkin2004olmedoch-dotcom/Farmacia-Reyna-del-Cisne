@@ -29,6 +29,6 @@ test('almacenamiento bloqueado o JSON corrupto no impiden utilizar el carrito', 
   assert.equal(blocked.saveCart({ vitaminas: 2 }).saved, false);
   assert.equal(blocked.readCart().items.vitaminas, 2);
   const { storage, map } = load();
-  map.set('farmacia-reyna-cart', '{broken');
+  map.set('farmacia-reina-cart', '{broken');
   assert.equal(Object.keys(storage.readCart()).length, 0);
 });

@@ -1,7 +1,7 @@
 (function (global) {
   'use strict';
-  const CART_KEY = 'farmacia-reyna-cart';
-  const FILTER_KEY = 'farmacia-reyna-filters';
+  const CART_KEY = 'farmacia-reina-cart';
+  const FILTER_KEY = 'farmacia-reina-filters';
   const memory = new Map();
 
   function read(area, key, fallback) {
@@ -59,7 +59,7 @@
         resolve(db);
       }
       try {
-        const request = global.indexedDB.open('farmacia-reyna', 1);
+        const request = global.indexedDB.open('farmacia-reina', 1);
         request.onupgradeneeded = () => {
           if (!request.result.objectStoreNames.contains('products')) request.result.createObjectStore('products');
         };

@@ -15,29 +15,29 @@
   },
   {
     "id": "solar",
-    "name": "Protector solar",
+    "name": "Protector solar Eucerin FPS 50",
     "category": "cuidado",
-    "description": "Protección diaria para tu piel.",
+    "description": "Photoaging Control Sun Fluid facial, 50 ml.",
     "price": 9.75,
     "badge": "Favorito",
     "badgeClass": "catalog-badge catalog-badge--sun",
     "icon": "✦",
     "tag": "Cuidado personal",
-    "image": "assets/images/producto-solar.jpg",
-    "alt": "Envases de cuidado de la piel, imagen de referencia de protector solar"
+    "image": "assets/images/producto-solar-eucerin.png",
+    "alt": "Envase blanco con tapa naranja de Eucerin Photoaging Control Sun Fluid FPS 50, 50 ml"
   },
   {
     "id": "bebe",
-    "name": "Cuidado del bebé",
+    "name": "Set de cuidado Pigeon",
     "category": "bebe",
-    "description": "Productos suaves para cada etapa.",
+    "description": "Health Care Set para el cuidado del bebé.",
     "price": 15,
     "badge": "Nuevo",
     "badgeClass": "catalog-badge",
     "icon": "♡",
     "tag": "Mamá y bebé",
-    "image": "assets/images/producto-bebe.jpg",
-    "alt": "Niña jugando, imagen de referencia de cuidado infantil"
+    "image": "assets/images/producto-bebe-pigeon.png",
+    "alt": "Caja blanca, roja y verde de Pigeon Health Care Set con accesorios para el cuidado del bebé"
   },
   {
     "id": "botiquin",
