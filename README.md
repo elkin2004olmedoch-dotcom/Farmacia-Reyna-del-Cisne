@@ -2,6 +2,65 @@
 
 Sitio estático del Reto 1: catálogo y carrito con cantidades, filtros, subtotal, total, uso sin conexión después de la primera visita por HTTPS y datos persistentes en el navegador. Los productos y precios son de demostración; el pedido se envía por WhatsApp.
 
+**Sitio web:** [Neocities](https://proyecto01.neocities.org/) · [GitHub Pages](https://elkin2004olmedoch-dotcom.github.io/Farmacia-Reyna-del-Cisne/).
+
+## Estructura solicitada en el reto
+
+Los archivos de entrada están en la raíz del repositorio. Los estilos y recursos están en `assets/`, los datos en `data/` y los scripts en `js/`. La documentación complementaria se encuentra en `docs/`.
+
+```text
+Farmacia-Reyna-del-Cisne/
+├── index.html                  Entrada: header, nav, main y footer
+├── catalogo.html               Catálogo de productos y carrito
+├── README.md                   Instrucciones y explicación técnica
+├── assets/
+│   ├── styles.css              Diseño adaptable con Flexbox y Grid
+│   ├── accesibilidad.css       Foco visible, contraste y controles
+│   ├── images/                 Imágenes y textos alternativos en HTML/JS
+│   ├── fonts/                  Fuentes locales
+│   └── vendor/                 Bootstrap Grid y estilos de fuentes
+├── data/
+│   ├── productos.json          Fuente de datos del catálogo
+│   └── productos-local.js      Copia para abrir sin servidor
+├── js/
+│   ├── app.js                  Inicialización, filtros y eventos
+│   ├── repo.js                 Carga y validación de productos
+│   ├── view.js                 Tarjetas reutilizables y vista del carrito
+│   ├── cart.js                 Cantidades, subtotal y total
+│   ├── storage.js              localStorage, IndexedDB y cookies
+│   ├── validation.js           Validación mediante regex
+│   ├── form.js                 Formulario y errores accesibles
+│   └── offline.js              Conexión y registro del service worker
+├── docs/
+│   ├── auditorias/             Revisiones técnicas del proyecto
+│   └── agentes/                Documentación de herramientas de apoyo
+├── scripts/
+│   ├── build-data.cjs          Genera la copia local del JSON
+│   └── crear-entrega.ps1       Genera el ZIP para el aula virtual
+├── tests/                      Pruebas de lógica, recursos y accesibilidad
+├── .github/workflows/pages.yml Publicación automática en GitHub Pages
+├── .gitignore                  Excluye entregas y archivos temporales
+├── robots.txt
+└── service-worker.js           Caché para uso sin conexión
+```
+
+## Relación con los requisitos
+
+| Requisito | Implementación |
+|---|---|
+| HTML5 semántico | `index.html` y `catalogo.html`: `header`, `nav`, `main`, `footer` |
+| Diseño responsive | `assets/styles.css` y `assets/accesibilidad.css`: Flexbox, Grid y media queries |
+| Productos desde JSON local | `data/productos.json` y `js/repo.js` |
+| Tarjetas con imagen, descripción, precio y botón | Plantilla en `catalogo.html` y renderizado en `js/view.js` |
+| Añadir, eliminar y actualizar cantidades | `js/cart.js` y eventos en `js/app.js` |
+| Subtotal y total dinámicos | Cálculos en centavos en `js/cart.js` |
+| Al menos tres mecanismos de persistencia | `js/storage.js`: localStorage, IndexedDB y cookies |
+| Marca de última actualización | Fecha del carrito y de la caché del catálogo |
+| Validaciones con regex y errores accesibles | `js/validation.js` y `js/form.js`: `aria-invalid` y `aria-describedby` |
+| Accesibilidad y teclado | Enlace al contenido, textos alternativos, foco visible, diálogo y regiones live |
+| Ejecución local y por Internet | Apertura directa de `index.html`, Neocities y GitHub Pages |
+| Documentación | Este README y las [revisiones técnicas](docs/auditorias/) |
+
 ## Uso
 
 1. Descomprime la entrega conservando las carpetas.
@@ -14,42 +73,15 @@ Sitio estático del Reto 1: catálogo y carrito con cantidades, filtros, subtota
 
 No necesita instalación, servidor dinámico ni backend. Imágenes, estilos, fuentes y scripts están incluidos. El uso offline con el service worker requiere HTTPS (como GitHub Pages) y una primera visita con internet. Si abres directamente los archivos con `file://`, el carrito se guarda, pero el navegador no permite instalar el service worker. WhatsApp, redes y Google Maps necesitan Internet.
 
-## Estructura
+## Entrega en ZIP
 
-```text
-index.html                 Portada y formulario
-catalogo.html              Catálogo y diálogo del carrito
-assets/
-  styles.css               Diseño responsive con Flexbox y Grid
-  accesibilidad.css        Controles, contraste y recorrido de compra
-  images/                  Logo y fotografías locales
-  fonts/                   Fuentes locales
-  vendor/                  Bootstrap Grid y estilos de fuentes
-data/
-  productos.json           Fuente de los productos
-  productos-local.js       Copia generada para apertura directa
-js/
-  app.js                   Inicialización, filtros, menú y eventos
-  repo.js                  Carga y validación del catálogo
-  cart.js                  Cantidades e importes en centavos
-  storage.js               Almacenamiento y recuperación
-  view.js                  Tarjetas reutilizables y carrito
-  validation.js            Expresiones regulares
-  form.js                  Errores accesibles y borrador de consulta
-  offline.js               Estado de conexión e instalación del service worker
-service-worker.js           Guarda la página y sus recursos para uso offline
-scripts/build-data.cjs      Genera la copia local del JSON
-tests/                     Pruebas con Node.js
-AUDITORIA.md                01: estructura HTML e index
-AUDITORIA-02-*.md           02: CSS y diseño responsive
-AUDITORIA-03-*.md           03: catálogo, JavaScript y JSON
-AUDITORIA-04-*.md           04: búsqueda, filtros y orden
-AUDITORIA-05-*.md           05: carrito y cálculos
-AUDITORIA-06-*.md           06: persistencia e IndexedDB
-AUDITORIA-07-*.md           07: formulario y WhatsApp
-AUDITORIA-08-*.md           08: accesibilidad y teclado
-AUDITORIA-09-*.md           09: pruebas, recursos y publicación
+Desde la raíz del proyecto, ejecuta en PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/crear-entrega.ps1
 ```
+
+Se genera `entrega/Reto1_Olmedo_Elkin.zip` con las páginas, `assets/`, `data/`, `js/`, README, documentación, scripts y pruebas. El ZIP contiene `index.html` en su raíz: descomprímelo y ábrelo para utilizar el sitio. Puedes personalizar el nombre con `-Nombre Reto1_Apellido_Nombre.zip`. La carpeta `entrega/` queda excluida de GitHub mediante `.gitignore`; sube el ZIP al aula virtual.
 
 ## Explicación técnica
 
@@ -89,7 +121,7 @@ Las pruebas `tests/accesibilidad.browser.cjs` y `tests/teclado.browser.cjs` son 
 
 `tests/dialogo.browser.cjs` comprueba que cancelar y reabrir la confirmación conserve el producto pendiente incluso si llega un evento `close` atrasado.
 
-GitHub Pages publica la rama `main`. Para Neocities, sube `index.html`, `catalogo.html`, `robots.txt` y las carpetas `assets`, `data` y `js` conservando las rutas. No subas el ZIP como sustituto de los archivos de la web.
+GitHub Pages publica la rama `main` mediante `.github/workflows/pages.yml`. En GitHub, `index.html`, `README.md`, `assets/`, `data/` y `js/` deben verse directamente en la raíz, como en el árbol anterior. Para Neocities, sube `index.html`, `catalogo.html`, `robots.txt`, `service-worker.js` y las carpetas `assets`, `data` y `js` conservando las rutas. No subas el ZIP como sustituto de los archivos de la web.
 
 Sitios: [Neocities](https://proyecto01.neocities.org/) y [GitHub Pages](https://elkin2004olmedoch-dotcom.github.io/Farmacia-Reyna-del-Cisne/).
 
