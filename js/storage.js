@@ -5,6 +5,7 @@
   const CONTACT_KEY = 'farmacia-reina-contact-draft';
   const BUYER_KEY = 'farmacia-reina-buyer';
   const memory = new Map();
+  const fieldLimits = { name: 80, email: 254, phone: 25, message: 1000, address: 200 };
 
   function read(area, key, fallback) {
     try {
@@ -20,21 +21,42 @@
 
   function saveCart(items) {
     const updatedAt = new Date().toISOString();
+    if (!items || typeof items !== 'object' || Array.isArray(items)
+      || Object.entries(items).some(([id, units]) => !/^[a-z0-9-]{1,80}$/.test(id)
+        || !Number.isInteger(units) || units < 1 || units > 99)) return { saved: false, updatedAt };
     const saved = write('localStorage', CART_KEY, { version: 2, items, updatedAt });
     return { saved, updatedAt };
   }
 
   const readCart = () => read('localStorage', CART_KEY, {});
+  const cleanFields = (value, fields) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    return Object.fromEntries(fields.map((key) => [key,
+      typeof value[key] === 'string' ? value[key].slice(0, fieldLimits[key]) : '']));
+  };
   const readFilters = () => {
     const filters = read('localStorage', FILTER_KEY, {});
-    return filters && typeof filters === 'object' && !Array.isArray(filters) ? filters : {};
+    return {
+      query: typeof filters?.query === 'string' ? filters.query.slice(0, 100) : '',
+      category: ['todos', 'bienestar', 'cuidado', 'bebe'].includes(filters?.category) ? filters.category : 'todos',
+      priceRange: ['all', 'under10', '10-15', 'over15'].includes(filters?.priceRange) ? filters.priceRange : 'all',
+      sort: ['recommended', 'low', 'high'].includes(filters?.sort) ? filters.sort : 'recommended',
+    };
   };
-  const saveFilters = (filters) => write('localStorage', FILTER_KEY, filters);
+  const saveFilters = (filters) => {
+    if (!filters || typeof filters !== 'object' || Array.isArray(filters)) return false;
+    return write('localStorage', FILTER_KEY, {
+      query: typeof filters.query === 'string' ? filters.query.slice(0, 100) : '',
+      category: ['todos', 'bienestar', 'cuidado', 'bebe'].includes(filters.category) ? filters.category : 'todos',
+      priceRange: ['all', 'under10', '10-15', 'over15'].includes(filters.priceRange) ? filters.priceRange : 'all',
+      sort: ['recommended', 'low', 'high'].includes(filters.sort) ? filters.sort : 'recommended',
+    });
+  };
 
-  const readContactDraft = () => read('localStorage', CONTACT_KEY, {});
-  const saveContactDraft = (draft) => write('localStorage', CONTACT_KEY, draft);
-  const readBuyer = () => read('localStorage', BUYER_KEY, {});
-  const saveBuyer = (buyer) => write('localStorage', BUYER_KEY, buyer);
+  const readContactDraft = () => cleanFields(read('localStorage', CONTACT_KEY, {}), ['name', 'email', 'phone', 'message']);
+  const saveContactDraft = (draft) => write('localStorage', CONTACT_KEY, cleanFields(draft, ['name', 'email', 'phone', 'message']));
+  const readBuyer = () => cleanFields(read('localStorage', BUYER_KEY, {}), ['name', 'phone', 'address']);
+  const saveBuyer = (buyer) => write('localStorage', BUYER_KEY, cleanFields(buyer, ['name', 'phone', 'address']));
   function clearSaved(key) {
     memory.delete(key);
     try { global.localStorage.removeItem(key); return true; } catch (_) { return false; }

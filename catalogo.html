@@ -42,7 +42,7 @@
           <label for="catalog-search">Buscar un producto</label>
         <div class="catalog-search-wide">
           <span class="catalog-search-icon" aria-hidden="true">⌕</span>
-          <input id="catalog-search" type="search" placeholder="Ej. protector solar" aria-describedby="search-help" aria-controls="catalog-grid">
+          <input id="catalog-search" type="search" maxlength="100" placeholder="Ej. protector solar" aria-describedby="search-help" aria-controls="catalog-grid">
         </div>
           <small id="search-help">Busca por nombre o descripción.</small>
         </div>
@@ -100,16 +100,15 @@
           <form id="cart-order-form" class="cart-order-form" hidden>
             <fieldset>
               <legend>Datos del comprador</legend>
-              <div><label for="buyer-name">Nombre completo</label><input id="buyer-name" name="name" autocomplete="name" maxlength="80" required></div>
+              <div><label for="buyer-name">Nombre completo</label><input id="buyer-name" name="name" autocomplete="name" minlength="2" maxlength="80" required></div>
               <div><label for="buyer-phone">Teléfono</label><input id="buyer-phone" name="phone" type="tel" autocomplete="tel" maxlength="25" pattern="[+0-9 ()-]{7,25}" required></div>
-              <div><label for="buyer-address">Dirección</label><input id="buyer-address" name="address" autocomplete="street-address" maxlength="200" required></div>
+              <div><label for="buyer-address">Dirección</label><input id="buyer-address" name="address" autocomplete="street-address" minlength="5" maxlength="200" required></div>
               <p class="cart-order-help">No necesitas crear una cuenta. Tus datos se guardan en este navegador y se agregan al pedido al abrir WhatsApp.</p>
               <p id="cart-order-status" class="cart-order-status" role="status" aria-live="polite" hidden></p>
               <button id="whatsapp-order-link" class="button button-primary" type="submit" disabled>Confirmar pedido por WhatsApp ↗</button>
               <button id="cart-buyer-clear" class="cart-buyer-clear" type="button">Borrar datos guardados</button>
             </fieldset>
           </form>
-          <p class="cart-note">Cada cambio del carrito descarga automáticamente un archivo JSON con tu selección.</p>
           <button type="button" id="cart-clear" class="cart-clear" disabled>Vaciar carrito</button>
           <button type="button" id="cart-continue" class="cart-continue" data-close-cart>Seguir viendo productos</button>
         </div>

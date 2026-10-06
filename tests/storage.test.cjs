@@ -32,3 +32,21 @@ test('almacenamiento bloqueado o JSON corrupto no impiden utilizar el carrito', 
   map.set('farmacia-reina-cart', '{broken');
   assert.equal(Object.keys(storage.readCart()).length, 0);
 });
+
+test('almacenamiento limita cantidades y normaliza filtros y datos de formularios', () => {
+  const { storage } = load();
+  assert.equal(storage.saveCart({ vitaminas: 100 }).saved, false);
+  assert.equal(storage.saveCart({ 'javascript:alert(1)': 1 }).saved, false);
+  storage.saveFilters({ query: 'x'.repeat(150), category: 'invalida', priceRange: 'invalido', sort: 'invalido' });
+  assert.deepEqual(JSON.parse(JSON.stringify(storage.readFilters())), {
+    query: 'x'.repeat(100), category: 'todos', priceRange: 'all', sort: 'recommended',
+  });
+  storage.saveBuyer({ name: 'n'.repeat(100), phone: 123, address: 'a'.repeat(250) });
+  assert.deepEqual(JSON.parse(JSON.stringify(storage.readBuyer())), {
+    name: 'n'.repeat(80), phone: '', address: 'a'.repeat(200),
+  });
+  storage.saveContactDraft({ name: 'n'.repeat(100), email: 'e'.repeat(300) });
+  assert.deepEqual(JSON.parse(JSON.stringify(storage.readContactDraft())), {
+    name: 'n'.repeat(80), email: 'e'.repeat(254), phone: '', message: '',
+  });
+});

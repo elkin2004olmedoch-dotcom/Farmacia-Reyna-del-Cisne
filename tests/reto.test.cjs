@@ -91,9 +91,28 @@ test('validación rechaza campos vacíos, correos incorrectos y teléfonos no nu
   assert.equal(Object.keys(validation.validate({})).length, 4);
 });
 
+test('validación del comprador exige nombre, teléfono y dirección válidos', () => {
+  assert.deepEqual(validation.validateBuyer({ name: 'José María', phone: '+593 97 927 5988', address: 'Av. Central 123, Quito' }), {});
+  for (const invalid of [
+    {},
+    { name: 'A', phone: '123456', address: 'Quito' },
+    { name: 'Nombre 123', phone: '+593 97 927 5988', address: 'Calle 1' },
+    { name: 'José María', phone: '1234567890123456', address: 'Calle 1' },
+    { name: 'José María', phone: '1234567890', address: '  ' },
+    { name: 'José María', phone: '1234567890', address: `Calle ${'x'.repeat(200)}` },
+  ]) assert.ok(Object.keys(validation.validateBuyer(invalid)).length > 0);
+  assert.ok(Object.keys(validation.validateBuyer(null)).length > 0);
+});
+
 test('repositorio rechaza JSON sin esquema válido, duplicados y precios inválidos', () => {
   assert.equal(repo.validateProducts(products).length, 2);
-  for (const invalid of [null, {}, [], [...products, products[0]], [{ ...products[0], price: -2 }], [{ ...products[0], price: '12.5' }], [{ ...products[0], image: 'javascript:alert(1)' }]]) {
+  for (const invalid of [
+    null, {}, [], [...products, products[0]],
+    [{ ...products[0], price: -2 }], [{ ...products[0], price: '12.5' }],
+    [{ ...products[0], price: 1.234 }], [{ ...products[0], name: '' }],
+    [{ ...products[0], category: 'desconocida' }], [{ ...products[0], description: 'x'.repeat(501) }],
+    [{ ...products[0], image: 'javascript:alert(1)' }], [{ ...products[0], badge: {} }],
+  ]) {
     assert.throws(() => repo.validateProducts(invalid));
   }
 });
