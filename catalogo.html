@@ -97,7 +97,18 @@
           <dl class="cart-totals"><div><dt>Subtotal</dt><dd id="cart-subtotal">$0,00</dd></div><div class="cart-grand-total"><dt>Total estimado</dt><dd id="cart-total">$0,00</dd></div></dl>
           <p class="cart-updated">Última actualización: <time id="cart-updated">Sin cambios</time></p>
           <p id="cart-note" class="cart-note">Confirmaremos disponibilidad, entrega y precio final por WhatsApp.</p>
-          <a id="whatsapp-order-link" class="button button-primary" href="https://wa.me/593979275988" target="_blank" rel="noopener noreferrer" hidden>Consultar pedido por WhatsApp ↗</a>
+          <form id="cart-order-form" class="cart-order-form" hidden>
+            <fieldset>
+              <legend>Datos del comprador</legend>
+              <div><label for="buyer-name">Nombre completo</label><input id="buyer-name" name="name" autocomplete="name" maxlength="80" required></div>
+              <div><label for="buyer-phone">Teléfono</label><input id="buyer-phone" name="phone" type="tel" autocomplete="tel" maxlength="25" pattern="[+0-9 ()-]{7,25}" required></div>
+              <div><label for="buyer-address">Dirección</label><input id="buyer-address" name="address" autocomplete="street-address" maxlength="200" required></div>
+              <p class="cart-order-help">No necesitas crear una cuenta. Tus datos se guardan en este navegador y se agregan al pedido al abrir WhatsApp.</p>
+              <p id="cart-order-status" class="cart-order-status" role="status" aria-live="polite" hidden></p>
+              <button id="whatsapp-order-link" class="button button-primary" type="submit" disabled>Confirmar pedido por WhatsApp ↗</button>
+              <button id="cart-buyer-clear" class="cart-buyer-clear" type="button">Borrar datos guardados</button>
+            </fieldset>
+          </form>
           <p class="cart-note">Cada cambio del carrito descarga automáticamente un archivo JSON con tu selección.</p>
           <button type="button" id="cart-clear" class="cart-clear" disabled>Vaciar carrito</button>
           <button type="button" id="cart-continue" class="cart-continue" data-close-cart>Seguir viendo productos</button>
@@ -124,5 +135,6 @@
     <script defer src="js/validation.js"></script>
     <script defer src="js/form.js"></script>
     <script defer src="js/app.js"></script>
+    <script defer src="js/offline.js"></script>
   </body>
 </html>

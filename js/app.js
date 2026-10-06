@@ -24,6 +24,60 @@
   let pendingRemoval = null;
   const status = document.getElementById('catalog-status');
   const search = document.getElementById('catalog-search');
+  const orderForm = document.getElementById('cart-order-form');
+  const orderFields = ['name', 'phone', 'address'];
+  const savedBuyer = app.storage.readBuyer();
+  const buyer = savedBuyer && typeof savedBuyer === 'object' && !Array.isArray(savedBuyer) ? savedBuyer : {};
+  const buyerName = orderForm.elements.namedItem('name');
+  const buyerPhone = orderForm.elements.namedItem('phone');
+  const buyerAddress = orderForm.elements.namedItem('address');
+  orderFields.forEach((key) => {
+    const input = orderForm.elements.namedItem(key);
+    if (typeof buyer[key] === 'string') input.value = buyer[key];
+  });
+  const orderButton = document.getElementById('whatsapp-order-link');
+  const orderStatus = document.getElementById('cart-order-status');
+  function updateBuyerValidity() {
+    buyerName.setCustomValidity(buyerName.value.trim() ? '' : 'Escribe el nombre del comprador.');
+    buyerPhone.setCustomValidity(buyerPhone.value.replace(/\D/g, '').length >= 7 ? '' : 'Escribe un teléfono con al menos 7 números.');
+    buyerAddress.setCustomValidity(buyerAddress.value.trim() ? '' : 'Escribe la dirección del comprador.');
+  }
+  updateBuyerValidity();
+  orderForm.addEventListener('input', () => {
+    updateBuyerValidity();
+    app.storage.saveBuyer(Object.fromEntries(orderFields.map((key) => [key, orderForm.elements.namedItem(key).value])));
+    orderButton.disabled = !orderForm.checkValidity() || !Object.keys(state.items).length;
+    orderStatus.hidden = true;
+    orderStatus.textContent = '';
+  });
+  document.getElementById('cart-buyer-clear').addEventListener('click', () => {
+    app.storage.clearBuyer();
+    orderForm.reset();
+    updateBuyerValidity();
+    orderButton.disabled = true;
+    orderStatus.hidden = false;
+    orderStatus.textContent = 'Se borraron los datos del comprador guardados en este navegador.';
+    orderForm.elements.namedItem('name').focus();
+  });
+  orderForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    updateBuyerValidity();
+    if (!Object.keys(state.items).length || !orderForm.reportValidity()) return;
+    if (!global.navigator.onLine) {
+      orderStatus.hidden = false;
+      orderStatus.textContent = 'Tu pedido y tus datos se conservan en este dispositivo. Conéctate para abrir WhatsApp y enviarlo.';
+      return;
+    }
+    const details = Object.fromEntries(orderFields.map((key) => [key, orderForm.elements.namedItem(key).value.trim()]));
+    const totals = app.cart.totals(state.items, state.products);
+    const lines = totals.lines.map(({ product, quantity, amountCents }) => `${quantity} × ${product.name}: ${app.view.money(amountCents)}`);
+    const message = [
+      `Hola, quiero realizar este pedido.`, `Comprador: ${details.name}`,
+      `Teléfono: ${details.phone}`, `Dirección: ${details.address}`,
+      ...lines, `Total estimado: ${app.view.money(totals.totalCents)}. Por favor, confirmen disponibilidad y precio final.`
+    ].join('\n');
+    global.open(`https://wa.me/593979275988?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+  });
   const normalize = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   let announcementTimer;
   const announce = (message) => {

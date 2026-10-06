@@ -6,6 +6,16 @@
     const fields = ['name', 'email', 'phone', 'message'];
     const status = document.getElementById('form-status');
     const success = document.getElementById('form-success');
+    const storage = global.Farmacia.storage;
+    const savedDraft = storage.readContactDraft();
+    const draft = savedDraft && typeof savedDraft === 'object' && !Array.isArray(savedDraft) ? savedDraft : {};
+    fields.forEach((key) => {
+      const input = form.elements.namedItem(key);
+      if (typeof draft[key] === 'string') input.value = draft[key];
+    });
+    function saveDraft() {
+      storage.saveContactDraft(Object.fromEntries(fields.map((key) => [key, form.elements.namedItem(key).value])));
+    }
     function showError(key, message) {
       const input = form.elements.namedItem(key);
       const error = document.getElementById(`contact-${key}-error`);
@@ -14,9 +24,18 @@
       error.hidden = !message;
     }
     form.addEventListener('input', (event) => {
+      saveDraft();
       success.hidden = true;
       if (fields.includes(event.target.name)) showError(event.target.name, '');
       status.textContent = '';
+    });
+    document.getElementById('contact-clear-saved').addEventListener('click', () => {
+      storage.clearContactDraft();
+      form.reset();
+      fields.forEach((key) => showError(key, ''));
+      success.hidden = true;
+      status.textContent = 'Se borraron los datos guardados en este navegador.';
+      form.elements.namedItem(fields[0]).focus();
     });
     form.addEventListener('submit', (event) => {
       event.preventDefault();

@@ -2,6 +2,8 @@
   'use strict';
   const CART_KEY = 'farmacia-reina-cart';
   const FILTER_KEY = 'farmacia-reina-filters';
+  const CONTACT_KEY = 'farmacia-reina-contact-draft';
+  const BUYER_KEY = 'farmacia-reina-buyer';
   const memory = new Map();
 
   function read(area, key, fallback) {
@@ -24,10 +26,21 @@
 
   const readCart = () => read('localStorage', CART_KEY, {});
   const readFilters = () => {
-    const filters = read('sessionStorage', FILTER_KEY, {});
+    const filters = read('localStorage', FILTER_KEY, {});
     return filters && typeof filters === 'object' && !Array.isArray(filters) ? filters : {};
   };
-  const saveFilters = (filters) => write('sessionStorage', FILTER_KEY, filters);
+  const saveFilters = (filters) => write('localStorage', FILTER_KEY, filters);
+
+  const readContactDraft = () => read('localStorage', CONTACT_KEY, {});
+  const saveContactDraft = (draft) => write('localStorage', CONTACT_KEY, draft);
+  const readBuyer = () => read('localStorage', BUYER_KEY, {});
+  const saveBuyer = (buyer) => write('localStorage', BUYER_KEY, buyer);
+  function clearSaved(key) {
+    memory.delete(key);
+    try { global.localStorage.removeItem(key); return true; } catch (_) { return false; }
+  }
+  const clearContactDraft = () => clearSaved(CONTACT_KEY);
+  const clearBuyer = () => clearSaved(BUYER_KEY);
 
   function saveSort(sort) {
     if (!['recommended', 'low', 'high'].includes(sort)) return false;
@@ -100,5 +113,8 @@
     });
   }
 
-  (global.Farmacia ||= {}).storage = { readCart, saveCart, readFilters, saveFilters, readSort, saveSort, cacheProducts, getCachedProducts };
+  (global.Farmacia ||= {}).storage = {
+    readCart, saveCart, readFilters, saveFilters, readContactDraft, saveContactDraft,
+    clearContactDraft, readBuyer, saveBuyer, clearBuyer, readSort, saveSort, cacheProducts, getCachedProducts
+  };
 })(globalThis);

@@ -1,6 +1,6 @@
 # Farmacia Reina del Cisne
 
-Sitio estático del Reto 1: catálogo y carrito con cantidades, filtros, subtotal, total, persistencia y formulario accesible. Los productos y precios son de demostración; el pedido se consulta por WhatsApp.
+Sitio estático del Reto 1: catálogo y carrito con cantidades, filtros, subtotal, total, uso sin conexión después de la primera visita por HTTPS y datos persistentes en el navegador. Los productos y precios son de demostración; el pedido se envía por WhatsApp.
 
 ## Uso
 
@@ -8,10 +8,11 @@ Sitio estático del Reto 1: catálogo y carrito con cantidades, filtros, subtota
 2. Abre `index.html` en un navegador actual (Chrome, Edge, Firefox o Brave).
 3. Entra en **Productos**, añade artículos y abre **Carrito**.
 4. Cambia cantidades, elimina productos y recarga para comprobar la persistencia.
-5. En la portada, completa **Prepara tu consulta**. Una consulta válida habilita el enlace para enviarla por WhatsApp.
-6. Al añadir productos, cambiar cantidades, confirmar una eliminación o vaciar el carrito, el navegador descarga automáticamente `carrito-reina-del-cisne.json`. Puedes abrir el archivo en VS Code o en un editor de texto para mostrar la selección.
+5. En el carrito, escribe el nombre, teléfono y dirección del comprador para preparar el pedido. No necesitas crear una cuenta; al confirmar, WhatsApp abre el mensaje para que lo revises y lo envíes.
+6. Abre la portada y el catálogo al menos una vez con internet desde GitHub Pages. Después puedes recargar y recorrer el sitio sin conexión; el pedido quedará guardado hasta que vuelvas a tener internet para enviarlo por WhatsApp.
+7. Al añadir productos, cambiar cantidades, confirmar una eliminación o vaciar el carrito, el navegador descarga automáticamente `carrito-reina-del-cisne.json`. Puedes abrir el archivo en VS Code o en un editor de texto para mostrar la selección.
 
-No necesita instalación, servidor dinámico ni backend. Imágenes, estilos, fuentes y scripts están incluidos. WhatsApp, redes y Google Maps necesitan Internet.
+No necesita instalación, servidor dinámico ni backend. Imágenes, estilos, fuentes y scripts están incluidos. El uso offline con el service worker requiere HTTPS (como GitHub Pages) y una primera visita con internet. Si abres directamente los archivos con `file://`, el carrito se guarda, pero el navegador no permite instalar el service worker. WhatsApp, redes y Google Maps necesitan Internet.
 
 ## Estructura
 
@@ -34,7 +35,9 @@ js/
   storage.js               Almacenamiento y recuperación
   view.js                  Tarjetas reutilizables y carrito
   validation.js            Expresiones regulares
-  form.js                  Errores accesibles y consulta
+  form.js                  Errores accesibles y borrador de consulta
+  offline.js               Estado de conexión e instalación del service worker
+service-worker.js           Guarda la página y sus recursos para uso offline
 scripts/build-data.cjs      Genera la copia local del JSON
 tests/                     Pruebas con Node.js
 AUDITORIA.md                01: estructura HTML e index
@@ -62,12 +65,13 @@ La descarga JSON refleja el carrito en el momento de cada cambio. Contiene ident
 
 | Mecanismo | Información guardada |
 |---|---|
-| localStorage | Carrito, cantidades y fecha ISO de actualización |
-| sessionStorage | Búsqueda, categoría, filtro de precio y orden de esta sesión |
+| localStorage | Carrito, búsqueda, categoría, filtros, orden, borradores del formulario y datos del comprador |
 | IndexedDB | Caché del catálogo y su fecha de actualización |
 | Cookie `farmacia-sort` | Orden preferido durante 30 días; SameSite=Lax y Secure en HTTPS |
 
-La selección antigua se migra a cantidades. Datos corruptos o productos retirados se descartan. Si se bloquea el almacenamiento, se informa y el carrito funciona temporalmente. Las cookies pueden estar limitadas en `file://`; ese modo utiliza los otros tres mecanismos. Los datos personales del formulario no se guardan.
+La selección antigua se migra a cantidades. Datos corruptos o productos retirados se descartan. Si se bloquea el almacenamiento, se informa y el carrito funciona temporalmente. Los borradores del formulario y el nombre, teléfono y dirección del comprador se guardan en el navegador de este dispositivo para continuar después; usa **Borrar datos guardados** para eliminarlos. No se envían hasta confirmar y abrir WhatsApp. Las cookies pueden estar limitadas en `file://`; el carrito, filtros y formularios utilizan localStorage.
+
+El service worker guarda las dos páginas, los scripts, estilos, fuentes, catálogo e imágenes locales. Al recargar sin conexión sirve esos archivos desde la caché. La red sigue siendo necesaria para WhatsApp, enlaces externos y el mapa.
 
 ## Accesibilidad
 

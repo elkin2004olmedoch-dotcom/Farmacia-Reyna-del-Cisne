@@ -112,8 +112,9 @@
     const order = document.getElementById('whatsapp-order-link');
     order.hidden = !totals.units;
     order.setAttribute('aria-label', `Consultar pedido por WhatsApp, total estimado ${money(totals.totalCents)} (se abre en una pestaña nueva)`);
-    const lines = totals.lines.map(({ product, quantity, amountCents }) => `${quantity} × ${product.name}: ${money(amountCents)}`);
-    order.href = `https://wa.me/593979275988?text=${encodeURIComponent('Hola, quisiera consultar este pedido:\n' + lines.join('\n') + '\nTotal estimado: ' + money(totals.totalCents) + '. Por favor, confirmen disponibilidad y precio final.')}`;
+    const orderForm = document.getElementById('cart-order-form');
+    orderForm.hidden = !totals.units;
+    order.disabled = !totals.units || !orderForm.checkValidity();
     document.getElementById('cart-clear').disabled = !totals.units;
     document.getElementById('cart-continue').textContent = totals.units ? 'Seguir viendo productos' : 'Explorar productos';
   }
