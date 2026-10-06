@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'farmacia-reina-shell-v1';
+const CACHE_NAME = 'farmacia-reina-shell-v2';
 const APP_FILES = [
   'index.html', 'catalogo.html', 'robots.txt', 'service-worker.js',
   'data/productos.json', 'data/productos-local.js',
@@ -14,7 +14,14 @@ const APP_FILES = [
   'assets/images/farmacia-5.jpg', 'assets/images/farmacia-6.jpg', 'assets/images/farmacia-7.jpg',
   'assets/images/farmacia-8.jpg', 'assets/images/farmacia-9.jpg', 'assets/images/producto-vitaminas.jpg',
   'assets/images/producto-solar-eucerin.png', 'assets/images/producto-botiquin.jpg',
-  'assets/images/producto-bebe-pigeon.png'
+  'assets/images/producto-bebe-pigeon.png',
+  'assets/images/producto-tabletas-blister.svg', 'assets/images/producto-medicamento-liquido.svg',
+  'assets/images/producto-generico-referencia.svg', 'assets/images/producto-frasco-tabletas.svg',
+  'assets/images/producto-alcohol-antiseptico.svg', 'assets/images/producto-gasas-esteriles.svg',
+  'assets/images/producto-venda-elastica.svg', 'assets/images/producto-curitas-adhesivas.svg',
+  'assets/images/producto-termometro-digital.svg', 'assets/images/producto-mascarillas.svg',
+  'assets/images/producto-solucion-salina.svg', 'assets/images/producto-gel-antibacterial.svg',
+  'assets/images/producto-algodon.svg', 'assets/images/producto-toallitas-bebe.svg'
 ];
 
 self.addEventListener('install', (event) => {
