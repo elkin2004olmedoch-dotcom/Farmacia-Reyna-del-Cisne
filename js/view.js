@@ -18,10 +18,17 @@
       const image = card.querySelector('img');
       image.src = product.image;
       image.alt = product.alt;
+      const imageLink = document.createElement('a');
+      imageLink.href = `producto.html?id=${product.id}`;
+      image.replaceWith(imageLink); imageLink.append(image);
       card.querySelector('.catalog-badge').textContent = product.badge || 'Selección';
       card.querySelector('.catalog-tag').textContent = product.tag || product.category;
       const title = card.querySelector('h3');
       title.textContent = product.name;
+      const detailLink = document.createElement('a');
+      detailLink.href = `producto.html?id=${product.id}`;
+      detailLink.textContent = product.name;
+      title.replaceChildren(detailLink);
       title.id = `product-name-${product.id}`;
       card.setAttribute('aria-labelledby', title.id);
       card.querySelector('p').textContent = product.description;
@@ -33,6 +40,9 @@
       button.disabled = items[product.id] >= global.Farmacia.cart.MAX_QUANTITY;
       if (button.disabled) button.textContent = 'Límite de 99 unidades';
       card.querySelector('.product-cart-note').textContent = items[product.id] ? `${items[product.id]} ${items[product.id] === 1 ? 'unidad en tu carrito' : 'unidades en tu carrito'}` : '';
+      const details = node('a', 'text-link catalog-detail-link', 'Ver producto →');
+      details.href = `producto.html?id=${product.id}`;
+      card.querySelector('.catalog-card-bottom').append(details);
       fragment.append(card);
     }
     if (!products.length) {

@@ -1,11 +1,11 @@
-async (page) => {
+﻿async (page) => {
   const check = (condition, message) => { if (!condition) throw new Error(message); };
   const context = await page.context().browser().newContext({ viewport: { width: 1280, height: 900 } });
   const p = await context.newPage();
   const errors = [];
   p.on('pageerror', error => errors.push(error.message));
   try {
-    await p.goto('http://127.0.0.1:4173/catalogo.html');
+    await p.goto('http://localhost:4173/catalogo.html');
     await p.locator('.catalog-add').first().waitFor();
     await p.locator('.catalog-add').first().focus();
     await p.keyboard.press('Enter');
@@ -49,7 +49,7 @@ async (page) => {
     await p.locator('#filter-todos').focus();
     await p.keyboard.press('ArrowRight');
     check(await p.locator('#filter-bienestar').getAttribute('aria-selected') === 'true', 'Las categorías deben poder cambiarse con las flechas.');
-    await p.goto('http://127.0.0.1:4173/index.html');
+    await p.goto('http://localhost:4173/index.html');
     await p.locator('#contact-form button[type="submit"]').click();
     check(await p.locator('#form-status a').count() === 4, 'El resumen de errores debe enlazar con los cuatro campos.');
     await p.locator('#form-status a[href="#contact-email"]').click();

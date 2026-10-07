@@ -1,9 +1,26 @@
 'use strict';
 
-const CACHE_NAME = 'farmacia-reina-shell-v2';
+const CACHE_NAME = 'farmacia-reina-shell-v3-cream-promotions';
 const APP_FILES = [
+  'assets/images/producto-tabletas-blister.svg',
+  'assets/images/producto-medicamento-liquido.svg',
+  'assets/images/producto-generico-referencia.svg',
+  'assets/images/producto-frasco-tabletas.svg',
+  'assets/images/producto-alcohol-antiseptico.svg',
+  'assets/images/producto-gasas-esteriles.svg',
+  'assets/images/producto-venda-elastica.svg',
+  'assets/images/producto-curitas-adhesivas.svg',
+  'assets/images/producto-termometro-digital.svg',
+  'assets/images/producto-mascarillas.svg',
+  'assets/images/producto-solucion-salina.svg',
+  'assets/images/producto-gel-antibacterial.svg',
+  'assets/images/producto-algodon.svg',
+  'assets/images/producto-toallitas-bebe.svg',
   'index.html', 'catalogo.html', 'robots.txt', 'service-worker.js',
+  'producto.html', 'comparar.html', 'cuenta.html', 'checkout.html', 'pedidos.html', 'ayuda.html',
+  'js/commerce.js', 'js/shop.js', 'assets/shop.css',
   'data/productos.json', 'data/productos-local.js',
+  'data/promociones.json', 'data/promociones-local.js', 'js/promotions.js',
   'js/storage.js', 'js/cart.js', 'js/repo.js', 'js/view.js',
   'js/validation.js', 'js/form.js', 'js/app.js', 'js/offline.js',
   'assets/styles.css', 'assets/accesibilidad.css',
@@ -14,14 +31,7 @@ const APP_FILES = [
   'assets/images/farmacia-5.jpg', 'assets/images/farmacia-6.jpg', 'assets/images/farmacia-7.jpg',
   'assets/images/farmacia-8.jpg', 'assets/images/farmacia-9.jpg', 'assets/images/producto-vitaminas.jpg',
   'assets/images/producto-solar-eucerin.png', 'assets/images/producto-botiquin.jpg',
-  'assets/images/producto-bebe-pigeon.png',
-  'assets/images/producto-tabletas-blister.svg', 'assets/images/producto-medicamento-liquido.svg',
-  'assets/images/producto-generico-referencia.svg', 'assets/images/producto-frasco-tabletas.svg',
-  'assets/images/producto-alcohol-antiseptico.svg', 'assets/images/producto-gasas-esteriles.svg',
-  'assets/images/producto-venda-elastica.svg', 'assets/images/producto-curitas-adhesivas.svg',
-  'assets/images/producto-termometro-digital.svg', 'assets/images/producto-mascarillas.svg',
-  'assets/images/producto-solucion-salina.svg', 'assets/images/producto-gel-antibacterial.svg',
-  'assets/images/producto-algodon.svg', 'assets/images/producto-toallitas-bebe.svg'
+  'assets/images/producto-bebe-pigeon.png'
 ];
 
 self.addEventListener('install', (event) => {

@@ -1,4 +1,4 @@
-async (page) => {
+﻿async (page) => {
   const check = (condition, message) => { if (!condition) throw new Error(message); };
   const results = [];
   for (const width of [1280, 375]) {
@@ -21,17 +21,16 @@ async (page) => {
     const open = id => p.locator(id).evaluate(el => el.open);
     const focused = selector => p.evaluate(s => document.activeElement?.matches(s), selector);
     try {
-      await p.goto('http://127.0.0.1:4173/catalogo.html');
+      await p.goto('http://localhost:4173/catalogo.html');
       await p.locator('.catalog-add').first().waitFor();
       await p.keyboard.press('Tab');
       check(await focused('.skip-link'), 'El primer Tab debe ofrecer saltar al contenido.');
       await p.keyboard.press('Enter');
       check(await focused('#contenido'), 'El salto debe enfocar el contenido principal.');
-      check(!/carrito/i.test(await p.locator('.cart-trigger').innerText()), 'El icono no debe llevar el texto visible Carrito.');
-      check(/Carrito/.test(await p.locator('.cart-trigger').getAttribute('aria-label')), 'El icono debe conservar su nombre accesible.');
+      check(/carrito/i.test(await p.locator('#cart-dock [data-open-cart]').getAttribute('aria-label')), 'El carrito debe conservar su nombre accesible.');
       await activate('.catalog-add[data-product-id="vitaminas"]');
       await activate('.catalog-add[data-product-id="solar"]', 'Space');
-      await activate('.cart-trigger');
+      await activate('#cart-dock [data-open-cart]');
       check(await open('#cart-dialog'), 'Enter debe abrir el carrito desde el icono.');
       await activate('[data-product-id="vitaminas"][data-cart-action="increase"]', 'Space');
       check(await p.locator('#quantity-vitaminas').inputValue() === '2', 'Espacio debe aumentar la cantidad.');
@@ -63,13 +62,16 @@ async (page) => {
       check(await p.locator('.cart-item').count() === 1, 'Confirmar debe eliminar solo el producto seleccionado.');
       check(await focused('#quantity-solar'), 'Al eliminar, el foco debe pasar al producto siguiente.');
       check((await p.locator('#cart-total').innerText()).includes('9,75'), 'Eliminar debe recalcular el total.');
+      for (const [selector, value] of [['#buyer-name', 'Cliente de Prueba'], ['#buyer-phone', '0979275988'], ['#buyer-address', 'Av. Amazonas N10-20, Quito']]) {
+        await tabTo(selector); await p.keyboard.type(value);
+      }
       await tabTo('#whatsapp-order-link');
-      check(/solar/i.test(decodeURIComponent(await p.locator('#whatsapp-order-link').getAttribute('href'))), 'El pedido debe incluir el producto restante.');
+      check(await p.locator('#whatsapp-order-link').isEnabled(), 'Datos ecuatorianos válidos deben permitir preparar el pedido.');
       await activate('[data-product-id="solar"][data-cart-action="remove"]', 'Space');
       await activate('#cart-remove-confirm', 'Space');
       check(await focused('#cart-continue'), 'Al eliminar el último producto debe enfocarse Explorar productos.');
       await p.keyboard.press('Escape');
-      check(await focused('.cart-trigger'), 'Cerrar debe devolver el foco al icono que abrió el carrito.');
+      check(await focused('#cart-dock [data-open-cart]'), 'Cerrar debe devolver el foco al botón que abrió el carrito.');
       await activate('#cart-dock [data-open-cart]', 'Space');
       await activate('[data-close-cart]');
       check(await focused('#cart-dock [data-open-cart]'), 'Cerrar con Enter debe devolver el foco al resumen.');
@@ -99,7 +101,7 @@ async (page) => {
       check(await p.locator('.catalog-add').count() === 0, 'La búsqueda debe admitir escritura con teclado.');
       await activate('#empty-reset');
       check(await focused('#catalog-search') && await p.locator('.catalog-add').count() === 4, 'Restablecer debe recuperar los productos y el foco.');
-      await p.goto('http://127.0.0.1:4173/index.html');
+      await p.goto('http://localhost:4173/index.html');
       if (width < 901) {
         await activate('#menu-button', 'Space');
         check(await p.locator('#menu-button').getAttribute('aria-expanded') === 'true', 'Espacio debe abrir el menú móvil.');

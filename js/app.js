@@ -38,14 +38,9 @@
   const orderButton = document.getElementById('whatsapp-order-link');
   const orderStatus = document.getElementById('cart-order-status');
   function updateBuyerValidity() {
-    const errors = app.validation.validateBuyer({
-      name: buyerName.value,
-      phone: buyerPhone.value,
-      address: buyerAddress.value,
-    });
-    buyerName.setCustomValidity(errors.name || '');
-    buyerPhone.setCustomValidity(errors.phone || '');
-    buyerAddress.setCustomValidity(errors.address || '');
+    const values = Object.fromEntries(orderFields.map(key => [key, orderForm.elements.namedItem(key).value]));
+    const errors = app.validation.validateBuyer(values);
+    orderFields.forEach(key => orderForm.elements.namedItem(key).setCustomValidity(errors[key] || ''));
   }
   updateBuyerValidity();
   orderForm.addEventListener('input', () => {
@@ -96,7 +91,7 @@
     const query = normalize(state.query.trim());
     const products = state.products.filter((product) =>
       (state.category === 'todos' || state.category === product.category)
-      && (!query || normalize(`${product.name} ${product.description}`).includes(query))
+      && (!query || normalize(`${product.name} ${product.description} ${product.tag || ''} ${product.category}`).includes(query))
       && (state.priceRange === 'all' || state.priceRange === 'under10' && product.price < 10
         || state.priceRange === '10-15' && product.price >= 10 && product.price <= 15
         || state.priceRange === 'over15' && product.price > 15));
@@ -131,6 +126,7 @@
     state.items = nextItems;
     const result = app.storage.saveCart(state.items);
     state.updatedAt = result.updatedAt;
+    global.dispatchEvent(new Event('farmacia:cart'));
     const warning = document.getElementById('storage-warning');
     warning.hidden = result.saved;
     warning.textContent = result.saved ? '' : 'El navegador bloqueó el almacenamiento. Puedes comprar, pero el carrito no se conservará al cerrar esta página.';
@@ -245,6 +241,9 @@
       if (['todos', 'bienestar', 'cuidado', 'bebe'].includes(filters.category)) state.category = filters.category;
       if (['all', 'under10', '10-15', 'over15'].includes(filters.priceRange)) state.priceRange = filters.priceRange;
       if (['recommended', 'low', 'high'].includes(filters.sort)) state.sort = filters.sort;
+      const route = new URLSearchParams(global.location.search);
+      if (route.has('q')) { state.query = route.get('q').slice(0, 100); state.category = 'todos'; state.priceRange = 'all'; }
+      if (['todos', 'bienestar', 'cuidado', 'bebe'].includes(route.get('category'))) state.category = route.get('category');
       search.value = state.query;
       filtersChanged(false);
       document.getElementById('catalog-loading').hidden = true;

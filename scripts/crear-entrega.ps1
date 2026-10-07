@@ -8,7 +8,8 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $deliveryDirectory = Join-Path $projectRoot 'entrega'
 $archivePath = Join-Path $deliveryDirectory $Nombre
 $projectEntries = @(
-    'index.html', 'catalogo.html', 'README.md',
+    'index.html', 'catalogo.html', 'producto.html', 'comparar.html',
+    'cuenta.html', 'checkout.html', 'pedidos.html', 'ayuda.html', 'README.md',
     'assets', 'data', 'js', 'docs', 'scripts', 'tests',
     'robots.txt', 'service-worker.js'
 )

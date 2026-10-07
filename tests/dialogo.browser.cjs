@@ -1,13 +1,13 @@
-async (page) => {
+﻿async (page) => {
   const context = await page.context().browser().newContext({ viewport: { width: 1280, height: 940 } });
   const p = await context.newPage();
   const check = (condition, message) => { if (!condition) throw new Error(message); };
   try {
-    await p.goto('http://127.0.0.1:4173/catalogo.html');
+    await p.goto('http://localhost:4173/catalogo.html');
     await p.locator('.catalog-add').first().waitFor();
     await p.locator('.catalog-add[data-product-id="vitaminas"]').click();
     await p.locator('.catalog-add[data-product-id="solar"]').click();
-    await p.locator('.cart-trigger').click();
+    await p.locator('#cart-dock [data-open-cart]').click();
     await p.evaluate(() => {
       const remove = document.querySelector('[data-cart-action="remove"][data-product-id="vitaminas"]');
       remove.click();
