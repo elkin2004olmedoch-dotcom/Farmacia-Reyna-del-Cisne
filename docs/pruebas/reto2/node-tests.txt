@@ -1,0 +1,26 @@
+✔ login admin devuelve JWT firmado y no expone hash ni contraseña (491.6218ms)
+✔ registro ecuatoriano crea usuario con bcrypt y no persiste cédula (1264.7507ms)
+✔ registro rechaza roles inyectados, correo, cédula, teléfono y contraseña inválidos (41.0733ms)
+✔ credenciales incorrectas, login user y expiración/revocación se controlan (823.6204ms)
+✔ crear producto requiere JWT y rol admin; user recibe 403 (101.7602ms)
+✔ catálogo, ficha y paginación son públicos; validación de params/body es estricta (49.8705ms)
+✔ edición admin persiste y sanitiza texto (93.4483ms)
+✔ pedido exige login; el total se calcula en servidor y queda en BD con detalles (130.7041ms)
+✔ carrito manipulado o incompleto y entrega ecuatoriana inválida no crean pedidos (30.2765ms)
+✔ stock insuficiente revierte toda la transacción y evita sobreventa concurrente (273.8858ms)
+✔ mis pedidos separa usuarios; admin ve pedidos y todas las tablas sin hashes (560.0806ms)
+✔ promociones CRUD admin publica solo campañas activas y vigentes (288.4855ms)
+✔ eliminación lógica impide nuevas compras y conserva detalle/precio histórico (27.8796ms)
+✔ CORS exacto, JSON incorrecto, tamaño y errores no filtran stacktraces (19.2089ms)
+✔ logout revoca tokens ya emitidos y la BD persiste al abrir otro cliente Prisma (71.0408ms)
+✔ MVC separa datos, renderizado, eventos, rutas, controladores y middleware (4.2945ms)
+✔ las nueve páginas y los imports MVC apuntan a recursos locales existentes (45.8871ms)
+✔ configuración de producción rechaza secreto débil y orígenes inseguros (8.2659ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7916.4998

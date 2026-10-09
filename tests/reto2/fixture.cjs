@@ -1,0 +1,18 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const os=require('node:os');
+const {execFileSync}=require('node:child_process');
+const {randomBytes}=require('node:crypto');
+const directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-reto2-'));
+process.env.NODE_ENV='test';
+process.env.DATABASE_URL='file:'+path.join(directory,'test.db').replaceAll('\\','/');
+process.env.JWT_SECRET=randomBytes(48).toString('hex');
+process.env.CORS_ORIGIN='http://localhost:3000';
+process.env.ADMIN_EMAIL='admin-test@example.ec';
+process.env.ADMIN_PASSWORD='AdminPrueba2026!';
+execFileSync(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],{stdio:'pipe',env:process.env});
+execFileSync(process.execPath,['server/prisma/seed.cjs'],{stdio:'pipe',env:process.env});
+const app=require('../../server/app.cjs')();
+const db=require('../../server/models/db.cjs');
+const supertest=require('supertest');
+module.exports={app,db,request:supertest(app),directory};

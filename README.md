@@ -1,125 +1,222 @@
-﻿# Farmacia Reina del Cisne
+# Farmacia Reina del Cisne — Reto 2 Full Stack MVC
 
-Tienda estática de farmacia adaptada al prototipo ATHLETIX ECOMMERCE: portada, búsqueda, catálogo, ficha, comparación, opiniones, cuentas locales, carrito, compra por pasos y consulta de pedidos. Conserva el contacto y los pedidos por WhatsApp.
+Plataforma de farmacia con catálogo, carrito persistente, registro/login, pedidos en base de datos y administración de productos y promociones. Mantiene la fachada del negocio, identidad crema/vino, ubicación, WhatsApp y las 18 referencias anteriores.
 
-Los productos y precios son de demostración. Las cuentas, opiniones y pedidos se guardan en el navegador. No existe un backend ni un cobro bancario: la opción de tarjeta es una simulación con números de prueba.
+**Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3 y SQLite. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.
 
-## Abrir el proyecto
+## Instalación y ejecución
 
-Requiere Node.js para el servidor local, sin instalar dependencias:
+~~~powershell
+npm ci
+npm run setup
+npm start
+~~~
 
-```powershell
-node scripts/serve.cjs
-```
+Abre **http://localhost:3000/**. Express sirve frontend y API en el mismo origen. Setup genera el cliente Prisma, aplica la migración, ejecuta seed y construye las nueve pantallas. Si .env no existe, genera JWT_SECRET y contraseña admin aleatorios; no sobrescribe un archivo existente.
 
-Abre **http://localhost:4173/**. Este modo permite usar las páginas con el mismo origen, conservar el carrito y registrar el service worker. El servidor solo escucha en la máquina local.
+Consulta ADMIN_EMAIL y ADMIN_PASSWORD en tu **archivo privado .env** e inicia sesión en /cuenta.html. Una cuenta admin entra automáticamente en /admin.html; una cuenta cliente conserva su cuenta, carrito e historial. No compartas ese archivo. Las cuentas normales se crean desde “Crear cuenta”; el registro nunca concede admin. Usa datos de prueba con formatos/verificadores ecuatorianos válidos durante la evaluación.
 
-También puedes abrir `index.html` directamente para consultar el sitio. El almacenamiento compartido entre archivos, las cuentas y las APIs criptográficas dependen del navegador en `file://`; para probar todo el recorrido utiliza localhost o HTTPS.
+Los 18 productos comienzan con stock de demostración de 20 unidades y precios de referencia. Confirma los datos comerciales reales con la farmacia. El seed no restaura stock vendido ni sobrescribe ediciones, usuarios o contraseñas existentes.
 
-## Pantallas y funciones
+Alternativa manual: copia .env.example a .env, configura valores privados y ejecuta:
 
-| Archivo | Función |
+~~~powershell
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+npm run build:frontend
+npm start
+~~~
+
+DATABASE_URL="file:./farmacia.db" se resuelve respecto al schema: la BD está en **server/prisma/farmacia.db**. Se excluye de Git/ZIP y se reconstruye con migraciones/seed. npm run dev recarga el servidor; npm run db:studio inspecciona la BD local.
+
+## Arquitectura MVC
+
+~~~text
+frontend/
+  index.html, catalogo.html, producto.html, comparar.html
+  cuenta.html, checkout.html, pedidos.html, admin.html, ayuda.html
+  models/           API, sesión, catálogo, carrito, pedidos y administración
+  views/            tarjetas, formularios, tablas, mensajes y confirmación
+  controllers/      eventos, navegación y coordinación de modelos/vistas
+  assets/           CSS, imágenes, iconos y fuentes
+server/
+  index.cjs         arranque HTTP/HTTPS
+  app.cjs           composición Express y contenido público
+  config.cjs        entorno validado
+  routes/           endpoints y middleware
+  controllers/      entrada/salida HTTP
+  models/           Prisma y transacciones
+  middleware/       JWT, roles, validación, errores y logger
+  prisma/
+    schema.prisma
+    migrations/202610090001_init/migration.sql
+    migrations/migration_lock.toml
+    seed.cjs
+scripts/            instalación, frontend, HTTPS y ZIP
+tests/reto2/        API, recursos y navegador
+docs/
+  REQUISITOS-RETO-2.txt
+  auditorias/reto2/  cinco auditorías completas
+  pruebas/reto2/     evidencias y resultados
+.env.example
+package.json
+package-lock.json
+~~~
+
+Cliente: controlador → modelo Fetch/estado → vista reutilizable. Los modelos no renderizan DOM: publican señales con EventTarget. Las vistas no consumen API ni registran eventos del flujo. La misma tarjeta de views/products.js se utiliza en portada y catálogo. scripts/build-frontend.cjs genera cabecera, pie y campos compartidos: edita sus plantillas para conservar cambios al reconstruir HTML.
+
+Servidor: ruta → validación/JWT/rol → controlador HTTP → modelo Prisma → BD. El cálculo/transacción del pedido pertenece al modelo. Hay middleware de errores centralizado y logger sin cuerpos ni credenciales.
+
+Los HTML, js/ y assets/ raíz conservan el Reto 1 como antecedente; su README está en docs/README-RETO-1.md. **Evalúa el Reto 2 con npm start y localhost:3000**, no abriendo HTML raíz ni usando el servidor estático anterior. GitHub Pages solo sirve contenido estático; esta aplicación necesita un proceso Node y BD.
+
+## Persistencia y consistencia
+
+| Entidad | Campos principales |
 |---|---|
-| `index.html` | Portada con la fachada del negocio, beneficios, selección de productos, categorías, promociones, ubicación y contacto |
-| `catalogo.html` | Búsqueda por nombre, descripción o categoría; filtros; orden; añadido rápido y carrito lateral |
-| `producto.html?id=solar` | Imagen ampliable, precio, cantidad, ficha del catálogo, relacionados y opiniones locales |
-| `comparar.html` | Selección de productos y comparación de precio, categoría, presentación y entrega |
-| `cuenta.html` | Registro, acceso, perfil y cierre de sesión locales |
-| `checkout.html` | Carrito → datos y entrega → pago → confirmación |
-| `pedidos.html` | Historial local, resumen descargable y consulta del pedido por WhatsApp |
-| `ayuda.html` | Centro de ayuda, privacidad y condiciones de la demostración |
+| Producto | id, nombre, precio Decimal, stock, categoría, imagen, activo, createdAt |
+| Usuario | id, email único, nombre, teléfono, passwordHash, role, activo, tokenVersion |
+| Pedido | id, userId FK, total Decimal, entrega, comprador, documento enmascarado, createdAt |
+| PedidoDetalle | id, pedidoId FK, productoId FK, nombre histórico, cantidad, precioUnitario Decimal |
+| Promocion | id, título, etiqueta, productoId FK, publicación, vistaPrevia, orden, inicio, fin |
 
-La cabecera comparte búsqueda, promociones, ayuda, cuenta y contador del carrito. El diseño conserva la identidad crema y vino de la farmacia, su fachada y la estructura de tienda del prototipo. Se mantienen los 18 productos publicados. Todas las imágenes y fuentes del sitio son locales.
+El carrito guarda IDs/cantidades en localStorage. El servidor lee precio/stock, calcula en centavos y persiste Decimal. Cabecera, detalles y descuento de stock están en una transacción serializable; una línea sin stock revierte todo el pedido.
 
-## Validaciones
+Cada confirmación incluye UUID de idempotencia. Repetir la misma solicitud devuelve el pedido existente sin otro descuento; la misma clave con otros datos devuelve 409. El cliente guarda solo clave y huella, no documento en claro. Los detalles preservan nombre/precio históricos. DELETE producto lo desactiva sin destruir el historial.
 
-Las reglas están centralizadas en `js/validation.js` y se aplican a contacto, datos del comprador, registro y compra.
+## Endpoints y roles
 
-- Nombres y apellidos con letras, tildes y espacios, entre 2 y 80 caracteres.
-- Correos con estructura válida, límites de longitud y control de puntos consecutivos. No se restringen a `.ec`.
-- Celulares ecuatorianos `09XXXXXXXX`, fijos con código de área `02` a `07`, y formato internacional `+593` sin el cero inicial. Se normalizan a formato internacional.
-- Cédula de 10 dígitos, provincia 01 a 24 o prefijo 30, tercer dígito de persona natural y verificador módulo 10.
-- RUC de 13 dígitos terminado en 001: persona natural con módulo 10, sociedad privada y entidad pública con sus verificadores módulo 11.
-- Las 24 provincias, ciudad o cantón, dirección y referencia; código postal opcional de 6 dígitos con prefijo de la provincia seleccionada.
-- Contraseña de 8 a 128 caracteres, una letra y un número, y confirmación idéntica.
-- Visa y Mastercard de 16 dígitos: marca, Luhn, mes, vencimiento vigente y CVV de 3 dígitos.
-- Cantidades enteras de 1 a 99 y aceptación de condiciones.
+En rutas protegidas: **Authorization: Bearer &lt;token&gt;**.
 
-La validación comprueba estructura y verificadores. No comprueba identidad con Registro Civil, registro activo en SRI, existencia de correo, titularidad de teléfono, dirección real, banco, tipo débito/crédito ni fondos. Las fuentes y el alcance están en [la revisión de adaptación y validaciones](docs/auditorias/AUDITORIA-10-tienda-ecuador.md).
+| Método | Endpoint | Acceso |
+|---|---|---|
+| POST | /api/auth/register | Público; crea user |
+| POST | /api/auth/login | Público; devuelve JWT |
+| GET | /api/auth/me | user/admin |
+| POST | /api/auth/logout | user/admin; revoca sesiones |
+| GET | /api/productos | Público |
+| GET | /api/productos/:id | Público |
+| POST | /api/productos | admin |
+| PUT | /api/productos/:id | admin |
+| DELETE | /api/productos/:id | admin |
+| POST | /api/pedidos | user/admin |
+| GET | /api/pedidos/mis-pedidos | user/admin; solo propios |
+| GET | /api/pedidos | admin; todos |
+| GET | /api/promociones | Público; activas/vigentes |
+| POST | /api/promociones | admin |
+| PUT | /api/promociones/:id | admin |
+| DELETE | /api/promociones/:id | admin |
+| GET | /api/admin/tablas | admin |
+| GET | /api/salud | Público; prueba BD |
 
-## Probar una compra
+Catálogo: ?q=solar&categoria=cuidado&page=1&pageSize=20. Pedidos/tablas admiten page/pageSize; máximo 100 registros. Tablas admin: productos, usuarios, pedidos, detalles y promociones.
 
-1. Añade productos desde el catálogo o la ficha y abre **Carrito** en la cabecera.
-2. Revisa cantidades. Puedes comprar como invitado o crear una cuenta local para agrupar tus pedidos.
-3. Completa los datos con una cédula o RUC estructuralmente válido y elige retiro o entrega por coordinar.
-4. Selecciona **Coordinar con la farmacia** o **Tarjeta · simulación**.
-5. En la simulación, utiliza **Usar tarjeta de prueba**: completa la Visa de prueba para Ecuador `4000 0021 8000 0000`, un vencimiento futuro y un CVV de prueba.
-6. Revisa las condiciones y registra el pedido. La confirmación indica que no se ha realizado un cobro.
-7. Abre la consulta de WhatsApp para revisar el mensaje y enviarlo tú. Las pruebas automatizadas no envían mensajes.
+Éxito: {ok:true,data:...}. Listados: data:{items,total,page,pageSize}. Error: {ok:false,error:{code,message,details?},requestId}. HTTP: creación 201; listado/edición 200; borrado/logout 204; sin sesión 401; sin permiso 403; ausente 404; conflicto/stock 409; cuerpo grande 413; validación 422; rate limit 429; fallo interno 500 sin stacktrace.
 
-La entrega tiene cobertura y costo pendientes de cotizar; no se suma una tarifa inventada. El precio final y la disponibilidad se confirman con la farmacia. El historial no simula una preparación o entrega que la farmacia no haya confirmado.
+### Ejemplos de endpoints probados
 
-## Datos y persistencia
+POST /api/auth/register:
 
-El catálogo proviene de `data/productos.json`. Para modificarlo, edita el JSON y ejecuta:
+~~~json
+{"nombre":"Cliente Prueba","email":"cliente@example.ec","telefono":"0979275988","cedula":"0102030400","password":"ClaveSoloPrueba2026!"}
+~~~
 
-```powershell
-node scripts/build-data.cjs
-```
+POST /api/auth/login:
 
-`productos-local.js` permite cargar productos sin un servidor dinámico. Los cálculos usan centavos y formato `es-EC`, moneda USD.
+~~~json
+{"email":"cliente@example.ec","password":"ClaveSoloPrueba2026!"}
+~~~
 
-| Mecanismo | Datos |
+POST /api/productos con Bearer admin:
+
+~~~json
+{"nombre":"Producto de prueba","precio":7.25,"stock":10,"categoria":"bienestar","descripcion":"Artículo de referencia","imagen":"assets/images/producto-vitaminas.jpg","alt":"Imagen de referencia de vitaminas"}
+~~~
+
+POST /api/pedidos con Bearer user/admin:
+
+~~~json
+{
+  "carrito":[{"productoId":"solar","cantidad":1}],
+  "comprador":{
+    "name":"Cliente Prueba","email":"cliente@example.ec","phone":"0979275988",
+    "documentType":"cedula","document":"0102030400","delivery":"pickup",
+    "province":"","city":"","address":"","postalCode":""
+  },
+  "claveSolicitud":"3b4ad6dc-f1a1-4f11-856a-c6313d3c54d1"
+}
+~~~
+
+Son datos de prueba. Usa una clave nueva por pedido nuevo, sin precio ni total en el cuerpo. Para entrega: delivery=delivery, provincia válida, ciudad, dirección y código postal correspondiente si se incluye. [Resultados HTTP observados](docs/pruebas/reto2/README.md).
+
+## Seguridad y OWASP
+
+Tres riesgos de [OWASP Top 10:2025](https://top10.owasp.org/2025/0x00_2025-Introduction/) y sus mitigaciones:
+
+| Riesgo | Mitigación aplicada |
 |---|---|
-| localStorage | Carrito, filtros, borradores de contacto y comprador, cuentas, opiniones, comparación e historial |
-| sessionStorage | Sesión de cuenta y referencias a pedidos de invitado de esta sesión |
-| IndexedDB | Catálogo y fecha de actualización |
-| Cookie | Orden preferido, SameSite=Lax y Secure en HTTPS |
+| A01 — Broken Access Control | JWT/rol en servidor, registro fija user, permisos admin e historial filtrado por identidad; pruebas 401/403 y usuario ajeno |
+| A05 — Injection | Prisma parametrizado, express-validator, campos permitidos, sanitización, escape HTML, imágenes locales existentes y CSP sin scripts inline |
+| A07 — Authentication Failures | bcrypt 12, secretos privados aleatorios, HS256 con issuer/audience/exp, revocación tokenVersion y límites de intentos |
 
-Las cuentas guardan un hash PBKDF2 con sal aleatoria de la contraseña de prueba. No se guarda la cédula del registro. Los pedidos conservan un documento enmascarado y, para tarjeta, marca y últimos cuatro dígitos. **Nunca se guardan ni se envían por WhatsApp el PAN completo, vencimiento o CVV.** Las cuentas locales no constituyen autenticación de producción.
+Controles adicionales: Helmet, API sin caché, cuerpo de 32 KB, paginación y errores centralizados. Config rechaza JWT_SECRET débil, CORS comodín y orígenes HTTP en producción. CORS usa orígenes exactos y no sustituye JWT/roles. Las prácticas siguen la [guía de Express](https://expressjs.com/en/advanced/best-practice-security.html).
 
-El carrito se guarda sin descargar archivos automáticamente, conservando el comportamiento de la última versión publicada. Las fichas y la compra comparten el carrito. El historial permite descargar un resumen sin datos personales. Los formularios de contacto y comprador conservan sus botones para borrar borradores. Eliminar los datos del sitio en el navegador borra los datos locales.
+JWT de 30 minutos en sessionStorage; logout revoca los tokens del usuario. La cédula del registro no se conserva; el documento del pedido se enmascara. No se piden ni guardan tarjeta, CVV o vencimiento. El admin ve datos de entrega necesarios, sin passwordHash ni huellas internas. Logger sin body ni Authorization.
 
-## Uso sin conexión
+.env, BD, dependencias y claves privadas se excluyen de Git/ZIP; el backend publica solo frontend/. El override deepmerge-ts 8.0.0 corrige la alerta transitiva detectada y se verificó con Prisma, migraciones y pruebas. No se declara certificación OWASP.
 
-El service worker guarda las ocho páginas, scripts, estilos, catálogo, fuentes e imágenes. Requiere localhost o HTTPS y una primera visita con conexión. Después permite navegar por las páginas guardadas sin internet. WhatsApp, el mapa y las redes externas necesitan conexión.
+## HTTPS opcional
 
-## Archivos de implementación
+Requiere OpenSSL; el script detecta el incluido con Git para Windows:
 
-- `assets/shop.css`: adaptación visual de las pantallas.
-- `js/commerce.js`: cuentas locales, sesión, pedidos, simulación y mensajes.
-- `js/shop.js`: cabecera, ficha, comparación, opiniones, cuenta, compra e historial.
-- `js/app.js`, `view.js`, `cart.js`, `storage.js`, `repo.js`, `form.js`: catálogo, carrito, carga, persistencia y contacto originales, integrados con la tienda.
-- `scripts/build-shop.cjs`: genera las seis nuevas páginas y actualiza la cabecera, portada y catálogo. Edita las plantillas de este script si quieres regenerarlas; las modificaciones manuales de esas páginas generadas se sobrescriben al ejecutarlo.
+~~~powershell
+npm run cert:dev
+npm run start:https
+~~~
 
-## Verificación
+Abre **https://localhost:3443/**. El certificado self-signed de desarrollo puede mostrar advertencia de confianza; no se sobrescriben archivos existentes. Producción necesita certificado confiable o proxy HTTPS, NODE_ENV=production y CORS_ORIGIN real. TLS_CERT_PATH/TLS_KEY_PATH admiten certificados propios.
 
-```powershell
-node --test tests/*.test.cjs
-```
+## Panel administrador
 
-29 pruebas de lógica y recursos: cálculos, persistencia, validaciones ecuatorianas, cuentas, privacidad, campañas y archivos offline.
+El panel tiene cabecera, menú y pie propios, con Productos, Promociones, Pedidos de clientes, Usuarios y Detalles de pedidos. Conserva los colores crema/vino de la farmacia. “Ver tienda” permite revisar la página pública y “Cerrar sesión” revoca la sesión.
 
-Las funciones `tests/*.browser.cjs` se ejecutan con Playwright sobre el servidor local. `shop.browser.cjs` prueba el recorrido de compra a 1440 y 375 px, registro y acceso, errores de formulario, historial y ausencia de desbordamiento en las ocho páginas. `teclado.browser.cjs` recorre los controles con Tab, Enter, Espacio y Escape; las otras pruebas comprueban accesibilidad y la confirmación de eliminación.
+El cliente dispone de carrito, checkout y “Mis pedidos”. En la sesión admin, las acciones de compra se ocultan al revisar la tienda; /cuenta.html y /checkout.html llevan al panel y /pedidos.html abre todos los pedidos de clientes. Los enlaces /admin.html?tabla=productos, promociones, pedidos, usuarios o detalles seleccionan la sección correspondiente; valores desconocidos abren Productos. La API mantiene los permisos user/admin de pedidos exigidos por la rúbrica; la interfaz separa las tareas de cada rol.
 
-Se revisaron las ocho páginas con axe-core 4.10.3 y etiquetas WCAG A/AA en móvil. También se comprobaron las páginas en escritorio, el contraste del carrito y la navegación offline. No es una certificación ni sustituye una evaluación con lectores de pantalla y usuarios reales.
+CRUD de productos/promociones. Usa imágenes existentes de frontend/assets/images/ con ruta assets/images/archivo.ext. Campañas: publicación, vista previa, orden y fechas; inicio inclusivo y fin exclusivo. El panel utiliza la hora del dispositivo y envía ISO con zona. Las dos campañas iniciales son vistas previas, sin descuentos vigentes inventados.
 
-## Entrega y publicación
+Usuarios, pedidos y detalles son tablas de consulta: no se modifican hashes, roles ni historial. Las cinco tablas requieren JWT/rol admin, independientemente del enlace visible en la UI.
 
-Para generar un ZIP con todas las páginas:
+## Pruebas, accesibilidad y auditorías
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/crear-entrega.ps1
-```
+~~~powershell
+npm test
+npm run test:browser
+npm audit
+~~~
 
-La entrega se escribe en `entrega/Reto1_Olmedo_Elkin.zip`. El script incluye las ocho páginas y sus recursos. El ZIP anterior se actualiza solo al ejecutar este comando.
+**18 pruebas Node:** API/recursos con migración y seed en BD temporal. **10 pruebas Chrome:** cinco recorridos en escritorio/móvil. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
 
-Para alojamiento estático, sube las ocho páginas, `assets/`, `data/`, `js/`, `service-worker.js` y `robots.txt`, conservando las rutas. `.github/workflows/pages.yml` despliega GitHub Pages al actualizar `main`.
+Se cubren JWT admin, creación admin, user 403, catálogo, carrito persistente, pedido en BD y admin ve todos los pedidos. También stock concurrente, reversión, idempotencia, revocación, CORS, validación ecuatoriana, sanitización, errores de red/500 y CRUD de campañas. Las pruebas de navegador comprueban login por rol, navegación administrativa sin compras, enlaces de sección, redirecciones, vista de tienda sin carrito para admin y cierre de sesión; compras y accesibilidad de cuenta/historial se prueban con un cliente. El panel ignora respuestas atrasadas al cambiar de tabla, bloquea acciones durante la carga y borra el contenido administrativo/cierra diálogos cuando vence la sesión.
 
-## Promociones y futuro administrador
+Las nueve pantallas se revisan con axe-core WCAG A/AA a 1440 y 375 px, salto al contenido, foco visible, labels, menú y Escape. No sustituye evaluación con lectores de pantalla y usuarios ni certifica WCAG.
 
-`data/promociones.json` contiene campañas separadas del HTML: identificador, título, descripción, etiqueta, producto, imagen, estado activo, orden y fechas opcionales ISO 8601 con zona horaria. Ecuador continental usa `-05:00`. El inicio es inclusivo y el fin exclusivo; campañas desactivadas, futuras o vencidas no se muestran. Una lista vacía muestra un mensaje de próximas novedades.
+1. [Auditoría 1 — MVC](docs/auditorias/reto2/01-arquitectura-mvc.md).
+2. [Auditoría 2 — Persistencia](docs/auditorias/reto2/02-persistencia-prisma.md).
+3. [Auditoría 3 — API REST](docs/auditorias/reto2/03-api-rest.md).
+4. [Auditoría 4 — Seguridad](docs/auditorias/reto2/04-seguridad.md).
+5. [Auditoría 5 — Frontend y accesibilidad](docs/auditorias/reto2/05-frontend-accesibilidad.md).
 
-Por ahora hay dos ejemplos marcados como **vista previa**, sin descuentos ni precios inventados. Para publicar una campaña real, cambia sus datos y `demo` a `false`. Regenera la copia para apertura directa con `node scripts/build-promotions.cjs`. La caché offline utiliza la última versión instalada del sitio; actualizaciones reales requerirán conexión.
+[Índice y rúbrica](docs/auditorias/reto2/README.md). [Evidencias de ejecución](docs/pruebas/reto2/README.md).
 
-`js/promotions.js` expone `Farmacia.promotions.load()`: al implementar administrador y base de datos, esta función podrá consultar la API sin rehacer las tarjetas. En esa fase se implementarán autenticación, autorización y persistencia en servidor. Esta entrega no incluye administrador ni base de datos.
+## Entrega comprimida
+
+~~~powershell
+npm run package
+~~~
+
+Genera **entrega/Reto2_Olmedo_Elkin.zip** con frontend/backend MVC, schema/migración/seed, .env.example, lockfile, README, pruebas y auditorías. Conserva el antecedente Reto 1 para reconstruir plantillas. Excluye secretos, BD personal, certificados, node_modules y logs. En otra carpeta: npm ci y npm run setup.
+
+## Límites prácticos
+
+SQLite sirve para esta entrega; muchas escrituras requieren evaluar otro motor y backups. Rate limit en memoria de una instancia. No se implementan pasarela bancaria, logística automática, MFA, recuperación de clave ni verificación de correo. Los pedidos quedan pendientes de coordinación. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
+

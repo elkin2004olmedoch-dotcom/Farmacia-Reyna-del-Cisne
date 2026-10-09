@@ -1,0 +1,12 @@
+const fs=require('node:fs');
+const path=require('node:path');
+const {spawnSync}=require('node:child_process');
+const folder=path.resolve(__dirname,'../server/certificates');
+fs.mkdirSync(folder,{recursive:true});
+const key=path.join(folder,'localhost.key');const cert=path.join(folder,'localhost.crt');
+if(fs.existsSync(key) || fs.existsSync(cert))throw new Error('Ya existen certificados. No se sobrescriben automáticamente.');
+const gitOpenSSL='C:/Program Files/Git/usr/bin/openssl.exe';
+const command=process.env.OPENSSL_PATH || (fs.existsSync(gitOpenSSL)?gitOpenSSL:'openssl');
+const result=spawnSync(command,['req','-x509','-newkey','rsa:2048','-nodes','-keyout',key,'-out',cert,'-days','30','-subj','/CN=localhost','-addext','subjectAltName=DNS:localhost,IP:127.0.0.1'],{stdio:'pipe'});
+if(result.error || result.status!==0)throw new Error('Instala OpenSSL o define OPENSSL_PATH para generar certificados de desarrollo.');
+console.info('Certificado local creado. npm run start:https inicia https://localhost:3443.');

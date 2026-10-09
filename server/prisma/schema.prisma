@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Producto {
+  id          String   @id @default(uuid())
+  nombre      String
+  precio      Decimal
+  stock       Int      @default(0)
+  categoria   String
+  descripcion String
+  imagen      String
+  alt         String
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  detalles    PedidoDetalle[]
+  promociones Promocion[]
+  @@index([activo, categoria])
+}
+
+model Usuario {
+  id           String   @id @default(uuid())
+  nombre       String
+  email        String   @unique
+  telefono     String
+  passwordHash String
+  role         String   @default("user")
+  tokenVersion Int      @default(0)
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  pedidos      Pedido[]
+}
+
+model Pedido {
+  id             String   @id @default(uuid())
+  userId         String
+  usuario        Usuario  @relation(fields: [userId], references: [id], onDelete: Restrict)
+  total          Decimal
+  estado         String   @default("pendiente")
+  entrega        String
+  nombre         String
+  email          String
+  telefono       String
+  documento      String
+  provincia      String?
+  ciudad         String?
+  direccion      String?
+  codigoPostal   String?
+  requestKey     String
+  fingerprint    String
+  createdAt      DateTime @default(now())
+  detalles       PedidoDetalle[]
+  @@unique([userId, requestKey])
+  @@index([userId, createdAt])
+}
+
+model PedidoDetalle {
+  id             String   @id @default(uuid())
+  pedidoId       String
+  pedido         Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Restrict)
+  productoId     String
+  producto       Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
+  nombreProducto String
+  cantidad       Int
+  precioUnitario Decimal
+  @@unique([pedidoId, productoId])
+}
+
+model Promocion {
+  id          String   @id @default(uuid())
+  titulo      String
+  descripcion String
+  etiqueta    String
+  productoId  String
+  producto    Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
+  activa      Boolean  @default(true)
+  vistaPrevia Boolean  @default(false)
+  orden       Int      @default(0)
+  inicio      DateTime?
+  fin         DateTime?
+  createdAt   DateTime @default(now())
+}
