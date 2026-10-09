@@ -2,7 +2,7 @@
 
 ## Objetivo y método
 
-Comprobar que el Reto 1 se transforma en una aplicación cliente-servidor con separación real de datos, renderizado y eventos. Se inspeccionaron dependencias entre módulos, estructura física, flujo HTTP y generación de pantallas, incluyendo el dashboard administrativo de estilo ERP. La prueba `tests/reto2/resources.test.cjs` verifica recursos y evita acceso Fetch/eventos en las vistas y consultas Prisma directas en los controladores del servidor. La suite Node actual contiene 20 pruebas y pasó; la verificación visual y de navegador se registra por separado en el informe 05 y en `docs/pruebas/reto2/`.
+Comprobar que el Reto 1 se transforma en una aplicación cliente-servidor con separación real de datos, renderizado y eventos. Se inspeccionaron dependencias entre módulos, estructura física, flujo HTTP y generación de pantallas, incluyendo el dashboard administrativo de estilo ERP y la conexión de pantallas abiertas. La prueba `tests/reto2/resources.test.cjs` verifica recursos y evita acceso Fetch/eventos en las vistas y consultas Prisma directas en los controladores del servidor. La suite Node actual contiene 23 pruebas y pasó; la suite ampliada de 14 casos de navegador pasó y se registra por separado en el informe 05 y en `docs/pruebas/reto2/`.
 
 ## Matriz de subpuntos
 
@@ -10,14 +10,14 @@ Comprobar que el Reto 1 se transforma en una aplicación cliente-servidor con se
 |---|---|---|---|
 | 1.1 `/frontend/models/` | `api.js`, `auth.js`, `catalog.js`, `cart.js`, `orders.js`, `admin.js` y validación ecuatoriana | Datos API, sesión y carrito independientes del renderizado; `administration.summary()` consulta el resumen protegido | Implementado |
 | 1.1 `/frontend/views/` | `products.js`, `orders.js`, `admin.js`, `admin-dashboard.js`, `layout.js`, `common.js` | Tarjeta reutilizable, formularios, tablas, confirmación, diálogos y dashboard con SVG accesible | Implementado |
-| 1.1 `/frontend/controllers/` | `app.js`, `catalog.js`, `account.js`, `checkout.js`, `admin.js`, `layout.js`, `contact.js` | Eventos y coordinación de modelos/vistas | Implementado |
+| 1.1 `/frontend/controllers/` | `app.js`, `catalog.js`, `account.js`, `checkout.js`, `admin.js`, `layout.js`, `contact.js`, `updates.js` | Eventos, coordinación de modelos/vistas y refresco de pantallas abiertas | Implementado |
 | 1.1 `/frontend/assets/` | Estilos, fuentes, imágenes, iconos y `mvc.css` | Nueve HTML referencian recursos de esa carpeta | Implementado |
 | 1.1 index semántico/accesible | `frontend/index.html` con header, nav, main, section, footer y salto al contenido | Test de recursos y navegador | Implementado |
 | 1.2 `/server/routes/` | `routes/index.cjs` compone URL, middleware y controlador | Las rutas no contienen consultas Prisma ni cálculo del pedido | Implementado |
 | 1.2 `/server/controllers/` | Controladores de auth, productos, pedidos, promociones, admin y `admin-summary.cjs` | Traducción de entradas validadas a servicios de modelo y respuestas HTTP; el controlador del resumen no consulta Prisma directamente | Implementado |
 | 1.2 `/server/models/` | Acceso Prisma, transacción de pedido y `admin-summary.cjs` | Persistencia, consultas, precios, stock y agregados del dashboard centralizados | Implementado |
 | 1.2 `/server/middleware/` | Auth, roles, validación, errores, logger; CORS en composición de app | Pipeline reutilizable en cada ruta | Implementado |
-| 1.2 `/server/prisma/` | Schema, migración versionada y seed | Inicialización reproducible con `npm run setup` | Implementado |
+| 1.2 `/server/prisma/` | Schema, migraciones versionadas y seed con marca Semilla | Inicialización reproducible con `npm run setup`; reinstalar conserva las decisiones administrativas | Implementado |
 
 ## Flujo verificado
 
@@ -49,6 +49,16 @@ El administrador entra en `admin.html`, cuya vista inicial es el dashboard. El c
 
 El mismo controlador coordina las cinco tablas existentes mediante `?tabla=productos`, `promociones`, `pedidos`, `usuarios` o `detalles`. Los accesos rápidos a crear un producto o una promoción abren el editor del CRUD correspondiente. La plantilla del panel tiene sidebar, topbar y sesión propios; las páginas de carrito e historial personal redirigen a los administradores al panel, mientras el cliente conserva su compra y sus pedidos. No se agregaron pantallas de proveedores, nómina ni contabilidad.
 
+## Conexión entre administración y tienda
+
+El cliente y el administrador consultan las mismas entidades persistidas. Los cambios exitosos de productos, promociones y pedidos publican `data:changed` desde el modelo API; `models/events.js` guarda además un UUID en `farmacia-mvc-datos-actualizados` para avisar a otras pestañas del mismo origen. Esa señal no transporta datos de negocio ni credenciales: cada pantalla vuelve a consultar su API y sus permisos.
+
+`controllers/updates.js` coordina refrescos al recuperar el foco, volver a estar visible, recibir la señal o cada 30 segundos mientras la página permanece visible. Evita consultas simultáneas del mismo watcher, agrupa un aviso pendiente y detiene sus listeners al abandonar la página. Los controladores comparan el resultado con la información mostrada y solo reconstruyen la zona que cambió; `preserveFocus` conserva el foco del control equivalente. Los filtros y formularios quedan fuera de esas zonas, y se pospone el refresco durante edición de cantidad, envío o diálogo abierto según la pantalla.
+
+Los handlers de catálogo y detalle están delegados y consultan el producto actual antes de añadirlo al carrito. El checkout escucha también `cart:changed`, incluidos cambios de almacenamiento de otra pestaña, recalcula totales y bloquea continuar/confirmar si falta un producto o la cantidad supera el stock. El editor administrativo envía la versión original `esperadoUpdatedAt`; el modelo de servidor decide atómicamente si todavía corresponde al registro persistido.
+
+Las aperturas asíncronas del editor de campañas tienen su propia secuencia `openingId`. Solo la última apertura de la sección todavía activa puede asignar el registro, su ID y sus opciones; una respuesta atrasada no mezcla el contenido visible de una campaña con el ID usado al guardar.
+
 ## Hallazgos y cierre
 
 1. La versión previa tenía cuentas y pedidos locales: reemplazados por API y base de datos en la aplicación de `frontend/`.
@@ -56,6 +66,7 @@ El mismo controlador coordina las cinco tablas existentes mediante `?tabla=produ
 3. Renderizado repetido: tarjetas, precios, estados, tablas y formularios se centralizaron en las vistas y en las plantillas de construcción.
 4. El Reto 1 se conserva en la raíz como antecedente. La aplicación evaluable del Reto 2 se ejecuta con `npm start`, que sirve exclusivamente `frontend/` y `/api`. No hay que abrir los HTML raíz para evaluar este reto.
 5. El panel administrativo era una lista de registros con una cabecera similar a la tienda. Ahora tiene un espacio ERP independiente, resumen persistido y navegación por funciones administrativas, conservando los mismos modelos de productos, promociones, usuarios y pedidos.
+6. Los datos quedaban fijados al cargar cada página. Ahora los controladores refrescan las vistas abiertas mediante la API sin reemplazar filtros ni formularios; el modelo del carrito notifica también cambios entre pestañas.
 
 ## Límites
 

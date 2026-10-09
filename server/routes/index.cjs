@@ -18,7 +18,7 @@ module.exports=config=> {
   router.get('/productos',...V.catalog,products.list);
   router.get('/productos/:id',V.id,V.validated,products.find);
   router.post('/productos',auth,admin,...V.product,V.validated,products.create);
-  router.put('/productos/:id',auth,admin,V.id,...V.product,V.validated,products.update);
+  router.put('/productos/:id',auth,admin,V.id,...V.productUpdate,V.validated,products.update);
   router.delete('/productos/:id',auth,admin,V.id,V.validated,products.remove);
   router.post('/pedidos',auth,buyer,...V.order,orders.create);
   router.get('/pedidos/mis-pedidos',auth,buyer,...V.pagination,orders.mine);

@@ -13,6 +13,8 @@ export function layoutController() {
       document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());closeMenu();
       sessionStorage.setItem('farmacia-mvc-login-message','Tu sesión venció. Inicia sesión con tu cuenta de administrador para continuar.');location.replace('cuenta.html?next=admin.html');return;
     }
+    if(document.body.dataset.page==='orders'){document.getElementById('orders-list').replaceChildren();for(const id of ['orders-prev','orders-next'])document.getElementById(id).disabled=true;document.getElementById('orders-page-info').textContent='';}
+    if(document.body.dataset.page==='checkout'){const form=document.getElementById('delivery-form');form.reset();form.hidden=true;}
     message('Tu sesión venció. Inicia sesión nuevamente para continuar.',true);
   });
   const button=document.getElementById('menu-button');const menu=document.getElementById('mobile-nav');

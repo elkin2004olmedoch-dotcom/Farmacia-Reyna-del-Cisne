@@ -16,7 +16,9 @@ Abre **http://localhost:3000/**. Express sirve frontend y API en el mismo origen
 
 Consulta ADMIN_EMAIL y ADMIN_PASSWORD en tu **archivo privado .env** e inicia sesión en /cuenta.html. Una cuenta admin entra automáticamente en /admin.html; una cuenta cliente conserva su cuenta, carrito e historial. No compartas ese archivo. Las cuentas normales se crean desde “Crear cuenta”; el registro nunca concede admin. Usa datos de prueba con formatos/verificadores ecuatorianos válidos durante la evaluación.
 
-Los 18 productos comienzan con stock de demostración de 20 unidades y precios de referencia. Confirma los datos comerciales reales con la farmacia. El seed no restaura stock vendido ni sobrescribe ediciones, usuarios o contraseñas existentes.
+Los 18 productos comienzan con stock de demostración de 20 unidades y precios de referencia. Confirma los datos comerciales reales con la farmacia. El seed no restaura stock vendido ni sobrescribe ediciones, usuarios o contraseñas existentes. El marcador técnico `Semilla` inicializa el catálogo una sola vez y conserva las promociones eliminadas; al actualizar una base anterior adopta el catálogo inicial existente.
+
+Para actualizar una instalación existente, detén el servidor y ejecuta `npm run db:generate`, `npm run db:migrate`, `npm run db:seed` y `npm start`. La segunda migración añade únicamente el marcador de inicialización. Conserva una copia privada de la BD antes de migrar; no reemplaces el archivo por una base de demostración.
 
 Alternativa manual: copia .env.example a .env, configura valores privados y ejecuta:
 
@@ -51,6 +53,7 @@ server/
   prisma/
     schema.prisma
     migrations/202610090001_init/migration.sql
+    migrations/202610090002_seed_marker/migration.sql
     migrations/migration_lock.toml
     seed.cjs
 scripts/            instalación, frontend, HTTPS y ZIP
@@ -83,6 +86,16 @@ Los HTML, js/ y assets/ raíz conservan el Reto 1 como antecedente; su README es
 El carrito guarda IDs/cantidades en localStorage. El servidor lee precio/stock, calcula en centavos y persiste Decimal. Cabecera, detalles y descuento de stock están en una transacción serializable; una línea sin stock revierte todo el pedido.
 
 Cada confirmación incluye UUID de idempotencia. Repetir la misma solicitud devuelve el pedido existente sin otro descuento; la misma clave con otros datos devuelve 409. El cliente guarda solo clave y huella, no documento en claro. Los detalles preservan nombre/precio históricos. DELETE producto lo desactiva sin destruir el historial.
+
+El editor de productos envía `esperadoUpdatedAt` con la versión que recibió al abrirse. Una compra u otra edición cambia esa versión; un guardado antiguo devuelve `409 PRODUCT_CHANGED` y conserva el stock/precio actual. Cierra y vuelve a abrir el editor para revisar los datos antes de guardar. Este campo es opcional para clientes API anteriores; el panel lo incluye siempre.
+
+### Conexión entre administrador y clientes
+
+Todos los módulos consultan la misma API y BD: el registro aparece en Usuarios; los productos y campañas administrados aparecen en la tienda; los pedidos del cliente aparecen en Pedidos, Detalles y dashboard, con descuento de stock. Cada cliente consulta únicamente su historial.
+
+Portada, catálogo, ficha, comparación, carrito, historial y panel consultan cambios al regresar a la pestaña y cada 30 segundos mientras está visible. Pestañas del mismo navegador reciben además una señal local de cambios; el carrito escucha cambios de almacenamiento. Las señales contienen únicamente un UUID, sin cuentas, JWT ni datos de entrega. La actualización usa consultas HTTP, sin conexión WebSocket.
+
+Se mantienen filtros, productos elegidos para comparar, cantidades y datos de entrega. El editor administrativo abierto pausa las actualizaciones para conservar el trabajo; la precondición detecta ventas ocurridas durante la edición. El carrito informa productos retirados o cantidades superiores al stock y bloquea la confirmación hasta corregirlos. La API vuelve a verificar precio, disponibilidad y stock en la transacción final.
 
 ## Endpoints y roles
 
@@ -201,11 +214,13 @@ npm run test:browser
 npm audit
 ~~~
 
-**20 pruebas Node:** API/recursos con migración y seed en BD temporal. **12 pruebas Chrome:** seis recorridos en escritorio/móvil. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
+**23 pruebas Node:** API/recursos con migraciones y seed en BD temporal. **14 pruebas Chrome:** siete recorridos en escritorio/móvil. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
 
 Se cubren JWT admin, creación admin, user 403, catálogo, carrito persistente, pedido en BD y admin ve todos los pedidos. También stock concurrente, reversión, idempotencia, revocación, CORS, validación ecuatoriana, sanitización, errores de red/500 y CRUD de campañas. Las pruebas de navegador comprueban login por rol, navegación administrativa sin compras, enlaces de sección, redirecciones, vista de tienda sin carrito para admin y cierre de sesión; compras y accesibilidad de cuenta/historial se prueban con un cliente. El panel ignora respuestas atrasadas al cambiar de tabla, bloquea acciones durante la carga y borra el contenido administrativo/cierra diálogos cuando vence la sesión.
 
 Las nueve pantallas, el dashboard y sus tablas de Productos/Pedidos se revisan con axe-core WCAG A/AA a 1440 y 375 px, salto al contenido, foco visible, labels, menú y Escape. Las pruebas del resumen verifican 401/403, importes, estados, meses vacíos, el cambio diciembre/enero y límites exactos de stock/vigencia. En navegador se cubren tarjetas con datos reales, creación desde accesos rápidos, reintento tras 500 y expiración al cargar el dashboard. No sustituye evaluación con lectores de pantalla y usuarios ni certifica WCAG.
+
+La prueba cruzada mantiene sesiones independientes de administrador y cliente, con páginas previamente abiertas. Comprueba registro visible en Usuarios, CRUD reflejado en catálogo/campañas, refresco por foco/visibilidad/30 segundos, carrito entre pestañas, checkout conservado ante cambios de stock, pedido visible en tablas/dashboard y conflicto de edición sin restaurar unidades vendidas. Las pruebas Prisma reconectan la BD y verifican usuarios, productos, promociones, pedidos, detalles y stock; repetir seed conserva cambios, eliminaciones y credenciales.
 
 1. [Auditoría 1 — MVC](docs/auditorias/reto2/01-arquitectura-mvc.md).
 2. [Auditoría 2 — Persistencia](docs/auditorias/reto2/02-persistencia-prisma.md).

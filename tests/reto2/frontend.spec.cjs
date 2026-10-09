@@ -68,6 +68,15 @@ test('el panel ignora respuestas atrasadas y bloquea una sesión vencida',async(
   await page.locator('#admin-table-choice').selectOption('promociones');await expect(page.locator('#admin-create')).toBeEnabled();await expect(page.locator('#admin-section-title')).toHaveText('Promociones');
   const response=page.waitForResponse(response=>new URL(response.url()).searchParams.get('tabla')==='productos');release();await (await response).finished();await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   await expect(page.locator('#admin-table-choice')).toHaveValue('promociones');await expect(page.locator('#admin-table th').first()).toHaveText('Campaña');await page.unroute(matcher);
+  // Two delayed editor openings must keep the displayed campaign and save ID together.
+  const campaignRows=page.locator('#admin-table tbody tr');expect(await campaignRows.count()).toBeGreaterThanOrEqual(2);
+  const secondCampaign=await campaignRows.nth(1).locator('td').first().textContent();const secondCampaignId=await campaignRows.nth(1).locator('[data-edit]').getAttribute('data-edit');
+  let releaseOpening,openingStarted;const pendingOpening=new Promise(resolve=>releaseOpening=resolve);const startedOpening=new Promise(resolve=>openingStarted=resolve);let openingCount=0;
+  await page.route('**/api/productos?*',async route=>{if(++openingCount===1){openingStarted();await pendingOpening;}await route.continue();});
+  await campaignRows.nth(0).locator('[data-edit]').click();await startedOpening;await campaignRows.nth(1).locator('[data-edit]').click();await expect(page.locator('#promotion-titulo')).toHaveValue(secondCampaign);
+  const lateOpening=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/productos');releaseOpening();await (await lateOpening).finished();await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  await expect(page.locator('#promotion-titulo')).toHaveValue(secondCampaign);await page.unroute('**/api/productos?*');
+  const correctSave=page.waitForResponse(response=>response.request().method()==='PUT' && new URL(response.url()).pathname.startsWith('/api/promociones/'));await page.locator('#promotion-form [type=submit]').click();expect(new URL((await correctSave).url()).pathname).toBe('/api/promociones/'+secondCampaignId);await expect(page.locator('#editor-dialog')).toBeHidden();
   await page.locator('#admin-table-choice').selectOption('productos');await expect(page.locator('#admin-create')).toBeEnabled();await page.locator('#admin-table [data-edit]:enabled').first().click();await expect(page.locator('#editor-dialog')).toBeVisible();
   await page.route('**/api/productos/*',route=>route.fulfill({status:401,json:{ok:false,error:{message:'Tu sesión venció.'}}}));await page.locator('#product-form [type=submit]').click();
   await expect(page).toHaveURL(/cuenta.html\?next=admin.html$/);await expect(page.locator('#page-status')).toContainText('Tu sesión venció');await expect(page.locator('#login-form')).toBeVisible();expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();expect(errors).toEqual([]);
@@ -98,4 +107,99 @@ test('dashboard ERP con datos reales, enlaces de gestión y recuperación de err
   await page.locator('.admin-quick-links a[href*="productos&crear=1"]').click();await expect(page.locator('#editor-dialog')).toBeVisible();await expect(page.locator('#editor-title')).toHaveText('Crear producto');await page.keyboard.press('Escape');await expect(page.locator('#editor-dialog')).toBeHidden();
   await page.route('**/api/admin/resumen',route=>route.fulfill({status:500,json:{ok:false,error:{message:'Resumen no disponible.'}}}));await page.goto('/admin.html');await expect(page.locator('#admin-retry-summary')).toBeVisible();await expect(page.locator('.admin-metric')).toHaveCount(0);await expect(page.locator('#page-status')).toContainText('Resumen no disponible');await page.unroute('**/api/admin/resumen');await page.locator('#admin-retry-summary').click();await expect(page.locator('.admin-metric')).toHaveCount(8);
   await page.route('**/api/admin/resumen',route=>route.fulfill({status:401,json:{ok:false,error:{message:'Tu sesión venció.'}}}));await page.reload();await expect(page).toHaveURL(/cuenta.html\?next=admin.html$/);await expect(page.locator('#page-status')).toContainText('Tu sesión venció');expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();expect(errors).toEqual([]);
+});
+
+test('administración y cliente comparten datos persistidos y actualizan pantallas abiertas',async({page,browser,baseURL},testInfo)=>{
+  const clientContext=await browser.newContext({baseURL,viewport:page.viewportSize()});
+  const client=await clientContext.newPage();const home=await clientContext.newPage();
+  const errors=[];for(const tab of [page,client,home])tab.on('pageerror',error=>errors.push(error.message));
+  const suffix=testInfo.project.name+'-'+Date.now();const email='sincronizacion-'+suffix+'@example.ec';
+  const productName='Producto sincronizado '+suffix;const campaignName='Campaña sincronizada '+suffix;
+  const currency=value=>new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(value);
+  let productId,campaignId,adminToken,adminOrders;
+  async function focus(tab){await tab.bringToFront();await tab.evaluate(()=>window.dispatchEvent(new Event('focus')));}
+  async function findRow(text,tab=page){
+    const row=tab.locator('#admin-table tbody tr').filter({hasText:text});
+    await expect(tab.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');
+    while(await row.count()===0 && await tab.locator('#admin-next').isEnabled()){
+      await tab.locator('#admin-next').click();await expect(tab.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');
+    }
+    await expect(row).toHaveCount(1);return row;
+  }
+  async function setStock(stock){
+    const currentResponse=await page.request.get('/api/productos/'+productId);expect(currentResponse.status()).toBe(200);const current=(await currentResponse.json()).data;
+    const fields=Object.fromEntries(['nombre','precio','stock','categoria','descripcion','imagen','alt'].map(key=>[key,current[key]]));
+    const updated=await page.request.put('/api/productos/'+productId,{headers:{Authorization:'Bearer '+adminToken},data:{...fields,precio:Number(current.precio),stock,esperadoUpdatedAt:current.updatedAt}});expect(updated.status()).toBe(200);return (await updated.json()).data;
+  }
+  try{
+    // Both roles use the isolated browser-server database, never the personal .env or DB.
+    await page.goto('/cuenta.html');await page.locator('#login-email').fill('admin-browser@example.ec');await page.locator('#login-password').fill('AdminBrowser2026!');await page.locator('#login-form [type=submit]').click();await expect(page.locator('.admin-metric')).toHaveCount(8);
+    adminToken=await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'));
+    const summaryResponse=await page.request.get('/api/admin/resumen',{headers:{Authorization:'Bearer '+adminToken}});expect(summaryResponse.status()).toBe(200);const before=(await summaryResponse.json()).data.indicadores;
+    await page.goto('/admin.html?tabla=usuarios');await expect(page.locator('#admin-table table')).toBeVisible();await expect(page.locator('#admin-table')).not.toContainText(email);
+
+    await client.goto('/cuenta.html');await client.locator('#show-register').click();
+    for(const [name,value] of Object.entries({nombre:'Cliente Sincronizacion',email,telefono:'0979275988',cedula:'0102030400',password:'ClienteBrowser2026!',confirm:'ClienteBrowser2026!'}))await client.locator('#register-'+name).fill(value);
+    await client.locator('#register-terms').check();await client.locator('#register-form [type=submit]').click();await expect(client.locator('#logout')).toBeVisible();
+    const clientToken=await client.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'));expect(clientToken).toBeTruthy();expect(clientToken).not.toBe(adminToken);
+    await focus(page);await expect(page.locator('#admin-table')).toContainText(email);await expect(page.locator('#admin-table')).not.toContainText('passwordHash');
+
+    // The storefront is already open before the administrator creates or edits anything.
+    await client.clock.install();await client.goto('/catalogo.html?q='+encodeURIComponent(productName));await expect(client.locator('#catalog-grid article')).toHaveCount(0);
+    await home.goto('/');await expect(home.locator('#promotions-list')).not.toContainText(campaignName);
+    const catalogURL=client.url();const homeURL=home.url();
+    await page.goto('/admin.html?tabla=productos&crear=1');await expect(page.locator('#editor-dialog')).toBeVisible();
+    for(const [key,value] of Object.entries({nombre:productName,precio:'6.25',stock:'4',descripcion:'Existencias y precio iniciales de la prueba cruzada',imagen:'assets/images/producto-vitaminas.jpg',alt:'Vitaminas de verificación cruzada'}))await page.locator('#product-'+key).fill(value);
+    const createdResponse=page.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/productos');
+    await page.locator('#product-form [type=submit]').click();const created=await createdResponse;expect(created.status()).toBe(201);productId=(await created.json()).data.id;await expect(page.locator('#editor-dialog')).toBeHidden();
+    await focus(client);await expect(client.locator('#catalog-grid article')).toHaveCount(1);await expect(client.locator('#catalog-grid')).toContainText(currency(6.25));await expect(client.locator('.product-stock')).toHaveText('4 unidades disponibles');await expect(client.locator('#catalog-search')).toHaveValue(productName);expect(client.url()).toBe(catalogURL);
+
+    let productRow=await findRow(productName);await productRow.locator('[data-edit]').click();await page.locator('#product-precio').fill('7.50');await page.locator('#product-descripcion').fill('Precio editado y guardado desde administración');await page.locator('#product-form [type=submit]').click();await expect(page.locator('#editor-dialog')).toBeHidden();
+    await focus(client);await expect(client.locator('#catalog-grid')).toContainText(currency(7.5));await expect(client.locator('#catalog-grid')).toContainText('Precio editado y guardado desde administración');expect(client.url()).toBe(catalogURL);
+
+    await page.goto('/admin.html?tabla=promociones&crear=1');await expect(page.locator('#editor-dialog')).toBeVisible();
+    for(const [key,value] of Object.entries({titulo:campaignName,etiqueta:'Campaña de prueba',descripcion:'Promoción publicada para el cliente abierto'}))await page.locator('#promotion-'+key).fill(value);
+    await page.locator('#promotion-productoId').selectOption(productId);await page.locator('#promotion-form [name=vistaPrevia]').check();
+    const campaignResponse=page.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/promociones');
+    await page.locator('#promotion-form [type=submit]').click();const promoted=await campaignResponse;expect(promoted.status()).toBe(201);campaignId=(await promoted.json()).data.id;await expect(page.locator('#editor-dialog')).toBeHidden();
+    await focus(home);let campaign=home.locator('.promotion-card').filter({hasText:campaignName});await expect(campaign).toBeVisible();await expect(campaign.locator('a')).toHaveAttribute('href','producto.html?id='+productId);expect(home.url()).toBe(homeURL);
+    const campaignRow=await findRow(campaignName);await campaignRow.locator('[data-edit]').click();await page.locator('#promotion-descripcion').fill('Promoción editada y persistida en la base de datos');await page.locator('#promotion-form [type=submit]').click();await expect(page.locator('#editor-dialog')).toBeHidden();
+    await home.bringToFront();await home.evaluate(()=>document.dispatchEvent(new Event('visibilitychange')));await expect(campaign).toContainText('Promoción editada y persistida en la base de datos');expect(home.url()).toBe(homeURL);
+
+    // Keep an order table open separately while the main admin tab edits the product.
+    adminOrders=await page.context().newPage();adminOrders.on('pageerror',error=>errors.push(error.message));await adminOrders.addInitScript(token=>sessionStorage.setItem('farmacia-mvc-token',token),adminToken);await adminOrders.goto('/admin.html?tabla=pedidos');await expect(adminOrders.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');await expect(adminOrders.locator('#admin-table')).not.toContainText(email);
+    await client.locator('[data-add="'+productId+'"]').click();await client.locator('[data-add="'+productId+'"]').click();await expect(client.locator('[data-shop-count]')).toHaveText('2');await expect(home.locator('[data-shop-count]')).toHaveText('2');expect(await page.evaluate(()=>localStorage.getItem('farmacia-mvc-carrito'))).toBeNull();
+    const checkout=await clientContext.newPage();checkout.on('pageerror',error=>errors.push(error.message));
+    // A second tab restores this client's JWT through /auth/me; it does not log in again.
+    await checkout.addInitScript(token=>sessionStorage.setItem('farmacia-mvc-token',token),clientToken);await checkout.goto('/checkout.html');await expect(checkout.locator('.checkout-cart-item')).toHaveCount(1);await expect(checkout.locator('#checkout-summary')).toContainText(currency(15));
+    await checkout.locator('#checkout-next').click();await expect(checkout.locator('#delivery-form')).toBeVisible();await checkout.locator('#checkout-name').fill('Cliente Formulario Conservado');await checkout.locator('#checkout-document').fill('0102030400');await checkout.locator('#checkout-terms').check();
+    const formValues=await checkout.locator('#delivery-form').evaluate(form=>Object.fromEntries(new FormData(form)));
+
+    // A visible catalog detects external changes through its 30-second timer without a focus event.
+    await client.bringToFront();await setStock(1);await client.clock.runFor(30000);await expect(client.locator('.product-stock')).toHaveText('1 unidades disponibles');
+    await focus(checkout);await expect(checkout.locator('#checkout-next')).toBeDisabled();await expect(checkout.locator('#delivery-form [type=submit]')).toBeDisabled();await expect(checkout.locator('#qty-'+productId)).toHaveValue('2');expect(await checkout.locator('#delivery-form').evaluate(form=>Object.fromEntries(new FormData(form)))).toEqual(formValues);
+    await setStock(4);await focus(checkout);await expect(checkout.locator('#checkout-next')).toBeEnabled();await expect(checkout.locator('#delivery-form [type=submit]')).toBeEnabled();expect(await checkout.locator('#delivery-form').evaluate(form=>Object.fromEntries(new FormData(form)))).toEqual(formValues);
+
+    await page.goto('/admin.html?tabla=productos');productRow=await findRow(productName);await productRow.locator('[data-edit]').click();await expect(page.locator('#product-stock')).toHaveValue('4');await expect(page.locator('#product-precio')).toHaveValue(/^7\.50?$/);await page.locator('#product-precio').fill('8.25');await focus(page);await expect(page.locator('#editor-dialog')).toBeVisible();await expect(page.locator('#product-precio')).toHaveValue('8.25');await expect(page.locator('#product-stock')).toHaveValue('4');
+    const orderResponse=checkout.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/pedidos');await checkout.locator('#delivery-form [type=submit]').click();const saved=await orderResponse;expect(saved.status()).toBe(201);const order=(await saved.json()).data;
+    expect(Number(order.total)).toBe(15);expect(order.detalles).toHaveLength(1);expect(order.detalles[0].productoId).toBe(productId);expect(order.detalles[0].cantidad).toBe(2);expect(Number(order.detalles[0].precioUnitario)).toBe(7.5);expect(order.documento).not.toContain('0102030400');await expect(checkout.locator('#order-confirmation')).toContainText(productName);
+    await expect(home.locator('[data-shop-count]')).toHaveText('0');await expect(client.locator('[data-shop-count]')).toHaveText('0');
+    // The stale editor must neither reset unsaved fields nor overwrite a concurrent sale.
+    await focus(page);await expect(page.locator('#editor-dialog')).toBeVisible();await expect(page.locator('#product-stock')).toHaveValue('4');await expect(page.locator('#product-precio')).toHaveValue('8.25');
+    const staleResponse=page.waitForResponse(response=>response.request().method()==='PUT' && new URL(response.url()).pathname==='/api/productos/'+productId);await page.locator('#product-form [type=submit]').click();const rejected=await staleResponse;expect(rejected.status()).toBe(409);expect((await rejected.json()).error.code).toBe('PRODUCT_CHANGED');await expect(page.locator('#editor-status')).toContainText('El producto cambió');await expect(page.locator('#editor-dialog')).toBeVisible();await expect(page.locator('#product-stock')).toHaveValue('4');await expect(page.locator('#product-precio')).toHaveValue('8.25');
+    const preserved=await client.request.get('/api/productos/'+productId);expect(preserved.status()).toBe(200);const actual=(await preserved.json()).data;expect(actual.stock).toBe(2);expect(Number(actual.precio)).toBe(7.5);
+    await page.locator('#product-form [data-editor-close]').click();await expect(page.locator('#editor-dialog')).toBeHidden();await expect(productRow.locator('td').nth(2)).toHaveText('2');await productRow.locator('[data-edit]').click();await expect(page.locator('#product-stock')).toHaveValue('2');await expect(page.locator('#product-precio')).toHaveValue(/^7\.50?$/);await page.locator('#product-form [data-editor-close]').click();await expect(page.locator('#editor-dialog')).toBeHidden();
+    await focus(adminOrders);const orderRow=await findRow(order.id,adminOrders);await expect(orderRow).toContainText(email);await expect(orderRow).toContainText(currency(15));
+    await focus(client);await expect(client.locator('.product-stock')).toHaveText('2 unidades disponibles');expect(client.url()).toBe(catalogURL);
+    await page.locator('#admin-table-choice').selectOption('detalles');const detailRow=await findRow(productName);await expect(detailRow).toContainText(order.id);await expect(detailRow.locator('td').nth(3)).toHaveText('2');await expect(detailRow.locator('td').nth(4)).toHaveText(currency(7.5));
+    await page.locator('#admin-table-choice').selectOption('productos');productRow=await findRow(productName);await expect(productRow.locator('td').nth(2)).toHaveText('2');
+    await page.goto('/admin.html');await expect(page.locator('[data-metric=pendientes] .admin-metric-value')).toHaveText(String(before.pedidosPendientes+1));await expect(page.locator('[data-metric=clientes] .admin-metric-value')).toHaveText(String(before.clientesActivos+1));await expect(page.locator('[data-metric=productos] .admin-metric-value')).toHaveText(String(before.productosActivos+1));await expect(page.locator('[data-metric=total] .admin-metric-value')).toHaveText(currency((before.pedidosTotales.totalCentavos+1500)/100));await expect(page.locator('.admin-recent-table')).toContainText(order.id.slice(0,8));
+    await checkout.goto('/pedidos.html');await expect(checkout.locator('.order-card')).toContainText(productName);await checkout.reload();await expect(checkout.locator('.order-card')).toContainText(currency(15));
+    const durableProduct=await client.request.get('/api/productos/'+productId);expect(durableProduct.status()).toBe(200);expect((await durableProduct.json()).data.stock).toBe(2);expect(errors).toEqual([]);
+  }finally{
+    // Orders remain auditable in the temporary fixture; only synthetic campaigns/catalog entries are retired.
+    if(adminToken){const headers={Authorization:'Bearer '+adminToken};if(campaignId)await page.request.delete('/api/promociones/'+campaignId,{headers});if(productId)await page.request.delete('/api/productos/'+productId,{headers});}
+    if(adminOrders)await adminOrders.close();
+    await clientContext.close();
+  }
 });

@@ -6,32 +6,34 @@ import {confirmAction} from './dialog.js';
 import {requireUser} from './layout.js';
 import {auth} from '../models/auth.js';
 import {dashboardView,dashboardLoadingView,dashboardErrorView} from '../views/admin-dashboard.js';
+import {watchUpdates,preserveFocus} from './updates.js';
 export async function adminController() {
   if(!requireUser('admin.html',true))return;
   document.getElementById('admin-area').hidden=false;
   const requested=new URLSearchParams(location.search).get('tabla');
-  let name=['productos','promociones','pedidos','usuarios','detalles'].includes(requested)?requested:requested?'productos':'dashboard',page=1,result,editing=null,requestId=0;
+  let name=['productos','promociones','pedidos','usuarios','detalles'].includes(requested)?requested:requested?'productos':'dashboard',page=1,result,editing=null,editingVersion=null,summarySnapshot='',requestId=0,openingId=0;
   const dialog=document.getElementById('editor-dialog');const productForm=document.getElementById('product-form');const promoForm=document.getElementById('promotion-form');
-  async function render(){
+  async function render({silent=false}={}){
     const id=++requestId;const tableName=name;const tablePage=page;
-    adminSectionView(tableName);
+    if(!silent)adminSectionView(tableName);
     if(tableName==='dashboard'){
-      const dashboard=document.getElementById('admin-dashboard');dashboard.setAttribute('aria-busy','true');dashboardLoadingView();
-      try{const data=await administration.summary();if(id===requestId && auth.isAdmin)dashboardView(data);}
-      catch(error){if(id!==requestId || !auth.isAdmin)return;dashboardErrorView();throw error;}
+      const dashboard=document.getElementById('admin-dashboard');dashboard.setAttribute('aria-busy','true');if(!silent)dashboardLoadingView();
+      try{const data=await administration.summary();if(id===requestId && auth.isAdmin){const snapshot=JSON.stringify({...data,generadoEn:null});if(!silent || snapshot!==summarySnapshot){preserveFocus(dashboard,()=>dashboardView(data));summarySnapshot=snapshot;}}}
+      catch(error){if(id!==requestId || !auth.isAdmin)return;if(!silent)dashboardErrorView();throw error;}
       finally{if(id===requestId)dashboard.removeAttribute('aria-busy');}
       return;
     }
     const table=document.getElementById('admin-table');const create=document.getElementById('admin-create');
-    result=null;table.setAttribute('aria-busy','true');table.innerHTML='<p class="shop-empty" role="status">Cargando registros…</p>';create.disabled=true;
-    for(const button of ['admin-prev','admin-next'])document.getElementById(button).disabled=true;
-    try{const loaded=await administration.table(tableName,tablePage);if(id!==requestId || !auth.isAdmin)return;result=loaded;tableView(tableName,loaded);create.disabled=false;}
-    catch(error){if(id!==requestId || !auth.isAdmin)return;table.innerHTML='<p class="shop-empty">No se pudieron cargar los registros. Selecciona la sección para volver a intentar.</p>';throw error;}
+    table.setAttribute('aria-busy','true');if(!silent){result=null;table.innerHTML='<p class="shop-empty" role="status">Cargando registros…</p>';create.disabled=true;for(const button of ['admin-prev','admin-next'])document.getElementById(button).disabled=true;}
+    try{const loaded=await administration.table(tableName,tablePage);if(id!==requestId || !auth.isAdmin || (silent && document.querySelector('dialog[open]')))return;if(!silent || JSON.stringify(loaded)!==JSON.stringify(result)){result=loaded;preserveFocus(table,()=>tableView(tableName,loaded));}create.disabled=false;}
+    catch(error){if(id!==requestId || !auth.isAdmin)return;if(!silent)table.innerHTML='<p class="shop-empty">No se pudieron cargar los registros. Selecciona la sección para volver a intentar.</p>';throw error;}
     finally{if(id===requestId)table.removeAttribute('aria-busy');}
   }
   async function open(record){
-    editing=record?.id || null;const product=name==='productos';productForm.hidden=!product;promoForm.hidden=product;
-    if(!product){const select=promoForm.elements.productoId;select.replaceChildren();for(const item of await catalog.all()){const option=document.createElement('option');option.value=item.id;option.textContent=item.nombre;select.append(option);}}
+    const id=++openingId;const section=name;const product=section==='productos';const choices=product?[]:await catalog.all();
+    if(id!==openingId || name!==section || !auth.isAdmin)return;
+    editing=record?.id || null;editingVersion=record?.updatedAt || null;productForm.hidden=!product;promoForm.hidden=product;
+    if(!product){const select=promoForm.elements.productoId;select.replaceChildren();for(const item of choices){const option=document.createElement('option');option.value=item.id;option.textContent=item.nombre;select.append(option);}}
     const form=product?productForm:promoForm;editorView(form,record);formErrors(form,{});document.getElementById('editor-status').textContent='';dialog.showModal();form.querySelector('input').focus();
   }
   document.getElementById('admin-create').addEventListener('click',()=>open().catch(error=>message(error.message,true)));
@@ -45,12 +47,14 @@ export async function adminController() {
   });
   for(const form of [productForm,promoForm])form.addEventListener('submit',async event=>{
     event.preventDefault();const fields=Object.fromEntries(new FormData(form));const product=form===productForm;
-    const values=product?{...fields,precio:Number(fields.precio),stock:Number(fields.stock)}:{...fields,activa:form.elements.activa.checked,vistaPrevia:form.elements.vistaPrevia.checked,orden:Number(fields.orden),inicio:fields.inicio?new Date(fields.inicio).toISOString():null,fin:fields.fin?new Date(fields.fin).toISOString():null};
+    const values=product?{...fields,precio:Number(fields.precio),stock:Number(fields.stock),...(editing?{esperadoUpdatedAt:editingVersion}:{})}:{...fields,activa:form.elements.activa.checked,vistaPrevia:form.elements.vistaPrevia.checked,orden:Number(fields.orden),inicio:fields.inicio?new Date(fields.inicio).toISOString():null,fin:fields.fin?new Date(fields.fin).toISOString():null};
     const submit=form.querySelector('[type=submit]');busy(submit,true);document.getElementById('editor-status').textContent='';
     try{await (product?administration.saveProduct(values,editing):administration.savePromotion(values,editing));dialog.close();await render();message('Cambios guardados en la farmacia.');document.getElementById('admin-create').focus();}
     catch(error){document.getElementById('editor-status').textContent=error.message;formErrors(form,Object.fromEntries((error.details||[]).map(issue=>[issue.field,issue.message])));}finally{busy(submit,false);}
   });
   for(const button of document.querySelectorAll('[data-editor-close]'))button.addEventListener('click',()=>dialog.close());
   await render();
+  const refresh=watchUpdates(()=>render({silent:true}),{canRefresh:()=>auth.isAdmin && !document.querySelector('dialog[open]') && !document.querySelector('#admin-area [aria-busy=true]')});
+  dialog.addEventListener('close',()=>{void refresh();});
   if(new URLSearchParams(location.search).get('crear')==='1' && ['productos','promociones'].includes(name) && result && auth.isAdmin)await open();
 }

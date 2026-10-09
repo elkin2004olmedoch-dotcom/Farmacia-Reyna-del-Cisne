@@ -1,5 +1,6 @@
 import {events} from './events.js';
 const KEY='farmacia-mvc-carrito';
+window.addEventListener('storage',event=>{if(event.key===KEY || event.key===null)events.dispatchEvent(new Event('cart:changed'));});
 export const cart={
   read(){
     try{const data=JSON.parse(localStorage.getItem(KEY)||'{}');if(!data || typeof data!=='object' || Array.isArray(data))return {};return Object.fromEntries(Object.entries(data).filter(([id,qty])=>/^[a-z0-9][a-z0-9-]{0,79}$/.test(id) && Number.isInteger(qty) && qty>=1 && qty<=99));}catch(_){return {};}

@@ -86,3 +86,9 @@ model Promocion {
   fin         DateTime?
   createdAt   DateTime @default(now())
 }
+
+// Technical marker: the initial catalog is seeded once, including legacy DBs.
+model Semilla {
+  id        String   @id
+  createdAt DateTime @default(now())
+}

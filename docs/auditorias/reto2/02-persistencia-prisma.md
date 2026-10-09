@@ -2,7 +2,7 @@
 
 ## Objetivo y método
 
-Verificar entidades, relaciones, migraciones, seed y almacenamiento real del pedido, además de la coherencia del resumen administrativo. Se ejecutó `prisma migrate deploy`, se inicializó el catálogo y se hicieron consultas desde Prisma y HTTP. Las pruebas usan SQLite temporal, aplican la misma migración de entrega y vuelven a abrir el archivo con otro PrismaClient para comprobar persistencia. La suite Node actual contiene 20 pruebas y pasó, incluyendo la incorporación del resumen ERP.
+Verificar entidades, relaciones, migraciones, seed y almacenamiento real del pedido, además de la coherencia del resumen administrativo y las ediciones concurrentes. Se ejecutó `prisma migrate deploy`, se inicializó el catálogo y se hicieron consultas desde Prisma y HTTP. Las pruebas usan SQLite temporal, aplican las mismas migraciones de entrega y vuelven a abrir el archivo con otro PrismaClient para comprobar persistencia. La suite Node actual contiene 23 pruebas y pasó, incluyendo el resumen ERP, el conflicto de edición y la repetición del seed.
 
 ## Matriz de subpuntos
 
@@ -15,8 +15,10 @@ Verificar entidades, relaciones, migraciones, seed y almacenamiento real del ped
 | Carrito frontend | Solo identificadores y cantidades en localStorage | Recarga del navegador conserva selección | Implementado |
 | Pedido final en BD | Cabecera y detalles en una transacción Prisma | Pedido sigue existiendo con otro cliente de BD | Implementado |
 | Motor relacional | SQLite, alternativa aceptada por el estudiante | `provider = "sqlite"` y archivo real | Implementado con motor alternativo |
-| Migraciones y seed | `server/prisma/migrations/202610090001_init/migration.sql`, `seed.cjs` | Instalación desde BD vacía | Implementado |
+| Migraciones y seed | `202610090001_init`, `202610090002_seed_marker`, `seed.cjs` | Instalación desde BD vacía y repetición conservando el estado administrativo | Implementado |
 | Resumen administrativo | Agregados de Producto, Usuario, Pedido y Promocion ya persistidos | `server/models/admin-summary.cjs`, endpoint protegido y pruebas del resumen | Implementado sin nuevas entidades ni migraciones |
+| Semilla | ID de inicialización y `createdAt`; sin datos personales ni exposición en las tablas del panel | Marca `catalogo-inicial-v1`, detección del catálogo previo y prueba de seed repetido | Implementado como metadato de instalación |
+| Edición concurrente | `Producto.updatedAt` comparado con `esperadoUpdatedAt` | Una compra u otra edición invalida la versión y devuelve 409 sin restaurar stock anterior | Implementado en el editor administrativo |
 
 ## Modelo y consistencia
 
@@ -34,7 +36,11 @@ El servidor convierte precios a centavos para el cálculo y escribe el total con
 
 La clave de confirmación se combina con el usuario y con una huella de la solicitud. Repetir exactamente el mismo pedido devuelve el existente; reutilizar la clave con otro contenido devuelve 409. La prueba simultánea de dos compras sobre una unidad produce una compra y un conflicto, manteniendo stock cero.
 
-Los detalles guardan nombre y precio al comprar. Eliminar un producto lo desactiva y lo retira de nuevas compras, sin borrar detalles históricos. El seed crea los 18 productos iniciales con stock de demostración y dos campañas de vista previa; ejecutarlo de nuevo conserva ediciones y no restaura stock vendido ni modifica contraseñas existentes.
+Los detalles guardan nombre y precio al comprar. Eliminar un producto lo desactiva y lo retira de nuevas compras, sin borrar detalles históricos. En una base nueva, el seed crea los 18 productos iniciales con stock de demostración y dos campañas de vista previa. La tabla Semilla marca esa inicialización con `catalogo-inicial-v1`: ejecutarlo de nuevo no vuelve a crear campañas eliminadas, reactivar productos, restaurar stock ni modificar contraseñas existentes.
+
+La migración `202610090002_seed_marker` agrega únicamente ese metadato. Para adoptar una base creada antes de la marca, el seed detecta la presencia de IDs del catálogo inicial, conserva su estado y escribe la marca sin volver a insertar las campañas. La marca y la inicialización ocurren en una transacción Serializable. El administrador configurado se crea solo si no existe; si ese correo pertenece a un cliente, se rechaza la inicialización en lugar de elevar su rol.
+
+El editor de productos conserva `updatedAt` al abrir y envía `esperadoUpdatedAt` al guardar. El modelo ejecuta `updateMany` condicionado por ID, producto activo y versión exacta dentro de una transacción Serializable. Si una compra descontó stock o un administrador cambió el registro entretanto, no actualiza ninguna fila y responde 409. Esto evita que guardar un precio desde un formulario antiguo restaure unidades vendidas. El campo de versión es opcional en el contrato HTTP por compatibilidad; el frontend de esta entrega lo incluye en todas las ediciones de producto.
 
 ## Snapshot del dashboard ERP
 
@@ -46,7 +52,7 @@ Los detalles guardan nombre y precio al comprar. Eliminar un producto lo desacti
 - Los pedidos recientes son los cinco más nuevos, con desempate por ID. La consulta selecciona únicamente ID, nombre del comprador, importe, estado y fecha para esta sección.
 - Las campañas visibles deben estar activas, referenciar un producto activo y cumplir su vigencia: inicio nulo o ya alcanzado; fin nulo o posterior al instante del resumen. Las campañas de vista previa se incluyen porque también son visibles en la tienda.
 
-No se alteró el schema ni se añadió una migración para el dashboard: todas las consultas usan las entidades y relaciones existentes. El snapshot se vuelve a solicitar al entrar o reintentar la vista; no hay sincronización en tiempo real.
+No se alteró el schema ni se añadió una migración para el dashboard: todas sus consultas usan las entidades y relaciones existentes. La migración posterior de Semilla corresponde al control de inicialización. El snapshot se vuelve a solicitar al entrar, reintentar, recuperar el foco o cada 30 segundos mientras el panel permanece visible; no se usa una conexión de eventos en tiempo real.
 
 ## Evidencia reproducible
 
@@ -56,7 +62,7 @@ npm run setup
 npm test
 ```
 
-Casos específicos: registro con hash, CRUD persistido, total servidor, pedido con detalles, reversión por stock, concurrencia, conservación histórica, reapertura de BD y resumen administrativo de la información persistida. El archivo de trabajo es `server/prisma/farmacia.db`, excluido de Git y ZIP; la entrega incluye schema, SQL y seed para reconstruirlo.
+Casos específicos: registro con hash, CRUD persistido, total servidor, pedido con detalles, reversión por stock, concurrencia, conservación histórica, reapertura de BD, resumen administrativo, edición con versión vencida y repetición del seed conservando campañas eliminadas y credenciales. La prueba de reconexión comprueba conjuntamente usuario, producto editado, campaña, pedido, detalles y stock. El archivo de trabajo es `server/prisma/farmacia.db`, excluido de Git y ZIP; la entrega incluye schema, SQL y seed para reconstruirlo.
 
 ## Hallazgos y límites
 
@@ -64,5 +70,8 @@ Casos específicos: registro con hash, CRUD persistido, total servidor, pedido c
 - Cerrado: el total podía venir del cliente; ahora se obtiene exclusivamente del catálogo persistido.
 - Cerrado: reintentos podían descontar stock más de una vez; se incorporó idempotencia y prueba de repetición.
 - Cerrado: el panel no tenía una vista agregada de la operación; el dashboard ahora obtiene métricas, alertas y pedidos desde un snapshot relacional sin mantener totales paralelos.
+- Cerrado: una edición abierta podía restaurar stock anterior a una compra; el editor envía la versión y el modelo rechaza el conflicto sin modificar la fila.
+- Cerrado: repetir setup podía recrear una campaña inicial eliminada; la marca de seed conserva el catálogo existente y adopta bases anteriores sin duplicarlo.
+- El PUT sin `esperadoUpdatedAt` conserva la compatibilidad del contrato previo y no aplica el control de versión. Los consumidores externos que quieran proteger sus ediciones deben enviar ese campo.
 - SQLite es suficiente para la entrega y tiene un solo escritor concurrente; la operación a mayor escala requerirá evaluar un motor servidor, copias de seguridad y migración explícita. Cambiar solo DATABASE_URL no cambia el proveedor.
 - SQL Server no se instaló ni se presenta como probado. Se implementó el motor alternativo autorizado.
