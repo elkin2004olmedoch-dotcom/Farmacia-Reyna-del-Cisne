@@ -215,3 +215,18 @@ body[data-session-role="admin"] [data-customer-only] { display:none !important; 
   .admin-recent-table :is(th,td) { min-width:95px; }
 }
 @media(max-width:360px) { .shop-actions>a[data-admin-link] { font-size:10px; } .shop-actions>a[data-account-link]::before { content:'♙'; } }
+.promotion-ribbon { display:block; padding:9px 13px; background:#ffdf57; color:#332b08; font-size:12px; font-weight:800; line-height:1.4; letter-spacing:.02em; border-radius:5px; }
+.featured-image .promotion-ribbon { position:absolute; top:auto; bottom:0; left:0; right:0; border-radius:0; background:#ffdf57; color:#332b08; padding:9px 10px; text-align:center; font-size:11px; }
+.promotion-card>.promotion-ribbon { grid-column:1/-1; border-radius:0; text-align:center; }
+.price-with-discount { display:flex; flex-direction:column; gap:3px; }
+.price-with-discount del { color:#655b4f; font-size:12px; font-weight:400; }
+.detail-price .price-with-discount { gap:7px; }
+.detail-price .price-with-discount del { font-size:17px; }
+.image-editor { display:grid; gap:10px; padding:16px; border:1px dashed #b8a78e; border-radius:10px; background:#fffcf4; min-width:0; }
+.image-editor label { font-weight:600; }
+.image-editor input[type=file] { width:100%; min-width:0; font-size:12px; }
+.image-editor input[type=file]::file-selector-button { margin-right:10px; padding:9px 12px; color:var(--brand-dark); background:white; border:1px solid #b8a78e; border-radius:6px; cursor:pointer; }
+.image-editor small { color:#655b4f; line-height:1.5; }
+.image-editor-preview { width:180px; height:140px; max-width:100%; object-fit:contain; border:1px solid var(--line); border-radius:8px; background:white; }
+#order-state-history { font-size:13px; line-height:1.7; }
+.checkout-item-copy>.promotion-ribbon { display:inline-block; margin-bottom:8px; font-size:11px; }

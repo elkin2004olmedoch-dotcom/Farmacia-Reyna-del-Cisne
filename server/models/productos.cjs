@@ -1,13 +1,15 @@
 const db = require('./db.cjs');
 const {Prisma}=require('@prisma/client');
 const {AppError}=require('../middleware/errors.cjs');
+const {discountWhere,effectivePrice}=require('./prices.cjs');
 module.exports = {
   async list({page,pageSize,q,categoria}) {
+    const now=new Date();
     const where={activo:true,...(categoria ? {categoria} : {}),...(q ? {OR:[{nombre:{contains:q}},{descripcion:{contains:q}}]} : {})};
-    const [items,total]=await db.$transaction([db.producto.findMany({where,orderBy:{createdAt:'asc'},skip:(page-1)*pageSize,take:pageSize}),db.producto.count({where})]);
-    return {items,total,page,pageSize};
+    const [items,total]=await db.$transaction([db.producto.findMany({where,include:{promociones:{where:discountWhere(now)}},orderBy:{createdAt:'asc'},skip:(page-1)*pageSize,take:pageSize}),db.producto.count({where})]);
+    return {items:items.map(product=>effectivePrice(product,product.promociones,now)),total,page,pageSize};
   },
-  find:id=>db.producto.findFirst({where:{id,activo:true}}),
+  async find(id) {const now=new Date();const product=await db.producto.findFirst({where:{id,activo:true},include:{promociones:{where:discountWhere(now)}}});return product?effectivePrice(product,product.promociones,now):null;},
   create:data=>db.producto.create({data}),
   async update(id,data,expectedUpdatedAt) {
     if(!expectedUpdatedAt)return db.producto.update({where:{id},data});

@@ -1,6 +1,11 @@
 {
   "fecha": "2026-10-09",
   "instalacion": "npm ci + npm run setup desde ZIP: OK",
+  "migracionesAplicadas": [
+    "202610090001_init",
+    "202610090002_seed_marker",
+    "202610090003_commerce"
+  ],
   "catalogoHTTP": 200,
   "productos": 18,
   "loginAdminHTTP": 200,
@@ -8,6 +13,13 @@
   "resumenAdminHTTP": 200,
   "dashboardERP": true,
   "navegacionAdminPropia": true,
+  "selectoresImagenProductoPromocion": true,
+  "descuentosYEstados": true,
+  "defaultsComercio": true,
+  "uploadSinSesionHTTP": 401,
+  "estadoSinSesionHTTP": 401,
+  "pruebasSinMutaciones": true,
+  "integridadReferencial": true,
   "archivosPrivadosPublicados": 0,
   "auditorias": 5
 }

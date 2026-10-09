@@ -23,6 +23,7 @@ module.exports=config=> {
   router.post('/pedidos',auth,buyer,...V.order,orders.create);
   router.get('/pedidos/mis-pedidos',auth,buyer,...V.pagination,orders.mine);
   router.get('/pedidos',auth,admin,...V.pagination,orders.all);
+  router.put('/pedidos/:id/estado',auth,admin,V.id,...V.orderStatus,V.validated,orders.updateStatus);
   router.get('/promociones',promos.list);
   router.post('/promociones',auth,admin,...V.promotion,V.validated,promos.create);
   router.put('/promociones/:id',auth,admin,V.id,...V.promotion,V.validated,promos.update);

@@ -1,6 +1,8 @@
 export const money=cents=>new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(cents/100);
 export const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const price=product=>money(Math.round(Number(product.precio)*100));
+export const priceMarkup=product=>product.descuentoPorcentaje>0?`<span class="price-with-discount"><del><span class="sr-only">Precio anterior: </span>${money(Math.round(Number(product.precioOriginal)*100))}</del><strong>${price(product)}</strong></span>`:`<strong>${price(product)}</strong>`;
+export const promotionRibbon=(percentage,preview=false)=>percentage>0?`<span class="promotion-ribbon">${preview?'Vista previa · ':''}PROMO · ${escape(percentage)}% de descuento</span>`:'';
 export function message(text,error=false,focus=false) {
   const area=document.getElementById('page-status');area.textContent=text;area.classList.toggle('is-error',error);area.setAttribute('role',error?'alert':'status');area.hidden=!text;if(focus)area.focus();
 }

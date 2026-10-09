@@ -2,7 +2,7 @@
 
 ## Objetivo, alcance y método
 
-Revisar autenticación, autorización, entradas, transporte y exposición de datos. Se probaron JWT válido, inválido y vencido; user/admin; registro con rol inyectado; documentos, precios y cantidades manipulados; CORS; JSON mal formado; tamaño del cuerpo; logout e historial ajeno. El alcance actual incluye el endpoint del dashboard ERP, su respuesta limitada, la sincronización entre pantallas y los conflictos de edición. La suite Node actual contiene 23 pruebas y pasó. Se ejecutó `npm audit` y se comprobó `/api/salud` por HTTPS con un certificado local; la ampliación de navegador pasó sus 14 casos y su evidencia se registra por separado en el informe 05.
+Revisar autenticación, autorización, entradas, transporte, exposición de datos e integridad. Se probaron JWT inválido/vencido/revocado, roles, registro manipulado, documentos/precios/cantidades, CORS, cuerpos y errores. El alcance incluye dashboard, ediciones concurrentes, cambios de estado, descuentos, carga de imágenes y recuperación. Las ejecuciones completas y `npm audit` se conservan en `docs/pruebas/reto2/`; HTTPS local se comprobó mediante `/api/salud`.
 
 ## Matriz de subpuntos
 
@@ -15,6 +15,9 @@ Revisar autenticación, autorización, entradas, transporte y exposición de dat
 | 4.4 bcrypt | Coste 12, sal por contraseña, límite de 72 bytes y validación de longitud/letra/número | Prueba compara hash y verifica que no sea texto plano | Implementado |
 | 4.5 Body y params | express-validator, lista de campos, tipos, longitudes, rutas de imagen y sanitización | Entradas inválidas 422; JSON inválido 400 | Implementado |
 | Consistencia de edición | `esperadoUpdatedAt` validado y comparación atómica de versión en Producto | Compra/edición intermedia provoca 409 sin restaurar stock vendido | Implementado para las ediciones del frontend |
+| Estados y stock | JWT admin, versión obligatoria, transiciones y transacción CAS | 401/403, terminales, doble cancelación con una sola devolución e historial | Implementado |
+| Imágenes subidas | JWT/rol antes de parser 3 MB, validación binaria y recodificación WebP | SVG/formato falso/ruta/tamaño/dimensiones rechazados | Implementado |
+| Recuperación | Copia consistente, manifiesto SHA-256, integridad/FK, servidor detenido y respaldo previo | Restauración temporal, modificación de archivo y proceso activo | Implementado por CLI |
 | 4.5 Errores consistentes | Middleware único, ID de solicitud, mensaje genérico para fallos internos | Sin stacktrace en respuestas | Implementado |
 | 4.6 HTTPS opcional | Certificado self-signed local y servidor HTTPS | HTTP 200 sobre https://localhost:3443/api/salud | Implementado y comprobado en desarrollo |
 
@@ -34,11 +37,11 @@ Las prácticas de TLS, entrada validada y cabeceras siguen la orientación de [s
 
 - Helmet: CSP, protección contra framing, MIME sniffing y cabeceras de seguridad. HSTS se habilita en producción.
 - El backend sirve solo `frontend/`; `.env`, Prisma, base de datos, scripts y dependencias no son contenido estático público.
-- `express.json` limita el cuerpo a 32 KB. La API tiene rate limit y auth un límite específico de intentos.
+- `express.json` limita el cuerpo general a 32 KB. La subida tiene parser de 3 MB solo después de JWT/rol; rate limit propio 10/min y máximo dos imágenes procesándose por instancia. Auth conserva su límite específico.
 - La API responde `Cache-Control: no-store`. La nueva aplicación no instala el service worker del Reto 1 para evitar stock y permisos cacheados.
 - Cédula de registro: no persistida. Documento del pedido: últimos cuatro dígitos, resto enmascarado. No existen campos bancarios en la compra real.
 - Los administradores ven datos de entrega necesarios, sin passwordHash ni claves de reintento. Logger sin request body ni Authorization.
-- `.env`, archivos SQLite, certificados privados y node_modules se excluyen de Git y del ZIP. `.env.example` no contiene claves reales.
+- Configuración privada, SQLite, certificados, node_modules, `server/backups/` e imágenes UUID de trabajo se excluyen de Git y ZIP. El archivo de configuración de ejemplo no contiene claves reales.
 
 ## Controles del dashboard y separación de roles
 
@@ -60,9 +63,17 @@ Las consultas automáticas no realizan mutaciones ni envían formularios. Se pos
 
 El editor asigna su registro e ID únicamente después de confirmar que la apertura asíncrona sigue siendo la más reciente y conserva la sección y sesión administrativas. Esto evita que consultas retrasadas de opciones de campaña produzcan una edición sobre un ID diferente al mostrado.
 
+## Controles de comercio, imágenes y recuperación
+
+Cambiar estado exige administrador y `esperadoUpdatedAt`; la transición válida se comprueba de nuevo en una transacción Serializable. La actualización es condicional por ID/estado/versión. Cancelar repone stock y escribe el evento con actor en esa transacción; un reintento no produce otra reposición. El cliente no puede gestionar estados ni enviar precios/descuentos en el carrito. El porcentaje válido se obtiene exclusivamente de campañas persistidas, vigentes y fuera de vista previa.
+
+La ruta de imágenes autentica y verifica rol antes de analizar el cuerpo grande. Comprueba base64, extensión y firma, decodifica con Sharp, limita píxeles/dimensiones y rechaza animación. Se recodifica como WebP sin metadatos con nombre UUID nuevo, sin sobrescribir archivos. La ruta persistida debe existir, resolver dentro de la carpeta autorizada y cumplir el patrón local. Una promoción con imagen propia exige texto alternativo. La validación del frontend mejora el mensaje, pero el servidor vuelve a comprobar todo.
+
+Las copias se guardan fuera del contenido estático y no tienen endpoint de descarga/restauración. El archivo SQLite incluye hashes de contraseñas y datos operativos: debe conservarse privado como la base original. Se validan tamaños y SHA-256 contra el manifiesto, firma SQLite, integridad y referencias antes de restaurar. SHA-256 detecta cambios respecto al manifiesto; no es una firma de autenticidad ni cifrado. La restauración requiere `--offline`, ausencia de servidor registrado activo y, para reemplazar una base, `--replace` con respaldo previo. No se publican copias ni credenciales en la entrega.
+
 ## Hallazgos corregidos
 
-1. Dependencia `deepmerge-ts` transitiva de Prisma con alerta de agotamiento de pila: fijada en 8.0.0 mediante override. Generación Prisma, migración, seed y pruebas se ejecutaron con esa versión. `npm audit` final: sin vulnerabilidades reportadas.
+1. Dependencia `deepmerge-ts` transitiva de Prisma con alerta de agotamiento de pila: fijada en 8.0.0 mediante override. Generación, migración, seed y pruebas usan esa versión. La salida de `npm audit` de la ejecución final se conserva como evidencia; no demuestra ausencia de cualquier vulnerabilidad.
 2. bcrypt solo utiliza hasta 72 bytes: se limita en registro y login para evitar truncamientos silenciosos.
 3. Registro con campos de administración: se rechazan campos no permitidos y se fija role=user en servidor.
 4. Pedido manipulado o repetido: total calculado en BD, stock transaccional e idempotencia.
@@ -73,4 +84,4 @@ El editor asigna su registro e ID únicamente después de confirmar que la apert
 
 ## Límites y operación
 
-El certificado self-signed sirve para desarrollo y genera advertencia de confianza en el navegador. Producción requiere un certificado confiable, HTTPS en el origen real y, si se usa reverse proxy, configuración correcta del proxy. El rate limit usa memoria de una instancia; varias instancias necesitarían un almacén común. Un token en sessionStorage sigue siendo accesible a un XSS, por lo que CSP y escape son relevantes pero no sustituyen una revisión de penetración. Recuperación de contraseña, MFA, verificación de correo, gestión de roles y backups operativos no forman parte de los mínimos implementados.
+El certificado self-signed sirve para desarrollo y genera advertencia de confianza. Producción requiere certificado confiable, origen HTTPS y configuración de proxy cuando corresponda. Los límites usan memoria por instancia; varias instancias requieren un almacén común. SessionStorage sigue accesible ante XSS. No hay recuperación de contraseña, MFA, verificación de correo ni gestión de roles. El backup implementado es local y exige operación privada: no incluye cifrado, firma digital, copia externa ni garantía frente a pérdida del disco. La comprobación offline reconoce los servidores registrados por esta aplicación; el operador debe detener también otros procesos que escriban en la base.

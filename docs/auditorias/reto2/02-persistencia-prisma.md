@@ -2,7 +2,7 @@
 
 ## Objetivo y método
 
-Verificar entidades, relaciones, migraciones, seed y almacenamiento real del pedido, además de la coherencia del resumen administrativo y las ediciones concurrentes. Se ejecutó `prisma migrate deploy`, se inicializó el catálogo y se hicieron consultas desde Prisma y HTTP. Las pruebas usan SQLite temporal, aplican las mismas migraciones de entrega y vuelven a abrir el archivo con otro PrismaClient para comprobar persistencia. La suite Node actual contiene 23 pruebas y pasó, incluyendo el resumen ERP, el conflicto de edición y la repetición del seed.
+Verificar entidades, relaciones, migraciones, seed, pedidos, estados, precios e imágenes persistidas. Las pruebas usan SQLite temporal, aplican las mismas migraciones de entrega y abren otro PrismaClient para comprobar persistencia. Se verificó además la migración commerce sobre filas anteriores y su integridad referencial. Los resultados completos se conservan en `docs/pruebas/reto2/`.
 
 ## Matriz de subpuntos
 
@@ -10,12 +10,14 @@ Verificar entidades, relaciones, migraciones, seed y almacenamiento real del ped
 |---|---|---|---|
 | Producto | `id`, `nombre`, `precio Decimal`, `stock Int`, `createdAt`; categoría, imagen, activo y actualización | Schema y CRUD HTTP | Implementado |
 | Usuario | `id`, `email unique`, `passwordHash`, `role admin/user`; nombre, teléfono, activo y versión del token | Registro, bcrypt y login | Implementado |
-| Pedido | `id`, `userId FK`, `total Decimal`, `createdAt`; entrega, comprador y documento enmascarado | POST pedidos y reapertura de BD | Implementado |
-| PedidoDetalle | `id`, `pedidoId FK`, `productoId FK`, `cantidad`, `precioUnitario Decimal` | Pedido recuperado con detalles | Implementado |
+| Pedido | `id`, `userId FK`, `total Decimal`, `createdAt`, `updatedAt`, estado, entrega y documento enmascarado | Pedido recuperado, transiciones e idempotencia | Implementado |
+| PedidoDetalle | `id`, dos FK, cantidad, `precioUnitario`, `precioOriginal`, `descuentoPorcentaje` | Snapshot conservado tras cambiar producto/campaña | Implementado |
+| Promocion | Producto FK, publicación, vista previa, vigencia, porcentaje, imagen/alt opcionales | API pública elegible y cálculo efectivo compartido | Implementado |
+| PedidoEstado | Pedido y actor FK, estado anterior/nuevo y fecha | Historial inicial y transiciones administrativas; una sola cancelación | Implementado |
 | Carrito frontend | Solo identificadores y cantidades en localStorage | Recarga del navegador conserva selección | Implementado |
 | Pedido final en BD | Cabecera y detalles en una transacción Prisma | Pedido sigue existiendo con otro cliente de BD | Implementado |
 | Motor relacional | SQLite, alternativa aceptada por el estudiante | `provider = "sqlite"` y archivo real | Implementado con motor alternativo |
-| Migraciones y seed | `202610090001_init`, `202610090002_seed_marker`, `seed.cjs` | Instalación desde BD vacía y repetición conservando el estado administrativo | Implementado |
+| Migraciones y seed | `202610090001_init`, `202610090002_seed_marker`, `202610090003_commerce`, `seed.cjs` | Base nueva y migración histórica; seed conserva el estado administrativo | Implementado |
 | Resumen administrativo | Agregados de Producto, Usuario, Pedido y Promocion ya persistidos | `server/models/admin-summary.cjs`, endpoint protegido y pruebas del resumen | Implementado sin nuevas entidades ni migraciones |
 | Semilla | ID de inicialización y `createdAt`; sin datos personales ni exposición en las tablas del panel | Marca `catalogo-inicial-v1`, detección del catálogo previo y prueba de seed repetido | Implementado como metadato de instalación |
 | Edición concurrente | `Producto.updatedAt` comparado con `esperadoUpdatedAt` | Una compra u otra edición invalida la versión y devuelve 409 sin restaurar stock anterior | Implementado en el editor administrativo |
@@ -28,6 +30,8 @@ erDiagram
   Pedido ||--|{ PedidoDetalle : contiene
   Producto ||--o{ PedidoDetalle : referencia
   Producto ||--o{ Promocion : presenta
+  Pedido ||--o{ PedidoEstado : registra
+  Usuario ||--o{ PedidoEstado : actua
 ```
 
 Se agregan campañas a `Promocion` para la administración solicitada previamente. La migración contiene claves primarias, foráneas e índices únicos para correo, detalles por producto y la clave de confirmación por usuario. Las relaciones usan Restrict para conservar el historial.
@@ -41,6 +45,24 @@ Los detalles guardan nombre y precio al comprar. Eliminar un producto lo desacti
 La migración `202610090002_seed_marker` agrega únicamente ese metadato. Para adoptar una base creada antes de la marca, el seed detecta la presencia de IDs del catálogo inicial, conserva su estado y escribe la marca sin volver a insertar las campañas. La marca y la inicialización ocurren en una transacción Serializable. El administrador configurado se crea solo si no existe; si ese correo pertenece a un cliente, se rechaza la inicialización en lugar de elevar su rol.
 
 El editor de productos conserva `updatedAt` al abrir y envía `esperadoUpdatedAt` al guardar. El modelo ejecuta `updateMany` condicionado por ID, producto activo y versión exacta dentro de una transacción Serializable. Si una compra descontó stock o un administrador cambió el registro entretanto, no actualiza ninguna fila y responde 409. Esto evita que guardar un precio desde un formulario antiguo restaure unidades vendidas. El campo de versión es opcional en el contrato HTTP por compatibilidad; el frontend de esta entrega lo incluye en todas las ediciones de producto.
+
+## Estados y descuentos históricos
+
+Las transiciones son pendiente → confirmado/cancelado, confirmado → preparado/cancelado y preparado → entregado/cancelado. Entregado y cancelado son terminales. El administrador envía la versión obligatoria del pedido; el modelo compara estado y `updatedAt` mediante una actualización condicional. Cancelar devuelve las cantidades de cada detalle al producto referido y agrega un único evento al historial dentro de la misma transacción Serializable. Repetir el estado ya alcanzado devuelve el pedido existente, sin otra devolución ni otro evento. La prueba concurrente cancela el mismo pedido desde dos solicitudes y conserva el stock correcto tras reconectar.
+
+Una promoción descuenta solo si está activa, vigente, fuera de vista previa, asociada a producto activo y con porcentaje entre 1 y 90. Entre varias se elige el mayor porcentaje; no se suman. Inicio es inclusivo y fin exclusivo. El precio se calcula y redondea por unidad en centavos (USD 7,50 con 25% queda en USD 5,63). El catálogo y el pedido reutilizan `prices.cjs`; el pedido guarda precio efectivo, precio original y porcentaje. Cambiar o eliminar la campaña no altera un pedido ya registrado ni su repetición idempotente.
+
+La migración commerce conserva las filas anteriores, agrega `Pedido.updatedAt` tomando su `createdAt`, completa `PedidoDetalle.precioOriginal` con el precio histórico y deja su descuento en cero. No inventa cambios logísticos anteriores: los pedidos previos empiezan a acumular historial con su siguiente transición. La prueba de conversión conserva IDs, totales, cantidades, credenciales, stock, campañas y claves de reintento, y comprueba `PRAGMA foreign_key_check`.
+
+La aplicación de esta migración en la base de trabajo se realizó con respaldo privado previo. Se cotejó SHA-256 de los campos originales de Producto, Usuario, Pedido, PedidoDetalle y Promocion antes/después, sin cambios en esos datos, y se verificó integridad. La copia y las credenciales no se incorporan a estos informes ni a la entrega.
+
+## Respaldo y recuperación
+
+`models/backups.cjs` usa `VACUUM INTO` para una copia SQLite consistente, que incluye las entidades, historial, marca de seed y metadatos de migración. Copia también las imágenes UUID referidas por Producto y Promocion. Cada carpeta privada de `server/backups/` contiene base, imágenes y un manifiesto con tamaños y SHA-256; se verifican `integrity_check`, claves foráneas y referencias. La copia se publica después de completarse y conserva las siete más recientes. Fuera de test se ejecuta al arrancar el servidor y cada 24 horas mientras permanece activo.
+
+`npm run backup` crea una copia manual. La restauración requiere servidor detenido y `npm run backup:restore -- --from "carpeta-del-respaldo" --offline`; si la base destino existe exige además `--replace` y genera primero una copia de ella. Se validan archivos/manifiesto y la integridad antes de publicar la base. Las imágenes usan UUID inmutable; si un archivo existente difiere, se rechaza en lugar de sobrescribirlo. Pruebas temporales verifican recuperación de usuarios/hash/versiones, pedidos/detalles/historial, imágenes y retención; no sustituyen una restauración operativa en el servidor desplegado.
+
+Cuando el destino tiene corrupción SQLite identificada, se conserva una copia cruda de DB y WAL/SHM existentes antes de publicar el respaldo válido. Se prepara en `.recovery-UUID` y se publica como `recovery-FECHA-UUID` bajo el mismo directorio privado. Su manifiesto indica `motor: sqlite-unreadable`, `tipo: recuperacion-forense` y `restaurable: false`, junto con tamaños y SHA-256 de los bytes conservados. Estas copias quedan para revisión y no reciben poda automática. Errores de permisos, espacio o rutas de imágenes no se tratan genéricamente como corrupción; si la copia previa falla, no se reemplaza el destino. La novena prueba de imágenes/respaldos comprueba bytes exactos de los tres archivos, restauración de usuarios/pedidos/stock y rechazo ante un archivo WAL que no puede copiarse de forma segura.
 
 ## Snapshot del dashboard ERP
 
@@ -73,5 +95,5 @@ Casos específicos: registro con hash, CRUD persistido, total servidor, pedido c
 - Cerrado: una edición abierta podía restaurar stock anterior a una compra; el editor envía la versión y el modelo rechaza el conflicto sin modificar la fila.
 - Cerrado: repetir setup podía recrear una campaña inicial eliminada; la marca de seed conserva el catálogo existente y adopta bases anteriores sin duplicarlo.
 - El PUT sin `esperadoUpdatedAt` conserva la compatibilidad del contrato previo y no aplica el control de versión. Los consumidores externos que quieran proteger sus ediciones deben enviar ese campo.
-- SQLite es suficiente para la entrega y tiene un solo escritor concurrente; la operación a mayor escala requerirá evaluar un motor servidor, copias de seguridad y migración explícita. Cambiar solo DATABASE_URL no cambia el proveedor.
+- SQLite tiene un solo escritor concurrente; una operación a mayor escala requiere evaluar un motor servidor y migración explícita. El respaldo implementado es local: no hay copia externa, cifrado ni protección frente a pérdida del disco completo. Cambiar solo DATABASE_URL no cambia el proveedor.
 - SQL Server no se instaló ni se presenta como probado. Se implementó el motor alternativo autorizado.

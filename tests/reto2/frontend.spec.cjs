@@ -1,5 +1,6 @@
 const {test,expect}=require('@playwright/test');
 const AxeBuilder=require('@axe-core/playwright').default;
+const tinyPNG=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGP4fGkRVsQwtCQAJ4yZwRji18kAAAAASUVORK5CYII=','base64');
 test('catálogo, persistencia, login obligatorio, registro y pedido real',async({page},testInfo)=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('/');await expect(page.locator('#featured-products article')).toHaveCount(4);await expect(page.locator('.promotion-card')).toHaveCount(2);
@@ -36,7 +37,8 @@ test('administrador crea, edita y elimina; consulta todas las tablas y publica p
   await page.goto('/admin.html?tabla=desconocida');await expect(page.locator('#admin-table-choice')).toHaveValue('productos');
   await page.goto('/admin.html?tabla=productos');await expect(page.locator('#admin-table table')).toBeVisible();
   await page.locator('#admin-create').click();const name='Producto browser '+testInfo.project.name;
-  for(const [key,value] of Object.entries({nombre:name,precio:'6.25',stock:'5',descripcion:'Artículo de verificación',imagen:'assets/images/producto-vitaminas.jpg',alt:'Vitaminas de prueba'}))await page.locator('#product-'+key).fill(value);
+  for(const [key,value] of Object.entries({nombre:name,precio:'6.25',stock:'5',descripcion:'Artículo de verificación',alt:'Vitaminas de prueba'}))await page.locator('#product-'+key).fill(value);
+  const imageUpload=page.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/admin/imagenes');await page.locator('#product-image-file').setInputFiles({name:'producto-browser.png',mimeType:'image/png',buffer:tinyPNG});expect((await imageUpload).status()).toBe(201);await expect(page.locator('#product-image-preview')).toBeVisible();await expect.poll(()=>page.locator('#product-image-preview').evaluate(img=>img.naturalWidth)).toBe(8);await expect(page.locator('#product-form [type=submit]')).toBeEnabled();
   await page.locator('#product-form [type=submit]').click();await expect(page.locator('#editor-dialog')).not.toBeVisible();
   let row=page.locator('#admin-table tr').filter({hasText:name});await row.locator('[data-edit]').click();await page.locator('#product-precio').fill('7.50');await page.locator('#product-form [type=submit]').click();await expect(row).toContainText('$7,50');
   await page.goto('/admin.html');await expect(page.locator('.admin-metric')).toHaveCount(8);await expect(page.locator('#stock-alerts')).toContainText(name);await page.locator('.admin-quick-links a[href*="promociones"]').click();await expect(page.locator('#editor-dialog')).toBeVisible();await expect(page.locator('#editor-title')).toHaveText('Crear promoción');
@@ -76,7 +78,11 @@ test('el panel ignora respuestas atrasadas y bloquea una sesión vencida',async(
   await campaignRows.nth(0).locator('[data-edit]').click();await startedOpening;await campaignRows.nth(1).locator('[data-edit]').click();await expect(page.locator('#promotion-titulo')).toHaveValue(secondCampaign);
   const lateOpening=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/productos');releaseOpening();await (await lateOpening).finished();await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   await expect(page.locator('#promotion-titulo')).toHaveValue(secondCampaign);await page.unroute('**/api/productos?*');
-  const correctSave=page.waitForResponse(response=>response.request().method()==='PUT' && new URL(response.url()).pathname.startsWith('/api/promociones/'));await page.locator('#promotion-form [type=submit]').click();expect(new URL((await correctSave).url()).pathname).toBe('/api/promociones/'+secondCampaignId);await expect(page.locator('#editor-dialog')).toBeHidden();
+  let releaseSave,saveStarted;const pendingSave=new Promise(resolve=>releaseSave=resolve);const startedSave=new Promise(resolve=>saveStarted=resolve);
+  await page.route('**/api/promociones/*',async route=>{if(route.request().method()==='PUT'){saveStarted();await pendingSave;}await route.continue();});
+  const correctSave=page.waitForResponse(response=>response.request().method()==='PUT' && new URL(response.url()).pathname.startsWith('/api/promociones/'));await page.locator('#promotion-form [type=submit]').click();await startedSave;
+  try{await expect(page.locator('#promotion-form [type=submit]')).toBeDisabled();await expect(page.locator('#promotion-form [data-editor-close]')).toBeDisabled();await expect(page.locator('#product-form [data-editor-close]')).toBeDisabled();await expect(page.locator('#promotion-image-file')).toBeDisabled();await expect(page.locator('#promotion-image-reset')).toBeDisabled();await expect(page.locator('#promotion-descuentoPorcentaje')).toBeDisabled();await page.keyboard.press('Escape');await expect(page.locator('#editor-dialog')).toBeVisible();await expect(page.locator('#promotion-titulo')).toHaveValue(secondCampaign);}finally{releaseSave();}
+  const savedCampaign=await correctSave;expect(savedCampaign.status()).toBe(200);expect(new URL(savedCampaign.url()).pathname).toBe('/api/promociones/'+secondCampaignId);expect(savedCampaign.request().postDataJSON().titulo).toBe(secondCampaign);expect((await savedCampaign.json()).data.id).toBe(secondCampaignId);await expect(page.locator('#editor-dialog')).toBeHidden();await page.unroute('**/api/promociones/*');
   await page.locator('#admin-table-choice').selectOption('productos');await expect(page.locator('#admin-create')).toBeEnabled();await page.locator('#admin-table [data-edit]:enabled').first().click();await expect(page.locator('#editor-dialog')).toBeVisible();
   await page.route('**/api/productos/*',route=>route.fulfill({status:401,json:{ok:false,error:{message:'Tu sesión venció.'}}}));await page.locator('#product-form [type=submit]').click();
   await expect(page).toHaveURL(/cuenta.html\?next=admin.html$/);await expect(page.locator('#page-status')).toContainText('Tu sesión venció');await expect(page.locator('#login-form')).toBeVisible();expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();expect(errors).toEqual([]);
@@ -116,8 +122,14 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
   const suffix=testInfo.project.name+'-'+Date.now();const email='sincronizacion-'+suffix+'@example.ec';
   const productName='Producto sincronizado '+suffix;const campaignName='Campaña sincronizada '+suffix;
   const currency=value=>new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(value);
-  let productId,campaignId,adminToken,adminOrders;
+  let productId,campaignId,adminToken,adminOrders,detail,stateAccessibilityChecked=false;
   async function focus(tab){await tab.bringToFront();await tab.evaluate(()=>window.dispatchEvent(new Event('focus')));}
+  async function assertAccessible(tab,label,include){
+    const audit=new AxeBuilder({page:tab}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']);if(include)audit.include(include);const violations=(await audit.analyze()).violations;expect(violations.map(item=>({id:item.id,nodes:item.nodes.map(node=>node.target)})),label).toEqual([]);
+  }
+  async function capture(tab,filename,label){
+    await tab.evaluate(()=>{document.activeElement?.blur?.();window.scrollTo(0,0);document.querySelectorAll('.table-scroll').forEach(table=>{table.scrollLeft=0;table.scrollTop=0;});});await tab.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));const path=testInfo.outputPath(filename);await tab.screenshot({path,fullPage:true});await testInfo.attach(label,{path,contentType:'image/png'});
+  }
   async function findRow(text,tab=page){
     const row=tab.locator('#admin-table tbody tr').filter({hasText:text});
     await expect(tab.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');
@@ -129,7 +141,17 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
   async function setStock(stock){
     const currentResponse=await page.request.get('/api/productos/'+productId);expect(currentResponse.status()).toBe(200);const current=(await currentResponse.json()).data;
     const fields=Object.fromEntries(['nombre','precio','stock','categoria','descripcion','imagen','alt'].map(key=>[key,current[key]]));
-    const updated=await page.request.put('/api/productos/'+productId,{headers:{Authorization:'Bearer '+adminToken},data:{...fields,precio:Number(current.precio),stock,esperadoUpdatedAt:current.updatedAt}});expect(updated.status()).toBe(200);return (await updated.json()).data;
+    const updated=await page.request.put('/api/productos/'+productId,{headers:{Authorization:'Bearer '+adminToken},data:{...fields,precio:Number(current.precioOriginal ?? current.precio),stock,esperadoUpdatedAt:current.updatedAt}});expect(updated.status()).toBe(200);return (await updated.json()).data;
+  }
+  async function uploadImage(prefix){
+    const response=page.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/admin/imagenes');
+    await page.locator('#'+prefix+'-image-file').setInputFiles({name:prefix+'-prueba.png',mimeType:'image/png',buffer:tinyPNG});const uploaded=await response;expect(uploaded.status()).toBe(201);const image=(await uploaded.json()).data.imagen;
+    await expect(page.locator('#'+prefix+'-imagen')).toHaveValue(image);await expect(page.locator('#'+prefix+'-image-preview')).toBeVisible();await expect.poll(()=>page.locator('#'+prefix+'-image-preview').evaluate(img=>img.naturalWidth)).toBe(8);await expect(page.locator('#'+prefix+'-form [type=submit]')).toBeEnabled();return image;
+  }
+  async function changeState(id,state){
+    await focus(adminOrders);const row=await findRow(id,adminOrders);await row.locator('[data-order-state="'+id+'"]').click();await expect(adminOrders.locator('#order-state-dialog')).toBeVisible();await adminOrders.locator('#order-state').selectOption(state);
+    if(!stateAccessibilityChecked){await assertAccessible(adminOrders,'Gestión del estado y su historial','#order-state-dialog');stateAccessibilityChecked=true;}
+    const response=adminOrders.waitForResponse(response=>response.request().method()==='PUT' && new URL(response.url()).pathname==='/api/pedidos/'+id+'/estado');await adminOrders.locator('#order-state-form [type=submit]').click();if(state==='cancelado'){await expect(adminOrders.locator('#confirm-dialog')).toBeVisible();await adminOrders.locator('#confirm-dialog [value=confirm]').click();}const updated=await response;expect(updated.status()).toBe(200);const order=(await updated.json()).data;await expect(adminOrders.locator('#order-state-dialog')).toBeHidden();await expect(row).toContainText(new RegExp(state,'i'));return order;
   }
   try{
     // Both roles use the isolated browser-server database, never the personal .env or DB.
@@ -149,10 +171,14 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
     await home.goto('/');await expect(home.locator('#promotions-list')).not.toContainText(campaignName);
     const catalogURL=client.url();const homeURL=home.url();
     await page.goto('/admin.html?tabla=productos&crear=1');await expect(page.locator('#editor-dialog')).toBeVisible();
-    for(const [key,value] of Object.entries({nombre:productName,precio:'6.25',stock:'4',descripcion:'Existencias y precio iniciales de la prueba cruzada',imagen:'assets/images/producto-vitaminas.jpg',alt:'Vitaminas de verificación cruzada'}))await page.locator('#product-'+key).fill(value);
+    for(const [key,value] of Object.entries({nombre:productName,precio:'6.25',stock:'4',descripcion:'Existencias y precio iniciales de la prueba cruzada',alt:'Vitaminas de verificación cruzada'}))await page.locator('#product-'+key).fill(value);
+    await page.locator('#product-image-file').setInputFiles({name:'no-es-imagen.txt',mimeType:'text/plain',buffer:Buffer.from('Archivo sintético de prueba')});await expect(page.locator('#editor-status')).toContainText(/PNG|JPG|JPEG|WEBP/i);await expect(page.locator('#product-imagen')).toHaveValue('');
+    await page.locator('#product-image-file').setInputFiles({name:'imagen-demasiado-grande.png',mimeType:'image/png',buffer:Buffer.concat([tinyPNG,Buffer.alloc(2*1024*1024)])});await expect(page.locator('#editor-status')).toContainText(/2\s*MB/i);await expect(page.locator('#product-imagen')).toHaveValue('');
+    const productImage=await uploadImage('product');await assertAccessible(page,'Editor con selector de archivo y vista previa','#editor-dialog');
     const createdResponse=page.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/productos');
     await page.locator('#product-form [type=submit]').click();const created=await createdResponse;expect(created.status()).toBe(201);productId=(await created.json()).data.id;await expect(page.locator('#editor-dialog')).toBeHidden();
     await focus(client);await expect(client.locator('#catalog-grid article')).toHaveCount(1);await expect(client.locator('#catalog-grid')).toContainText(currency(6.25));await expect(client.locator('.product-stock')).toHaveText('4 unidades disponibles');await expect(client.locator('#catalog-search')).toHaveValue(productName);expect(client.url()).toBe(catalogURL);
+    await expect(client.locator('#catalog-grid img')).toHaveAttribute('src',productImage);await expect.poll(()=>client.locator('#catalog-grid img').evaluate(img=>img.naturalWidth)).toBe(8);
 
     let productRow=await findRow(productName);await productRow.locator('[data-edit]').click();await page.locator('#product-precio').fill('7.50');await page.locator('#product-descripcion').fill('Precio editado y guardado desde administración');await page.locator('#product-form [type=submit]').click();await expect(page.locator('#editor-dialog')).toBeHidden();
     await focus(client);await expect(client.locator('#catalog-grid')).toContainText(currency(7.5));await expect(client.locator('#catalog-grid')).toContainText('Precio editado y guardado desde administración');expect(client.url()).toBe(catalogURL);
@@ -160,9 +186,11 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
     await page.goto('/admin.html?tabla=promociones&crear=1');await expect(page.locator('#editor-dialog')).toBeVisible();
     for(const [key,value] of Object.entries({titulo:campaignName,etiqueta:'Campaña de prueba',descripcion:'Promoción publicada para el cliente abierto'}))await page.locator('#promotion-'+key).fill(value);
     await page.locator('#promotion-productoId').selectOption(productId);await page.locator('#promotion-form [name=vistaPrevia]').check();
+    await page.locator('#promotion-alt').fill('Imagen sintética de una campaña de farmacia');const campaignImage=await uploadImage('promotion');
     const campaignResponse=page.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/promociones');
     await page.locator('#promotion-form [type=submit]').click();const promoted=await campaignResponse;expect(promoted.status()).toBe(201);campaignId=(await promoted.json()).data.id;await expect(page.locator('#editor-dialog')).toBeHidden();
     await focus(home);let campaign=home.locator('.promotion-card').filter({hasText:campaignName});await expect(campaign).toBeVisible();await expect(campaign.locator('a')).toHaveAttribute('href','producto.html?id='+productId);expect(home.url()).toBe(homeURL);
+    await expect(campaign.locator('img')).toHaveAttribute('src',campaignImage);await expect(campaign.locator('img')).toHaveAttribute('alt','Imagen sintética de una campaña de farmacia');
     const campaignRow=await findRow(campaignName);await campaignRow.locator('[data-edit]').click();await page.locator('#promotion-descripcion').fill('Promoción editada y persistida en la base de datos');await page.locator('#promotion-form [type=submit]').click();await expect(page.locator('#editor-dialog')).toBeHidden();
     await home.bringToFront();await home.evaluate(()=>document.dispatchEvent(new Event('visibilitychange')));await expect(campaign).toContainText('Promoción editada y persistida en la base de datos');expect(home.url()).toBe(homeURL);
 
@@ -195,7 +223,33 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
     await page.locator('#admin-table-choice').selectOption('productos');productRow=await findRow(productName);await expect(productRow.locator('td').nth(2)).toHaveText('2');
     await page.goto('/admin.html');await expect(page.locator('[data-metric=pendientes] .admin-metric-value')).toHaveText(String(before.pedidosPendientes+1));await expect(page.locator('[data-metric=clientes] .admin-metric-value')).toHaveText(String(before.clientesActivos+1));await expect(page.locator('[data-metric=productos] .admin-metric-value')).toHaveText(String(before.productosActivos+1));await expect(page.locator('[data-metric=total] .admin-metric-value')).toHaveText(currency((before.pedidosTotales.totalCentavos+1500)/100));await expect(page.locator('.admin-recent-table')).toContainText(order.id.slice(0,8));
     await checkout.goto('/pedidos.html');await expect(checkout.locator('.order-card')).toContainText(productName);await checkout.reload();await expect(checkout.locator('.order-card')).toContainText(currency(15));
-    const durableProduct=await client.request.get('/api/productos/'+productId);expect(durableProduct.status()).toBe(200);expect((await durableProduct.json()).data.stock).toBe(2);expect(errors).toEqual([]);
+    const durableProduct=await client.request.get('/api/productos/'+productId);expect(durableProduct.status()).toBe(200);expect((await durableProduct.json()).data.stock).toBe(2);
+
+    // The same customer sees each state change without reloading the already open history.
+    const history=checkout.locator('.order-card').filter({hasText:order.id.slice(0,8)});
+    let delivered;
+    for(const state of ['confirmado','preparado','entregado']){delivered=await changeState(order.id,state);await focus(checkout);await expect(history.locator('.product-label')).toContainText(new RegExp(state,'i'));}
+    const forbidden=await page.request.put('/api/pedidos/'+order.id+'/estado',{headers:{Authorization:'Bearer '+adminToken},data:{estado:'cancelado',esperadoUpdatedAt:delivered.updatedAt}});expect(forbidden.status()).toBe(409);
+    const unchangedStock=await client.request.get('/api/productos/'+productId);expect((await unchangedStock.json()).data.stock).toBe(2);
+
+    // Publishing a real discount affects catalog, detail, cart and the server's order price.
+    await page.goto('/admin.html?tabla=promociones');const discountRow=await findRow(campaignName);await discountRow.locator('[data-edit]').click();await page.locator('#promotion-descuentoPorcentaje').fill('25');await page.locator('#promotion-form [name=vistaPrevia]').uncheck();await page.locator('#promotion-image-reset').click();await expect(page.locator('#promotion-imagen')).toHaveValue('');await page.locator('#promotion-form [type=submit]').click();await expect(page.locator('#editor-dialog')).toBeHidden();await focus(home);await expect(campaign.locator('img')).toHaveAttribute('src',productImage);
+    await focus(client);await expect(client.locator('#catalog-grid .promotion-ribbon')).toContainText('25%');await expect(client.locator('#catalog-grid')).toContainText(currency(5.63));await expect(client.locator('#catalog-grid')).toContainText(currency(7.5));await expect(client.locator('#catalog-grid img')).toHaveAttribute('src',productImage);
+    await assertAccessible(client,'Catálogo con precio promocional y etiqueta amarilla');
+    const discountedResponse=await client.request.get('/api/productos/'+productId);expect(discountedResponse.status()).toBe(200);const discounted=(await discountedResponse.json()).data;expect(Number(discounted.precio)).toBe(5.63);expect(Number(discounted.precioOriginal)).toBe(7.5);expect(discounted.descuentoPorcentaje).toBe(25);expect(discounted.promocionId).toBe(campaignId);
+    detail=await clientContext.newPage();detail.on('pageerror',error=>errors.push(error.message));await detail.goto('/producto.html?id='+productId);await expect(detail.locator('.promotion-ribbon')).toContainText('25%');await expect(detail.locator('#product-detail')).toContainText(currency(5.63));await expect(detail.locator('#product-detail')).toContainText(currency(7.5));await expect(detail.locator('.product-main-image img')).toHaveAttribute('src',productImage);
+    await assertAccessible(detail,'Detalle con descuento e imagen subida');
+    await capture(client,'catalogo-promocion.png','Catálogo con promoción y foto subida');
+    await capture(detail,'detalle-promocion.png','Detalle con precio promocional');
+
+    await client.locator('[data-add="'+productId+'"]').click();await checkout.goto('/checkout.html');await expect(checkout.locator('#checkout-summary')).toContainText(currency(5.63));await checkout.locator('#checkout-next').click();await checkout.locator('#checkout-document').fill('0102030400');await checkout.locator('#checkout-terms').check();
+    const discountedOrderResponse=checkout.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/pedidos');await checkout.locator('#delivery-form [type=submit]').click();const purchased=await discountedOrderResponse;expect(purchased.status()).toBe(201);const discountedOrder=(await purchased.json()).data;expect(Number(discountedOrder.total)).toBe(5.63);expect(Number(discountedOrder.detalles[0].precioUnitario)).toBe(5.63);
+    const consumed=await client.request.get('/api/productos/'+productId);expect((await consumed.json()).data.stock).toBe(1);await checkout.goto('/pedidos.html');
+    const cancelled=await changeState(discountedOrder.id,'cancelado');await focus(checkout);await expect(checkout.locator('.order-card').filter({hasText:discountedOrder.id.slice(0,8)}).locator('.product-label')).toContainText(/cancelado/i);
+    const restored=await client.request.get('/api/productos/'+productId);expect((await restored.json()).data.stock).toBe(2);
+    const repeated=await page.request.put('/api/pedidos/'+discountedOrder.id+'/estado',{headers:{Authorization:'Bearer '+adminToken},data:{estado:'cancelado',esperadoUpdatedAt:cancelled.updatedAt}});expect([200,409]).toContain(repeated.status());const onceOnly=await client.request.get('/api/productos/'+productId);expect((await onceOnly.json()).data.stock).toBe(2);await focus(client);await expect(client.locator('.product-stock')).toHaveText('2 unidades disponibles');
+    await capture(adminOrders,'administracion-estados-pedidos.png','Gestión de estados de pedidos de prueba');
+    await checkout.reload();await expect(checkout.locator('.order-card').filter({hasText:order.id.slice(0,8)})).toContainText(/entregado/i);await expect(checkout.locator('.order-card').filter({hasText:discountedOrder.id.slice(0,8)})).toContainText(/cancelado/i);expect(errors).toEqual([]);
   }finally{
     // Orders remain auditable in the temporary fixture; only synthetic campaigns/catalog entries are retired.
     if(adminToken){const headers={Authorization:'Bearer '+adminToken};if(campaignId)await page.request.delete('/api/promociones/'+campaignId,{headers});if(productId)await page.request.delete('/api/productos/'+productId,{headers});}

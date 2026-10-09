@@ -4,7 +4,7 @@ const {spawnSync}=require('node:child_process');
 process.chdir(path.resolve(__dirname,'..'));
 const folder='docs/pruebas/reto2';fs.mkdirSync(folder,{recursive:true});
 const tasks=[
-  ['node-tests',[process.execPath,['--test','--test-concurrency=1','tests/reto2/api.test.cjs','tests/reto2/resources.test.cjs']]],
+  ['node-tests',[process.execPath,['--test','--test-concurrency=1',...fs.readdirSync('tests/reto2').filter(file=>file.endsWith('.test.cjs')).sort().map(file=>'tests/reto2/'+file)]]],
   ['browser-tests',[process.execPath,['node_modules/@playwright/test/cli.js','test','--config','tests/reto2/playwright.config.cjs']]],
   ['npm-audit',[process.execPath,[process.env.npm_execpath || require.resolve('npm/bin/npm-cli.js'),'audit','--json']]],
 ];

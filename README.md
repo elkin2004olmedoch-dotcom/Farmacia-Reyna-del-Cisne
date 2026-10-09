@@ -2,7 +2,7 @@
 
 Plataforma de farmacia con catálogo, carrito persistente, registro/login, pedidos en base de datos y administración de productos y promociones. Mantiene la fachada del negocio, identidad crema/vino, ubicación, WhatsApp y las 18 referencias anteriores.
 
-**Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3 y SQLite. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.
+**Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.
 
 ## Instalación y ejecución
 
@@ -18,7 +18,7 @@ Consulta ADMIN_EMAIL y ADMIN_PASSWORD en tu **archivo privado .env** e inicia se
 
 Los 18 productos comienzan con stock de demostración de 20 unidades y precios de referencia. Confirma los datos comerciales reales con la farmacia. El seed no restaura stock vendido ni sobrescribe ediciones, usuarios o contraseñas existentes. El marcador técnico `Semilla` inicializa el catálogo una sola vez y conserva las promociones eliminadas; al actualizar una base anterior adopta el catálogo inicial existente.
 
-Para actualizar una instalación existente, detén el servidor y ejecuta `npm run db:generate`, `npm run db:migrate`, `npm run db:seed` y `npm start`. La segunda migración añade únicamente el marcador de inicialización. Conserva una copia privada de la BD antes de migrar; no reemplaces el archivo por una base de demostración.
+Para actualizar una instalación existente, detén el servidor, ejecuta `npm ci`, `npm run db:generate`, `npm run db:migrate`, `npm run db:seed` y `npm start`. La segunda migración añade el marcador de inicialización; la tercera añade estados/historial, versiones de pedidos, porcentajes e imágenes de campañas. Conserva una copia privada de la BD y de las imágenes subidas antes de migrar; no reemplaces los archivos por datos de demostración. La conversión se prueba también con pedidos anteriores.
 
 Alternativa manual: copia .env.example a .env, configura valores privados y ejecuta:
 
@@ -54,6 +54,7 @@ server/
     schema.prisma
     migrations/202610090001_init/migration.sql
     migrations/202610090002_seed_marker/migration.sql
+    migrations/202610090003_commerce/migration.sql
     migrations/migration_lock.toml
     seed.cjs
 scripts/            instalación, frontend, HTTPS y ZIP
@@ -79,9 +80,10 @@ Los HTML, js/ y assets/ raíz conservan el Reto 1 como antecedente; su README es
 |---|---|
 | Producto | id, nombre, precio Decimal, stock, categoría, imagen, activo, createdAt |
 | Usuario | id, email único, nombre, teléfono, passwordHash, role, activo, tokenVersion |
-| Pedido | id, userId FK, total Decimal, entrega, comprador, documento enmascarado, createdAt |
-| PedidoDetalle | id, pedidoId FK, productoId FK, nombre histórico, cantidad, precioUnitario Decimal |
-| Promocion | id, título, etiqueta, productoId FK, publicación, vistaPrevia, orden, inicio, fin |
+| Pedido | id, userId FK, total Decimal, entrega, comprador, documento enmascarado, estado, createdAt, updatedAt |
+| PedidoDetalle | id, pedidoId FK, productoId FK, nombre histórico, cantidad, precioUnitario, precioOriginal, descuentoPorcentaje |
+| PedidoEstado | pedidoId FK, estado anterior/nuevo, actorId FK y fecha; historial de cambios |
+| Promocion | id, título, etiqueta, productoId FK, publicación, vistaPrevia, orden, inicio, fin, descuentoPorcentaje, imagen/alt propios opcionales |
 
 El carrito guarda IDs/cantidades en localStorage. El servidor lee precio/stock, calcula en centavos y persiste Decimal. Cabecera, detalles y descuento de stock están en una transacción serializable; una línea sin stock revierte todo el pedido.
 
@@ -115,12 +117,14 @@ En rutas protegidas: **Authorization: Bearer &lt;token&gt;**.
 | POST | /api/pedidos | user/admin |
 | GET | /api/pedidos/mis-pedidos | user/admin; solo propios |
 | GET | /api/pedidos | admin; todos |
+| PUT | /api/pedidos/:id/estado | admin; transición con versión y registro de historial |
 | GET | /api/promociones | Público; activas/vigentes |
 | POST | /api/promociones | admin |
 | PUT | /api/promociones/:id | admin |
 | DELETE | /api/promociones/:id | admin |
 | GET | /api/admin/tablas | admin |
 | GET | /api/admin/resumen | admin; indicadores, alertas y tendencia |
+| POST | /api/admin/imagenes | admin; imagen JPEG/PNG/WebP validada y recodificada |
 | GET | /api/salud | Público; prueba BD |
 
 Catálogo: ?q=solar&categoria=cuidado&page=1&pageSize=20. Pedidos/tablas admiten page/pageSize; máximo 100 registros. Tablas admin: productos, usuarios, pedidos, detalles y promociones.
@@ -173,7 +177,7 @@ Tres riesgos de [OWASP Top 10:2025](https://top10.owasp.org/2025/0x00_2025-Intro
 | A05 — Injection | Prisma parametrizado, express-validator, campos permitidos, sanitización, escape HTML, imágenes locales existentes y CSP sin scripts inline |
 | A07 — Authentication Failures | bcrypt 12, secretos privados aleatorios, HS256 con issuer/audience/exp, revocación tokenVersion y límites de intentos |
 
-Controles adicionales: Helmet, API sin caché, cuerpo de 32 KB, paginación y errores centralizados. Config rechaza JWT_SECRET débil, CORS comodín y orígenes HTTP en producción. CORS usa orígenes exactos y no sustituye JWT/roles. Las prácticas siguen la [guía de Express](https://expressjs.com/en/advanced/best-practice-security.html).
+Controles adicionales: Helmet, API sin caché, cuerpo JSON de 32 KB y excepción de 3 MiB exclusivamente para la subida de imágenes tras autenticar al administrador, paginación y errores centralizados. Config rechaza JWT_SECRET débil, CORS comodín y orígenes HTTP en producción. CORS usa orígenes exactos y no sustituye JWT/roles. Las prácticas siguen la [guía de Express](https://expressjs.com/en/advanced/best-practice-security.html).
 
 JWT de 30 minutos en sessionStorage; logout revoca los tokens del usuario. La cédula del registro no se conserva; el documento del pedido se enmascara. No se piden ni guardan tarjeta, CVV o vencimiento. El admin ve datos de entrega necesarios, sin passwordHash ni huellas internas. Logger sin body ni Authorization.
 
@@ -202,9 +206,37 @@ Los accesos “Nuevo producto” y “Nueva promoción” abren sus formularios 
 
 El cliente dispone de carrito, checkout y “Mis pedidos”. En la sesión admin, las acciones de compra se ocultan al revisar la tienda; /cuenta.html y /checkout.html llevan al panel y /pedidos.html abre todos los pedidos de clientes. Los enlaces /admin.html?tabla=productos, promociones, pedidos, usuarios o detalles seleccionan la sección correspondiente; valores desconocidos abren Productos. La API mantiene los permisos user/admin de pedidos exigidos por la rúbrica; la interfaz separa las tareas de cada rol.
 
-CRUD de productos/promociones. Usa imágenes existentes de frontend/assets/images/ con ruta assets/images/archivo.ext. Campañas: publicación, vista previa, orden y fechas; inicio inclusivo y fin exclusivo. El panel utiliza la hora del dispositivo y envía ISO con zona. Las dos campañas iniciales son vistas previas, sin descuentos vigentes inventados.
+En **Productos → Editar**, pulsa el selector de imagen, elige un JPG, PNG o WebP y revisa la vista previa. Guarda el producto para publicar el cambio. Admite hasta 2 MiB y 16 millones de píxeles; el servidor verifica el contenido, rechaza animaciones/SVG y recodifica WebP de hasta 1600 px sin metadatos. Las imágenes quedan en `frontend/assets/uploads/` con UUID generado por el servidor. La subida exige admin antes de leer el JSON grande; tiene límite propio de diez intentos por minuto y el resto de la API conserva su límite de 32 KB.
 
-Usuarios, pedidos y detalles son tablas de consulta: no se modifican hashes, roles ni historial. Las cinco tablas requieren JWT/rol admin, independientemente del enlace visible en la UI.
+En **Promociones**, carga una imagen propia o pulsa “Usar imagen del producto”. Configura **Descuento (%)**, de 0 a 90, publicación y fechas. Una franja amarilla muestra el porcentaje; el catálogo y la ficha presentan precio anterior tachado y precio rebajado. Solo campañas activas, vigentes y sin vista previa aplican descuento. Si coinciden varias, se aplica el mayor porcentaje y no se acumulan. El servidor calcula en centavos: por ejemplo, $7,50 con 25 % queda en $5,63. El carrito usa ese precio y el pedido guarda precio original, porcentaje y precio final históricos. Cambiar o eliminar la campaña no altera pedidos anteriores.
+
+Las fechas tienen inicio inclusivo y fin exclusivo. El panel utiliza la hora del dispositivo y envía ISO con zona. Las dos campañas iniciales siguen como vistas previas, sin descuentos vigentes inventados. Una imagen propia de campaña requiere descripción accesible.
+
+En **Pedidos de clientes → Gestionar estado**, sigue pendiente → confirmado → preparado → entregado. Puedes cancelar desde pendiente, confirmado o preparado; entregado y cancelado son estados finales. La cancelación devuelve las cantidades al inventario exactamente una vez, dentro de la transacción de cambio de estado. El historial conserva quién hizo cada transición y cuándo; el cliente ve el estado e historial en “Mis pedidos”. Los cambios requieren `esperadoUpdatedAt`: una edición simultánea devuelve 409 para revisar los datos actuales.
+
+Usuarios y detalles son tablas de consulta: no se modifican hashes, roles ni líneas históricas. Los pedidos admiten exclusivamente las transiciones previstas; sus importes y artículos no se reescriben. Las cinco tablas requieren JWT/rol admin, independientemente del enlace visible en la UI.
+
+## Respaldos y restauración
+
+El servidor crea un respaldo al arrancar y cada 24 horas mientras permanece activo. Conserva las siete copias completas más recientes en `server/backups/`. Cada carpeta contiene un snapshot SQLite mediante `VACUUM INTO`, las imágenes subidas referenciadas por productos/campañas y un manifiesto de tamaños y SHA-256. Un fallo de copia se anuncia en el servidor sin presentar un respaldo incompleto como válido.
+
+Respaldo manual:
+
+~~~powershell
+npm run backup
+~~~
+
+Restauración con los servidores HTTP y HTTPS detenidos:
+
+~~~powershell
+npm run backup:restore -- --from "server/backups/backup-FECHA-UUID" --offline --replace
+~~~
+
+`--replace` crea una copia previa de la BD actual. El restaurador comprueba el manifiesto, firmas SQLite, integridad, claves foráneas e imágenes; rechaza servidores activos y rutas ajenas. Los UUID de imágenes son inmutables: si existe el mismo UUID con bytes diferentes, se rechaza el conflicto para conservar el archivo actual. No ejecutes una restauración sobre una base en uso.
+
+Si la BD destino está corrupta y no admite un respaldo consistente, antes de reemplazarla se conservan sus bytes y los archivos WAL/SHM existentes en una carpeta privada `server/backups/recovery-FECHA-UUID`, con tamaños y SHA-256. Esta copia forense se marca como no restaurable y queda disponible para revisión; no entra en la retención automática de siete respaldos. Solo los errores de corrupción activan esa recuperación. Si falla la copia previa, los permisos o el espacio, se aborta sin reemplazar la BD; la fuente de restauración debe ser siempre un respaldo válido.
+
+La BD, respaldos e imágenes de trabajo se excluyen de Git/ZIP. Conserva `server/prisma/farmacia.db` y `frontend/assets/uploads/` en almacenamiento persistente cuando despliegues; copiar solo el repositorio no transporta los registros del negocio. Las copias locales no cubren la pérdida del disco: guarda también una copia privada fuera de esa máquina. Las pruebas usan rutas temporales y no crean fotos de prueba en la carpeta personal de imágenes.
 
 ## Pruebas, accesibilidad y auditorías
 
@@ -214,13 +246,13 @@ npm run test:browser
 npm audit
 ~~~
 
-**23 pruebas Node:** API/recursos con migraciones y seed en BD temporal. **14 pruebas Chrome:** siete recorridos en escritorio/móvil. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
+**37 pruebas Node:** API, recursos, migración sobre datos anteriores, imágenes y respaldo/restauración con BD temporal. **14 pruebas Chrome:** siete recorridos en escritorio/móvil. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
 
 Se cubren JWT admin, creación admin, user 403, catálogo, carrito persistente, pedido en BD y admin ve todos los pedidos. También stock concurrente, reversión, idempotencia, revocación, CORS, validación ecuatoriana, sanitización, errores de red/500 y CRUD de campañas. Las pruebas de navegador comprueban login por rol, navegación administrativa sin compras, enlaces de sección, redirecciones, vista de tienda sin carrito para admin y cierre de sesión; compras y accesibilidad de cuenta/historial se prueban con un cliente. El panel ignora respuestas atrasadas al cambiar de tabla, bloquea acciones durante la carga y borra el contenido administrativo/cierra diálogos cuando vence la sesión.
 
 Las nueve pantallas, el dashboard y sus tablas de Productos/Pedidos se revisan con axe-core WCAG A/AA a 1440 y 375 px, salto al contenido, foco visible, labels, menú y Escape. Las pruebas del resumen verifican 401/403, importes, estados, meses vacíos, el cambio diciembre/enero y límites exactos de stock/vigencia. En navegador se cubren tarjetas con datos reales, creación desde accesos rápidos, reintento tras 500 y expiración al cargar el dashboard. No sustituye evaluación con lectores de pantalla y usuarios ni certifica WCAG.
 
-La prueba cruzada mantiene sesiones independientes de administrador y cliente, con páginas previamente abiertas. Comprueba registro visible en Usuarios, CRUD reflejado en catálogo/campañas, refresco por foco/visibilidad/30 segundos, carrito entre pestañas, checkout conservado ante cambios de stock, pedido visible en tablas/dashboard y conflicto de edición sin restaurar unidades vendidas. Las pruebas Prisma reconectan la BD y verifican usuarios, productos, promociones, pedidos, detalles y stock; repetir seed conserva cambios, eliminaciones y credenciales.
+La prueba cruzada mantiene sesiones independientes de administrador y cliente, con páginas previamente abiertas. Comprueba registro visible en Usuarios, CRUD reflejado en catálogo/campañas, subida real de imágenes y fallback de campaña a la imagen del producto, descuento del 25 % visible en cliente y pedido, estados visibles en ambos recorridos y cancelación que devuelve stock una sola vez. También verifica refresco por foco/visibilidad/30 segundos, carrito entre pestañas, checkout conservado ante cambios de stock, pedido visible en tablas/dashboard y conflicto de edición sin restaurar unidades vendidas. Las pruebas Prisma reconectan la BD y verifican usuarios, productos, promociones, pedidos, detalles y stock; repetir seed conserva cambios, eliminaciones y credenciales. La recuperación con destino corrupto conserva DB/WAL/SHM, recupera usuarios y stock y demuestra que un fallo de copia impide reemplazarlo.
 
 1. [Auditoría 1 — MVC](docs/auditorias/reto2/01-arquitectura-mvc.md).
 2. [Auditoría 2 — Persistencia](docs/auditorias/reto2/02-persistencia-prisma.md).
@@ -240,5 +272,5 @@ Genera **entrega/Reto2_Olmedo_Elkin.zip** con frontend/backend MVC, schema/migra
 
 ## Límites prácticos
 
-SQLite sirve para esta entrega; muchas escrituras requieren evaluar otro motor y backups. Rate limit en memoria de una instancia. No se implementan pasarela bancaria, logística automática, MFA, recuperación de clave ni verificación de correo. Los pedidos quedan pendientes de coordinación. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
+SQLite sirve para esta entrega; muchas escrituras requieren evaluar otro motor. Rate limit en memoria de una instancia. Los respaldos automáticos requieren el servidor activo y espacio disponible; no se envían a servicios externos. No se implementan pasarela bancaria, logística automática, MFA, recuperación de clave ni verificación de correo. El administrador actualiza los estados; el pago y la entrega se coordinan con la farmacia. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
 

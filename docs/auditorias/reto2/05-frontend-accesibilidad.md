@@ -2,7 +2,7 @@
 
 ## Objetivo y método
 
-Comprobar que la interfaz usa la API y completa el flujo catálogo → carrito → login → pedido → historial y administración, con pantallas abiertas conectadas a los cambios persistidos. La validación anterior ejecutó Chrome en 1440×1000 y 375×900, pruebas de errores y axe-core sobre las nueve pantallas. La suite ampliada pasó sus 14 casos de navegador; la suite Node actual ya pasó 23 pruebas. Se conservaron la fachada, identidad crema/vino, categorías, mapa, WhatsApp y las 18 referencias del catálogo.
+Comprobar el flujo catálogo → carrito → login → pedido → historial y administración, con pantallas abiertas conectadas a la persistencia. Las pruebas usan Chrome en 1440×1000 y 375×900, errores simulados y axe-core sobre las nueve pantallas. La ampliación incluye estados, descuentos e imágenes; resultados completos en `docs/pruebas/reto2/`. Se conservan fachada, identidad crema/vino, categorías, mapa, WhatsApp y las 18 referencias iniciales.
 
 ## Matriz de subpuntos
 
@@ -25,14 +25,17 @@ Comprobar que la interfaz usa la API y completa el flujo catálogo → carrito �
 | Dashboard ERP | Barra lateral por áreas, ocho métricas de API, alertas, accesos rápidos, estados, tendencia y pedidos recientes | Datos del resumen coinciden con tarjetas; CRUD desde acceso rápido; 500/Reintentar y 401 | Implementado |
 | Conexión de pantallas abiertas | Actualización al foco/visibilidad, cada 30 s y señal entre pestañas; API única | Caso ampliado con administrador y cliente en contextos independientes | Implementado y verificado en escritorio/móvil |
 | Edición y compra concurrentes | Editor manda versión; checkout bloquea productos retirados/cantidades sin stock | Prueba API 409 sin restaurar unidades; nuevo flujo visual conserva datos de entrega | API y navegador verificados |
+| Estado del pedido | Diálogo administrativo de transición/historial; versión enviada a API | Cliente recibe confirmado/preparado/entregado/cancelado y reposición tras cancelar | Implementado; evidencia en suite ampliada |
+| Descuento real | Franja amarilla con porcentaje, precio original tachado y efectivo | Catálogo, detalle y carrito usan precio servidor; detalle histórico conserva oferta | Implementado; evidencia en suite ampliada |
+| Imagen desde equipo | Selección local, progreso, validación, vista previa y publicación al guardar | Producto/campaña muestran WebP persistido; quitar imagen propia usa producto | Implementado; evidencia en suite ampliada |
 
 ## Campañas y otras pantallas
 
-Promociones pasó de datos estáticos a entidad de BD. Admin crea, edita y elimina campañas; decide publicación, vista previa, orden y vigencia. El cliente muestra solo campañas activas del servidor. Las campañas iniciales siguen identificadas como vista previa y no anuncian descuentos reales.
+Promociones pasó de datos estáticos a entidad de BD. Admin crea, edita y elimina campañas; define publicación, vista previa, orden, vigencia, porcentaje e imagen opcional. El cliente recibe solo campañas activas y vigentes del servidor. Las iniciales siguen como vista previa y no descuentan; una campaña real elegible aplica su porcentaje, entre 1 y 90, al precio recibido en catálogo, ficha, carrito y pedido. Si coinciden varias, el servidor elige el mayor descuento sin sumarlos. La franja amarilla y el porcentaje acompañan al precio original tachado y al precio efectivo.
 
 Las nueve páginas son inicio, catálogo, ficha, comparación, cuenta, checkout, pedidos, administrador y ayuda. Los componentes de comparación reutilizan los productos de la API. Contacto valida datos ecuatorianos y prepara un mensaje para que el usuario lo revise antes de enviarlo por WhatsApp.
 
-El administrador entra directamente en el Dashboard ejecutivo al iniciar sesión. El diseño toma como referencia el ERP aportado: sidebar fija por áreas, topbar, tarjetas y tablas a todo el ancho, con colores crema/vino. Productos y Promociones ofrecen CRUD; Pedidos de clientes, Usuarios y Detalles son consultas de gestión. Ofrece Ver tienda y Cerrar sesión. Los enlaces ?tabla= seleccionan únicamente las cinco secciones permitidas; la ruta sin tabla muestra el resumen. La sesión admin redirige cuenta/checkout al dashboard e historial a todos los pedidos; las acciones de compra se ocultan en la tienda pública. El contrato de roles de la API de pedidos se mantiene según la rúbrica.
+El administrador entra directamente en el Dashboard ejecutivo. El diseño toma el ERP aportado: sidebar por áreas, topbar, tarjetas y tablas, con colores crema/vino. Productos y Promociones ofrecen CRUD; Pedidos de clientes añade gestión de estado e historial; Usuarios y Detalles son consultas. Ofrece Ver tienda y Cerrar sesión. Los enlaces ?tabla= seleccionan cinco secciones; la ruta sin tabla muestra el resumen. La sesión admin redirige cuenta/checkout al dashboard e historial a todos los pedidos; oculta las acciones de compra públicas. Se conserva el contrato de roles de creación de pedidos de la rúbrica.
 
 El dashboard obtiene ocho indicadores de /api/admin/resumen y muestra alertas de stock menor o igual a cinco, accesos a creación/gestión, pedidos por estado, una gráfica SVG de seis meses y los últimos cinco pedidos. La gráfica tiene título y descripción textual con todos los importes/cantidades; los períodos sin pedidos muestran cero. Se presentan importes de pedidos registrados, no ventas cobradas. Campos dinámicos se escapan. El estado de error ofrece Reintentar y no reemplaza cifras con ejemplos. Se mantienen solo las funciones actuales, según la elección del usuario.
 
@@ -52,7 +55,13 @@ El modelo de carrito escucha `storage`, por lo que un cambio en otra pestaña ac
 
 El panel refresca silenciosamente el dashboard o la sección/página actual, sin volver a cargar filtros ni abrir formularios. No aplica refrescos mientras existe un diálogo abierto, y solicita los datos al cerrarlo. Cada edición de producto guarda la versión de apertura y envía `esperadoUpdatedAt`: una compra u otra edición intermedia devuelve 409 y conserva el formulario para que el administrador revise el conflicto. Historial muestra el estado recibido, en lugar de etiquetar todos los pedidos como pendientes.
 
-El nuevo caso `administración y cliente comparten datos persistidos y actualizan pantallas abiertas` comprueba cambios de producto y promoción desde un administrador, lectura desde cliente, conservación de filtros y formulario, compra persistida, stock y consultas del panel. Sus ejecuciones de escritorio y móvil forman parte de los 14 casos de navegador aprobados. Las pruebas Node aprobadas verifican además que los datos siguen conectados al abrir una nueva conexión Prisma y que repetir seed no restaura campañas eliminadas.
+El diálogo de estado muestra la secuencia disponible y los eventos registrados. Cancelar exige una confirmación explícita; el servidor decide la transición y devuelve stock una vez. El cliente recibe el estado e historial al refrescar Mis pedidos. Los entregados/cancelados muestran estado final; un pedido previo a la migración puede no tener eventos antiguos, porque no se fabrican retrospectivamente.
+
+El editor de producto/campaña permite escoger JPEG, PNG o WebP del equipo. Se anuncia progreso/error, se deshabilita guardar durante carga y se presenta una vista previa de la ruta persistida. Secuencia y AbortController descartan respuestas de selecciones anteriores o de un editor cerrado. La carga no publica por sí sola: guardar el registro enlaza la imagen. Producto exige texto alternativo; campaña con imagen propia también lo exige y permite quitarla para reutilizar la imagen del producto. El límite visual de 2 MB se vuelve a validar en servidor.
+
+La gestión de respaldo no se mezcla con el recorrido de compra: el servidor crea copias privadas automáticamente y ofrece comandos CLI de respaldo/restauración con operación offline, descritos en los informes 02 y 04.
+
+El caso `administración y cliente comparten datos persistidos y actualizan pantallas abiertas` comprueba cambios de producto/promoción, lectura del cliente, filtros/formulario, compra, stock y panel. Los casos ampliados cubren estados, cancelación, descuento e imagen en ambos tamaños. Node comprueba además reconexión, snapshots, cancelación concurrente, migración anterior, seed y respaldo/restauración. Los conteos aprobados proceden de la ejecución completa conservada en evidencia.
 
 ## Accesibilidad obligatoria
 
@@ -87,4 +96,4 @@ Estados visibles: carga, catálogo sin resultados, carrito vacío, tabla vacía,
 
 El mapa, redes y WhatsApp requieren conexión. No se activa un modo de compra offline: los precios y stock se consultan al servidor. No se envían mensajes automáticamente. Los pedidos iniciales tienen estado pendiente y el pago se coordina con la farmacia; una confirmación en pantalla representa un registro persistido, no un cobro bancario.
 
-El refresco usa consultas HTTP periódicas, no WebSocket ni actualización instantánea garantizada: otras sesiones reciben cambios al volver a la página o en el siguiente intervalo visible. Ante un fallo transitorio se conserva la última información recibida del servidor y se anuncia el error; no se crean datos de ejemplo. Las 14 ejecuciones de la suite ampliada aprobaron el flujo funcional y las comprobaciones de accesibilidad previstas.
+El refresco usa consultas HTTP periódicas: otras sesiones reciben cambios al volver a la página o en el siguiente intervalo visible, sin garantía de actualización instantánea. Ante un fallo se conserva la última respuesta válida y se anuncia el error. El descuento definitivo se calcula al registrar el pedido con las condiciones vigentes; la vista no reserva precio ni unidades. Las comprobaciones de accesibilidad de la suite no equivalen a certificación WCAG ni evaluación completa con lectores de pantalla.

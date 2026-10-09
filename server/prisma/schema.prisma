@@ -35,6 +35,7 @@ model Usuario {
   activo       Boolean  @default(true)
   createdAt    DateTime @default(now())
   pedidos      Pedido[]
+  cambiosPedidos PedidoEstado[]
 }
 
 model Pedido {
@@ -55,7 +56,9 @@ model Pedido {
   requestKey     String
   fingerprint    String
   createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
   detalles       PedidoDetalle[]
+  historial      PedidoEstado[]
   @@unique([userId, requestKey])
   @@index([userId, createdAt])
 }
@@ -69,6 +72,8 @@ model PedidoDetalle {
   nombreProducto String
   cantidad       Int
   precioUnitario Decimal
+  precioOriginal Decimal?
+  descuentoPorcentaje Int @default(0)
   @@unique([pedidoId, productoId])
 }
 
@@ -81,10 +86,25 @@ model Promocion {
   producto    Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
   activa      Boolean  @default(true)
   vistaPrevia Boolean  @default(false)
+  descuentoPorcentaje Int @default(0)
+  imagen      String?
+  alt         String?
   orden       Int      @default(0)
   inicio      DateTime?
   fin         DateTime?
   createdAt   DateTime @default(now())
+}
+
+model PedidoEstado {
+  id        String   @id @default(uuid())
+  pedidoId  String
+  pedido    Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Restrict)
+  anterior  String?
+  estado    String
+  actorId   String
+  actor     Usuario  @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  @@index([pedidoId, createdAt])
 }
 
 // Technical marker: the initial catalog is seeded once, including legacy DBs.

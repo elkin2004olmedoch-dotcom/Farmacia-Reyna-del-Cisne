@@ -5,6 +5,7 @@ const {execFileSync}=require('node:child_process');
 const {randomBytes}=require('node:crypto');
 const directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-reto2-'));
 process.env.NODE_ENV='test';
+process.env.UPLOAD_DIR=path.join(directory,'uploads');
 process.env.DATABASE_URL='file:'+path.join(directory,'test.db').replaceAll('\\','/');
 process.env.JWT_SECRET=randomBytes(48).toString('hex');
 process.env.CORS_ORIGIN='http://localhost:3000';

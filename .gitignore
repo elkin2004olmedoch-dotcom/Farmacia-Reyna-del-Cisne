@@ -16,3 +16,5 @@ node_modules/
 test-results/
 playwright-report/
 server/certificates/
+server/backups/
+frontend/assets/uploads/

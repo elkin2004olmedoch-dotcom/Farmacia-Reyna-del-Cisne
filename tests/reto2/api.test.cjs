@@ -67,7 +67,7 @@ test('edición de producto detecta stock cambiado por compra y otra sesión admi
     current=(await request.get('/api/productos/'+id).expect(200)).body.data;
     assert.equal(current.stock,19);assert.equal(Number(current.precio),9.99);assert.equal(current.updatedAt,updated.body.data.updatedAt);
   } finally {
-    if(pendingOrder){await db.pedidoDetalle.deleteMany({where:{pedidoId:pendingOrder}});await db.pedido.delete({where:{id:pendingOrder}});}
+    if(pendingOrder){await db.pedidoEstado.deleteMany({where:{pedidoId:pendingOrder}});await db.pedidoDetalle.deleteMany({where:{pedidoId:pendingOrder}});await db.pedido.delete({where:{id:pendingOrder}});}
     await db.producto.delete({where:{id}});
   }
 });
@@ -111,6 +111,130 @@ test('promociones CRUD admin publica solo campañas activas y vigentes',async()=
   assert.ok(!(await request.get('/api/promociones').expect(200)).body.data.some(p=>p.id===id));
   await request.put('/api/promociones/'+id).set('Authorization',bearer(adminToken)).send({...values,inicio:'2026-10-09T10:00:00-05:00',fin:'2026-10-08T10:00:00-05:00'}).expect(422);
   await request.delete('/api/promociones/'+id).set('Authorization',bearer(adminToken)).expect(204);
+});
+test('estados de pedidos requieren admin, versión vigente y secuencia; conservan historial e idempotencia',async()=>{
+  const created=await request.post('/api/productos').set('Authorization',bearer(adminToken)).send({...productInput,nombre:'Producto estados',stock:20}).expect(201);
+  const id=created.body.data.id;let statusOrder;
+  const payload={carrito:[{productoId:id,cantidad:3}],comprador:buyer,claveSolicitud:randomUUID()};
+  try {
+    let order=(await request.post('/api/pedidos').set('Authorization',bearer(userToken)).send(payload).expect(201)).body.data;statusOrder=order.id;
+    const endpoint='/api/pedidos/'+order.id+'/estado';const initialVersion=order.updatedAt;
+    assert.equal(order.historial.length,1);assert.equal(order.historial[0].estado,'pendiente');assert.equal(order.historial[0].actorId,userId);
+    await request.put(endpoint).send({estado:'confirmado',esperadoUpdatedAt:initialVersion}).expect(401);
+    await request.put(endpoint).set('Authorization',bearer(userToken)).send({estado:'confirmado',esperadoUpdatedAt:initialVersion}).expect(403);
+    for(const body of [{estado:'confirmado'},{estado:'pagado',esperadoUpdatedAt:initialVersion},{estado:'confirmado',esperadoUpdatedAt:'2026-10-09'},{estado:'confirmado',esperadoUpdatedAt:initialVersion,stock:20}])await request.put(endpoint).set('Authorization',bearer(adminToken)).send(body).expect(422);
+    const skipped=await request.put(endpoint).set('Authorization',bearer(adminToken)).send({estado:'entregado',esperadoUpdatedAt:initialVersion}).expect(409);assert.equal(skipped.body.error.code,'INVALID_ORDER_TRANSITION');
+    order=(await request.put(endpoint).set('Authorization',bearer(adminToken)).send({estado:'confirmado',esperadoUpdatedAt:initialVersion}).expect(200)).body.data;
+    assert.equal(order.estado,'confirmado');assert.ok(Date.parse(order.updatedAt)>Date.parse(initialVersion));
+    const repeat=await request.put(endpoint).set('Authorization',bearer(adminToken)).send({estado:'confirmado',esperadoUpdatedAt:initialVersion}).expect(200);assert.equal(repeat.body.replayed,true);assert.equal(repeat.body.data.historial.length,2);
+    const stale=await request.put(endpoint).set('Authorization',bearer(adminToken)).send({estado:'preparado',esperadoUpdatedAt:initialVersion}).expect(409);assert.equal(stale.body.error.code,'ORDER_CHANGED');
+    order=(await request.put(endpoint).set('Authorization',bearer(adminToken)).send({estado:'preparado',esperadoUpdatedAt:order.updatedAt}).expect(200)).body.data;
+    order=(await request.put(endpoint).set('Authorization',bearer(adminToken)).send({estado:'entregado',esperadoUpdatedAt:order.updatedAt}).expect(200)).body.data;
+    assert.deepEqual(order.historial.map(row=>row.estado),['pendiente','confirmado','preparado','entregado']);
+    assert.deepEqual(order.historial.map(row=>row.anterior),[null,'pendiente','confirmado','preparado']);
+    assert.ok(order.historial.slice(1).every(row=>row.actorId===jwt.decode(adminToken).sub));
+    await request.put(endpoint).set('Authorization',bearer(adminToken)).send({estado:'cancelado',esperadoUpdatedAt:order.updatedAt}).expect(409);
+    const customer=(await request.get('/api/pedidos/mis-pedidos').set('Authorization',bearer(userToken)).expect(200)).body.data.items.find(row=>row.id===order.id);
+    assert.equal(customer.estado,'entregado');assert.equal(customer.historial.length,4);
+    const replay=await request.post('/api/pedidos').set('Authorization',bearer(userToken)).send(payload).expect(200);assert.equal(replay.body.data.estado,'entregado');assert.equal(replay.body.data.historial.length,4);
+    assert.equal((await db.producto.findUnique({where:{id}})).stock,17);
+  } finally {
+    if(statusOrder){await db.pedidoEstado.deleteMany({where:{pedidoId:statusOrder}});await db.pedidoDetalle.deleteMany({where:{pedidoId:statusOrder}});await db.pedido.deleteMany({where:{id:statusOrder}});}
+    await db.producto.deleteMany({where:{id}});
+  }
+});
+test('cancelaciones concurrentes devuelven cada unidad una sola vez y quedan registradas al reconectar',async()=>{
+  const products=await Promise.all([10,5].map(stock=>db.producto.create({data:{...productInput,id:randomUUID(),stock}})));
+  let canceledOrder,reopened;
+  const payload={carrito:products.map((product,index)=>({productoId:product.id,cantidad:index===0?4:2})),comprador:buyer,claveSolicitud:randomUUID()};
+  try {
+    let order=(await request.post('/api/pedidos').set('Authorization',bearer(userToken)).send(payload).expect(201)).body.data;canceledOrder=order.id;
+    const endpoint='/api/pedidos/'+order.id+'/estado';
+    for(const estado of ['confirmado','preparado'])order=(await request.put(endpoint).set('Authorization',bearer(adminToken)).send({estado,esperadoUpdatedAt:order.updatedAt}).expect(200)).body.data;
+    const results=await Promise.all([1,2].map(()=>request.put(endpoint).set('Authorization',bearer(adminToken)).send({estado:'cancelado',esperadoUpdatedAt:order.updatedAt})));
+    assert.ok(results.every(result=>result.status===200));assert.equal(results.filter(result=>result.body.replayed===false).length,1);assert.equal(results.filter(result=>result.body.replayed===true).length,1);
+    order=results[0].body.data;assert.equal(order.estado,'cancelado');assert.equal(order.historial.length,4);
+    assert.deepEqual(await Promise.all(products.map(product=>db.producto.findUnique({where:{id:product.id}}).then(row=>row.stock))),[10,5]);
+    await request.put(endpoint).set('Authorization',bearer(adminToken)).send({estado:'confirmado',esperadoUpdatedAt:order.updatedAt}).expect(409);
+    await request.post('/api/pedidos').set('Authorization',bearer(userToken)).send(payload).expect(200);
+    await db.$disconnect();const {PrismaClient}=require('@prisma/client');reopened=new PrismaClient();
+    const stored=await reopened.pedido.findUnique({where:{id:order.id},include:{historial:true}});assert.equal(stored.estado,'cancelado');assert.equal(stored.historial.filter(row=>row.estado==='cancelado').length,1);
+    assert.deepEqual(await Promise.all(products.map(product=>reopened.producto.findUnique({where:{id:product.id}}).then(row=>row.stock))),[10,5]);
+  } finally {
+    if(reopened)await reopened.$disconnect();
+    if(canceledOrder){await db.pedidoEstado.deleteMany({where:{pedidoId:canceledOrder}});await db.pedidoDetalle.deleteMany({where:{pedidoId:canceledOrder}});await db.pedido.deleteMany({where:{id:canceledOrder}});}
+    await db.producto.deleteMany({where:{id:{in:products.map(product=>product.id)}}});
+  }
+});
+test('descuento vigente mayor coincide entre catálogo y pedido, y su snapshot sobrevive a cambios de campaña',async()=>{
+  const created=await request.post('/api/productos').set('Authorization',bearer(adminToken)).send({...productInput,nombre:'Producto descuento',precio:7.50,stock:20}).expect(201);
+  const id=created.body.data.id;const campaign={titulo:'Descuento real',descripcion:'Condiciones de la campaña de prueba',etiqueta:'Oferta',productoId:id,activa:true,vistaPrevia:false,orden:0,inicio:null,fin:null,descuentoPorcentaje:25,imagen:null,alt:null};
+  const campaigns=[];let discountedOrder;
+  try {
+    for(const patch of [{},{descuentoPorcentaje:10},{descuentoPorcentaje:80,vistaPrevia:true},{descuentoPorcentaje:90,fin:'2000-01-01T05:00:00Z'},{descuentoPorcentaje:90,inicio:'2099-01-01T05:00:00Z'},{descuentoPorcentaje:90,activa:false}])campaigns.push((await request.post('/api/promociones').set('Authorization',bearer(adminToken)).send({...campaign,...patch}).expect(201)).body.data);
+    for(const value of [-1,91,2.5,'25',null])await request.post('/api/promociones').set('Authorization',bearer(adminToken)).send({...campaign,descuentoPorcentaje:value}).expect(422);
+    for(const patch of [{imagen:'https://example.ec/campana.png',alt:'Campaña externa'},{imagen:'assets/uploads/../images/producto-vitaminas.jpg',alt:'Ruta inválida'},{imagen:productInput.imagen,alt:null}])await request.post('/api/promociones').set('Authorization',bearer(adminToken)).send({...campaign,...patch}).expect(422);
+    const custom=(await request.put('/api/promociones/'+campaigns[0].id).set('Authorization',bearer(adminToken)).send({...campaign,imagen:productInput.imagen,alt:'Campaña vitaminas de prueba'}).expect(200)).body.data;
+    assert.equal(custom.imagen,productInput.imagen);assert.equal(custom.alt,'Campaña vitaminas de prueba');
+    const reset=(await request.put('/api/promociones/'+campaigns[0].id).set('Authorization',bearer(adminToken)).send({...campaign,imagen:null,alt:null}).expect(200)).body.data;
+    assert.equal(reset.imagen,null);assert.equal(reset.alt,null);
+    const storedReset=await db.promocion.findUnique({where:{id:campaigns[0].id}});assert.equal(storedReset.imagen,null);assert.equal(storedReset.alt,null);
+    const publicReset=(await request.get('/api/promociones').expect(200)).body.data.find(row=>row.id===campaigns[0].id);assert.equal(publicReset.imagen,null);assert.equal(publicReset.producto.imagen,productInput.imagen);
+    const detail=(await request.get('/api/productos/'+id).expect(200)).body.data;
+    const listed=(await request.get('/api/productos?q=Producto%20descuento').expect(200)).body.data.items.find(row=>row.id===id);
+    for(const row of [detail,listed]){assert.equal(Number(row.precio),5.63);assert.equal(Number(row.precioOriginal),7.5);assert.equal(row.descuentoPorcentaje,25);assert.equal(row.promocionId,campaigns[0].id);}
+    const visible=(await request.get('/api/promociones').expect(200)).body.data;assert.ok(visible.some(row=>row.id===campaigns[2].id));assert.ok(!visible.some(row=>row.id===campaigns[3].id || row.id===campaigns[4].id || row.id===campaigns[5].id));assert.equal(Number(visible.find(row=>row.id===campaigns[0].id).producto.precio),5.63);
+    const payload={carrito:[{productoId:id,cantidad:3}],comprador:buyer,claveSolicitud:randomUUID()};
+    await request.post('/api/pedidos').set('Authorization',bearer(userToken)).send({...payload,carrito:[{productoId:id,cantidad:3,descuentoPorcentaje:90}]}).expect(422);
+    const order=(await request.post('/api/pedidos').set('Authorization',bearer(userToken)).send(payload).expect(201)).body.data;discountedOrder=order.id;
+    assert.equal(Number(order.total),16.89);assert.equal(Number(order.detalles[0].precioUnitario),5.63);assert.equal(Number(order.detalles[0].precioOriginal),7.5);assert.equal(order.detalles[0].descuentoPorcentaje,25);
+    await request.put('/api/promociones/'+campaigns[0].id).set('Authorization',bearer(adminToken)).send({...campaign,activa:false}).expect(200);
+    const current=await db.producto.findUnique({where:{id}});
+    await request.put('/api/productos/'+id).set('Authorization',bearer(adminToken)).send({...productInput,nombre:'Producto descuento editado',precio:9.20,stock:17,esperadoUpdatedAt:current.updatedAt.toISOString()}).expect(200);
+    const changed=(await request.get('/api/productos/'+id).expect(200)).body.data;assert.equal(Number(changed.precio),8.28);assert.equal(changed.descuentoPorcentaje,10);
+    await request.put('/api/promociones/'+campaigns[1].id).set('Authorization',bearer(adminToken)).send({...campaign,descuentoPorcentaje:10,fin:'2000-01-01T05:00:00Z'}).expect(200);
+    const noDiscount=(await request.get('/api/productos/'+id).expect(200)).body.data;assert.equal(Number(noDiscount.precio),9.2);assert.equal(noDiscount.descuentoPorcentaje,0);assert.equal(noDiscount.promocionId,null);
+    const replay=await request.post('/api/pedidos').set('Authorization',bearer(userToken)).send(payload).expect(200);assert.equal(replay.body.data.id,order.id);assert.equal(Number(replay.body.data.total),16.89);assert.equal(Number(replay.body.data.detalles[0].precioOriginal),7.5);assert.equal(replay.body.data.detalles[0].descuentoPorcentaje,25);assert.equal((await db.producto.findUnique({where:{id}})).stock,17);
+  } finally {
+    await db.promocion.deleteMany({where:{productoId:id}});
+    if(discountedOrder){await db.pedidoEstado.deleteMany({where:{pedidoId:discountedOrder}});await db.pedidoDetalle.deleteMany({where:{pedidoId:discountedOrder}});await db.pedido.deleteMany({where:{id:discountedOrder}});}
+    await db.producto.deleteMany({where:{id}});
+  }
+});
+test('precios efectivos respetan límites temporales, vista previa, empate y redondeo de centavos',()=>{
+  const {effectivePrice}=require('../../server/models/prices.cjs');const now=new Date('2029-12-01T05:00:00Z');const product={id:'precio-prueba',precio:7.50,activo:true};
+  const promo=(id,patch={})=>({id,orden:0,activa:true,vistaPrevia:false,descuentoPorcentaje:25,inicio:null,fin:null,...patch});
+  const price=effectivePrice(product,[promo('b',{inicio:now}),promo('a',{inicio:now}),promo('c',{descuentoPorcentaje:90,fin:now}),promo('d',{descuentoPorcentaje:90,inicio:new Date(now.getTime()+1)}),promo('e',{descuentoPorcentaje:90,vistaPrevia:true}),promo('f',{descuentoPorcentaje:90,activa:false})],now);
+  assert.equal(Number(price.precio),5.63);assert.equal(price.descuentoPorcentaje,25);assert.equal(price.promocionId,'a');
+  assert.equal(effectivePrice({...product,activo:false},[promo('a')],now).descuentoPorcentaje,0);
+  assert.equal(Number(effectivePrice({precio:0.01,activo:true},[promo('a',{descuentoPorcentaje:50})],now).precio),0.01);
+});
+test('migración commerce conserva pedidos, detalles, campañas y relaciones de una base anterior',async()=>{
+  const fs=require('node:fs');const path=require('node:path');const {execFileSync}=require('node:child_process');const {PrismaClient}=require('@prisma/client');
+  const url='file:'+path.join(directory,'legacy-commerce.db').replaceAll('\\','/');
+  let legacy=new PrismaClient({datasources:{db:{url}}});
+  const root=path.resolve(__dirname,'../..');const env={...process.env,DATABASE_URL:url};
+  const run=(...args)=>execFileSync(process.execPath,['node_modules/prisma/build/index.js','migrate',...args,'--schema','server/prisma/schema.prisma'],{cwd:root,stdio:'pipe',env});
+  const legacyOrder=randomUUID(),legacyDetail=randomUUID(),legacyCampaign=randomUUID(),timestamp='2020-01-02T08:00:00.000Z';
+  try {
+    for(const migration of ['202610090001_init','202610090002_seed_marker'])for(const statement of fs.readFileSync(path.join(root,'server/prisma/migrations',migration,'migration.sql'),'utf8').split(';').filter(sql=>sql.trim()))await legacy.$executeRawUnsafe(statement);
+    const oldUser=await legacy.usuario.create({data:{id:randomUUID(),nombre:'Cliente anterior',email:'anterior@example.ec',telefono:'+593979275988',passwordHash:'hash-legado',role:'user'}});
+    const oldProduct=await legacy.producto.create({data:{...productInput,id:randomUUID(),stock:6}});
+    await legacy.$executeRawUnsafe('INSERT INTO Pedido (id,userId,total,estado,entrega,nombre,email,telefono,documento,requestKey,fingerprint,createdAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',legacyOrder,oldUser.id,29,'pendiente','pickup','Cliente anterior',oldUser.email,oldUser.telefono,'••••••0400','clave-legado','huella-legado',timestamp);
+    await legacy.$executeRawUnsafe('INSERT INTO PedidoDetalle (id,pedidoId,productoId,nombreProducto,cantidad,precioUnitario) VALUES (?,?,?,?,?,?)',legacyDetail,legacyOrder,oldProduct.id,'Nombre histórico',4,7.25);
+    await legacy.$executeRawUnsafe('INSERT INTO Promocion (id,titulo,descripcion,etiqueta,productoId,activa,vistaPrevia,orden) VALUES (?,?,?,?,?,?,?,?)',legacyCampaign,'Campaña anterior','Descripción histórica','Vista previa',oldProduct.id,true,true,5);
+    await legacy.$disconnect();
+    run('resolve','--applied','202610090001_init');run('resolve','--applied','202610090002_seed_marker');run('deploy');
+    legacy=new PrismaClient({datasources:{db:{url}}});
+    const order=await legacy.pedido.findUnique({where:{id:legacyOrder},include:{detalles:true,historial:true}});
+    const campaign=await legacy.promocion.findUnique({where:{id:legacyCampaign}});
+    assert.equal(Number(order.total),29);assert.equal(order.estado,'pendiente');assert.equal(order.requestKey,'clave-legado');assert.equal(order.fingerprint,'huella-legado');
+    assert.equal(order.createdAt.toISOString(),timestamp);assert.equal(order.updatedAt.toISOString(),timestamp);
+    assert.equal(order.detalles[0].id,legacyDetail);assert.equal(order.detalles[0].nombreProducto,'Nombre histórico');assert.equal(order.detalles[0].cantidad,4);assert.equal(Number(order.detalles[0].precioUnitario),7.25);assert.equal(Number(order.detalles[0].precioOriginal),7.25);assert.equal(order.detalles[0].descuentoPorcentaje,0);assert.equal(order.historial.length,0);
+    assert.equal(campaign.titulo,'Campaña anterior');assert.equal(campaign.vistaPrevia,true);assert.equal(campaign.descuentoPorcentaje,0);assert.equal(campaign.imagen,null);assert.equal(campaign.alt,null);
+    assert.equal((await legacy.producto.findUnique({where:{id:oldProduct.id}})).stock,6);assert.equal((await legacy.usuario.findUnique({where:{id:oldUser.id}})).passwordHash,'hash-legado');
+    assert.deepEqual(await legacy.$queryRawUnsafe('PRAGMA foreign_key_check'),[]);
+  } finally {await legacy.$disconnect();}
 });
 test('eliminación lógica impide nuevas compras y conserva detalle/precio histórico',async()=>{
   await request.delete('/api/productos/'+productId).set('Authorization',bearer(userToken)).expect(403);
@@ -229,7 +353,7 @@ test('usuario, producto editado, promoción, pedido y stock siguen conectados de
   } finally {
     if(reopened)await reopened.$disconnect();
     if(promotionId)await db.promocion.deleteMany({where:{id:promotionId}});
-    if(persistentOrderId){await db.pedidoDetalle.deleteMany({where:{pedidoId:persistentOrderId}});await db.pedido.deleteMany({where:{id:persistentOrderId}});}
+    if(persistentOrderId){await db.pedidoEstado.deleteMany({where:{pedidoId:persistentOrderId}});await db.pedidoDetalle.deleteMany({where:{pedidoId:persistentOrderId}});await db.pedido.deleteMany({where:{id:persistentOrderId}});}
     await db.producto.deleteMany({where:{id}});await db.usuario.deleteMany({where:{id:persistentUser.id}});
   }
 });
