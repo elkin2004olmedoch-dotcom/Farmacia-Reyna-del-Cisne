@@ -97,6 +97,78 @@ test('eliminación lógica impide nuevas compras y conserva detalle/precio hist�
   const order=await db.pedido.findUnique({where:{id:orderId},include:{detalles:true}});assert.equal(order.detalles[0].nombreProducto,'Producto editado');assert.equal(Number(order.detalles[0].precioUnitario),8.5);
   await request.post('/api/pedidos').set('Authorization',bearer(userToken)).send({carrito:[{productoId:productId,cantidad:1}],comprador:buyer,claveSolicitud:randomUUID()}).expect(409);
 });
+test('resumen ejecutivo exige admin y expone solo indicadores y listas públicas del panel',async()=>{
+  await request.get('/api/admin/resumen').expect(401);
+  await request.get('/api/admin/resumen').set('Authorization',bearer(userToken)).expect(403);
+  const res=await request.get('/api/admin/resumen').set('Authorization',bearer(adminToken)).expect(200);
+  const data=res.body.data;
+  assert.equal(data.zonaHoraria,'America/Guayaquil');assert.equal(data.umbralStock,5);
+  assert.ok(!Number.isNaN(Date.parse(data.generadoEn)));assert.equal(data.tendencia.length,6);
+  assert.ok(data.indicadores.pedidosTotales.cantidad>=2);
+  assert.ok(Number.isSafeInteger(data.indicadores.pedidosTotales.totalCentavos));
+  assert.ok(data.alertas.length<=10);assert.ok(data.recientes.length<=5);
+  for(const row of data.recientes)assert.deepEqual(Object.keys(row).sort(),['createdAt','estado','id','nombre','totalCentavos']);
+  for(const privateField of ['passwordHash','fingerprint','requestKey','documento','telefono','email'])assert.ok(!JSON.stringify(data).includes(privateField));
+});
+test('resumen usa centavos, seis meses ecuatorianos, vigencia real y límites de alertas y pedidos',async()=>{
+  const summary=require('../../server/models/admin-summary.cjs');
+  const now=new Date('2030-01-01T04:30:00Z'); // Still December 31 in Ecuador.
+  const baseline=await summary(now);
+  const products=Array.from({length:12},(_,index)=>({...productInput,id:randomUUID(),nombre:`Auditoría A${String(index+1).padStart(2,'0')}`,stock:index===11?5:0}));
+  const inactiveProduct={...productInput,id:randomUUID(),nombre:'Auditoría inactivo',stock:0,activo:false};
+  const healthyProduct={...productInput,id:randomUUID(),nombre:'Auditoría stock suficiente',stock:6};
+  const productIds=[...products,inactiveProduct,healthyProduct].map(product=>product.id);
+  const users=[{role:'user',activo:true},{role:'user',activo:false},{role:'admin',activo:true}].map((values,index)=>({...values,id:randomUUID(),nombre:'Usuario de auditoría',email:`resumen-${index}@example.ec`,telefono:'0979275988',passwordHash:'hash-privado-de-fixture'}));
+  const dates=['2029-07-01T05:00:00Z','2029-08-01T05:00:00Z','2029-09-01T05:00:00Z','2029-10-01T05:00:00Z','2029-11-01T05:00:00Z','2029-12-01T04:59:59Z','2029-12-01T05:00:00Z','2030-01-01T04:20:00Z','2030-01-01T05:00:00Z','2029-07-01T04:59:59Z'];
+  const amounts=[0.10,0.20,0.30,1.11,2.22,3.33,4.44,5.55,6.66,7.77];
+  const orders=dates.map((date,index)=>({id:randomUUID(),userId,total:amounts[index],estado:index===0?'entregado':index===1?'cancelado':'pendiente',entrega:'pickup',nombre:`Pedido de auditoría ${index}`,email:userInput.email,telefono:userInput.telefono,documento:'••••••0400',requestKey:randomUUID(),fingerprint:'huella-privada-de-fixture',createdAt:new Date(date)}));
+  const promotionBase={titulo:'Campaña de auditoría',descripcion:'Prueba de vigencia',etiqueta:'Vista previa',productoId:products[0].id,activa:true,vistaPrevia:true};
+  const promotions=[
+    {inicio:new Date('2029-12-01T05:00:00Z'),fin:new Date('2030-01-02T05:00:00Z')},
+    {inicio:new Date('2030-01-01T05:00:00Z')},
+    {fin:new Date('2029-12-01T05:00:00Z')},
+    {activa:false},
+    {productoId:inactiveProduct.id},
+    {fin:now},
+    {inicio:now},
+  ].map(values=>({...promotionBase,...values,id:randomUUID()}));
+  try {
+    await db.producto.createMany({data:[...products,inactiveProduct,healthyProduct]});
+    await db.usuario.createMany({data:users});
+    await db.pedido.createMany({data:orders});
+    await db.promocion.createMany({data:promotions});
+    const data=await summary(now);
+    assert.equal(data.generadoEn,now.toISOString());
+    assert.deepEqual(data.tendencia.map(({periodo,cantidad,totalCentavos})=>({periodo,cantidad,totalCentavos})),[
+      {periodo:'2029-07',cantidad:1,totalCentavos:10},
+      {periodo:'2029-08',cantidad:1,totalCentavos:20},
+      {periodo:'2029-09',cantidad:1,totalCentavos:30},
+      {periodo:'2029-10',cantidad:1,totalCentavos:111},
+      {periodo:'2029-11',cantidad:2,totalCentavos:555},
+      {periodo:'2029-12',cantidad:2,totalCentavos:999},
+    ]);
+    assert.deepEqual(data.indicadores.pedidosMes,{cantidad:2,totalCentavos:999});
+    assert.deepEqual(data.indicadores.pedidosTotales,{cantidad:baseline.indicadores.pedidosTotales.cantidad+10,totalCentavos:baseline.indicadores.pedidosTotales.totalCentavos+3168});
+    assert.equal(data.indicadores.pedidosPendientes,baseline.indicadores.pedidosPendientes+8);
+    assert.equal(data.indicadores.productosActivos,baseline.indicadores.productosActivos+13);
+    assert.equal(data.indicadores.clientesActivos,baseline.indicadores.clientesActivos+1);
+    assert.equal(data.indicadores.administradoresActivos,baseline.indicadores.administradoresActivos+1);
+    assert.equal(data.indicadores.stockBajo,baseline.indicadores.stockBajo+12);
+    assert.equal(data.indicadores.campanasVisibles,baseline.indicadores.campanasVisibles+2);
+    assert.deepEqual(data.alertas.map(product=>product.id),products.slice(0,10).map(product=>product.id));
+    assert.deepEqual(data.recientes.map(order=>order.id),[8,7,6,5,4].map(index=>orders[index].id));
+    assert.equal(data.estados.find(state=>state.estado==='entregado').totalCentavos,(baseline.estados.find(state=>state.estado==='entregado')?.totalCentavos || 0)+10);
+    assert.equal(data.estados.find(state=>state.estado==='cancelado').totalCentavos,(baseline.estados.find(state=>state.estado==='cancelado')?.totalCentavos || 0)+20);
+    const empty=await summary(new Date('2000-01-01T05:00:00Z'));
+    assert.equal(empty.tendencia.length,6);assert.equal(empty.tendencia[5].periodo,'2000-01');
+    assert.ok(empty.tendencia.every(month=>month.cantidad===0 && month.totalCentavos===0));
+  } finally {
+    await db.promocion.deleteMany({where:{id:{in:promotions.map(promotion=>promotion.id)}}});
+    await db.pedido.deleteMany({where:{id:{in:orders.map(order=>order.id)}}});
+    await db.producto.deleteMany({where:{id:{in:productIds}}});
+    await db.usuario.deleteMany({where:{id:{in:users.map(user=>user.id)}}});
+  }
+});
 test('CORS exacto, JSON incorrecto, tamaño y errores no filtran stacktraces',async()=>{
   const allowed=await request.get('/api/productos').set('Origin','http://localhost:3000').expect(200);assert.equal(allowed.headers['access-control-allow-origin'],'http://localhost:3000');assert.equal(allowed.headers['cache-control'],'no-store');
   const denied=await request.get('/api/productos').set('Origin','https://evil.example').expect(403);assert.ok(!denied.headers['access-control-allow-origin']);

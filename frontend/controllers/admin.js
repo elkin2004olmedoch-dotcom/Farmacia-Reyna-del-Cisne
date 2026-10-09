@@ -5,16 +5,25 @@ import {message,busy,formErrors} from '../views/common.js';
 import {confirmAction} from './dialog.js';
 import {requireUser} from './layout.js';
 import {auth} from '../models/auth.js';
+import {dashboardView,dashboardLoadingView,dashboardErrorView} from '../views/admin-dashboard.js';
 export async function adminController() {
   if(!requireUser('admin.html',true))return;
   document.getElementById('admin-area').hidden=false;
   const requested=new URLSearchParams(location.search).get('tabla');
-  let name=['productos','promociones','pedidos','usuarios','detalles'].includes(requested)?requested:'productos',page=1,result,editing=null,requestId=0;
+  let name=['productos','promociones','pedidos','usuarios','detalles'].includes(requested)?requested:requested?'productos':'dashboard',page=1,result,editing=null,requestId=0;
   const dialog=document.getElementById('editor-dialog');const productForm=document.getElementById('product-form');const promoForm=document.getElementById('promotion-form');
   async function render(){
     const id=++requestId;const tableName=name;const tablePage=page;
+    adminSectionView(tableName);
+    if(tableName==='dashboard'){
+      const dashboard=document.getElementById('admin-dashboard');dashboard.setAttribute('aria-busy','true');dashboardLoadingView();
+      try{const data=await administration.summary();if(id===requestId && auth.isAdmin)dashboardView(data);}
+      catch(error){if(id!==requestId || !auth.isAdmin)return;dashboardErrorView();throw error;}
+      finally{if(id===requestId)dashboard.removeAttribute('aria-busy');}
+      return;
+    }
     const table=document.getElementById('admin-table');const create=document.getElementById('admin-create');
-    result=null;adminSectionView(tableName);table.setAttribute('aria-busy','true');table.innerHTML='<p class="shop-empty" role="status">Cargando registros…</p>';create.disabled=true;
+    result=null;table.setAttribute('aria-busy','true');table.innerHTML='<p class="shop-empty" role="status">Cargando registros…</p>';create.disabled=true;
     for(const button of ['admin-prev','admin-next'])document.getElementById(button).disabled=true;
     try{const loaded=await administration.table(tableName,tablePage);if(id!==requestId || !auth.isAdmin)return;result=loaded;tableView(tableName,loaded);create.disabled=false;}
     catch(error){if(id!==requestId || !auth.isAdmin)return;table.innerHTML='<p class="shop-empty">No se pudieron cargar los registros. Selecciona la sección para volver a intentar.</p>';throw error;}
@@ -26,11 +35,12 @@ export async function adminController() {
     const form=product?productForm:promoForm;editorView(form,record);formErrors(form,{});document.getElementById('editor-status').textContent='';dialog.showModal();form.querySelector('input').focus();
   }
   document.getElementById('admin-create').addEventListener('click',()=>open().catch(error=>message(error.message,true)));
+  document.getElementById('admin-dashboard').addEventListener('click',async event=>{if(!event.target.closest('#admin-retry-summary'))return;try{message('');await render();}catch(error){message(error.message,true);}});
   document.getElementById('admin-table-choice').addEventListener('change',async event=>{name=event.target.value;page=1;history.replaceState(null,'','admin.html?tabla='+name);try{await render();}catch(error){message(error.message,true);}});
   for(const [id,offset] of [['admin-prev',-1],['admin-next',1]])document.getElementById(id).addEventListener('click',async()=>{page+=offset;try{await render();}catch(error){message(error.message,true);}});
   document.getElementById('admin-table').addEventListener('click',async event=>{
     const button=event.target.closest('button');if(!button)return;
-    const row=result.items.find(row=>row.id===(button.dataset.edit || button.dataset.delete));
+    const row=result?.items.find(row=>row.id===(button.dataset.edit || button.dataset.delete));if(!row)return;
     try{if(button.dataset.edit)await open(row);else if(button.dataset.delete && await confirmAction(`¿Eliminar ${row.nombre || row.titulo}? Los productos vendidos se conservan en el historial.`)){busy(button,true);await (name==='productos'?administration.removeProduct(row.id):administration.removePromotion(row.id));await render();document.getElementById('admin-create').focus();message('Registro eliminado.');}}catch(error){message(error.message,true);}finally{if(button.isConnected)busy(button,false);}
   });
   for(const form of [productForm,promoForm])form.addEventListener('submit',async event=>{
@@ -42,4 +52,5 @@ export async function adminController() {
   });
   for(const button of document.querySelectorAll('[data-editor-close]'))button.addEventListener('click',()=>dialog.close());
   await render();
+  if(new URLSearchParams(location.search).get('crear')==='1' && ['productos','promociones'].includes(name) && result && auth.isAdmin)await open();
 }

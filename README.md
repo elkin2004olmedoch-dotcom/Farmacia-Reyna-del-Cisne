@@ -107,6 +107,7 @@ En rutas protegidas: **Authorization: Bearer &lt;token&gt;**.
 | PUT | /api/promociones/:id | admin |
 | DELETE | /api/promociones/:id | admin |
 | GET | /api/admin/tablas | admin |
+| GET | /api/admin/resumen | admin; indicadores, alertas y tendencia |
 | GET | /api/salud | Público; prueba BD |
 
 Catálogo: ?q=solar&categoria=cuidado&page=1&pageSize=20. Pedidos/tablas admiten page/pageSize; máximo 100 registros. Tablas admin: productos, usuarios, pedidos, detalles y promociones.
@@ -178,7 +179,13 @@ Abre **https://localhost:3443/**. El certificado self-signed de desarrollo puede
 
 ## Panel administrador
 
-El panel tiene cabecera, menú y pie propios, con Productos, Promociones, Pedidos de clientes, Usuarios y Detalles de pedidos. Conserva los colores crema/vino de la farmacia. “Ver tienda” permite revisar la página pública y “Cerrar sesión” revoca la sesión.
+El panel adopta el diseño ERP de la referencia: barra lateral fija por áreas, cabecera compacta, dashboard con tarjetas y tablas de gestión a todo el ancho. Conserva los colores crema/vino de la farmacia. General contiene Dashboard; Inventario, Productos; Ventas, Pedidos de clientes y Detalles; Comercial, Promociones; Administración, Usuarios. “Ver tienda” permite revisar la página pública y “Cerrar sesión” revoca la sesión.
+
+`/admin.html` abre el **Dashboard ejecutivo** con ocho indicadores reales: importe de pedidos del mes, importe acumulado, pedidos pendientes, stock bajo, productos activos, clientes activos, administradores y campañas vigentes (incluye vistas previas). Añade alertas de inventario, accesos rápidos, pedidos por estado, tendencia de seis meses y últimos pedidos. Los importes representan pedidos registrados; no son cobros ni facturas.
+
+`GET /api/admin/resumen` genera el resumen en una transacción consistente de Prisma. Calcula dinero en centavos, meses con horario de Ecuador continental (America/Guayaquil), alertas con stock menor o igual a cinco, hasta diez productos en alerta y cinco pedidos recientes. Los meses sin pedidos muestran cero. No altera datos ni necesita otra migración.
+
+Los accesos “Nuevo producto” y “Nueva promoción” abren sus formularios reales; las tarjetas llevan a las tablas correspondientes. El menú móvil usa fondo superpuesto, bloquea el contenido cubierto y mantiene el foco dentro del menú; Escape o tocar el fondo lo cierra y devuelve el foco. Un error del resumen ofrece Reintentar, sin métricas ficticias. Esta adaptación utiliza las funciones actuales; proveedores, nómina, facturación fiscal y contabilidad no forman parte de esta versión.
 
 El cliente dispone de carrito, checkout y “Mis pedidos”. En la sesión admin, las acciones de compra se ocultan al revisar la tienda; /cuenta.html y /checkout.html llevan al panel y /pedidos.html abre todos los pedidos de clientes. Los enlaces /admin.html?tabla=productos, promociones, pedidos, usuarios o detalles seleccionan la sección correspondiente; valores desconocidos abren Productos. La API mantiene los permisos user/admin de pedidos exigidos por la rúbrica; la interfaz separa las tareas de cada rol.
 
@@ -194,11 +201,11 @@ npm run test:browser
 npm audit
 ~~~
 
-**18 pruebas Node:** API/recursos con migración y seed en BD temporal. **10 pruebas Chrome:** cinco recorridos en escritorio/móvil. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
+**20 pruebas Node:** API/recursos con migración y seed en BD temporal. **12 pruebas Chrome:** seis recorridos en escritorio/móvil. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
 
 Se cubren JWT admin, creación admin, user 403, catálogo, carrito persistente, pedido en BD y admin ve todos los pedidos. También stock concurrente, reversión, idempotencia, revocación, CORS, validación ecuatoriana, sanitización, errores de red/500 y CRUD de campañas. Las pruebas de navegador comprueban login por rol, navegación administrativa sin compras, enlaces de sección, redirecciones, vista de tienda sin carrito para admin y cierre de sesión; compras y accesibilidad de cuenta/historial se prueban con un cliente. El panel ignora respuestas atrasadas al cambiar de tabla, bloquea acciones durante la carga y borra el contenido administrativo/cierra diálogos cuando vence la sesión.
 
-Las nueve pantallas se revisan con axe-core WCAG A/AA a 1440 y 375 px, salto al contenido, foco visible, labels, menú y Escape. No sustituye evaluación con lectores de pantalla y usuarios ni certifica WCAG.
+Las nueve pantallas, el dashboard y sus tablas de Productos/Pedidos se revisan con axe-core WCAG A/AA a 1440 y 375 px, salto al contenido, foco visible, labels, menú y Escape. Las pruebas del resumen verifican 401/403, importes, estados, meses vacíos, el cambio diciembre/enero y límites exactos de stock/vigencia. En navegador se cubren tarjetas con datos reales, creación desde accesos rápidos, reintento tras 500 y expiración al cargar el dashboard. No sustituye evaluación con lectores de pantalla y usuarios ni certifica WCAG.
 
 1. [Auditoría 1 — MVC](docs/auditorias/reto2/01-arquitectura-mvc.md).
 2. [Auditoría 2 — Persistencia](docs/auditorias/reto2/02-persistencia-prisma.md).

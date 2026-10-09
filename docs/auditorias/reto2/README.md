@@ -25,7 +25,7 @@ Cada informe incluye matriz de cumplimiento, evidencia reproducible, hallazgos c
 | 5. JWT | Informe 04; firma, vencimiento, revocación y middleware |
 | 6. Roles | Informe 04; usuario recibe 403; admin CRUD y consultas |
 | 7. Seguridad OWASP | Informe 04; validación, sanitización, CORS, hashing y cabeceras |
-| 8. Frontend funcional | Informe 05; diez pruebas de navegador en dos tamaños, incluidos recorridos por rol |
+| 8. Frontend funcional | Informe 05; doce pruebas de navegador en dos tamaños, incluidos dashboard ERP y recorridos por rol |
 | 9. Accesibilidad | Informe 05; axe, navegación con teclado, labels y diálogos |
 | 10. Documentación | README raíz; cinco informes; evidencias; instalación y ZIP |
 

@@ -28,6 +28,7 @@ module.exports=config=> {
   router.put('/promociones/:id',auth,admin,V.id,...V.promotion,V.validated,promos.update);
   router.delete('/promociones/:id',auth,admin,V.id,V.validated,promos.remove);
   router.get('/admin/tablas',auth,admin,query('tabla').isIn(['productos','usuarios','pedidos','detalles','promociones']),...V.pagination,require('../controllers/admin.cjs'));
+  router.get('/admin/resumen',auth,admin,require('../controllers/admin-summary.cjs'));
   router.get('/salud',require('../controllers/salud.cjs'));
   return router;
 };

@@ -5,6 +5,8 @@
   "productos": 18,
   "loginAdminHTTP": 200,
   "panelHTTP": 200,
+  "resumenAdminHTTP": 200,
+  "dashboardERP": true,
   "navegacionAdminPropia": true,
   "archivosPrivadosPublicados": 0,
   "auditorias": 5

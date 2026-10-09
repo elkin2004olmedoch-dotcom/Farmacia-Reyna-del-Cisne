@@ -19,7 +19,9 @@ Comprobar contratos HTTP, permisos, códigos de estado, CRUD, registro de pedido
 | GET `/api/pedidos/mis-pedidos` | JWT user/admin | 200 solo pedidos del usuario autenticado |
 | GET `/api/pedidos` | JWT admin | 200 pedidos de todos los usuarios; user 403 |
 
-Rutas adicionales: GET `/api/auth/me`, POST `/api/auth/logout`, GET público y CRUD admin `/api/promociones`, GET admin `/api/admin/tablas` y GET `/api/salud`. La última comprueba disponibilidad de la BD con `SELECT 1` sin exponer credenciales.
+Rutas adicionales: GET `/api/auth/me`, POST `/api/auth/logout`, GET público y CRUD admin `/api/promociones`, GET admin `/api/admin/tablas`, GET admin `/api/admin/resumen` y GET `/api/salud`. La última comprueba disponibilidad de la BD con `SELECT 1` sin exponer credenciales.
+
+El resumen administrativo responde 401 sin sesión, 403 con rol user y 200 con admin. Devuelve indicadores, estados, seis meses de tendencia, hasta diez alertas y cinco pedidos recientes, sobre un snapshot Serializable de Prisma. Los importes son centavos enteros; los períodos usan America/Guayaquil. Stock bajo incluye cero y cinco, y excluye productos inactivos. Las campañas respetan publicación, producto activo, inicio inclusivo y fin exclusivo; se incluyen las vistas previas elegibles. Las dos nuevas pruebas de API/modelo cubren permisos, suma precisa, límites de fechas, cambio de año, conteos y resumen vacío; el total Node es veinte casos. El endpoint describe pedidos y no pagos o facturas.
 
 ## Contratos y buenas prácticas
 

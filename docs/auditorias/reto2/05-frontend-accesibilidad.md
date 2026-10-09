@@ -22,6 +22,7 @@ Comprobar que la interfaz usa la API y completa el flujo catálogo → carrito �
 | 5.5 Todas las tablas | Productos, Usuarios, Pedidos, Detalles y Promociones | Selector y consultas con admin | Implementado |
 | 5.5 Solo admin | Enlace y contenido por rol, más autorización backend | User ve denegación y recibe 403 | Implementado |
 | Separación cliente/admin | Cabecera, menú móvil, pie y secciones administrativas propios; login y rutas por rol | Admin sin carrito ni Mis pedidos, cliente conserva checkout/historial, logout | Implementado |
+| Dashboard ERP | Barra lateral por áreas, ocho métricas de API, alertas, accesos rápidos, estados, tendencia y pedidos recientes | Datos del resumen coinciden con tarjetas; CRUD desde acceso rápido; 500/Reintentar y 401 | Implementado |
 
 ## Campañas y otras pantallas
 
@@ -29,7 +30,9 @@ Promociones pasó de datos estáticos a entidad de BD. Admin crea, edita y elimi
 
 Las nueve páginas son inicio, catálogo, ficha, comparación, cuenta, checkout, pedidos, administrador y ayuda. Los componentes de comparación reutilizan los productos de la API. Contacto valida datos ecuatorianos y prepara un mensaje para que el usuario lo revise antes de enviarlo por WhatsApp.
 
-El administrador entra directamente en el panel al iniciar sesión. Productos y Promociones ofrecen CRUD; Pedidos de clientes, Usuarios y Detalles son consultas de gestión. El panel utiliza navegación propia en escritorio y móvil, conserva la identidad crema/vino y ofrece Ver tienda y Cerrar sesión. Los enlaces ?tabla= seleccionan únicamente las cinco secciones permitidas. La sesión admin redirige cuenta/checkout al panel e historial a todos los pedidos; las acciones de compra se ocultan en la tienda pública. El contrato de roles de la API de pedidos se mantiene según la rúbrica.
+El administrador entra directamente en el Dashboard ejecutivo al iniciar sesión. El diseño toma como referencia el ERP aportado: sidebar fija por áreas, topbar, tarjetas y tablas a todo el ancho, con colores crema/vino. Productos y Promociones ofrecen CRUD; Pedidos de clientes, Usuarios y Detalles son consultas de gestión. Ofrece Ver tienda y Cerrar sesión. Los enlaces ?tabla= seleccionan únicamente las cinco secciones permitidas; la ruta sin tabla muestra el resumen. La sesión admin redirige cuenta/checkout al dashboard e historial a todos los pedidos; las acciones de compra se ocultan en la tienda pública. El contrato de roles de la API de pedidos se mantiene según la rúbrica.
+
+El dashboard obtiene ocho indicadores de /api/admin/resumen y muestra alertas de stock menor o igual a cinco, accesos a creación/gestión, pedidos por estado, una gráfica SVG de seis meses y los últimos cinco pedidos. La gráfica tiene título y descripción textual con todos los importes/cantidades; los períodos sin pedidos muestran cero. Se presentan importes de pedidos registrados, no ventas cobradas. Campos dinámicos se escapan. El estado de error ofrece Reintentar y no reemplaza cifras con ejemplos. Se mantienen solo las funciones actuales, según la elección del usuario.
 
 Pruebas de separación: login admin incluso con next=checkout, enlaces de promociones, sección inválida, selector de las cinco tablas, redirecciones de cuenta/checkout/historial, controles de compra ocultos después de filtrar catálogo y en ficha, logout y acceso admin anónimo. El flujo cliente continúa probando registro, compra real, historial privado y denegación administrativa. Axe revisa las ocho pantallas comerciales con cliente y el panel con admin.
 
@@ -40,11 +43,11 @@ Correcciones verificadas en el panel: las solicitudes de tabla conservan su secc
 | Criterio | Control y comprobación |
 |---|---|
 | HTML5 semántico | Header, nav, main, section y footer; idioma es; jerarquía de títulos |
-| Teclado | Salto al contenido; Tab/Enter; menú móvil; Escape y diálogos nativos |
+| Teclado | Salto al contenido; Tab/Enter; drawer móvil con foco inicial, recorrido limitado y contenido cubierto inert; Escape/fondo restauran foco; diálogos nativos |
 | Foco visible | Contorno de tres píxeles; foco inicial y restauración en confirmación |
 | Labels | Label asociado por ID; instrucciones y errores por aria-describedby |
 | Componentes dinámicos | Role status/alert, aria-live, aria-expanded, aria-controls y diálogos nombrados |
-| Contraste | Paleta crema/vino y contraste automático WCAG A/AA en nueve páginas |
+| Contraste | Paleta crema/vino y contraste automático WCAG A/AA en nueve páginas, dashboard y tablas Productos/Pedidos |
 | Responsive | Sin desbordamiento de página en escritorio/móvil; las tablas grandes tienen scroll propio accesible |
 
 Axe se ejecuta con etiquetas WCAG 2 A/AA y 2.1 A/AA. No sustituye una evaluación completa con lectores de pantalla, usuarios con discapacidad o una certificación WCAG.

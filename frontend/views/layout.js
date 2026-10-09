@@ -6,6 +6,7 @@ export function sessionView(user,count) {
   for(const element of document.querySelectorAll('[data-admin-session]'))element.hidden=!admin;
   for(const element of document.querySelectorAll('[data-admin-guest]'))element.hidden=admin;
   for(const element of document.querySelectorAll('[data-admin-name]'))element.textContent=user?.nombre || '';
+  for(const element of document.querySelectorAll('[data-admin-email]'))element.textContent=user?.email || '';
   for(const counter of document.querySelectorAll('[data-shop-count]'))counter.textContent=count;
   for(const link of document.querySelectorAll('.shop-cart'))link.setAttribute('aria-label',`Carrito, ${count} unidades`);
 }

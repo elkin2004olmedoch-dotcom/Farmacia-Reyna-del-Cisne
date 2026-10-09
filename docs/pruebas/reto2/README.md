@@ -44,18 +44,18 @@ npm audit
 
 ## Resultado final observado
 
-- [Pruebas Node](node-tests.txt): 18 aprobadas, cero fallos.
-- [Pruebas Chrome](browser-tests.txt): 10 aprobadas, cero fallos; 1440 y 375 px.
+- [Pruebas Node](node-tests.txt): 20 aprobadas, cero fallos.
+- [Pruebas Chrome](browser-tests.txt): 12 aprobadas, cero fallos; 1440 y 375 px.
 - [npm audit](npm-audit.json): cero vulnerabilidades reportadas.
 - [Resumen de ejecución](resumen.json): los tres comandos terminaron con código cero.
 - [Portada](capturas/inicio.png), [catálogo escritorio](capturas/catalogo.png) y [catálogo móvil](capturas/catalogo-movil.png): catálogo de trabajo de 18 referencias, sin credenciales ni tokens en pantalla.
-- [Panel administrador](capturas/admin.png) y [panel móvil](capturas/admin-movil.png): navegación propia con estilo crema/vino, sin acciones de compra.
+- [Dashboard ERP](capturas/admin.png), [dashboard móvil](capturas/admin-movil.png) y [tabla de productos](capturas/admin-productos.png): datos sintéticos de la BD aislada de pruebas, navegación por áreas y estilo crema/vino.
 
 Para regenerar las salidas ejecuta `npm run verify`. Las credenciales de tests corresponden a bases temporales y no son las claves aleatorias del administrador de trabajo. La API y el navegador no usan datos personales reales en esas pruebas.
 
 ## Instalación desde la entrega
 
-El ZIP se inspeccionó para verificar cinco auditorías, frontend/backend MVC, migración, seed, README, lockfile y .env.example. No contenía archivos .env privados, SQLite, claves ni certificados. Se extrajo en una carpeta de comprobación dentro de .publish, se ejecutaron npm ci y npm run setup y se verificaron catálogo, login admin y panel por HTTP. [Resultado de la copia limpia](zip-verificado.json).
+El ZIP se inspeccionó para verificar cinco auditorías, frontend/backend MVC, migración, seed, README, lockfile y .env.example. No contenía archivos .env privados, SQLite, claves ni certificados. Se extrajo en una carpeta de comprobación dentro de .publish, se ejecutaron npm ci y npm run setup y se verificaron catálogo, login admin, panel ERP y resumen protegido por HTTP. La copia inicial devolvió 18 productos activos y seis meses de tendencia. [Resultado de la copia limpia](zip-verificado.json).
 
 ## HTTPS de desarrollo
 
@@ -67,4 +67,8 @@ Axe con etiquetas WCAG 2 A/AA y 2.1 A/AA en nueve pantallas y dos tamaños: ocho
 
 ## Separación de roles en la interfaz
 
-El login de admin llega directamente a /admin.html aunque el destino solicitado sea checkout. El panel no contiene carrito, búsqueda de compras, comparación ni Mis pedidos. La navegación de promociones y el selector sincronizan sección/título; una sección desconocida vuelve a Productos. Las rutas de cuenta/checkout de admin llevan al panel y /pedidos.html abre Pedidos de clientes. En la tienda, los controles de compra de admin permanecen ocultos al filtrar y abrir fichas. Logout elimina la sesión y el acceso anónimo al panel solicita credenciales administrativas. El cliente conserva el recorrido de compra e historial y no puede abrir el área de gestión. Una respuesta de Productos retenida hasta después de Promociones se descarta; mientras carga no quedan acciones antiguas disponibles. Un 401 durante una edición cierra el diálogo, limpia el área y solicita nuevo login. Estas comprobaciones forman parte de los diez casos Chrome.
+El login de admin llega directamente al Dashboard ejecutivo de /admin.html aunque el destino solicitado sea checkout. El panel no contiene carrito, búsqueda de compras, comparación ni Mis pedidos. La navegación de promociones y el selector sincronizan sección/título; una sección desconocida vuelve a Productos. Las rutas de cuenta/checkout de admin llevan al dashboard y /pedidos.html abre Pedidos de clientes. En la tienda, los controles de compra de admin permanecen ocultos al filtrar y abrir fichas. Logout elimina la sesión y el acceso anónimo al panel solicita credenciales administrativas. El cliente conserva el recorrido de compra e historial y no puede abrir el área de gestión. Una respuesta de Productos retenida hasta después de Promociones se descarta; mientras carga no quedan acciones antiguas disponibles. Un 401 durante una edición cierra el diálogo, limpia el área y solicita nuevo login. Estas comprobaciones forman parte de los doce casos Chrome.
+
+## Dashboard ERP
+
+Pruebas de API/modelo: acceso admin 200, invitado 401 y cliente 403; datos del snapshot; centavos sin errores de coma flotante; seis meses incluyendo meses sin pedidos; cambio diciembre/enero Ecuador; campañas activas/inactivas y fechas límite; productos activos/inactivos y stocks cero/cinco/seis; máximo diez alertas y cinco recientes; resumen vacío. Pruebas Chrome: ocho tarjetas coinciden con datos de API, gráfica con título/descripción accesibles, alerta del producto creado con cinco unidades, enlaces de Nuevo producto/Nueva promoción abren editores reales, error 500 sin cifras ficticias y reintento, 401 elimina sesión y redirige. El menú móvil enfoca su primer enlace y Tab permanece en menú/cierre; el contenido cubierto es inert y se rehabilita al cerrar con fondo/Escape. Axe incluye dashboard, tabla de productos y tabla de pedidos en ambos tamaños.
