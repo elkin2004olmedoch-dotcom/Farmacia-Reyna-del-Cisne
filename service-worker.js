@@ -1,7 +1,8 @@
 'use strict';
 
-const CACHE_NAME = 'farmacia-reina-shell-v3-cream-promotions';
+const CACHE_NAME = 'farmacia-reina-shell-v4-product-photo-d13f81e66a94';
 const APP_FILES = [
+  'assets/images/producto-alcohol-antiseptico-d13f81e66a94.webp',
   'assets/images/producto-tabletas-blister.svg',
   'assets/images/producto-medicamento-liquido.svg',
   'assets/images/producto-generico-referencia.svg',
@@ -57,6 +58,23 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin
     || !url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
+
+  if (/\/data\/(productos|promociones)\.json$/.test(url.pathname)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      try {
+        const response = await fetch(request, { cache: 'no-store' });
+        if (response.ok) await cache.put(request, response.clone());
+        return response;
+      } catch (_) {
+        return await cache.match(request, { ignoreSearch: true })
+          || new Response('No se pudo cargar el catálogo sin conexión.', {
+            status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+          });
+      }
+    })());
+    return;
+  }
 
   if (request.mode === 'navigate') {
     event.respondWith((async () => {

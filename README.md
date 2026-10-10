@@ -74,6 +74,10 @@ Servidor: ruta → validación/JWT/rol → controlador HTTP → modelo Prisma �
 
 Los HTML, js/ y assets/ raíz conservan el Reto 1 como antecedente; su README está en docs/README-RETO-1.md. **Evalúa el Reto 2 con npm start y localhost:3000**, no abriendo HTML raíz ni usando el servidor estático anterior. GitHub Pages solo sirve contenido estático; esta aplicación necesita un proceso Node y BD.
 
+El enlace GitHub Pages de este repositorio publica la tienda estática de la raíz. Sus productos se leen de `data/productos.json`; las ediciones del administrador local se guardan en SQLite e imágenes locales, por lo que requieren una publicación explícita para aparecer allí. Para actualización automática entre administrador y clientes en internet, despliega la aplicación MVC completa con Node.js, base de datos e imágenes persistentes y utiliza ese mismo servidor para ambos roles. La ficha pública de Alcohol antiséptico incorpora la imagen seleccionada localmente mediante una copia pública versionada; las cuentas y pedidos permanecen privados.
+
+El service worker consulta primero en internet los JSON de productos y promociones y guarda la última respuesta correcta para uso sin conexión. Las imágenes nuevas usan un nombre versionado y cada cambio de recursos debe actualizar la versión de caché del service worker para reemplazar las copias anteriores.
+
 ## Persistencia y consistencia
 
 | Entidad | Campos principales |
