@@ -4,7 +4,9 @@
 
 Verificar entidades, relaciones, migraciones, seed, pedidos, estados, precios e imágenes persistidas. Las pruebas usan SQLite temporal, aplican las mismas migraciones de entrega y abren otro PrismaClient para comprobar persistencia. Se verificó además la migración commerce sobre filas anteriores y su integridad referencial. Los resultados completos se conservan en `docs/pruebas/reto2/`.
 
-Se preparó también PostgreSQL en Supabase con schema, migración y cliente Prisma independientes. El traslado privado conserva IDs, hashes, fechas, decimales y referencias de imágenes, exige destino vacío y requiere `--apply`; la simulación no escribe. La configuración omite el seed inicial con `SKIP_INITIAL_SEED=true` hasta importar. Estas comprobaciones usan clientes simulados, además de validar el schema y generar el cliente PostgreSQL; no se ha conectado a Supabase ni desplegado en Render. Véase el [alcance de las pruebas de nube](../../pruebas/reto2/nube.json).
+PostgreSQL en Supabase ya está conectado, con schema, migración y cliente Prisma independientes. El traslado privado real conservó IDs, hashes, fechas, decimales y referencias de imágenes: un administrador, 18 productos, dos promociones, una marca Semilla y cero pedidos. Se comparó cada fila de las siete tablas contra SQLite y el SHA-256 de la imagen contra Storage; todos coincidieron, incluidos los hashes de credenciales. El traslado exige destino vacío y `--apply`; el modo de simulación no escribe. `SKIP_INITIAL_SEED=true` evita repoblar los datos importados.
+
+Las pruebas repetibles de importación usan clientes simulados. Por separado, las 17 comprobaciones reales con Express desde el equipo local verificaron creación de cliente y pedido, precio descontado, stock, cancelación repetida y persistencia tras reconectar a Supabase. Sus datos sintéticos se limpiaron y se volvió a comprobar la igualdad con el origen. RLS está habilitado sin políticas públicas en las siete tablas de farmacia y `_prisma_migrations`. Render aún no está publicado; véase el [alcance de las pruebas de nube](../../pruebas/reto2/nube.json).
 
 ## Matriz de subpuntos
 
@@ -18,7 +20,7 @@ Se preparó también PostgreSQL en Supabase con schema, migración y cliente Pri
 | PedidoEstado | Pedido y actor FK, estado anterior/nuevo y fecha | Historial inicial y transiciones administrativas; una sola cancelación | Implementado |
 | Carrito frontend | Solo identificadores y cantidades en localStorage | Recarga del navegador conserva selección | Implementado |
 | Pedido final en BD | Cabecera y detalles en una transacción Prisma | Pedido sigue existiendo con otro cliente de BD | Implementado |
-| Motor relacional | SQLite local, alternativa aceptada por el estudiante; PostgreSQL opcional en nube | Archivo SQLite real; schema/migración y cliente PostgreSQL validados | SQLite comprobado; nube preparada sin despliegue real |
+| Motor relacional | SQLite local, alternativa aceptada por el estudiante; PostgreSQL en Supabase | SQLite real; migración aplicada, traslado íntegro y persistencia PostgreSQL real tras reconectar | Ambos motores comprobados; publicación en Render pendiente |
 | Migraciones y seed | `202610090001_init`, `202610090002_seed_marker`, `202610090003_commerce`, `seed.cjs` | Base nueva y migración histórica; seed conserva el estado administrativo | Implementado |
 | Resumen administrativo | Agregados de Producto, Usuario, Pedido y Promocion ya persistidos | `server/models/admin-summary.cjs`, endpoint protegido y pruebas del resumen | Implementado sin nuevas entidades ni migraciones |
 | Semilla | ID de inicialización y `createdAt`; sin datos personales ni exposición en las tablas del panel | Marca `catalogo-inicial-v1`, detección del catálogo previo y prueba de seed repetido | Implementado como metadato de instalación |

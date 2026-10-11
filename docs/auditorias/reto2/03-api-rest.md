@@ -4,7 +4,7 @@
 
 Comprobar contratos HTTP, permisos, CRUD, pedidos, estados, descuentos, imágenes y conflictos de edición. Las pruebas usan Supertest con Express real y Prisma sobre bases temporales migradas. Los resultados de la ejecución completa, ejemplos y auditoría de dependencias están en `docs/pruebas/reto2/`.
 
-Los contratos se conservan con la opción PostgreSQL/Storage. Las pruebas HTTP y de navegador usan SQLite real temporal; las comprobaciones adicionales de nube usan servicios simulados. No se ha verificado una conexión real a Supabase ni un despliegue de Render; véase el [alcance de nube](../../pruebas/reto2/nube.json).
+Los contratos se conservan con PostgreSQL/Storage. La suite repetible usa SQLite real temporal y simulaciones para aislar servicios externos. Por separado, 17 comprobaciones puntuales de Express desde el equipo local contra Supabase real verificaron login del administrador importado, registro/login de cliente, 401/403 por rol, resumen ERP, carga WebP, edición visible para cliente y promoción con imagen propia. También verificaron descuento del 25 % ($12 → $9), pedido de dos unidades por $18, stock de cinco a tres, cancelación repetida que repone una sola vez a cinco, consulta del estado por cliente y persistencia tras reconectar. Los datos sintéticos se limpiaron y la paridad con el origen se comprobó nuevamente. El backend público de Render todavía no está desplegado; véase el [alcance de nube](../../pruebas/reto2/nube.json).
 
 ## Matriz del subpunto 3.1
 

@@ -4,7 +4,7 @@
 
 Revisar autenticación, autorización, entradas, transporte, exposición de datos e integridad. Se probaron JWT inválido/vencido/revocado, roles, registro manipulado, documentos/precios/cantidades, CORS, cuerpos y errores. El alcance incluye dashboard, ediciones concurrentes, cambios de estado, descuentos, carga de imágenes y recuperación. Las ejecuciones completas y `npm audit` se conservan en `docs/pruebas/reto2/`; HTTPS local se comprobó mediante `/api/salud`.
 
-La opción Render/Supabase incorpora controles de configuración, RLS y almacenamiento; las pruebas adicionales usan servicios simulados, mientras API y navegador usan SQLite real temporal. El despliegue y la conexión real a Supabase están pendientes: el [alcance de nube](../../pruebas/reto2/nube.json) no presenta esas comprobaciones como una auditoría del servicio publicado.
+La opción Render/Supabase incorpora controles de configuración, RLS y almacenamiento. La suite repetible usa SQLite real temporal y simulaciones para aislar servicios externos. La conexión real a Supabase y el traslado ya se completaron: RLS está habilitado sin políticas públicas en las siete tablas de farmacia y `_prisma_migrations`, y la comparación del traslado confirmó los hashes de credenciales intactos. Las 17 comprobaciones puntuales de Express local contra PostgreSQL/Storage reales incluyeron login del administrador conservado, registro/login de cliente, permisos 401/403 y carga de imágenes protegida. Render aún no está publicado; el [alcance de nube](../../pruebas/reto2/nube.json) distingue esta verificación del backend local conectado a Supabase de una auditoría del servicio público pendiente.
 
 ## Matriz de subpuntos
 
@@ -44,7 +44,7 @@ Las prácticas de TLS, entrada validada y cabeceras siguen la orientación de [s
 - Cédula de registro: no persistida. Documento del pedido: últimos cuatro dígitos, resto enmascarado. No existen campos bancarios en la compra real.
 - Los administradores ven datos de entrega necesarios, sin passwordHash ni claves de reintento. Logger sin request body ni Authorization.
 - Configuración privada, SQLite, certificados, node_modules, `server/backups/` e imágenes UUID de trabajo se excluyen de Git y ZIP. El archivo de configuración de ejemplo no contiene claves reales.
-- DATABASE_URL, JWT_SECRET y SUPABASE_SECRET_KEY (o SUPABASE_SERVICE_ROLE_KEY heredada) se configuran solo en el entorno privado del servidor; no se envían al navegador ni se incorporan a Git o ZIP. Las migraciones PostgreSQL habilitan RLS sin políticas de acceso público para las tablas de la farmacia.
+- DATABASE_URL, JWT_SECRET y SUPABASE_SECRET_KEY (o SUPABASE_SERVICE_ROLE_KEY heredada) se configuran solo en el entorno privado del servidor; no se envían al navegador ni se incorporan a Git o ZIP. La migración PostgreSQL aplicada habilitó RLS sin políticas de acceso público en las siete tablas de farmacia y `_prisma_migrations`.
 - El bucket público de Supabase se reserva para imágenes WebP. Las cuentas, hashes y pedidos permanecen en PostgreSQL privado; las escrituras de imágenes pasan por Express con JWT/rol y una clave de servidor, sin sobrescribir UUID.
 
 ## Controles del dashboard y separación de roles

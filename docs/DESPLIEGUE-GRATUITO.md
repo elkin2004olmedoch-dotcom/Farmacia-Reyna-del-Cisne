@@ -1,6 +1,6 @@
 # Publicar la farmacia completa: Render y Supabase
 
-Estado: el proyecto tiene configuración de despliegue y pruebas locales. **El backend todavía no está desplegado**. `data/deployment.json` permanece con `appOrigin: null` hasta comprobar el servicio público. GitHub Pages conserva su demostración estática mientras tanto.
+Estado al 11 de octubre de 2026: **Supabase ya está conectado y conserva el catálogo, administrador, promociones y foto trasladados**. Se verificaron la integridad del traslado y 17 operaciones de API desde el equipo contra PostgreSQL/Storage reales. **El backend público todavía no está desplegado**: Render solicitó verificación de tarjeta aun con Free seleccionado. `data/deployment.json` permanece con `appOrigin: null` hasta comprobar el servicio público. GitHub Pages conserva su demostración estática mientras tanto.
 
 GitHub Pages publica HTML/CSS/JavaScript, pero no ejecuta Express ni comparte la SQLite de tu computadora. La aplicación completa debe ejecutarse en un servidor: usuarios y administrador abrirán el mismo enlace de Render, respaldado por PostgreSQL y Storage de Supabase. Las cuentas de demostración del navegador son distintas de las cuentas MVC.
 
@@ -15,7 +15,7 @@ Las migraciones PostgreSQL habilitan RLS en todas las tablas de la farmacia y en
 
 ## 2. Crear el servicio gratuito de Render
 
-1. Entra a [Render](https://dashboard.render.com/) con GitHub. Crea un **Blueprint** desde este repositorio, usando el archivo `render.yaml`. Comprueba que el servicio indique **Free**. Este archivo no crea una base de datos ni un disco de pago en Render.
+1. Entra a [Render](https://dashboard.render.com/). Puedes crear un **Web Service** usando la URL pública de este repositorio, rama `main`, región Virginia, build `npm ci --include=dev && npm run setup:production`, inicio `npm start` y health check `/api/salud`; importa las variables mediante el formulario privado. También está disponible el **Blueprint** `render.yaml`. Comprueba que el servicio indique **Free ($0/mes)**. No crees base de datos ni disco de pago en Render. En la cuenta utilizada, desplegar Free abrió el formulario **Add Card** con una autorización temporal de USD 1; ese paso lo completa el titular. [Verificación de tarjeta](https://render.com/pricing).
 2. Configura los valores privados solicitados:
 
 | Variable | Valor |
@@ -26,7 +26,7 @@ Las migraciones PostgreSQL habilitan RLS en todas las tablas de la farmacia y en
 | `ADMIN_EMAIL` | Correo de la cuenta administradora que se conservará/importará |
 | `ADMIN_PASSWORD` | Contraseña privada: mínimo 10 caracteres, letra y número, máximo 72 bytes |
 
-`JWT_SECRET` se genera en Render. El blueprint fija `NODE_ENV=production`, `HOST=0.0.0.0`, `IMAGE_STORAGE=supabase`, bucket `farmaciaproductos` y `SKIP_INITIAL_SEED=true`. El `PORT` y `RENDER_EXTERNAL_URL` los asigna Render. CORS usa el origen HTTPS del servicio por defecto; si necesitas otros clientes, configura `CORS_ORIGIN` con orígenes HTTPS exactos separados por comas. Si ya usas una clave heredada, deja `SUPABASE_SECRET_KEY` vacía y agrega `SUPABASE_SERVICE_ROLE_KEY` como secreto privado en el servicio.
+`JWT_SECRET` se genera en Render con Blueprint, o se prepara aleatoriamente y se importa de forma privada para un Web Service manual. El blueprint fija `NODE_ENV=production`, `HOST=0.0.0.0`, `IMAGE_STORAGE=supabase`, bucket `farmaciaproductos` y `SKIP_INITIAL_SEED=true`. El `PORT` y `RENDER_EXTERNAL_URL` los asigna Render. CORS usa el origen HTTPS del servicio por defecto; si necesitas otros clientes, configura `CORS_ORIGIN` con orígenes HTTPS exactos separados por comas. Si ya usas una clave heredada, deja `SUPABASE_SECRET_KEY` vacía y agrega `SUPABASE_SERVICE_ROLE_KEY` como secreto privado en el servicio.
 
 3. Ejecuta el despliegue. La compilación genera el cliente Prisma PostgreSQL independiente y aplica las migraciones. El seed se omite inicialmente para poder trasladar tu base local a una base vacía. Si vas a importar datos, conserva el enlace sin compartir hasta terminar el traslado: registrar usuarios antes haría que el destino ya no estuviera vacío y la importación se rechazaría para proteger esos registros.
 
@@ -70,7 +70,7 @@ Publica los cambios de `data/deployment.json` y `service-worker.js` en GitHub. L
 
 ## Límites y respaldos
 
-Render Free suspende el servidor después de 15 minutos sin tráfico; el siguiente acceso puede tardar aproximadamente un minuto. Supabase Free puede pausar el proyecto tras una semana con poca actividad. Estos planes permiten conservar un enlace y datos con límites, **sin garantizar disponibilidad continua**. Las cuentas y el bucket gratuito ya fueron creados; todavía no se han contratado planes ni transferido datos reales desde este proyecto.
+Render Free suspende el servidor después de 15 minutos sin tráfico; el siguiente acceso puede tardar aproximadamente un minuto. Supabase Free puede pausar el proyecto tras una semana con poca actividad. Estos planes permiten conservar un enlace y datos con límites, **sin garantizar disponibilidad continua**. Las cuentas y el bucket gratuito ya fueron creados y los datos se trasladaron directamente a Supabase; no se han contratado planes de pago. Si agregas una tarjeta, Render puede facturar excesos de transferencia o minutos de compilación; revisa sus límites de uso y el límite de gasto de compilación. [Condiciones de facturación de instancias gratuitas](https://render.com/docs/faq#all-of-my-services-run-on-free-instances-can-i-still-be-billed).
 
 Render Free tiene almacenamiento efímero: por eso esta configuración guarda PostgreSQL e imágenes en Supabase. Los respaldos SQLite automáticos siguen funcionando localmente; en PostgreSQL se omiten y el servidor avisa que debes respaldar el servicio alojado. Supabase Free no incluye backups automáticos: exporta la base con `pg_dump` o las herramientas del proveedor y copia también los objetos de Storage. Una copia de la base no incluye las fotos de Storage.
 

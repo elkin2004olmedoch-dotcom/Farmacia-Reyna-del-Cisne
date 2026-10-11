@@ -1,6 +1,6 @@
 # Evidencias del Reto 2
 
-Las pruebas de API y navegador se ejecutan contra SQLite real con las migraciones y el seed de entrega, en una BD temporal separada de `server/prisma/farmacia.db`. Las pruebas adicionales de nube usan un servidor HTTP de almacenamiento simulado y clientes de importación simulados. No modifican datos personales de trabajo ni conectan a una cuenta real de Supabase.
+Las pruebas de API y navegador se ejecutan contra SQLite real con las migraciones y el seed de entrega, en una BD temporal separada de `server/prisma/farmacia.db`. Las pruebas adicionales repetibles de nube usan un servidor HTTP de almacenamiento simulado y clientes de importación simulados. Separadamente se hizo una transferencia y una comprobación puntual contra PostgreSQL y Storage reales de Supabase, con credenciales privadas excluidas de las evidencias.
 
 ## Reproducir
 
@@ -56,7 +56,7 @@ npm audit
 
 ## Resultado final observado
 
-- [Pruebas Node](node-tests.txt): 76 aprobadas, cero fallos.
+- [Pruebas Node](node-tests.txt): 80 aprobadas, cero fallos.
 - [Pruebas Chrome](browser-tests.txt): 14 aprobadas, cero fallos; 1440 y 375 px.
 - [npm audit](npm-audit.json): cero vulnerabilidades reportadas.
 - [Resumen de ejecución](resumen.json): los tres comandos terminaron con código cero.
@@ -74,7 +74,9 @@ Para regenerar las salidas ejecuta `npm run verify`. Las credenciales de tests c
 
 El schema PostgreSQL y la migración se validaron/generaron con Prisma. Un entorno temporal sin cliente SQLite generado comprobó el cliente PostgreSQL, `Decimal`, precio descontado y aislamiento `Serializable` sin abrir una BD. Las 34 pruebas del antecedente estático también pasan, incluidos el inicio de sesión con almacenamiento bloqueado y el enlace Pages hacia el servicio público. [Alcance de nube](nube.json).
 
-Render y Supabase todavía no están conectados. No se ejecutó la importación sobre datos reales ni se probó una BD PostgreSQL remota. `data/deployment.json` conserva `appOrigin: null`; el enlace de Pages se activará después de comprobar el servicio real y sus cuentas.
+Supabase real ya está conectado: se aplicaron las migraciones, se comprobó RLS en las ocho tablas sin políticas públicas y se importaron un administrador, 18 productos, dos promociones, una semilla y una foto. Las siete tablas coinciden fila por fila con la fuente y la foto conserva SHA-256. La API ejecutada desde el equipo pasó 17 comprobaciones contra PostgreSQL/Storage reales: salud, administrador conservado, resumen ERP, registro/login cliente, permisos 401/403, imagen, edición pública, promoción e imagen propia, precio de USD 12 a USD 9 con 25%, pedido de USD 18, stock, cancelación repetida, estado visible y persistencia tras reconectar. Los registros e imagen sintéticos fueron retirados y se volvió a comprobar la igualdad del destino con la fuente. Esta comprobación no representa un servicio público de Render ni una prueba de disponibilidad. [Detalle sin secretos](nube.json).
+
+Render Free permanece en el formulario de creación: el proveedor solicitó una tarjeta con autorización temporal de USD 1. El usuario está completando ese paso. `data/deployment.json` conserva `appOrigin: null`; el enlace de Pages se activará después de comprobar el backend público y sus cuentas.
 
 ## Instalación desde la entrega
 

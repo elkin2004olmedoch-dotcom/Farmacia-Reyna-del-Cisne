@@ -1,7 +1,7 @@
 {
-  "fecha": "2026-10-11T17:09:19.500Z",
+  "fecha": "2026-10-11T17:29:04.633Z",
   "pruebas": {
-    "servidorNode": 76,
+    "servidorNode": 80,
     "navegadorChrome": 14,
     "antecedenteEstatico": 34,
     "vulnerabilidadesNpm": 0
@@ -12,27 +12,72 @@
     "migracionGenerada": true,
     "clienteGeneradoSinClienteSqlite": true,
     "decimalYAislamientoVerificadosSinBD": true,
-    "conexionRealComprobada": false
+    "conexionRealComprobada": true,
+    "rls8TablasSinPoliticasPublicas": true
   },
   "storage": {
     "servidorHttpSimulado": true,
     "autorizacionAdmin": true,
     "webpValidado": true,
     "imagenesPublicasSinClaves": true,
-    "cargasRealesASupabase": 0,
-    "claveActualSoloEnApikey": true
+    "cargasRealesASupabase": 2,
+    "claveActualSoloEnApikey": true,
+    "imagenTrasladadaConHashIdentico": true,
+    "imagenSinteticaRetirada": true
   },
   "traslado": {
     "clientesSimulados": true,
     "idsYHashesConservados": true,
     "reintentoSinDuplicados": true,
-    "datosPersonalesTransferidos": false
+    "datosPersonalesTransferidos": true,
+    "conteosConservados": {
+      "usuario": 1,
+      "producto": 18,
+      "pedido": 0,
+      "pedidoDetalle": 0,
+      "promocion": 2,
+      "pedidoEstado": 0,
+      "semilla": 1
+    },
+    "registrosIguales": {
+      "usuario": true,
+      "producto": true,
+      "pedido": true,
+      "pedidoDetalle": true,
+      "promocion": true,
+      "pedidoEstado": true,
+      "semilla": true
+    }
   },
   "despliegue": {
     "renderServicioCreado": false,
     "supabaseProyectoCreado": true,
     "bucketImagenesCreado": true,
-    "pagesAppOrigin": null
+    "pagesAppOrigin": null,
+    "renderVerificacionTarjetaPendiente": true
   },
-  "limite": "Las cuentas y el bucket ya están creados. Falta completar las claves privadas, desplegar, trasladar los datos y verificar el backend real antes de activar Pages."
+  "limite": "Supabase y el traslado real están verificados. Las 17 operaciones de API se ejecutaron desde el equipo contra los servicios reales. Render Free solicitó verificación de tarjeta; no hay backend público confirmado ni redirección Pages activada todavía.",
+  "apiSupabaseReal": {
+    "fechaUTC": "2026-10-11T17:27:24.871Z",
+    "servidor": "local contra PostgreSQL y Storage reales; Render pendiente",
+    "comprobaciones": {
+      "saludPostgresql": true,
+      "loginAdministradorConservado": true,
+      "resumenERP": true,
+      "registroClienteCompartido": true,
+      "loginCliente": true,
+      "rolesSeparados": true,
+      "cargaImagenPersistente": true,
+      "edicionVisibleCliente": true,
+      "descuento25Compartido": true,
+      "promocionPublica": true,
+      "pedidoConDescuento": true,
+      "stockDescontado": true,
+      "pedidoVisibleAdministrador": true,
+      "cancelacionDevuelveStockUnaVez": true,
+      "estadoVisibleCliente": true,
+      "persistenciaTrasReconectar": true,
+      "limpiezaImagenSintetica": true
+    }
+  }
 }

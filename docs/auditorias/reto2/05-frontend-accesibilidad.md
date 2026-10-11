@@ -4,7 +4,7 @@
 
 Comprobar el flujo catálogo → carrito → login → pedido → historial y administración, con pantallas abiertas conectadas a la persistencia. Las pruebas usan Chrome en 1440×1000 y 375×900, errores simulados y axe-core sobre las nueve pantallas. La ampliación incluye estados, descuentos e imágenes; resultados completos en `docs/pruebas/reto2/`. Se conservan fachada, identidad crema/vino, categorías, mapa, WhatsApp y las 18 referencias iniciales.
 
-Las 14 pruebas de navegador usan Express y SQLite real en una base temporal. La opción de nube está preparada con PostgreSQL y Storage, pero sus pruebas adicionales usan servicios simulados; no se ha desplegado en Render ni conectado a Supabase real. El [alcance de nube](../../pruebas/reto2/nube.json) documenta esa diferencia. Para compartir datos publicados, ambos roles deben abrir la misma aplicación pública; una SQLite local independiente no se sincroniza con ella.
+Las 14 pruebas repetibles de navegador usan Express y SQLite real en una base temporal. Supabase ya está conectado y contiene el traslado real comprobado. Además, 17 verificaciones puntuales de la API, con Express desde el equipo local contra PostgreSQL/Storage reales, comprobaron que ambos roles leen las ediciones, la imagen del producto, la imagen propia de la promoción, el descuento, el estado del pedido y el stock persistidos. Estas comprobaciones no son pruebas de navegador del alojamiento público. El [alcance de nube](../../pruebas/reto2/nube.json) documenta esa diferencia: Render aún no está publicado y Pages conserva `appOrigin: null`. Para compartir datos publicados, ambos roles deberán abrir la misma aplicación pública; una SQLite local independiente no se sincroniza con ella.
 
 ## Matriz de subpuntos
 
