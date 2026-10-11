@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-10-11T17:46:35.230Z",
+  "fecha": "2026-10-11T17:49:08.663Z",
   "pruebas": {
     "servidorNode": 80,
     "navegadorChrome": 14,
@@ -24,7 +24,8 @@
     "claveActualSoloEnApikey": true,
     "imagenTrasladadaConHashIdentico": true,
     "imagenSinteticaRetirada": true,
-    "imagenesSinteticasRetiradas": 3
+    "imagenesSinteticasRetiradas": 3,
+    "imagenesSinteticasAusentesComprobadas": true
   },
   "traslado": {
     "clientesSimulados": true,
@@ -132,5 +133,26 @@
     "imagenConservadaTrasReinicio": true,
     "datosSinteticos": true,
     "fixturesRetiradas": true
+  },
+  "pagesPublico": {
+    "fechaUTC": "2026-10-11T17:49:08.664Z",
+    "commitComprobado": "230322d774ef8e8f3cb212b73442b0f2b5ba8041",
+    "publicacionGithubConfirmada": true,
+    "deployGithubPages": {
+      "id": 38161030230,
+      "conclusion": "success"
+    },
+    "pagesBuildAndDeployment": {
+      "id": 38161029803,
+      "conclusion": "success"
+    },
+    "configHTTP": 200,
+    "appOrigin": "https://farmacia-reina-del-cisne.onrender.com",
+    "enlaceOriginal": "https://elkin2004olmedoch-dotcom.github.io/Farmacia-Reyna-del-Cisne/producto.html?id=alcohol-antiseptico",
+    "destinoNavegador": "https://farmacia-reina-del-cisne.onrender.com/producto.html?id=alcohol-antiseptico",
+    "consultaProductoConservada": true,
+    "productoOriginalVisible": true,
+    "imagenOriginalCargada": true,
+    "captura": "capturas/nube-pages-producto.jpg"
   }
 }
