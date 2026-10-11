@@ -266,6 +266,8 @@ En **Pedidos de clientes → Gestionar estado**, sigue pendiente → confirmado 
 
 **Mis pedidos** muestra una línea de seguimiento con iconos de reloj, confirmación, paquete y entrega. Distingue la etapa actual, las completadas y las pendientes, con fechas en hora de Ecuador. Un pedido cancelado conserva las etapas registradas y muestra su aviso específico. Mientras la página está visible, consulta el estado cada cinco segundos; también al volver a la pestaña. Conserva el historial abierto y el foco del teclado cuando cambia el estado. Los demás refrescos periódicos mantienen treinta segundos.
 
+El seguimiento está publicado en Render. Se verificaron los archivos servidos, la sesión exigida y la conservación de los datos antes/después del despliegue, incluidas promociones editadas recientemente. [Evidencias de publicación y datos](docs/pruebas/reto2/README.md#publicación-del-seguimiento).
+
 La conexión con WhatsApp queda pendiente hasta recibir los datos y comprobar la elegibilidad del negocio, según lo acordado con el dueño. Las confirmaciones y el seguimiento se gestionan actualmente desde la web. Responder «OK» en la aplicación de WhatsApp todavía no modifica pedidos. Se documentan los requisitos para la conexión futura en [WhatsApp y pedidos](docs/WHATSAPP-PEDIDOS.md).
 
 Usuarios y detalles son tablas de consulta: no se modifican hashes, roles ni líneas históricas. Los pedidos admiten exclusivamente las transiciones previstas; sus importes y artículos no se reescriben. Las tablas administrativas requieren JWT/rol admin, independientemente del enlace visible en la UI.

@@ -1,0 +1,38 @@
+{
+  "fechaUTC": "2026-10-11T19:05:57.887Z",
+  "origen": "https://farmacia-reina-del-cisne.onrender.com",
+  "commit": "3b6cbb527080fb1e0e33f95f74b139e57fef6cb7",
+  "despliegue": "dep-db5tqrflot8c7385tihg",
+  "comparacion": "SHA-256 de texto con finales de línea LF normalizados entre Windows y Linux",
+  "salud": true,
+  "pedidosPropiosRequierenSesion": true,
+  "archivos": [
+    {
+      "ruta": "pedidos.html",
+      "coincideConFuentesProbadas": true
+    },
+    {
+      "ruta": "views/orders.js",
+      "coincideConFuentesProbadas": true
+    },
+    {
+      "ruta": "assets/shop.css",
+      "coincideConFuentesProbadas": true
+    },
+    {
+      "ruta": "controllers/checkout.js",
+      "coincideConFuentesProbadas": true
+    },
+    {
+      "ruta": "controllers/updates.js",
+      "coincideConFuentesProbadas": true
+    },
+    {
+      "ruta": "controllers/billing.js",
+      "coincideConFuentesProbadas": true
+    }
+  ],
+  "intervaloPedidosSegundos": 5,
+  "conexionWhatsapp": "pendiente por solicitud del usuario",
+  "mutacionesDeDatosReales": false
+}

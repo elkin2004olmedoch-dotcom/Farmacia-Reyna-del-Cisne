@@ -1,0 +1,24 @@
+{
+  "fechaUTC": "2026-10-11T19:05:34.444Z",
+  "fechaReferenciaUTC": "2026-10-11T19:02:48.851Z",
+  "alcance": "Conservar el estado real inmediatamente anterior a este despliegue; incluye ediciones posteriores a la auditoría fiscal.",
+  "datosConservados": {
+    "Usuario": true,
+    "Producto": true,
+    "Pedido": true,
+    "PedidoDetalle": true,
+    "Promocion": true,
+    "PedidoEstado": true,
+    "Semilla": true
+  },
+  "filas": {
+    "Usuario": 2,
+    "Producto": 18,
+    "Pedido": 1,
+    "PedidoDetalle": 4,
+    "Promocion": 2,
+    "PedidoEstado": 4,
+    "Semilla": 1
+  },
+  "mutacionesDeEstaComprobacion": false
+}

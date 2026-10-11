@@ -72,6 +72,12 @@ npm audit
 
 Para regenerar las salidas ejecuta `npm run verify`. Las credenciales de tests corresponden a bases temporales y no son las claves aleatorias del administrador de trabajo. La API y el navegador no usan datos personales reales en esas pruebas.
 
+## Publicación del seguimiento
+
+El commit `3b6cbb527080fb1e0e33f95f74b139e57fef6cb7` quedó activo en Render en el despliegue `dep-db5tqrflot8c7385tihg`. Ambos procesos de publicación de GitHub Pages (`38166357759` y `38166357446`) terminaron correctamente. [Comprobación pública](seguimiento-publicado.json): salud, sesión exigida para Mis pedidos y seis archivos de HTML/CSS/JavaScript comparados con las fuentes probadas mediante SHA-256, normalizando únicamente finales de línea Windows/Linux.
+
+[Conservación de datos](seguimiento-datos-nube.json): se comparó el estado inmediatamente anterior y posterior al despliegue, incluidas las ediciones de promociones hechas después de la auditoría fiscal. Las siete tablas de negocio coinciden; se conservan dos usuarios, dieciocho productos, un pedido con cuatro detalles y cuatro registros de historial, dos promociones y el marcador de inicialización. Las comprobaciones de publicación son de lectura y no cambian estados ni crean compras reales. WhatsApp permanece pendiente por solicitud del usuario.
+
 ## Preparación de despliegue gratuito
 
 `production.test.cjs` cubre variables privadas, SSL, origen HTTPS, selección del cliente/namespace Prisma y seed con cliente PostgreSQL. `cloudimages.test.cjs` y `cloudroutes.test.cjs` cubren autorización, conversión WebP, subida, redirección pública, imágenes inexistentes, límites, timeout, CSP y errores sin credenciales. `cloudmigration.test.cjs` comprueba importación repetible, conflictos, conservación de IDs/hashes/pedidos y preparación de imágenes mediante clientes simulados.
