@@ -14,6 +14,8 @@ npm audit
 
 `api.test.cjs`: autenticación/roles, CRUD, precios, pedidos/detalles, stock, versiones, transiciones/historial, cancelación concurrente, idempotencia, descuentos, migración antigua, CORS, errores y seed. `resources.test.cjs`: MVC, archivos/imports y configuración segura. `uploadbackup.test.cjs`: imágenes, límites, respaldo consistente, SHA-256, restauración, retención y servidor activo. `frontend.spec.cjs`: compra, panel ERP, roles, conexión entre pantallas, imágenes, descuentos, estados y accesibilidad en escritorio/móvil.
 
+`order-tracking.spec.cjs`: cuatro etapas con iconos SVG, cancelación sin entrega ficticia, fechas en Ecuador, axe y 320/375/768/1920 px. Cambia estados por la API administrativa en la BD temporal y comprueba que el cliente los recibe con un reloj de cinco segundos, sin recargar ni enviar eventos de foco. Verifica historial desplegado, foco conservado y consulta de factura retenida. No modifica pedidos reales ni conecta WhatsApp.
+
 ## Resultados HTTP comprobados
 
 | Solicitud | Respuesta observada | Comprobación adicional |
@@ -57,7 +59,7 @@ npm audit
 ## Resultado final observado
 
 - [Pruebas Node](node-tests.txt): 133 aprobadas, cero fallos.
-- [Pruebas Chrome](browser-tests.txt): 32 aprobadas, cero fallos; escritorio/móvil y controles adicionales en 320, 768 y 1920 px.
+- [Pruebas Chrome](browser-tests.txt): 36 aprobadas, cero fallos; escritorio/móvil y controles adicionales en 320, 768 y 1920 px.
 - [npm audit](npm-audit.json): cero vulnerabilidades reportadas.
 - [Resumen de ejecución](resumen.json): los tres comandos terminaron con código cero.
 - [Portada](capturas/inicio.png), [catálogo escritorio](capturas/catalogo.png) y [catálogo móvil](capturas/catalogo-movil.png): catálogo de trabajo de 18 referencias, sin credenciales ni tokens en pantalla.
@@ -65,6 +67,8 @@ npm audit
 - [Catálogo con promoción, escritorio](capturas/catalogo-promocion-escritorio.png) y [móvil](capturas/catalogo-promocion-movil.png): franja amarilla, porcentaje, precio original y precio descontado.
 - [Detalle con promoción, escritorio](capturas/detalle-promocion-escritorio.png) y [móvil](capturas/detalle-promocion-movil.png): imagen subida y precio efectivo del producto.
 - [Administración de estados, escritorio](capturas/administracion-estados-escritorio.png) y [móvil](capturas/administracion-estados-movil.png): diálogo de gestión e historial del pedido.
+- [Seguimiento de pedido, escritorio](capturas/seguimiento-pedidos-preparado-escritorio.png) y [móvil](capturas/seguimiento-pedidos-preparado-movil.png): iconos de pendiente, confirmado, preparado y entregado; datos sintéticos.
+- [Cancelación, escritorio](capturas/seguimiento-pedidos-cancelado-escritorio.png) y [móvil](capturas/seguimiento-pedidos-cancelado-movil.png): etapas alcanzadas y aviso de cancelación, sin marcar entrega. Las capturas de componentes ocultan el encabezado fijo únicamente durante la captura, para evitar que cubra la tarjeta al desplazarla; conservan las dimensiones reales.
 
 Para regenerar las salidas ejecuta `npm run verify`. Las credenciales de tests corresponden a bases temporales y no son las claves aleatorias del administrador de trabajo. La API y el navegador no usan datos personales reales en esas pruebas.
 
@@ -144,11 +148,11 @@ La prueba de recuperación de destino corrupto valida primero el respaldo fuente
 
 `npm run backup` permite una copia manual de SQLite; fuera de test, en modo SQLite, el servidor respalda al arrancar y cada 24 horas activo. Restaurar exige detenerlo y ejecutar `npm run backup:restore -- --from "carpeta-del-respaldo" --offline`; añadir `--replace` solo si se pretende sustituir una base existente. Las copias son privadas y locales, sin cifrado, firma digital ni almacenamiento externo. SHA-256 comprueba coherencia con el manifiesto, no autenticidad por sí mismo. No se ejecutó una restauración destructiva de la base personal para estas pruebas.
 
-Las actualizaciones son consultas HTTP al volver a la pestaña y cada 30 segundos mientras está visible. Formularios administrativos abiertos y cantidades en edición pausan el refresco correspondiente. No se afirma actualización instantánea entre navegadores ni cobertura de todos los fallos posibles.
+Las actualizaciones son consultas HTTP al volver a la pestaña y cada 30 segundos mientras está visible, con un intervalo de cinco segundos en Mis pedidos. Formularios administrativos abiertos y cantidades en edición pausan el refresco correspondiente. No se afirma actualización instantánea entre navegadores ni cobertura de todos los fallos posibles.
 
 ## Ampliación fiscal, farmacéutica y SRI
 
-La ejecución final completa aprobó 133 pruebas Node y 32 de navegador, con cero vulnerabilidades de dependencias. Incluye el cierre de sesión administrativa mientras hay un editor abierto, sin errores de foco. Fiscal/inventario prueba restricciones SQL/API, descuentos 85/86, IVA con vigencias, centavos mixtos, PVP, lotes vencidos, reservas FEFO y reposición única. SRI prueba XML contra XSD, firma criptográfica con tres referencias, P12 sintético, cifrado, secuencias/idempotencia, respuestas SOAP simuladas, permisos y descarga. No equivale a autorización ante el SRI.
+La ejecución final completa aprobó 133 pruebas Node y 36 de navegador, con cero vulnerabilidades de dependencias. Incluye el cierre de sesión administrativa mientras hay un editor abierto, sin errores de foco. Fiscal/inventario prueba restricciones SQL/API, descuentos 85/86, IVA con vigencias, centavos mixtos, PVP, lotes vencidos, reservas FEFO y reposición única. SRI prueba XML contra XSD, firma criptográfica con tres referencias, P12 sintético, cifrado, secuencias/idempotencia, respuestas SOAP simuladas, permisos y descarga. No equivale a autorización ante el SRI.
 
 [Administración fiscal en escritorio](capturas/admin-fiscal-escritorio.png), [móvil](capturas/admin-fiscal-movil.png), [detalle por teclado](capturas/cliente-detalle-accesible-escritorio.png) y [borrador SRI sintético](capturas/facturacion-borrador-escritorio.png) documentan las vistas aisladas de prueba.
 

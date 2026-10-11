@@ -84,9 +84,9 @@ export function billingController(){
 }
 export function connectCustomerInvoices(area){
   area.addEventListener('click',async event=>{
-    const button=event.target.closest('[data-order-invoice],[data-customer-invoice-xml],[data-customer-invoice-ride]');if(!button || button.disabled)return;busy(button,true);
+    const button=event.target.closest('[data-order-invoice],[data-customer-invoice-xml],[data-customer-invoice-ride]');if(!button || button.disabled)return;const wasFocused=document.activeElement===button;busy(button,true);
     try{if(button.dataset.orderInvoice){const invoice=await billing.own(button.dataset.orderInvoice);const status=document.getElementById('invoice-'+button.dataset.orderInvoice);status.innerHTML=invoice?`${escape(invoiceStates[invoice.estado] || invoice.estado)} · ${invoice.validezTributaria?'Comprobante de producción con validez tributaria.':invoice.ambiente==='1'?'Ambiente de PRUEBAS: sin validez tributaria.':'Sin autorización de producción con validez tributaria.'}${invoice.xmlDisponible?` <button class="text-link" data-customer-invoice-xml="${escape(invoice.id)}">Descargar XML</button>`:''}${invoice.rideDisponible?` <button class="text-link" data-customer-invoice-ride="${escape(invoice.id)}">Descargar RIDE</button>`:''}`:'La farmacia todavía no ha creado una factura para este pedido.';}
       else await downloadInvoice(button.dataset.customerInvoiceXml || button.dataset.customerInvoiceRide,button.dataset.customerInvoiceXml?'xml':'ride',{customer:true});
-    }catch(error){message(error.message,true);}finally{busy(button,false);}
+    }catch(error){message(error.message,true);}finally{if(button.isConnected){busy(button,false);if(wasFocused && (document.activeElement===document.body || document.activeElement===button))button.focus();}}
   });
 }

@@ -416,3 +416,47 @@ h1,h2,h3 { color:var(--ink); font-family:var(--sans); letter-spacing:-.045em; }
 .pharmaceutical-sheet dd { margin:0; overflow-wrap:anywhere; }
 .order-invoice { margin:1rem 0; }
 .order-invoice [role=status] { overflow-wrap:anywhere; }
+.order-state-label { display:inline-flex; align-items:center; gap:7px; }
+.order-state-label svg { width:20px; height:20px; flex-shrink:0; }
+.order-state-label.is-cancelled { background:#fae6e0; color:#8b142b; }
+.order-tracking { padding:24px; margin:22px 0; border:1px solid #e1d4bf; border-radius:16px; background:linear-gradient(135deg,#f8f1e4,#fffbf3); }
+.order-tracking h3 { font-size:18px; letter-spacing:-.025em; margin:0 0 8px; }
+.order-tracking-note { color:#625c51; font-size:13px; line-height:1.65; margin:0 0 24px; }
+.order-tracking-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; list-style:none; padding:0; margin:0; }
+.order-tracking-step { min-width:0; position:relative; padding:0 8px; text-align:center; color:#716657; }
+.order-tracking-step:not(:last-child)::after { content:''; position:absolute; left:calc(50% + 32px); top:25px; width:calc(100% - 64px); height:2px; border-radius:2px; background:#d7c9b4; }
+.order-tracking-step.is-complete::after { background:#2d6b4a; }
+.order-tracking-icon { position:relative; z-index:1; display:grid; place-items:center; margin:0 auto 12px; width:52px; height:52px; border:1px solid #d8cdbb; border-radius:50%; background:#f2eadc; }
+.order-tracking-icon svg { width:26px; height:26px; }
+.order-tracking-copy strong,.order-tracking-copy small,.order-tracking-copy time { display:block; overflow-wrap:anywhere; }
+.order-tracking-copy strong { font-size:14px; line-height:1.4; }
+.order-tracking-copy small { margin-top:5px; font-size:11px; line-height:1.5; }
+.order-tracking-copy time { margin-top:5px; font-size:10px; line-height:1.5; color:#625c51; }
+.order-tracking-step.is-complete,.order-tracking-step.is-finished { color:#225a3d; }
+.order-tracking-step.is-complete .order-tracking-icon,.order-tracking-step.is-finished .order-tracking-icon { color:white; border-color:#2d6b4a; background:#2d6b4a; }
+.order-tracking-step.is-current:not(.is-finished) { color:var(--brand-dark); }
+.order-tracking-step.is-current:not(.is-finished) .order-tracking-icon { color:white; border-color:var(--brand-red); background:var(--brand-red); box-shadow:0 0 0 5px #f2dbd5; }
+.order-tracking-step.is-current small { font-weight:700; }
+.order-tracking-step.is-stopped .order-tracking-icon { border-style:dashed; }
+.order-tracking-cancelled { display:flex; gap:12px; align-items:flex-start; padding:16px; margin:16px 0 24px; color:#8b142b; border:1px solid #ebc8bd; border-radius:12px; background:#fbece5; }
+.order-tracking-cancel-icon { display:grid; place-items:center; flex-shrink:0; width:36px; height:36px; border-radius:50%; background:#f4d5ca; }
+.order-tracking-cancel-icon svg { width:24px; height:24px; }
+.order-tracking-cancelled strong { font-size:14px; }
+.order-tracking-cancelled p { font-size:12px; line-height:1.6; margin:5px 0 0; }
+.order-history { margin:18px 0; border:1px solid var(--line); border-radius:12px; background:#fffaf1; }
+.order-history summary { padding:15px 16px; font-size:14px; font-weight:700; color:var(--brand-dark); cursor:pointer; }
+.order-history[open] summary { border-bottom:1px solid var(--line); }
+.order-history ol { padding:8px 20px 14px 38px; margin:0; }
+.order-history li { font-size:12px; line-height:1.75; padding:5px 0; }
+@media(max-width:600px) {
+  .order-tracking { padding:20px 16px; }
+  .order-tracking-steps { grid-template-columns:1fr; }
+  .order-tracking-step { display:grid; grid-template-columns:44px minmax(0,1fr); gap:14px; padding:0 0 20px; min-height:82px; text-align:left; align-items:start; }
+  .order-tracking-step:last-child { padding-bottom:0; min-height:44px; }
+  .order-tracking-step:not(:last-child)::after { left:21px; top:50px; width:2px; height:calc(100% - 56px); }
+  .order-tracking-icon { margin:0; width:44px; height:44px; }
+  .order-tracking-icon svg { width:24px; height:24px; }
+  .order-tracking-copy { padding-top:2px; }
+  .order-tracking-copy time { font-size:11px; }
+  .order-tracking-cancelled { padding:13px; gap:10px; }
+}

@@ -3,7 +3,7 @@ import {message} from '../views/common.js';
 
 // Consulta la misma API al regresar y mientras la página permanece visible.
 // No reemplaza formularios abiertos ni acumula peticiones simultáneas.
-export function watchUpdates(refresh,{canRefresh=()=>true}={}) {
+export function watchUpdates(refresh,{canRefresh=()=>true,intervalMs=30000}={}) {
   let stopped=false,running=false,pending=false,lastError='',lastNotice='';
   async function update(){
     if(stopped || document.hidden || !canRefresh())return;
@@ -16,7 +16,7 @@ export function watchUpdates(refresh,{canRefresh=()=>true}={}) {
   const visible=()=>{if(!document.hidden)void update();};
   const stored=event=>{if(event.key==='farmacia-mvc-datos-actualizados')void update();};
   let timer;
-  function start(){stopped=false;timer=setInterval(update,30000);window.addEventListener('focus',visible);document.addEventListener('visibilitychange',visible);window.addEventListener('storage',stored);events.addEventListener('data:changed',visible);}
+  function start(){stopped=false;timer=setInterval(update,intervalMs);window.addEventListener('focus',visible);document.addEventListener('visibilitychange',visible);window.addEventListener('storage',stored);events.addEventListener('data:changed',visible);}
   function stop(){stopped=true;clearInterval(timer);window.removeEventListener('focus',visible);document.removeEventListener('visibilitychange',visible);window.removeEventListener('storage',stored);events.removeEventListener('data:changed',visible);}
   start();window.addEventListener('pagehide',stop);
   window.addEventListener('pageshow',event=>{if(event.persisted){start();void update();}});
@@ -26,7 +26,7 @@ export function watchUpdates(refresh,{canRefresh=()=>true}={}) {
 export function preserveFocus(target,render) {
   const active=document.activeElement;
   let selector=active?.id?'#'+CSS.escape(active.id):null;
-  if(!selector && target.contains(active))for(const name of ['data-add','data-compare','data-pick','data-cart-remove','data-cart-plus','data-cart-minus','data-edit','data-delete','href'])if(active.hasAttribute(name)){selector=`[${name}="${CSS.escape(active.getAttribute(name))}"]`;break;}
+  if(!selector && target.contains(active))for(const name of ['data-add','data-compare','data-pick','data-cart-remove','data-cart-plus','data-cart-minus','data-edit','data-delete','data-order-invoice','data-customer-invoice-xml','data-customer-invoice-ride','href'])if(active.hasAttribute(name)){selector=`[${name}="${CSS.escape(active.getAttribute(name))}"]`;break;}
   const inside=target.contains(active);
   render();
   if(inside && selector)target.querySelector(selector)?.focus({preventScroll:true});

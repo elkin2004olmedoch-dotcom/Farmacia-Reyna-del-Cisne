@@ -42,7 +42,7 @@ export async function checkoutController() {
 export async function ordersController() {
   connectCustomerInvoices(document.getElementById('orders-list'));
   if(!requireUser('pedidos.html'))return;let page=1,requestId=0,snapshot='';
-  async function render(){const id=++requestId;const requestedPage=page;const result=await orders.mine(requestedPage);if(id!==requestId || !auth.user)return;const loaded=JSON.stringify(result);if(loaded!==snapshot){preserveFocus(document.getElementById('orders-list'),()=>ordersView(result));snapshot=loaded;}document.getElementById('orders-page-info').textContent=`Página ${requestedPage} · ${result.total} pedidos`;document.getElementById('orders-prev').disabled=requestedPage<=1;document.getElementById('orders-next').disabled=requestedPage*result.pageSize>=result.total;}
+  async function render(){const id=++requestId;const requestedPage=page;const result=await orders.mine(requestedPage);if(id!==requestId || !auth.user || document.querySelector('#orders-list [aria-busy="true"]'))return;const loaded=JSON.stringify(result);if(loaded!==snapshot){preserveFocus(document.getElementById('orders-list'),()=>ordersView(result));snapshot=loaded;}document.getElementById('orders-page-info').textContent=`Página ${requestedPage} · ${result.total} pedidos`;document.getElementById('orders-prev').disabled=requestedPage<=1;document.getElementById('orders-next').disabled=requestedPage*result.pageSize>=result.total;}
   for(const [id,offset] of [['orders-prev',-1],['orders-next',1]])document.getElementById(id).addEventListener('click',async()=>{page+=offset;try{await render();}catch(error){message(error.message,true);}});await render();
-  watchUpdates(render,{canRefresh:()=>Boolean(auth.user)});
+  watchUpdates(render,{canRefresh:()=>Boolean(auth.user) && !document.querySelector('#orders-list [aria-busy="true"]'),intervalMs:5000});
 }
