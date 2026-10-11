@@ -1,0 +1,32 @@
+{
+  "fechaUTC": "2026-10-11T18:41:00Z",
+  "origen": "https://farmacia-reina-del-cisne.onrender.com",
+  "commitAplicacion": "39aee06c2eb0477eca621fa859351a97633cc7c1",
+  "render": {
+    "estadoObservado": "Deploy succeeded | Live",
+    "plan": "Free",
+    "node": "22.23.3",
+    "preparacionProduccionCorrecta": true
+  },
+  "githubPages": {
+    "deployWorkflow": 38164472339,
+    "pagesBuildDeployment": 38164471952,
+    "ambosCompletadosCorrectamente": true,
+    "enlaceOriginalRedirigeConIdentificador": true
+  },
+  "navegadorReal": {
+    "loginAdministradorAbreDashboard": true,
+    "ivaVigente15YFormularioHistorial": true,
+    "emisorYFirmaSriSinConfigurar": true,
+    "imagenOriginalCargada": true,
+    "precioYStockDelProductoConservados": true,
+    "notaIvaVisibleParaCliente": true
+  },
+  "comprobacionesApi": "ampliacion-publicada.json",
+  "datosTributariosRealesAgregados": false,
+  "facturaSriRealEmitida": false,
+  "capturas": [
+    "capturas/nube-iva-administrador.png",
+    "capturas/nube-sri-pendiente.png"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "fechaUTC": "2026-10-11T18:38:41.052Z",
+  "origen": "https://farmacia-reina-del-cisne.onrender.com",
+  "commitDesplegado": "39aee06c2eb0477eca621fa859351a97633cc7c1",
+  "comprobaciones": {
+    "saludPostgresql": true,
+    "ivaVigente15": true,
+    "productoOriginalConservado": true,
+    "camposFarmaciaPublicos": true,
+    "imagenOriginalMismoSha256": true,
+    "sriSinSesion401": true,
+    "administradorConservado": true,
+    "GET /api/admin/configuracion/fiscal": true,
+    "GET /api/admin/proveedores": true,
+    "GET /api/admin/lotes": true,
+    "GET /api/admin/inventario/movimientos": true,
+    "GET /api/admin/facturacion/facturas": true,
+    "GET /api/admin/resumen": true,
+    "sriPendienteDatosReales": true,
+    "opensslDisponible": true
+  },
+  "mutacionesComerciales": false,
+  "emisionSriReal": false
+}
