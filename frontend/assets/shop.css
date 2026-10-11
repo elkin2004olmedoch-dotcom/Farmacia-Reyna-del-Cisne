@@ -420,6 +420,7 @@ h1,h2,h3 { color:var(--ink); font-family:var(--sans); letter-spacing:-.045em; }
 .order-state-label svg { width:20px; height:20px; flex-shrink:0; }
 .order-state-label.is-cancelled { background:#fae6e0; color:#8b142b; }
 .order-tracking { padding:24px; margin:22px 0; border:1px solid #e1d4bf; border-radius:16px; background:linear-gradient(135deg,#f8f1e4,#fffbf3); }
+.promotion-preview { display:block; grid-column:1/-1; padding:9px 13px; border-bottom:1px solid #dacbb4; background:#fff9ec; color:#584632; font-size:12px; font-weight:700; line-height:1.5; text-align:center; }
 .order-tracking h3 { font-size:18px; letter-spacing:-.025em; margin:0 0 8px; }
 .order-tracking-note { color:#625c51; font-size:13px; line-height:1.65; margin:0 0 24px; }
 .order-tracking-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; list-style:none; padding:0; margin:0; }

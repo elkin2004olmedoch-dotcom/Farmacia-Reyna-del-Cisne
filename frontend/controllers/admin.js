@@ -1,6 +1,7 @@
 import {administration,adminFormIssues,ecuadorDateTime,ecuadorToday} from '../models/admin.js';
 import {catalog} from '../models/catalog.js';
-import {tableView,editorView,adminSectionView,orderStateView,fiscalView} from '../views/admin.js';
+import {tableView,editorView,promotionEditorState,adminSectionView,orderStateView,fiscalView} from '../views/admin.js';
+import {promotionPublication} from '../models/promotion-publication.js';
 import {message,busy,formErrors} from '../views/common.js';
 import {confirmAction} from './dialog.js';
 import {requireUser} from './layout.js';
@@ -73,7 +74,7 @@ export async function adminController() {
     if(section==='lotes')populate(form.elements.proveedorId,suppliers.items.filter(s=>s.activo),{empty:'Sin proveedor'});
     editorView(form,record);errors(form,{});document.getElementById('editor-status').textContent='';
     if(section==='productos'){productImage.reset();pharmaceuticalRequired();}
-    if(section==='promociones')promoImage.reset();
+    if(section==='promociones'){promoImage.reset();promotionEditorState(form);}
     if(section==='lotes')form.elements.vencimiento.min=ecuadorToday();
     dialog.showModal();form.querySelector('input:not([type=hidden]),select,textarea')?.focus();
     if(section==='movimientos')await loadMovementLots();
@@ -84,6 +85,11 @@ export async function adminController() {
   for(const [id,offset] of [['admin-prev',-1],['admin-next',1]])document.getElementById(id).addEventListener('click',async()=>{page+=offset;try{await render();}catch(error){message(error.message,true);}});
   forms.productos.elements.ivaCategoria.addEventListener('change',pharmaceuticalRequired);
   forms.productos.elements.tipoProducto.addEventListener('change',pharmaceuticalRequired);
+  for(const event of ['input','change'])forms.promociones.addEventListener(event,()=>promotionEditorState(forms.promociones));
+  document.getElementById('promotion-publish-discount')?.addEventListener('click',()=>{
+    const form=forms.promociones;if(!auth.isAdmin || form.querySelector('[type=submit][aria-busy=true]'))return;
+    form.elements.activa.checked=true;form.elements.vistaPrevia.checked=false;promotionEditorState(form);form.requestSubmit();
+  });
   forms.movimientos.elements.productoId.addEventListener('change',()=>void loadMovementLots());
   document.getElementById('admin-table').addEventListener('click',async event=>{
     const button=event.target.closest('button');if(!button)return;
@@ -103,7 +109,7 @@ export async function adminController() {
     else values={...fields,loteId:fields.loteId || null,cantidad:Number(fields.cantidad)};
     const save={productos:()=>administration.saveProduct(values,editing),promociones:()=>administration.savePromotion(values,editing),proveedores:()=>administration.saveSupplier(values,editing),lotes:()=>administration.saveLot(values),movimientos:()=>administration.saveMovement(values)}[section];
     const submit=form.querySelector('[type=submit]');const locked=Array.from(form.elements).filter(control=>!control.disabled && control!==submit);for(const control of locked)control.disabled=true;busy(submit,true);for(const button of dialog.querySelectorAll('[data-editor-close]'))button.disabled=true;status.textContent='';let serverIssues;
-    try{await save();if(!auth.isAdmin || !dialog.isConnected)return;dialog.close();await render();if(auth.isAdmin){message('Cambios guardados en la farmacia.');document.getElementById('admin-create')?.focus();}}
+    try{await save();if(!auth.isAdmin || !dialog.isConnected)return;dialog.close();await render();if(auth.isAdmin){message(section==='promociones'?promotionPublication(values).message:'Cambios guardados en la farmacia.');document.getElementById('admin-create')?.focus();}}
     catch(error){status.textContent=error.message;serverIssues=Object.fromEntries((error.details || []).map(issue=>[issue.field,issue.message]));}
     finally{for(const control of locked)control.disabled=false;busy(submit,false);for(const button of dialog.querySelectorAll('[data-editor-close]'))button.disabled=false;if(serverIssues)errors(form,serverIssues);}
   });

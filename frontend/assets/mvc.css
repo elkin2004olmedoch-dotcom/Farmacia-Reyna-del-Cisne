@@ -1,4 +1,6 @@
 .page-status { position:sticky; top:0; z-index:5; padding:14px 20px; margin:0; border-block:1px solid var(--line); color:var(--ink); background:var(--soft); font-size:14px; }
+.admin-promotion-status { margin:0; padding:15px 18px; border:1px solid #dbcbb2; border-radius:12px; background:#fff7e7; color:#584632; font-size:14px; line-height:1.65; }
+.admin-promotion-status[data-state="discount"] { border-color:#bfd5c6; color:#225a3d; background:#f0f7ee; }
 .page-status.is-error { color:var(--brand-dark); background:#fff0ea; border-left:4px solid var(--brand-red); }
 .product-stock { font-size:12px; color:var(--muted); }
 .shop-actions [data-account-link] { max-width:130px; overflow:hidden; text-overflow:ellipsis; }

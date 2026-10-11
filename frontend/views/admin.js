@@ -1,10 +1,11 @@
 import {escape,money} from './common.js';
+import {promotionPublication} from '../models/promotion-publication.js';
 const columns={
   productos:[['nombre','Producto'],['precio','Precio con IVA'],['stock','Stock'],['descuentoPorcentaje','Descuento directo %'],['pvpMaximo','PVP máximo impreso'],['ivaCategoria','IVA'],['stockMinimo','Stock mínimo'],['requiereReceta','Receta'],['categoria','Categoría'],['activo','Activo']],
   usuarios:[['id','Usuario'],['nombre','Nombre'],['email','Correo'],['telefono','Teléfono'],['role','Rol'],['activo','Activo'],['createdAt','Creado']],
   pedidos:[['id','Pedido'],['userId','Usuario'],['nombre','Comprador'],['email','Correo'],['telefono','Teléfono'],['documento','Documento enmascarado'],['total','Total'],['baseImponible','Base imponible'],['ivaMonto','IVA'],['estado','Estado'],['entrega','Entrega'],['provincia','Provincia'],['ciudad','Ciudad'],['direccion','Dirección'],['codigoPostal','Código postal'],['createdAt','Creado']],
   detalles:[['pedidoId','Pedido'],['productoId','Producto'],['nombreProducto','Nombre al comprar'],['cantidad','Cantidad'],['precioUnitario','Precio unitario'],['precioOriginal','Precio original'],['descuentoPorcentaje','Descuento %'],['ivaPorcentaje','IVA %'],['baseImponible','Base imponible'],['ivaMonto','IVA']],
-  promociones:[['titulo','Campaña'],['productoId','Producto'],['descuentoPorcentaje','Descuento %'],['activa','Activa'],['vistaPrevia','Vista previa'],['inicio','Inicio'],['fin','Fin']],
+  promociones:[['titulo','Campaña'],['productoId','Producto'],['descuentoPorcentaje','Descuento configurado %'],['publicacion','Estado y aplicación'],['inicio','Inicio'],['fin','Fin']],
   proveedores:[['nombre','Proveedor'],['ruc','RUC'],['email','Correo'],['telefono','Teléfono'],['direccion','Dirección'],['activo','Activo']],
   lotes:[['producto','Producto'],['numero','Lote'],['vencimiento','Vencimiento'],['stock','Unidades'],['costoUnitario','Costo unitario'],['proveedor','Proveedor']],
   movimientos:[['createdAt','Fecha · Ecuador'],['producto','Producto'],['lote','Lote'],['tipo','Movimiento'],['cantidad','Unidades'],['motivo','Motivo'],['actor','Registrado por']],
@@ -26,7 +27,7 @@ export function adminSectionView(name) {
 export function tableView(name,result) {
   const editable=['productos','promociones','proveedores'].includes(name);const manageOrder=name==='pedidos';const labels=columns[name];
   const actions=row=>editable?`<td><button class="text-link" data-edit="${escape(row.id)}" aria-label="Editar ${escape(row.nombre || row.titulo)}" ${row.activo===false && name!=='proveedores'?'disabled':''}>Editar</button>${name==='proveedores'?'':`<button class="text-link" data-delete="${escape(row.id)}" aria-label="Eliminar ${escape(row.nombre || row.titulo)}" ${row.activo===false?'disabled':''}>Eliminar</button>`}</td>`:manageOrder?`<td><button class="text-link" data-order-state="${escape(row.id)}" aria-label="Gestionar estado del pedido ${escape(row.id.slice(0,8))}">Gestionar estado</button><a class="text-link" href="admin.html?tabla=facturacion&pedido=${encodeURIComponent(row.id)}">Crear / consultar factura SRI</a></td>`:'';
-  document.getElementById('admin-table').innerHTML=result.items.length?`<table class="admin-data-table"><caption>${escape(name)} · ${result.total} registros</caption><thead><tr>${labels.map(([key,label])=>`<th scope="col">${label}</th>`).join('')}${editable || manageOrder?'<th scope="col">Acciones</th>':''}</tr></thead><tbody>${result.items.map(row=>`<tr>${labels.map(([key])=>`<td>${cell(key,row[key])}</td>`).join('')}${actions(row)}</tr>`).join('')}</tbody></table>`:'<p class="shop-empty">No hay registros en esta tabla.</p>';
+  document.getElementById('admin-table').innerHTML=result.items.length?`<table class="admin-data-table"><caption>${escape(name)} · ${result.total} registros</caption><thead><tr>${labels.map(([key,label])=>`<th scope="col">${label}</th>`).join('')}${editable || manageOrder?'<th scope="col">Acciones</th>':''}</tr></thead><tbody>${result.items.map(row=>`<tr>${labels.map(([key])=>`<td>${key==='publicacion'?escape(promotionPublication(row).label):cell(key,row[key])}</td>`).join('')}${actions(row)}</tr>`).join('')}</tbody></table>`:'<p class="shop-empty">No hay registros en esta tabla.</p>';
   document.getElementById('admin-page-info').textContent=`Página ${result.page} · ${result.total} registros`;
   document.getElementById('admin-prev').disabled=result.page<=1;document.getElementById('admin-next').disabled=result.page*result.pageSize>=result.total;
   document.getElementById('admin-create').hidden=!editable && !['lotes','movimientos'].includes(name);
@@ -34,6 +35,21 @@ export function tableView(name,result) {
 export function editorView(form,values={}) {
   form.reset();for(const [key,value] of Object.entries(values)){const field=form.elements.namedItem(key);if(!field)continue;if(field.type==='checkbox')field.checked=value;else if(field.type==='datetime-local')field.value=value?localTime(value):'';else field.value=value??'';}
   document.getElementById('editor-title').textContent=(values.id?'Editar ':'Crear ')+({ 'product-form':'producto','promotion-form':'promoción','supplier-form':'proveedor','lot-form':'lote','movement-form':'ajuste de inventario'})[form.id];
+}
+export function promotionEditorState(form){
+  const campaign={descuentoPorcentaje:Number(form.elements.descuentoPorcentaje.value || 0),activa:form.elements.activa.checked,vistaPrevia:form.elements.vistaPrevia.checked,inicio:form.elements.inicio.value?form.elements.inicio.value+'-05:00':null,fin:form.elements.fin.value?form.elements.fin.value+'-05:00':null};
+  const state=promotionPublication(campaign);
+  const status=document.getElementById('promotion-publication-status');
+  if(!status)return state;
+  status.textContent=state.message;status.dataset.state=state.kind;
+  const publish=document.getElementById('promotion-publish-discount');
+  publish.hidden=state.percentage<=0 || (!campaign.vistaPrevia && campaign.activa);
+  publish.disabled=state.expired;
+  publish.textContent=state.scheduled?'Publicar descuento programado':'Publicar descuento del '+state.percentage+' %';
+  const submit=form.querySelector('[type=submit]');
+  submit.textContent=!campaign.activa?'Guardar sin publicar':campaign.vistaPrevia?'Guardar vista previa sin descuento':state.expired?'Guardar campaña finalizada':state.scheduled?'Guardar campaña programada':state.percentage>0?'Guardar y publicar descuento':'Guardar campaña sin descuento';
+  submit.classList.toggle('button-primary',publish.hidden);submit.classList.toggle('button-outline',!publish.hidden);
+  return state;
 }
 const localTime=value=>new Date(new Date(value).getTime()-5*60*60000).toISOString().slice(0,16);
 

@@ -1,7 +1,6 @@
 {
-  "fecha": "2026-10-11T18:57:42.176Z",
+  "fecha": "2026-10-11T19:20:41.191Z",
   "node": "v24.15.0",
-  "nodeVerificadoEnUTC": "2026-10-11T18:51:34.138Z",
   "resultados": [
     {
       "prueba": "node-tests",

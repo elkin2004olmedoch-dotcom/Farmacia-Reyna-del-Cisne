@@ -1,0 +1,42 @@
+{
+  "fechaUTC": "2026-10-11T19:15:31.513Z",
+  "referenciaUTC": "2026-10-11T19:15:28.074Z",
+  "campana": "cuidado-solar",
+  "descuentoPorcentaje": 26,
+  "cambioAutorizado": "Publicar el descuento solicitado retirando únicamente vistaPrevia; se conservan importe, producto y vigencia.",
+  "datosConservadosSegunCambio": {
+    "Producto": true,
+    "Usuario": true,
+    "Pedido": true,
+    "PedidoDetalle": true,
+    "Promocion": true,
+    "PedidoEstado": true,
+    "Semilla": true,
+    "ConfiguracionFiscal": true,
+    "Proveedor": true,
+    "Lote": true,
+    "MovimientoInventario": true,
+    "PedidoDetalleLote": true,
+    "ConfiguracionEmisor": true,
+    "SecuenciaFactura": true,
+    "FacturaPedido": true
+  },
+  "filas": {
+    "Producto": 18,
+    "Usuario": 2,
+    "Pedido": 1,
+    "PedidoDetalle": 4,
+    "Promocion": 2,
+    "PedidoEstado": 4,
+    "Semilla": 1,
+    "ConfiguracionFiscal": 1,
+    "Proveedor": 0,
+    "Lote": 0,
+    "MovimientoInventario": 0,
+    "PedidoDetalleLote": 0,
+    "ConfiguracionEmisor": 0,
+    "SecuenciaFactura": 0,
+    "FacturaPedido": 0
+  },
+  "stockUsuariosPedidosSinCambios": true
+}
