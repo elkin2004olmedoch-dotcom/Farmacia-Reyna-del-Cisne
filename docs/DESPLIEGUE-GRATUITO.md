@@ -1,8 +1,8 @@
 # Publicar la farmacia completa: Render y Supabase
 
-Estado al 11 de octubre de 2026: **Supabase ya está conectado y conserva el catálogo, administrador, promociones y foto trasladados**. Se verificaron la integridad del traslado y 17 operaciones de API desde el equipo contra PostgreSQL/Storage reales. **El backend público todavía no está desplegado**: Render solicitó verificación de tarjeta aun con Free seleccionado. `data/deployment.json` permanece con `appOrigin: null` hasta comprobar el servicio público. GitHub Pages conserva su demostración estática mientras tanto.
+Estado al 11 de octubre de 2026: **la [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) está activa en Render Free y utiliza PostgreSQL/Storage reales de Supabase**. El administrador, 18 productos, dos promociones y una foto fueron trasladados conservando registros y hash de la imagen. Se comprobaron la API pública, los recorridos de ambos roles y la persistencia después de reiniciar Render. Los datos sintéticos fueron retirados; los originales se conservaron. `data/deployment.json` apunta al origen real y Pages abre esa aplicación.
 
-GitHub Pages publica HTML/CSS/JavaScript, pero no ejecuta Express ni comparte la SQLite de tu computadora. La aplicación completa debe ejecutarse en un servidor: usuarios y administrador abrirán el mismo enlace de Render, respaldado por PostgreSQL y Storage de Supabase. Las cuentas de demostración del navegador son distintas de las cuentas MVC.
+Clientes y administrador utilizan [el mismo enlace público](https://farmacia-reina-del-cisne.onrender.com/). Abre [Ingresar](https://farmacia-reina-del-cisne.onrender.com/cuenta.html): la cuenta administrativa conservada llega al dashboard; los clientes usan “Crear cuenta” y consultan sus propios pedidos. Edita productos, fotos y promociones desde el panel en línea para compartirlos con todos. GitHub Pages sirve como entrada hacia Render, porque no ejecuta Express ni comparte la SQLite del equipo. Las cuentas de demostración del antiguo navegador son distintas de las cuentas MVC.
 
 ## 1. Crear el proyecto gratuito de Supabase
 
@@ -51,7 +51,7 @@ node scripts/migrate-cloud.cjs --apply
 
 El traslado conserva IDs, hashes de contraseña, fechas, catálogo, promociones, pedidos, detalles e historial. Sube las fotos con sus nombres originales y prohíbe sobrescribirlas. Los registros se importan en una transacción. Una falla puede dejar objetos de imagen sin referencias, pero no se informa éxito ni se importa parcialmente la base. Si el destino ya tiene datos, no se borra ni se mezcla automáticamente.
 
-5. Después de importar, cambia `SKIP_INITIAL_SEED` a `false` en Render y vuelve a desplegar. El seed respeta los datos existentes. Si quieres empezar una farmacia vacía, omite el traslado y cambia esa variable directamente.
+5. La instalación actual conserva `SKIP_INITIAL_SEED=true` porque ya tiene el administrador y catálogo importados. No necesita ejecutar seed en cada despliegue. En otra instalación que empiece vacía, omite el traslado y cambia esa variable a `false`; el seed respeta los datos existentes.
 
 Las cuentas de `localStorage` de la antigua demostración estática no se importan: no corresponden a usuarios MVC. Para usar los datos compartidos, abre el enlace público tanto como administrador como cliente. Editar una SQLite local independiente no modifica la base en internet.
 
@@ -66,7 +66,7 @@ Las cuentas de `localStorage` de la antigua demostración estática no se import
 node scripts/configure-public-site.cjs https://TU-SERVICIO.onrender.com
 ```
 
-Publica los cambios de `data/deployment.json` y `service-worker.js` en GitHub. Las ocho páginas de Pages abrirán la misma ruta de la aplicación completa, conservando identificador de producto, consulta y sección. No se activa una redirección a un servicio que aún no se haya comprobado.
+En esta instalación el origen configurado es `https://farmacia-reina-del-cisne.onrender.com`. Publica los cambios de `data/deployment.json` y `service-worker.js` en GitHub. Las ocho páginas de Pages abren la misma ruta de la aplicación completa, conservando identificador de producto, consulta y sección. La API, el navegador y el reinicio del servicio ya se comprobaron antes de activar esta configuración.
 
 ## Límites y respaldos
 

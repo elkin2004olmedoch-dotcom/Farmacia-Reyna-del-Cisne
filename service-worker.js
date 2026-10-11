@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'farmacia-reina-shell-v5-cloud-ready';
+const CACHE_NAME = 'farmacia-reina-shell-cloud-2d6191ff05d0';
 const APP_FILES = [
   'js/live-site.js', 'data/deployment.json',
   'assets/images/producto-alcohol-antiseptico-d13f81e66a94.webp',

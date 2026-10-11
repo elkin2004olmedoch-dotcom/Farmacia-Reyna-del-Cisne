@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-10-11T17:29:04.633Z",
+  "fecha": "2026-10-11T17:46:35.230Z",
   "pruebas": {
     "servidorNode": 80,
     "navegadorChrome": 14,
@@ -20,10 +20,11 @@
     "autorizacionAdmin": true,
     "webpValidado": true,
     "imagenesPublicasSinClaves": true,
-    "cargasRealesASupabase": 2,
+    "cargasRealesASupabase": 4,
     "claveActualSoloEnApikey": true,
     "imagenTrasladadaConHashIdentico": true,
-    "imagenSinteticaRetirada": true
+    "imagenSinteticaRetirada": true,
+    "imagenesSinteticasRetiradas": 3
   },
   "traslado": {
     "clientesSimulados": true,
@@ -47,19 +48,24 @@
       "promocion": true,
       "pedidoEstado": true,
       "semilla": true
-    }
+    },
+    "fechaVerificacionTrasLimpiezaUTC": "2026-10-11T17:44:32.500Z"
   },
   "despliegue": {
-    "renderServicioCreado": false,
+    "renderServicioCreado": true,
+    "renderEstadoLiveComprobado": true,
+    "renderPlan": "Free",
+    "appOrigin": "https://farmacia-reina-del-cisne.onrender.com",
     "supabaseProyectoCreado": true,
     "bucketImagenesCreado": true,
-    "pagesAppOrigin": null,
-    "renderVerificacionTarjetaPendiente": true
+    "pagesAppOrigin": "https://farmacia-reina-del-cisne.onrender.com",
+    "renderVerificacionTarjetaPendiente": false,
+    "commitComprobadoRender": "b987744c02991ef57b94cc8f21dec45a653dded6"
   },
-  "limite": "Supabase y el traslado real están verificados. Las 17 operaciones de API se ejecutaron desde el equipo contra los servicios reales. Render Free solicitó verificación de tarjeta; no hay backend público confirmado ni redirección Pages activada todavía.",
+  "limite": "Render Free, PostgreSQL y Storage reales verificados con API, navegador y reinicio. Las pruebas públicas usaron datos sintéticos después retirados; los datos originales conservan igualdad con la fuente. Pages tiene el origen público configurado. Comprobaciones puntuales, sin garantía de disponibilidad continua ni respaldo automático PostgreSQL/Storage.",
   "apiSupabaseReal": {
     "fechaUTC": "2026-10-11T17:27:24.871Z",
-    "servidor": "local contra PostgreSQL y Storage reales; Render pendiente",
+    "servidor": "local contra PostgreSQL y Storage reales; comprobación previa al despliegue público",
     "comprobaciones": {
       "saludPostgresql": true,
       "loginAdministradorConservado": true,
@@ -79,5 +85,52 @@
       "persistenciaTrasReconectar": true,
       "limpiezaImagenSintetica": true
     }
+  },
+  "apiRenderReal": {
+    "fechaUTC": "2026-10-11T17:35:19.098Z",
+    "servidor": "https://farmacia-reina-del-cisne.onrender.com",
+    "comprobaciones": {
+      "saludPostgresql": true,
+      "loginAdministradorConservado": true,
+      "resumenERP": true,
+      "registroClienteCompartido": true,
+      "loginCliente": true,
+      "rolesSeparados": true,
+      "cargaImagenPersistente": true,
+      "edicionVisibleCliente": true,
+      "descuento25Compartido": true,
+      "promocionPublica": true,
+      "pedidoConDescuento": true,
+      "stockDescontado": true,
+      "pedidoVisibleAdministrador": true,
+      "cancelacionDevuelveStockUnaVez": true,
+      "estadoVisibleCliente": true,
+      "persistenciaTrasReconectar": true
+    },
+    "fixturesSinteticasRetiradas": true
+  },
+  "persistenciaReinicioRender": {
+    "fechaUTC": "2026-10-11T17:41:32.607Z",
+    "servidor": "https://farmacia-reina-del-cisne.onrender.com",
+    "comprobaciones": {
+      "registrosConservadosTrasRedespliegue": true,
+      "imagenesConservadasTrasRedespliegue": true,
+      "loginAdminTrasRedespliegue": true,
+      "loginClienteTrasRedespliegue": true,
+      "pedidoHistoricoConservado": true,
+      "edicionUIVisibleTrasRedespliegue": true
+    }
+  },
+  "navegadorRenderReal": {
+    "sesionesAdminClienteSeparadas": true,
+    "dashboardOriginal18Productos": true,
+    "pedidoCanceladoVisibleCliente": true,
+    "imagenSeleccionadaDesdePanelVisibleCliente": true,
+    "franjaAmarilla25PorCiento": true,
+    "precioOriginal": 14,
+    "precioEfectivo": 10.5,
+    "imagenConservadaTrasReinicio": true,
+    "datosSinteticos": true,
+    "fixturesRetiradas": true
   }
 }
