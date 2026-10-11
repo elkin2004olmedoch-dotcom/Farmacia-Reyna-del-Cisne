@@ -1,0 +1,49 @@
+{
+  "fechaUTC": "2026-10-11T19:29:26.421Z",
+  "origen": "https://farmacia-reina-del-cisne.onrender.com",
+  "commit": "bd8a04dc641d6d2456750a9672ab05183b086b30",
+  "despliegue": "dep-db5u5r7lk1mc73b8gp7g",
+  "salud": true,
+  "archivos": [
+    {
+      "ruta": "admin.html",
+      "fuenteProbadaCoincide": true
+    },
+    {
+      "ruta": "controllers/admin.js",
+      "fuenteProbadaCoincide": true
+    },
+    {
+      "ruta": "models/promotion-publication.js",
+      "fuenteProbadaCoincide": true
+    },
+    {
+      "ruta": "views/common.js",
+      "fuenteProbadaCoincide": true
+    },
+    {
+      "ruta": "views/products.js",
+      "fuenteProbadaCoincide": true
+    },
+    {
+      "ruta": "views/admin.js",
+      "fuenteProbadaCoincide": true
+    },
+    {
+      "ruta": "assets/mvc.css",
+      "fuenteProbadaCoincide": true
+    },
+    {
+      "ruta": "assets/shop.css",
+      "fuenteProbadaCoincide": true
+    }
+  ],
+  "campana": "cuidado-solar",
+  "vistaPrevia": false,
+  "descuentoPorcentaje": 26,
+  "precioOriginal": "9.75",
+  "precioFinal": "7.22",
+  "finConfigurado": "2026-10-11T19:59:00.000Z",
+  "precioCampanaYFichaIguales": true,
+  "pruebaCompra": "Recorrido de carrito y pedido con datos aislados; sin crear pedidos reales en esta comprobación."
+}

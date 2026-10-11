@@ -7,7 +7,7 @@ New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
 $archivePath = Join-Path $outputDir $Nombre
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-$entries = @('frontend', 'server', 'assets', 'js', 'data', 'scripts', 'tests', 'docs', 'index.html', 'catalogo.html', 'producto.html', 'comparar.html', 'cuenta.html', 'checkout.html', 'pedidos.html', 'ayuda.html', 'service-worker.js', 'robots.txt', 'render.yaml', 'package.json', 'package-lock.json', '.env.example', '.gitignore', 'README.md')
+$entries = @('frontend', 'server', 'services', '.github', 'assets', 'js', 'data', 'scripts', 'tests', 'docs', 'index.html', 'catalogo.html', 'producto.html', 'comparar.html', 'cuenta.html', 'checkout.html', 'pedidos.html', 'ayuda.html', 'service-worker.js', 'robots.txt', 'render.yaml', 'package.json', 'package-lock.json', '.env.example', '.gitignore', 'README.md')
 $files = foreach ($entry in $entries) {
   $entryPath = Join-Path $projectRoot $entry
   if (Test-Path -LiteralPath $entryPath -PathType Container) { Get-ChildItem -LiteralPath $entryPath -File -Recurse -Force }
@@ -20,9 +20,10 @@ try {
     if (-not $file.FullName.StartsWith($projectRoot + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase)) { throw 'Archivo fuera del proyecto.' }
     $relative = $file.FullName.Substring($projectRoot.Length + 1).Replace('\', '/')
     if ($relative -match '^(server/backups|frontend/assets/uploads)(/|$)') { continue }
-    if ($relative -match '(^|/)(test-results|playwright-report)(/|$)') { continue }
+    if ($relative -match '(^|/)(test-results|TestResults|playwright-report)(/|$)') { continue }
+    if ($relative -match '(^|/)(bin|obj|\.vs)(/|$)' -or $relative -match '(^|/)appsettings\.(Production|Development|Local)\.json$') { continue }
     if ($relative -match '(^|/)(\.env($|\.)|node_modules|certificates)(/|$)' -and $relative -ne '.env.example') { continue }
-    if ($relative -match '\.(db|db-journal|db-wal|db-shm|key|pem|p12|pfx|log)$') { continue }
+    if ($relative -match '\.(env|db|db-journal|db-wal|db-shm|key|pem|p12|pfx|log)$') { continue }
     [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $file.FullName, $relative, [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
   }
 } finally { $archive.Dispose(); $stream.Dispose() }

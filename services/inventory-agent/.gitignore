@@ -1,0 +1,17 @@
+bin/
+obj/
+tests/bin/
+tests/obj/
+appsettings.local.json
+appsettings.*.json
+.env*
+TestResults/
+**/TestResults/
+*.env
+*.pfx
+*.p12
+*.pem
+*.key
+*.crt
+*.cer
+*.log

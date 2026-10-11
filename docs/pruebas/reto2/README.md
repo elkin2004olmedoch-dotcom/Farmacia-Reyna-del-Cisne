@@ -58,8 +58,8 @@ npm audit
 
 ## Resultado final observado
 
-- [Pruebas Node](node-tests.txt): 133 aprobadas, cero fallos.
-- [Pruebas Chrome](browser-tests.txt): 36 aprobadas, cero fallos; escritorio/móvil y controles adicionales en 320, 768 y 1920 px.
+- [Pruebas Node](node-tests.txt): 136 aprobadas, cero fallos.
+- [Pruebas Chrome](browser-tests.txt): 40 aprobadas, cero fallos; escritorio/móvil y controles adicionales en 320, 768 y 1920 px.
 - [npm audit](npm-audit.json): cero vulnerabilidades reportadas.
 - [Resumen de ejecución](resumen.json): los tres comandos terminaron con código cero.
 - [Portada](capturas/inicio.png), [catálogo escritorio](capturas/catalogo.png) y [catálogo móvil](capturas/catalogo-movil.png): catálogo de trabajo de 18 referencias, sin credenciales ni tokens en pantalla.
@@ -105,7 +105,7 @@ Axe con etiquetas WCAG 2 A/AA y 2.1 A/AA en nueve pantallas y dos tamaños: ocho
 
 ## Separación de roles en la interfaz
 
-El login de admin llega directamente al Dashboard ejecutivo de /admin.html aunque el destino solicitado sea checkout. El panel no contiene carrito, búsqueda de compras, comparación ni Mis pedidos. La navegación de promociones y el selector sincronizan sección/título; una sección desconocida vuelve a Productos. Las rutas de cuenta/checkout de admin llevan al dashboard y /pedidos.html abre Pedidos de clientes. En la tienda, los controles de compra de admin permanecen ocultos al filtrar y abrir fichas. Logout elimina la sesión y el acceso anónimo al panel solicita credenciales administrativas. El cliente conserva el recorrido de compra e historial y no puede abrir el área de gestión. Una respuesta de Productos retenida hasta después de Promociones se descarta; mientras carga no quedan acciones antiguas disponibles. Un 401 durante una edición cierra el diálogo, limpia el área y solicita nuevo login. Estas comprobaciones forman parte de los catorce casos Chrome.
+El login de admin llega directamente al Dashboard ejecutivo de /admin.html aunque el destino solicitado sea checkout. El panel no contiene carrito, búsqueda de compras, comparación ni Mis pedidos. La navegación de promociones y el selector sincronizan sección/título; una sección desconocida vuelve a Productos. Las rutas de cuenta/checkout de admin llevan al dashboard y /pedidos.html abre Pedidos de clientes. En la tienda, los controles de compra de admin permanecen ocultos al filtrar y abrir fichas. Logout elimina la sesión y el acceso anónimo al panel solicita credenciales administrativas. El cliente conserva el recorrido de compra e historial y no puede abrir el área de gestión. Una respuesta de Productos retenida hasta después de Promociones se descarta; mientras carga no quedan acciones antiguas disponibles. Un 401 durante una edición cierra el diálogo, limpia el área y solicita nuevo login. Estas comprobaciones forman parte de la suite Chrome.
 
 ## Dashboard ERP
 
@@ -158,10 +158,40 @@ Las actualizaciones son consultas HTTP al volver a la pestaña y cada 30 segundo
 
 ## Ampliación fiscal, farmacéutica y SRI
 
-La ejecución final completa aprobó 133 pruebas Node y 36 de navegador, con cero vulnerabilidades de dependencias. Incluye el cierre de sesión administrativa mientras hay un editor abierto, sin errores de foco. Fiscal/inventario prueba restricciones SQL/API, descuentos 85/86, IVA con vigencias, centavos mixtos, PVP, lotes vencidos, reservas FEFO y reposición única. SRI prueba XML contra XSD, firma criptográfica con tres referencias, P12 sintético, cifrado, secuencias/idempotencia, respuestas SOAP simuladas, permisos y descarga. No equivale a autorización ante el SRI.
+La ejecución final completa aprobó 136 pruebas Node y 40 de navegador, con cero vulnerabilidades de dependencias. Incluye el cierre de sesión administrativa mientras hay un editor abierto, sin errores de foco. Fiscal/inventario prueba restricciones SQL/API, descuentos 85/86, IVA con vigencias, centavos mixtos, PVP, lotes vencidos, reservas FEFO y reposición única. SRI prueba XML contra XSD, firma criptográfica con tres referencias, P12 sintético, cifrado, secuencias/idempotencia, respuestas SOAP simuladas, permisos y descarga. No equivale a autorización ante el SRI.
 
 [Administración fiscal en escritorio](capturas/admin-fiscal-escritorio.png), [móvil](capturas/admin-fiscal-movil.png), [detalle por teclado](capturas/cliente-detalle-accesible-escritorio.png) y [borrador SRI sintético](capturas/facturacion-borrador-escritorio.png) documentan las vistas aisladas de prueba.
 
 Las migraciones reales preservaron todos los registros originales de ambas instalaciones. Se conservan [paridad local](ampliacion-local.json), [paridad de nube y RLS de las 16 tablas](ampliacion-nube.json) y [ocho restricciones de PostgreSQL real](restricciones-postgresql.json). No se publican copias, filas privadas ni credenciales.
 
 La aplicación del commit `39aee06` quedó Live en Render Free y ambos procesos de GitHub Pages finalizaron correctamente. Pasaron 15 comprobaciones de API pública sin mutaciones comerciales: acceso conservado, IVA, campos farmacéuticos, imagen con el mismo SHA-256, módulos administrativos, permisos SRI y OpenSSL. En navegador se comprobó el dashboard, [IVA publicado](capturas/nube-iva-administrador.png), [SRI sin emisor/firma](capturas/nube-sri-pendiente.png) y el enlace original de Pages hacia la ficha con foto, precio y stock conservados y nota de IVA. [API pública](ampliacion-publicada.json) y [despliegue/interfaz](ampliacion-despliegue.json). No se agregaron datos tributarios del propietario ni se emitió una factura real; esa conexión se hará posteriormente.
+
+## Promoción real publicada
+
+[promocion-publicada.json](promocion-publicada.json) verifica salud, ocho fuentes publicadas y coincidencia campaña/ficha para `cuidado-solar`: 26 %, precio original USD 9,75 y efectivo USD 7,22 al comprobarlo. Se retiró la vista previa preservando la fecha final `2026-10-11T19:59:00Z`, las 14:59 de Ecuador del 11 de octubre. No se prolongó la campaña ni se creó una compra real; el recorrido de compra se verificó en datos aislados.
+
+[promocion-corregida.json](promocion-corregida.json) compara las 15 tablas reales según el cambio autorizado: sólo se publicó la campaña; usuarios, pedidos, stock y demás datos siguen conservados. [Ficha publicada](capturas/promocion-ficha-publicada.png). `promotion-publication.spec.cjs` y las pruebas Node del estado de publicación distinguen vista previa, programación, vigencia y fin; esta ampliación está incluida en las **136 pruebas Node y 40 Chrome**, no es otro conteo sumable.
+
+## Agente .NET: pruebas y activación
+
+Proyecto `services/inventory-agent/InventoryAgent.csproj`; pruebas `services/inventory-agent/tests/InventoryAgent.Tests.csproj`. Se compila y ejecuta de forma independiente del servidor Node:
+
+```text
+dotnet restore services/inventory-agent/InventoryAgent.csproj
+dotnet build services/inventory-agent/InventoryAgent.csproj
+dotnet test services/inventory-agent/tests/InventoryAgent.Tests.csproj
+```
+
+El conjunto C# cubre política primordial/intermedio/bajo, reloj de Ecuador, agente/canales desactivados, validación, parsers, secreto de Telegram, HMAC Meta, endpoints protegidos y transportes simulados. Los tests HTTP sustituyen repositorio y clientes de mensajería, incluido answerCallbackQuery; no utilizan cuentas reales ni mandan mensajes. La ejecución final recompiló el código definitivo y aprobó **92 de 92 pruebas**: **76 de dominio/HTTP/transportes y 16 de PostgreSQL**, con cero fallos, cero omisiones y cero envíos reales. Incluye los callbacks tempranos de ambos canales, devolución 503 y reintento sin perder definitivamente el evento.
+
+Las pruebas de repositorio requieren `INVENTORY_AGENT_TEST_CONNECTION` explícita; sin esa variable se omiten, sin buscar una conexión de producción como alternativa. Se recomienda un entorno de prueba separado; CI utilizará una base PostgreSQL 17 separada. Esta ejecución final realizó las 16 pruebas en **esquemas temporales aislados del Supabase existente, con fuentes ficticias**, sin copiar ni utilizar el inventario comercial como fuente de prueba. No se trató de otro servidor Supabase independiente. Los casos cubren Integrated/Standalone, episodio único, snapshots obsoletos, aprobación simultánea entre canales, outbox, lease perdida, conciliación y rearme. El SQL de permisos mínimos, `security_invoker` y políticas RLS recibió revisión estática: estas pruebas no crean ni ejercitan el usuario restringido, por lo que no acreditan sus permisos efectivos. La conexión se verificó con CA oficial de Supabase y VerifyFull, sin rebajar TLS. Se corrigieron los fallos detectados de integración; la ejecución final dejó cero tablas temporales restantes y confirmó conservación de los 15 modelos comerciales.
+
+| Informe del agente | Alcance | Estado de documentación |
+| --- | --- | --- |
+| [inventory-agent-results.json](inventory-agent-results.json) | Resultado consolidado de ejecución aislada/transportes/PG. | 92 ejecutadas y aprobadas; cero fallos y omisiones. |
+| [inventory-agent-tests.txt](inventory-agent-tests.txt) | Salida de pruebas .NET sobre el código final. | 76 dominio/HTTP/transportes y 16 PostgreSQL; sin envíos reales. |
+| [inventory-agent-dependencies.json](inventory-agent-dependencies.json) | Auditoría de paquetes .NET/NuGet independiente de npm. | Cero vulnerabilidades reportadas. |
+
+Los SQL de instalación no se aplican automáticamente a la base comercial. Usar un archivo de fuente, luego `003-agent.sql` y permisos revisados de `004-permissions.example.sql`. El modo integrado lee stock compartido sin copiarlo ni actualizarlo; standalone es una demostración aislada. [Guía completa](../../AGENTE-INVENTARIO.md).
+
+Agente, Gmail, Telegram y WhatsApp permanecen desactivados y no se realizaron envíos reales. Su alojamiento permanente está pendiente: Render Free bloquea SMTP, por lo que el servidor gratuito actual no activa este proceso de correo. No se confunden las pruebas simuladas con aceptación de Gmail, alta de Telegram, aprobación de Meta o compra recibida por un proveedor.

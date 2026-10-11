@@ -4,9 +4,13 @@ Plataforma de farmacia con catálogo, carrito persistente, registro/login, pedid
 
 **Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite local o PostgreSQL en Supabase, y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.
 
+**Agente de reposición:** servicio adicional en C#/.NET 10, PostgreSQL/Npgsql y MailKit, con revisión diaria, auditoría, correo al proveedor y aprobación del gerente por Telegram/WhatsApp. El código y la arquitectura están en [services/inventory-agent](services/inventory-agent/) y [su guía de configuración](docs/AGENTE-INVENTARIO.md). Comienza desactivado; los envíos reales y el alojamiento de este servicio requieren completar la configuración privada del negocio.
+
 ## Administración de farmacia e impuestos
 
 En [el panel en línea](https://farmacia-reina-del-cisne.onrender.com/admin.html), **Productos** permite cambiar imagen, precio final con IVA, descuento directo de **0 a 85 %**, tarifa general o tarifa 0 % con fundamento legal, ficha farmacéutica, PVP máximo y stock mínimo. Para medicamento se exige PVP, laboratorio, presentación y registro sanitario; el precio final original no puede superar PVP. **Promociones** admite el mismo límite y muestra franja amarilla; cuando coinciden campañas y descuento directo, se usa el mayor porcentaje sin sumarlos.
+
+Una campaña **publicada y vigente** aplica el mismo precio efectivo en promociones, catálogo, ficha, carrito y confirmación del pedido. Una **vista previa** conserva una propuesta sin aplicar descuentos: el panel y la tarjeta deben identificarla como tal. La vigencia se introduce en hora de Ecuador y se vuelve a verificar al confirmar; los pedidos anteriores conservan su descuento histórico.
 
 **Configuración de IVA** registra tarifa general 13, 14 o 15 %, fecha de inicio en hora de Ecuador y referencia normativa. Al 11 de octubre de 2026 rige **15 %**; el feriado turístico de 8 % no se aplica automáticamente a esta farmacia. La clasificación 0 % requiere revisión del producto concreto. Los precios conservan su carácter final: el impuesto se desglosa, no se añade por segunda vez. Carrito y pedido calculan centavos por línea, y el historial conserva la tarifa aplicada. Consulta [fuentes y criterios ecuatorianos](docs/ECUADOR-FARMACIA.md).
 
@@ -74,6 +78,8 @@ server/
     seed.cjs
     postgresql/       schema y migración PostgreSQL con RLS
 scripts/            instalación local/nube, traslado, frontend, HTTPS y ZIP
+services/
+  inventory-agent/  host .NET 10, Worker, canales, webhooks, SQL y pruebas
 tests/reto2/        API, recursos, nube, traslado y navegador
 docs/
   REQUISITOS-RETO-2.txt
@@ -130,6 +136,10 @@ El editor de productos envía `esperadoUpdatedAt` con la versión que recibió a
 ### Conexión entre administrador y clientes
 
 Todos los módulos consultan la misma API y BD: el registro aparece en Usuarios; los productos y campañas administrados aparecen en la tienda; los pedidos del cliente aparecen en Pedidos, Detalles y dashboard, con descuento de stock. Cada cliente consulta únicamente su historial.
+
+El agente de reposición tiene un modo **Integrated** que consulta los productos, proveedores y lotes del mismo PostgreSQL, sin copiar existencias ni cambiar stock al enviar un correo. Su modo **Standalone** incluye las tablas `Medicamentos`, `Proveedores` y `AuditoriaPedidos` para una instalación aislada. Se elige un solo modo; la tienda continúa realizando las ventas y entradas de inventario.
+
+La prioridad **primordial** genera el correo de compra automáticamente; **intermedio** y **bajo** esperan aprobación del gerente. Las respuestas de ambos canales comparten una solicitud y una tarea de correo: aprobar dos veces no genera dos compras. La auditoría conserva el resultado y los envíos SMTP inciertos esperan revisión. Consulta [arquitectura, SQL, variables privadas y límites de los canales](docs/AGENTE-INVENTARIO.md).
 
 Portada, catálogo, ficha, comparación, carrito, historial y panel consultan cambios al regresar a la pestaña y cada 30 segundos mientras está visible. Pestañas del mismo navegador reciben además una señal local de cambios; el carrito escucha cambios de almacenamiento. Las señales contienen únicamente un UUID, sin cuentas, JWT ni datos de entrega. La actualización usa consultas HTTP, sin conexión WebSocket.
 
@@ -260,7 +270,7 @@ En **Productos → Editar**, pulsa el selector de imagen, elige un JPG, PNG o We
 
 En **Promociones**, carga una imagen propia o pulsa “Usar imagen del producto”. Configura **Descuento (%)**, de 0 a 85, publicación y fechas. Una franja amarilla muestra el porcentaje; el catálogo y la ficha presentan precio anterior tachado y precio rebajado. Solo campañas activas, vigentes y sin vista previa aplican descuento. Si coinciden varias, se aplica el mayor porcentaje y no se acumulan. El servidor calcula en centavos: por ejemplo, $7,50 con 25 % queda en $5,63. El carrito usa ese precio y el pedido guarda precio original, porcentaje y precio final históricos. Cambiar o eliminar la campaña no altera pedidos anteriores.
 
-Las fechas tienen inicio inclusivo y fin exclusivo. El panel utiliza la hora del dispositivo y envía ISO con zona. Las dos campañas iniciales siguen como vistas previas, sin descuentos vigentes inventados. Una imagen propia de campaña requiere descripción accesible.
+Las fechas tienen inicio inclusivo y fin exclusivo. El panel utiliza la hora de Ecuador (UTC−5) y envía ISO con zona. Al editar una vista previa, pulsa **Publicar descuento del X %** para aplicarla; guardar una propuesta conserva su estado de vista previa. Las campañas del seed comienzan como propuestas y una imagen propia requiere descripción accesible. La campaña de cuidado solar configurada por el administrador se publicó con 26 % y su vigencia original, hasta el 11 de octubre de 2026 a las 14:59 de Ecuador; no se amplió automáticamente.
 
 En **Pedidos de clientes → Gestionar estado**, sigue pendiente → confirmado → preparado → entregado. Puedes cancelar desde pendiente, confirmado o preparado; entregado y cancelado son estados finales. La cancelación devuelve las cantidades al inventario exactamente una vez, dentro de la transacción de cambio de estado. El historial conserva quién hizo cada transición y cuándo; el cliente ve el estado e historial en “Mis pedidos”. Los cambios requieren `esperadoUpdatedAt`: una edición simultánea devuelve 409 para revisar los datos actuales.
 
@@ -302,7 +312,11 @@ npm run test:browser
 npm audit
 ~~~
 
-**133 pruebas Node:** API, fiscalidad, PVP, lotes/FEFO, migración histórica, firma/XML/SOAP SRI simulado, imágenes, respaldo y configuración de producción. **36 pruebas Chrome:** dieciocho recorridos en escritorio/móvil, con comprobaciones adicionales a 320, 768 y 1920 px, teclado y axe. **34 pruebas del antecedente estático:** incluye sesión bloqueada y enlace Pages al servicio público. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración. Las suites SRI utilizan datos y certificados sintéticos; no autorizan comprobantes reales.
+**136 pruebas Node:** API, fiscalidad, PVP, lotes/FEFO, migración histórica, firma/XML/SOAP SRI simulado, imágenes, respaldo, publicación de campañas y configuración de producción. **40 pruebas Chrome:** recorridos en escritorio/móvil, con comprobaciones adicionales a 320, 768 y 1920 px, teclado, axe y descuento consistente desde administrador hasta pedido. **34 pruebas del antecedente estático:** incluye sesión bloqueada y enlace Pages al servicio público. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración. Las suites SRI utilizan datos y certificados sintéticos; no autorizan comprobantes reales.
+
+El agente C# se prueba por separado con `dotnet test services/inventory-agent/tests/InventoryAgent.Tests.csproj --configuration Release` y .NET SDK 10. Las pruebas HTTP y de canales simulan los envíos. Las pruebas de PostgreSQL exigen la variable privada `INVENTORY_AGENT_TEST_CONNECTION`, crean esquemas temporales propios y los retiran al finalizar; sin esa variable se omiten explícitamente. El workflow [inventory-agent.yml](.github/workflows/inventory-agent.yml) utiliza PostgreSQL 17 independiente de la farmacia. Consulta [los resultados del agente](docs/pruebas/reto2/inventory-agent-results.json).
+
+La verificación final del agente aprobó **92 de 92 pruebas**, incluidas **16 de PostgreSQL**, sin omisiones ni envíos reales; sus dependencias no reportaron vulnerabilidades. Se comprueba aprobación simultánea, callback antes de persistir el envío, stock/proveedor cambiado, recuperación tras fallos seguros y revisión obligatoria ante una entrega incierta. Los permisos del rol de producción requieren aplicar y revisar el ejemplo privado antes de activar el servicio.
 
 La etapa inicial de conexión PostgreSQL/Storage comprobó autenticación, imágenes, edición, promociones, pedidos y reinicio de Render. Sus datos sintéticos se retiraron y su [evidencia histórica](docs/pruebas/reto2/nube.json) se conserva por separado. La ampliación actual aplicó las seis migraciones en SQLite y PostgreSQL, conserva todos los campos y filas originales de cada instalación y verifica RLS sin políticas públicas en las 16 tablas de Supabase. Ocho comprobaciones nativas de PostgreSQL probaron descuentos, IVA, PVP y lotes dentro de transacciones revertidas. No se reimportaron ni eliminaron cuentas o pedidos reales. Consulta [evidencia local](docs/pruebas/reto2/ampliacion-local.json), [evidencia de nube](docs/pruebas/reto2/ampliacion-nube.json) y [restricciones PostgreSQL](docs/pruebas/reto2/restricciones-postgresql.json).
 
@@ -328,9 +342,9 @@ La prueba cruzada mantiene sesiones independientes de administrador y cliente, c
 npm run package
 ~~~
 
-Genera **entrega/Reto2_Olmedo_Elkin.zip** con frontend/backend MVC, schema/migración/seed, .env.example, lockfile, README, pruebas y auditorías. Conserva el antecedente Reto 1 para reconstruir plantillas. Excluye secretos, BD personal, certificados, node_modules y logs. En otra carpeta: npm ci y npm run setup.
+Genera **entrega/Reto2_Olmedo_Elkin.zip** con frontend/backend MVC, schema/migración/seed, agente C#/SQL, configuración pública de referencia, lockfile, README, pruebas y cinco auditorías. Conserva el antecedente Reto 1 para reconstruir plantillas. Excluye secretos, BD personal, certificados, node_modules, bin/obj y logs. En otra carpeta: npm ci y npm run setup; el agente tiene su propia instalación descrita en su guía.
 
 ## Límites prácticos
 
-SQLite sirve para la instalación local; la aplicación pública utiliza PostgreSQL y Storage de Supabase. Rate limit en memoria de una instancia. Los respaldos automáticos SQLite requieren el servidor activo y espacio disponible; no cubren los servicios de nube. Render y Supabase gratuitos tienen límites y pausas por inactividad, sin garantía de disponibilidad continua. No se implementan pasarela bancaria, logística automática, MFA, recuperación de clave ni verificación de correo. El administrador actualiza los estados; el pago y la entrega se coordinan con la farmacia. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
+SQLite sirve para la instalación local; la aplicación pública utiliza PostgreSQL y Storage de Supabase. Rate limit en memoria de una instancia. Los respaldos automáticos SQLite requieren el servidor activo y espacio disponible; no cubren los servicios de nube. Render y Supabase gratuitos tienen límites y pausas por inactividad, sin garantía de disponibilidad continua. El nuevo agente todavía requiere cuentas, plantillas y configuración privada: para Gmail SMTP necesita alojamiento siempre activo con puertos SMTP disponibles; Render Free bloquea esos puertos. No se implementan pasarela bancaria, logística automática, MFA, recuperación de clave ni verificación de correo. El administrador actualiza los estados; el pago y la entrega se coordinan con la farmacia. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
 

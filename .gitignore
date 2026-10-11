@@ -22,3 +22,12 @@ playwright-report/
 server/certificates/
 server/backups/
 frontend/assets/uploads/
+**/bin/
+**/obj/
+**/.vs/
+**/TestResults/
+**/appsettings.Production.json
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.local.json
+*.env

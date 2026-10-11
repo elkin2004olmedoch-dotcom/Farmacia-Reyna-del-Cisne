@@ -1,0 +1,24 @@
+{
+  "fechaUTC": "2026-10-11T19:44:38.852Z",
+  "sdk": "10.0.401",
+  "basePruebas": "Esquemas temporales independientes; sin modificar registros de la farmacia",
+  "enviosReales": false,
+  "resultados": [
+    {
+      "prueba": "inventory-agent-tests",
+      "exitCode": 0
+    },
+    {
+      "prueba": "inventory-agent-dependencies",
+      "exitCode": 0
+    }
+  ],
+  "pruebas": {
+    "total": 92,
+    "ejecutadas": 92,
+    "aprobadas": 92,
+    "fallidas": 0,
+    "omitidas": 0
+  },
+  "vulnerabilidades": 0
+}

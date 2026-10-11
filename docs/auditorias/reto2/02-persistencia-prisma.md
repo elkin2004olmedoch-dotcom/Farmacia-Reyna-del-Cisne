@@ -116,3 +116,20 @@ FEFO reserva lotes vigentes, excluye vencidos y conserva asignaciones; cancelar 
 ConfiguracionEmisor, SecuenciaFactura y FacturaPedido conservan firma cifrada, numeración única y snapshots de emisor/comprador/importes/XML. La emisión tiene bloqueo temporal, transacción serializable y reintentos limitados; un pedido fiscalmente numerado/en proceso no se cancela devolviendo stock como si se hubiera anulado ante el SRI.
 
 El importador incluye los15 modelos y rechaza destino con datos; sólo admite retirar dentro de la transacción la fila fiscal inicial exacta creada por la migración. Para recuperar una firma cifrada se conserva también el secreto privado original o se vuelve a cargar el P12. El respaldo SQLite copia la base completa, por lo que incluye estas tablas. Evidencia: fiscal-inventory.test.cjs, sri-api.test.cjs, cloudmigration.test.cjs y uploadbackup.test.cjs.
+
+## Persistencia de promociones y reposición independiente
+
+La publicación real cambió únicamente la condición de vista previa de `cuidado-solar`, preservando 26 %, producto y vigencia hasta las 14:59 de Ecuador del 11 de octubre de 2026. Se compararon las **15 tablas de modelos reales** contra el estado anterior y el cambio autorizado: usuarios, pedidos, stock, precios originales y demás filas permanecen conservados. No se reimportó el catálogo ni se aplicó seed a los datos del negocio. [Comparación controlada](../../pruebas/reto2/promocion-corregida.json).
+
+| Persistencia del agente .NET | Implementación y límite |
+| --- | --- |
+| Fuente integrada | `sql/002-integrated.sql`: vistas con `security_invoker` sobre Producto/Lote/Proveedor; sólo lectura de inventario, sin stock duplicado. |
+| Fuente independiente | `sql/001-schema.sql`: Medicamentos/Proveedores/Lotes aislados para demostración; alternativa excluyente de la fuente integrada. |
+| Estado durable | `sql/003-agent.sql`: ConfiguracionReposicion, SolicitudesReposicion, Aprobaciones, WebhookInbox, Outbox y AuditoriaPedidos. |
+| Permisos privados | `sql/004-permissions.example.sql`: usuario dedicado NOSUPERUSER/NOBYPASSRLS, políticas por rol y lectura limitada; ningún permiso para clientes públicos. |
+| Concurrencia | Episodio único por producto, eventos externos únicos, tokens consumidos en transacción y una tarea por solicitud/tipo/canal. |
+| Recuperación | Una lease vencida implica revisión, no reenvío automático; rearme bloqueado ante envío/aceptación/entrega incierta y condicionado a confirmación tras fallos seguros intentados. |
+
+El proveedor, prioridad, cantidades y riesgos forman parte del snapshot; creación, aprobación y despacho vuelven a revisar los datos actuales. Deshabilitar una configuración no se interpreta como recuperación física de existencias. Enviar un correo o registrar su recepción por el proveedor no ingresa mercancía: la entrada real continúa en el sistema de la farmacia con lote y caducidad.
+
+Estos scripts no son migraciones Prisma del MVC ni se instalan automáticamente en la base comercial. La ejecución final aprobó **92 pruebas C#**, incluidas **16 de PostgreSQL** en esquemas temporales aislados del Supabase existente con fuentes ficticias, sin fallos ni omisiones. No se copió el inventario comercial para probar. Se comprobó conservación de los 15 modelos comerciales y cero tablas temporales restantes; no hubo mensajes reales. [Resultado independiente](../../pruebas/reto2/inventory-agent-results.json). El SQL de permisos/RLS recibió revisión estática; las pruebas no crean ni ejercitan el usuario restringido, por lo que no acreditan sus permisos efectivos. Configuración inicial y canales desactivados; [instalación y permisos](../../AGENTE-INVENTARIO.md).

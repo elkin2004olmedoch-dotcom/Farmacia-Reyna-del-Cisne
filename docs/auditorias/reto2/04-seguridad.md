@@ -102,3 +102,21 @@ Certificado y contraseña se cifran con AES-256-GCM, clave HKDF separada por dom
 XML/RIDE sólo para administrador o dueño del pedido. La identificación completa necesaria para factura vive en snapshot privado; los listados la enmascaran. Cambiar el RUC retira la firma anterior. Certificado, contraseña y archivos P12/PFX/PEM/KEY se excluyen de Git/ZIP. Los campos del navegador se vacían al terminar; esto no promete borrado criptográfico de memoria JavaScript.
 
 Todas las tablas PostgreSQL, incluidas las 15 entidades y _prisma_migrations, requieren RLS sin políticas públicas; el servidor utiliza credenciales privadas. Las pruebas temporales pueden aumentar cuotas sólo fuera de producción, y se verifica que producción siga limitada. Evidencia: rate-limits.test.cjs, production.test.cjs, sri-api.test.cjs, sri-crypto.test.cjs y npm-audit.json. La confianza y autorización real del emisor requieren pruebas con su firma ante SRI, no un certificado sintético.
+
+## Seguridad de publicación y reposición C#
+
+El paso de vista previa a campaña publicada continúa protegido por JWT/admin y validación del servidor. La corrección real conservó todas las filas de las 15 tablas salvo el campo autorizado de la campaña; no cambió usuarios, pedidos, existencias ni credenciales. [Comparación](../../pruebas/reto2/promocion-corregida.json).
+
+| Control del agente independiente | Evidencia inspeccionada |
+| --- | --- |
+| Administración privada | Bearer de al menos 32 caracteres, comparación constante y denegación con clave ausente; no reutiliza JWT de clientes. |
+| Entrada y SQL | Identificador de esquema validado, valores parametrizados, límites de cuerpo/frecuencia y validaciones de relaciones/objetivos/prioridad. |
+| Telegram | Secreto de webhook, identificador numérico del gerente, chat y contexto; callback opaco de 64 bytes, sin paciente o receta. |
+| WhatsApp | HMAC-SHA256 sobre bytes originales antes de JSON; Verify Token, WABA/Phone Number ID, actor/contexto y canal apagado por defecto. |
+| Persistencia | RLS, vistas `security_invoker`, rol privado sin superusuario/BYPASSRLS y sin permisos a anon/authenticated/PUBLIC. |
+| Aprobación simultánea | Hash de tokens, evento externo único y decisión transaccional que consume las acciones de ambos canales. |
+| Envío incierto | Timeout y lease; resultado incierto requiere conciliación, sin reenvío ciego ni promesa de SMTP exactamente una vez. |
+
+Secretos sólo en entorno privado; archivos de ejemplo vacíos y respuestas sin claves. Destinos y snapshots se vuelven a validar antes del despacho. TLS remoto comprueba certificado y host con VerifyFull; Supabase requiere su CA oficial configurada. El correo usa Gmail con TLS obligatorio; OAuthAccessToken no incluye renovación automática.
+
+Las **92 pruebas C# finales** aprobaron sin fallos ni omisiones: 76 de dominio/HTTP/transportes y 16 de PostgreSQL. Usan transportes simulados, incluido answerCallbackQuery, y fuentes ficticias en esquemas temporales aislados del Supabase existente; no hubo mensajes ni cambios comerciales reales. Al finalizar se verificó limpieza y conservación de los 15 modelos comerciales. Los callbacks tempranos de ambos canales devuelven 503 y permiten un reintento seguro. [Resultados](../../pruebas/reto2/inventory-agent-results.json). Los permisos mínimos y políticas del usuario restringido recibieron revisión estática; ese usuario no fue creado ni ejercitado por las pruebas. La [auditoría de dependencias C#](../../pruebas/reto2/inventory-agent-dependencies.json) no reportó vulnerabilidades y tiene informe propio; `npm audit` sólo describe las dependencias Node. WhatsApp exige revisión de elegibilidad de farmacia y plantilla aprobada: una opción de configuración no demuestra aprobación de Meta. [Guía y fuentes oficiales](../../AGENTE-INVENTARIO.md).

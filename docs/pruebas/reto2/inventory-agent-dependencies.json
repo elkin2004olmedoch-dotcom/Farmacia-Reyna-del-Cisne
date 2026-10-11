@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "parameters": "--vulnerable --include-transitive",
+  "sources": [
+    "https://api.nuget.org/v3/index.json"
+  ],
+  "projects": [
+    {
+      "path": "C:/Users/Elkin/Downloads/Farmacia-Reyna-del-Cisne-main (1)/Farmacia-Reyna-del-Cisne-main/services/inventory-agent/InventoryAgent.csproj"
+    }
+  ]
+}

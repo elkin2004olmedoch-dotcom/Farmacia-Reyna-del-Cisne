@@ -1,0 +1,10 @@
+  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos están actualizados para la restauración.
+  InventoryAgent -> C:\Users\Elkin\Downloads\Farmacia-Reyna-del-Cisne-main (1)\Farmacia-Reyna-del-Cisne-main\services\inventory-agent\bin\Release\net10.0\Farmacia.InventoryAgent.dll
+  InventoryAgent.Tests -> C:\Users\Elkin\Downloads\Farmacia-Reyna-del-Cisne-main (1)\Farmacia-Reyna-del-Cisne-main\services\inventory-agent\tests\bin\Release\net10.0\InventoryAgent.Tests.dll
+Serie de pruebas para C:\Users\Elkin\Downloads\Farmacia-Reyna-del-Cisne-main %281%29\Farmacia-Reyna-del-Cisne-main\services\inventory-agent\tests\bin\Release\net10.0\InventoryAgent.Tests.dll (.NETCoreApp,Version=v10.0)
+1 archivos de prueba en total coincidieron con el patrón especificado.
+ADVERTENCIA: Se sobrescribirá el archivo de resultados: C:\Users\Elkin\Downloads\Farmacia-Reyna-del-Cisne-main (1)\Farmacia-Reyna-del-Cisne-main\.publish\inventory-test-results\inventory-agent.trx
+Archivo de resultados: C:\Users\Elkin\Downloads\Farmacia-Reyna-del-Cisne-main (1)\Farmacia-Reyna-del-Cisne-main\.publish\inventory-test-results\inventory-agent.trx
+
+Correctas! - Con error:     0, Superado:    92, Omitido:     0, Total:    92, Duración: 2 m 54 s - InventoryAgent.Tests.dll (net10.0)
