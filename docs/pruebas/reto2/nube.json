@@ -1,7 +1,7 @@
 {
-  "fecha": "2026-10-11T16:47:41.793Z",
+  "fecha": "2026-10-11T17:09:19.500Z",
   "pruebas": {
-    "servidorNode": 72,
+    "servidorNode": 76,
     "navegadorChrome": 14,
     "antecedenteEstatico": 34,
     "vulnerabilidadesNpm": 0
@@ -19,7 +19,8 @@
     "autorizacionAdmin": true,
     "webpValidado": true,
     "imagenesPublicasSinClaves": true,
-    "cargasRealesASupabase": 0
+    "cargasRealesASupabase": 0,
+    "claveActualSoloEnApikey": true
   },
   "traslado": {
     "clientesSimulados": true,
@@ -28,9 +29,10 @@
     "datosPersonalesTransferidos": false
   },
   "despliegue": {
-    "renderCreado": false,
-    "supabaseCreado": false,
+    "renderServicioCreado": false,
+    "supabaseProyectoCreado": true,
+    "bucketImagenesCreado": true,
     "pagesAppOrigin": null
   },
-  "limite": "Faltan cuentas y variables privadas. Activar Pages solo después de verificar el backend real y completar el traslado privado."
+  "limite": "Las cuentas y el bucket ya están creados. Falta completar las claves privadas, desplegar, trasladar los datos y verificar el backend real antes de activar Pages."
 }

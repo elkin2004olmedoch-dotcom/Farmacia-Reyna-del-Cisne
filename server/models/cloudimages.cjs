@@ -12,8 +12,9 @@ function configuration(requireSecret=false){
     if(!(official || localTest) || url.username || url.password || url.pathname!=='/' || url.search || url.hash)throw new Error();
     const bucket=process.env.SUPABASE_STORAGE_BUCKET || 'farmaciaproductos';
     if(!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(bucket))throw new Error();
-    const key=process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if(requireSecret && (typeof key!=='string' || !/^[\x21-\x7e]{1,8192}$/.test(key)))throw new Error();
+    const modernKey=process.env.SUPABASE_SECRET_KEY;
+    const key=modernKey || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if(requireSecret && (typeof key!=='string' || !/^[\x21-\x7e]{1,8192}$/.test(key) || key.startsWith('sb_publishable_') || (modernKey && !/^sb_secret_[A-Za-z0-9_-]{20,}$/.test(modernKey))))throw new Error();
     return {origin:url.origin,bucket,key};
   }catch(_){throw storageError();}
 }
@@ -29,7 +30,10 @@ async function uploadCloudImage(reference,buffer){
   if(!isCloudStorage())throw storageError();
   const {origin,bucket,key}=configuration(true);
   try{
-    const response=await fetch(origin+'/storage/v1/object/'+bucket+'/'+name,{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'image/webp','Cache-Control':'max-age=31536000','x-upsert':'false'},body:buffer,redirect:'error',signal:AbortSignal.timeout(REQUEST_TIMEOUT_MS)});
+    const headers={apikey:key,'Content-Type':'image/webp','Cache-Control':'max-age=31536000','x-upsert':'false'};
+    // Secret API keys are opaque, not JWTs; only legacy service_role uses Bearer.
+    if(!key.startsWith('sb_secret_'))headers.Authorization='Bearer '+key;
+    const response=await fetch(origin+'/storage/v1/object/'+bucket+'/'+name,{method:'POST',headers,body:buffer,redirect:'error',signal:AbortSignal.timeout(REQUEST_TIMEOUT_MS)});
     // Never expose provider responses, which may include credentials or project details.
     if(response.body)await response.body.cancel();
     if(!response.ok)throw storageError();

@@ -31,6 +31,22 @@ test('producción prepara un entorno independiente con HTTPS y HOST externo sin 
   assert.equal(productionEnvironment({...valid(), CORS_ORIGIN: 'https://farmacia.example.ec, https://tienda.example.ec'}).CORS_ORIGIN, 'https://farmacia.example.ec,https://tienda.example.ec');
 });
 
+test('producción acepta Secret key sin legacy y prioriza la nueva sin imprimirla', () => {
+  const env = {...valid(), SUPABASE_SECRET_KEY: 'sb_secret_synthetic-server-key-never-use'};
+  delete env.SUPABASE_SERVICE_ROLE_KEY;
+  assert.equal(productionEnvironment(env).SUPABASE_SECRET_KEY, env.SUPABASE_SECRET_KEY);
+  assert.equal(productionEnvironment({...env, SUPABASE_SERVICE_ROLE_KEY: '\r\nobsolete-invalid-key'}).SUPABASE_SECRET_KEY, env.SUPABASE_SECRET_KEY);
+  const messages = [], calls = [];
+  runSetup({env, logger: {info: value => messages.push(value)}, run: (...args) => {
+    calls.push(args);
+    return {status: 0, stdout: env.SUPABASE_SECRET_KEY, stderr: env.SUPABASE_SECRET_KEY};
+  }});
+  assert.equal(calls.length, 4);
+  assert.equal(calls[0][2].env.SUPABASE_SECRET_KEY, env.SUPABASE_SECRET_KEY);
+  assert.ok(!messages.join('\n').includes(env.SUPABASE_SECRET_KEY));
+  assert.equal(productionEnvironment({...env, SUPABASE_SECRET_KEY: '', SUPABASE_SERVICE_ROLE_KEY: valid().SUPABASE_SERVICE_ROLE_KEY}).SUPABASE_SECRET_KEY, '');
+});
+
 test('producción bloquea configuraciones inválidas antes de ejecutar migraciones', () => {
   const invalid = [
     {NODE_ENV: 'development'}, {DATABASE_URL: 'file:./farmacia.db'},
@@ -47,7 +63,13 @@ test('producción bloquea configuraciones inválidas antes de ejecutar migracion
     {ADMIN_PASSWORD: '123456789012'}, {ADMIN_PASSWORD: 'Á1'.repeat(30)},
     {IMAGE_STORAGE: 'local'}, {SUPABASE_URL: 'https://example.ec'},
     {SUPABASE_URL: 'https://synthetic.supabase.co/storage'},
-    {SUPABASE_SERVICE_ROLE_KEY: ''}, {SUPABASE_STORAGE_BUCKET: '../private'},
+    {SUPABASE_SERVICE_ROLE_KEY: ''}, {SUPABASE_SERVICE_ROLE_KEY: 'sb_publishable_synthetic-key-never-use'},
+    {SUPABASE_SERVICE_ROLE_KEY: 'private-key\r\nmalicious-header'},
+    {SUPABASE_SECRET_KEY: 'sb_publishable_synthetic-key-never-use'},
+    {SUPABASE_SECRET_KEY: 'sb_secret_short'},
+    {SUPABASE_SECRET_KEY: valid().SUPABASE_SERVICE_ROLE_KEY},
+    {SUPABASE_SECRET_KEY: 'sb_secret_synthetic-server-key\r\nmalicious'},
+    {SUPABASE_STORAGE_BUCKET: '../private'},
     {SKIP_INITIAL_SEED: 'yes'}
   ];
   for (const patch of invalid) {

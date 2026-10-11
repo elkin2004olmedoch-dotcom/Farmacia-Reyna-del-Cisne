@@ -9,15 +9,16 @@ const sharp=require('sharp');
 const {isCloudStorage,getPublicImageUrl,uploadCloudImage,cloudImageExists}=require('../../server/models/cloudimages.cjs');
 const {validImagePath,validImagePathAsync,MAX_BYTES}=require('../../server/middleware/imagevalidation.cjs');
 const saveImage=require('../../server/models/imagenes.cjs');
-const keys=['NODE_ENV','IMAGE_STORAGE','SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','SUPABASE_STORAGE_BUCKET','UPLOAD_DIR'];
+const keys=['NODE_ENV','IMAGE_STORAGE','SUPABASE_URL','SUPABASE_SECRET_KEY','SUPABASE_SERVICE_ROLE_KEY','SUPABASE_STORAGE_BUCKET','UPLOAD_DIR'];
 const originalEnv=Object.fromEntries(keys.map(key=>[key,process.env[key]]));
 const objects=new Map();
 const requests=[];
 const secret='mock-service-role-secret';
+const modernSecret='sb_secret_synthetic-server-key-never-use';
 let server,origin,temporary,mode='normal';
 const reference=()=> 'assets/uploads/'+randomUUID()+'.webp';
-function configured(){Object.assign(process.env,{NODE_ENV:'test',IMAGE_STORAGE:'supabase',SUPABASE_URL:origin,SUPABASE_SERVICE_ROLE_KEY:secret,SUPABASE_STORAGE_BUCKET:'farmaciaproductos'});mode='normal';}
-function safeStorageError(error){assert.equal(error.status,503);assert.equal(error.code,'IMAGE_STORAGE_UNAVAILABLE');assert.equal(error.message.includes(secret),false);assert.equal(error.message.includes(origin),false);return true;}
+function configured(){delete process.env.SUPABASE_SECRET_KEY;Object.assign(process.env,{NODE_ENV:'test',IMAGE_STORAGE:'supabase',SUPABASE_URL:origin,SUPABASE_SERVICE_ROLE_KEY:secret,SUPABASE_STORAGE_BUCKET:'farmaciaproductos'});mode='normal';}
+function safeStorageError(error){assert.equal(error.status,503);assert.equal(error.code,'IMAGE_STORAGE_UNAVAILABLE');assert.equal(error.message.includes(secret),false);assert.equal(error.message.includes(modernSecret),false);assert.equal(error.message.includes(origin),false);return true;}
 before(async()=>{
   temporary=await fs.mkdtemp(path.join(os.tmpdir(),'farmacia-cloud-images-'));
   server=http.createServer(async(req,res)=>{
@@ -74,6 +75,29 @@ test('subida usa POST autenticado, WebP, UUID nuevo y prohíbe sobrescribir',asy
   await assert.rejects(uploadCloudImage(ref,Buffer.from('replacement')),safeStorageError);assert.deepEqual(objects.get(request.url),bytes);
   assert.equal(await cloudImageExists(ref),true);assert.equal(requests.at(-1).method,'HEAD');assert.equal(requests.at(-1).headers.authorization,undefined);assert.equal(requests.at(-1).headers.apikey,undefined);
   assert.equal(await cloudImageExists(reference()),false);
+});
+
+test('Secret key tiene prioridad y autentica solo por apikey; consultas públicas no usan secretos',async()=>{
+  configured();process.env.SUPABASE_SECRET_KEY=modernSecret;
+  const ref=reference();await uploadCloudImage(ref,Buffer.from('modern-key-webp'));
+  const request=requests.at(-1);assert.equal(request.headers.apikey,modernSecret);assert.equal(request.headers.authorization,undefined);
+  assert.equal(JSON.stringify(request.headers).includes(secret),false);
+  assert.equal(getPublicImageUrl(ref).includes(modernSecret),false);
+  assert.equal(await cloudImageExists(ref),true);assert.equal(requests.at(-1).headers.apikey,undefined);assert.equal(requests.at(-1).headers.authorization,undefined);
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;await uploadCloudImage(reference(),Buffer.from('no-legacy-key'));
+  assert.equal(requests.at(-1).headers.apikey,modernSecret);assert.equal(requests.at(-1).headers.authorization,undefined);
+  mode='provider-error';await assert.rejects(uploadCloudImage(reference(),Buffer.from('webp')),safeStorageError);
+});
+
+test('clave moderna malformada o Publishable key se rechaza sin respaldo silencioso ni petición remota',async()=>{
+  configured();const baseline=requests.length;
+  for(const key of ['sb_publishable_synthetic-server-key-never-use','sb_secret_short',secret,modernSecret+'\r\nmalicious']){
+    process.env.SUPABASE_SECRET_KEY=key;await assert.rejects(uploadCloudImage(reference(),Buffer.from('webp')),safeStorageError);
+  }
+  delete process.env.SUPABASE_SECRET_KEY;process.env.SUPABASE_SERVICE_ROLE_KEY='sb_publishable_synthetic-server-key-never-use';
+  await assert.rejects(uploadCloudImage(reference(),Buffer.from('webp')),safeStorageError);
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;await assert.rejects(uploadCloudImage(reference(),Buffer.from('webp')),safeStorageError);
+  assert.equal(requests.length,baseline);
 });
 
 test('límite de 2 MB y referencias malformadas se rechazan sin llamadas remotas',async()=>{

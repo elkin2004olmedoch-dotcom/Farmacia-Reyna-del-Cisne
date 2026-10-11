@@ -44,7 +44,7 @@ Las prácticas de TLS, entrada validada y cabeceras siguen la orientación de [s
 - Cédula de registro: no persistida. Documento del pedido: últimos cuatro dígitos, resto enmascarado. No existen campos bancarios en la compra real.
 - Los administradores ven datos de entrega necesarios, sin passwordHash ni claves de reintento. Logger sin request body ni Authorization.
 - Configuración privada, SQLite, certificados, node_modules, `server/backups/` e imágenes UUID de trabajo se excluyen de Git y ZIP. El archivo de configuración de ejemplo no contiene claves reales.
-- DATABASE_URL, JWT_SECRET y SUPABASE_SERVICE_ROLE_KEY se configuran solo en el entorno privado del servidor; no se envían al navegador ni se incorporan a Git o ZIP. Las migraciones PostgreSQL habilitan RLS sin políticas de acceso público para las tablas de la farmacia.
+- DATABASE_URL, JWT_SECRET y SUPABASE_SECRET_KEY (o SUPABASE_SERVICE_ROLE_KEY heredada) se configuran solo en el entorno privado del servidor; no se envían al navegador ni se incorporan a Git o ZIP. Las migraciones PostgreSQL habilitan RLS sin políticas de acceso público para las tablas de la farmacia.
 - El bucket público de Supabase se reserva para imágenes WebP. Las cuentas, hashes y pedidos permanecen en PostgreSQL privado; las escrituras de imágenes pasan por Express con JWT/rol y una clave de servidor, sin sobrescribir UUID.
 
 ## Controles del dashboard y separación de roles

@@ -56,7 +56,7 @@ npm audit
 
 ## Resultado final observado
 
-- [Pruebas Node](node-tests.txt): 72 aprobadas, cero fallos.
+- [Pruebas Node](node-tests.txt): 76 aprobadas, cero fallos.
 - [Pruebas Chrome](browser-tests.txt): 14 aprobadas, cero fallos; 1440 y 375 px.
 - [npm audit](npm-audit.json): cero vulnerabilidades reportadas.
 - [Resumen de ejecución](resumen.json): los tres comandos terminaron con código cero.

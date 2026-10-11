@@ -7,13 +7,14 @@ const os=require('node:os');
 const {randomUUID}=require('node:crypto');
 const sharp=require('sharp');
 const supertest=require('supertest');
-const envKeys=['IMAGE_STORAGE','SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','SUPABASE_STORAGE_BUCKET'];
+const envKeys=['IMAGE_STORAGE','SUPABASE_URL','SUPABASE_SECRET_KEY','SUPABASE_SERVICE_ROLE_KEY','SUPABASE_STORAGE_BUCKET'];
 const originalEnv=Object.fromEntries(envKeys.map(key=>[key,process.env[key]]));
 process.env.IMAGE_STORAGE='local';
 const {db,directory}=require('./fixture.cjs');
 const createApp=require('../../server/app.cjs');
 const objects=new Map();const remoteRequests=[];
 const secret='mock-cloud-routes-service-secret';
+const modernSecret='sb_secret_synthetic-cloud-routes-key';
 const knownReference='assets/uploads/'+randomUUID()+'.webp';
 const newReference=()=> 'assets/uploads/'+randomUUID()+'.webp';
 let server,origin,request,adminToken,product,photo;
@@ -33,6 +34,7 @@ before(async()=>{
       res.writeHead(200,{'content-type':'image/webp','content-length':data.length});return res.end();
     }
     if(req.method==='POST' && !match[1]){
+      if(req.headers.apikey?.startsWith('sb_secret_') && req.headers.authorization){res.writeHead(401);return res.end('Secret keys are not JWTs');}
       const chunks=[];for await(const chunk of req)chunks.push(chunk);entry.body=Buffer.concat(chunks);
       if(objects.has(name)){res.writeHead(400);return res.end('already exists');}
       objects.set(name,entry.body);res.writeHead(200,{'content-type':'application/json'});return res.end('{}');
@@ -40,6 +42,7 @@ before(async()=>{
     res.writeHead(405);res.end();
   });
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));origin='http://127.0.0.1:'+server.address().port;
+  delete process.env.SUPABASE_SECRET_KEY;
   Object.assign(process.env,{IMAGE_STORAGE:'supabase',SUPABASE_URL:origin,SUPABASE_SERVICE_ROLE_KEY:secret,SUPABASE_STORAGE_BUCKET:'farmaciaproductos'});
   request=supertest(createApp());
   const login=await request.post('/api/auth/login').send({email:process.env.ADMIN_EMAIL,password:process.env.ADMIN_PASSWORD}).expect(200);adminToken=login.body.data.token;
@@ -106,4 +109,22 @@ test('subida administrativa completa recodifica y guarda en nube con claves solo
   const updated=await request.put('/api/productos/'+product.id).set('Authorization',authorization()).send(productBody(image.imagen)).expect(200);assert.equal(updated.body.data.imagen,image.imagen);
   const redirect=await request.get('/'+image.imagen).expect(302);assert.equal(redirect.headers.location,origin+'/storage/v1/object/public/farmaciaproductos/'+path.basename(image.imagen));
   assert.equal(remoteRequests.filter(entry=>entry.method==='HEAD').every(entry=>!entry.headers.apikey && !entry.headers.authorization),true);
+});
+
+test('subida administrativa usa Secret key sin Bearer y publica producto y promoción sin exponerla',async()=>{
+  process.env.SUPABASE_SECRET_KEY=modernSecret;
+  try{
+    const response=await request.post('/api/admin/imagenes').set('Authorization',authorization()).send({archivo:photo.toString('base64'),nombreOriginal:'foto.png'}).expect(201);
+    const remote=remoteRequests.at(-1);assert.equal(remote.method,'POST');assert.equal(remote.headers.apikey,modernSecret);assert.equal(remote.headers.authorization,undefined);
+    assert.equal(JSON.stringify(response.body).includes(modernSecret),false);
+    const ref=response.body.data.imagen;
+    await request.put('/api/productos/'+product.id).set('Authorization',authorization()).send(productBody(ref)).expect(200);
+    const promo=await request.post('/api/promociones').set('Authorization',authorization()).send(promotionBody(ref)).expect(201);
+    assert.equal(promo.body.data.imagen,ref);assert.equal((await db.promocion.findUnique({where:{id:promo.body.data.id}})).imagen,ref);
+    const publicProduct=await request.get('/api/productos/'+product.id).expect(200);assert.equal(publicProduct.body.data.imagen,ref);
+    const publicImage=await request.get('/'+ref).expect(302);
+    assert.equal(publicImage.headers.location,origin+'/storage/v1/object/public/farmaciaproductos/'+path.basename(ref));
+    assert.equal(JSON.stringify({body:publicProduct.body,headers:publicImage.headers,text:publicImage.text}).includes(modernSecret),false);
+    assert.equal(remoteRequests.filter(entry=>entry.method==='HEAD').every(entry=>!entry.headers.apikey && !entry.headers.authorization),true);
+  }finally{delete process.env.SUPABASE_SECRET_KEY;}
 });

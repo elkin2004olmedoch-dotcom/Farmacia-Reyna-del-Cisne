@@ -44,8 +44,9 @@ function productionEnvironment(input) {
   if (env.IMAGE_STORAGE !== 'supabase') throw new Error('La instancia gratuita requiere IMAGE_STORAGE=supabase para conservar las imágenes.');
   const storage = httpsOrigin(env.SUPABASE_URL || '', 'SUPABASE_URL');
   if (storage.port || !/^[a-z0-9-]+\.supabase\.co$/i.test(storage.hostname)) throw new Error('SUPABASE_URL debe ser el origen HTTPS del proyecto Supabase.');
-  if (!env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLE_KEY.length < 20 || env.SUPABASE_SERVICE_ROLE_KEY.startsWith('REEMPLAZAR')) {
-    throw new Error('Configura SUPABASE_SERVICE_ROLE_KEY como secreto privado del servidor.');
+  const storageKey = env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
+  if (typeof storageKey !== 'string' || storageKey.length < 20 || !/^[\x21-\x7e]{1,8192}$/.test(storageKey) || storageKey.startsWith('REEMPLAZAR') || storageKey.startsWith('sb_publishable_') || (env.SUPABASE_SECRET_KEY && !/^sb_secret_[A-Za-z0-9_-]{20,}$/.test(env.SUPABASE_SECRET_KEY))) {
+    throw new Error('Configura SUPABASE_SECRET_KEY (sb_secret_...) o SUPABASE_SERVICE_ROLE_KEY como secreto privado del servidor.');
   }
   if (!/^[a-z0-9][a-z0-9-]{1,62}$/.test(env.SUPABASE_STORAGE_BUCKET || '')) throw new Error('Configura SUPABASE_STORAGE_BUCKET con un nombre válido.');
   if (env.SKIP_INITIAL_SEED && !['true', 'false'].includes(env.SKIP_INITIAL_SEED)) throw new Error('SKIP_INITIAL_SEED debe ser true o false.');

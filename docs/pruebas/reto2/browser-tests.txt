@@ -1,23 +1,23 @@
 
 Running 14 tests using 1 worker
 
-  ok  1 [escritorio] › tests\reto2\frontend.spec.cjs:4:1 › catálogo, persistencia, login obligatorio, registro y pedido real (6.4s)
-  ok  2 [escritorio] › tests\reto2\frontend.spec.cjs:31:1 › administrador crea, edita y elimina; consulta todas las tablas y publica promociones (7.6s)
-  ok  3 [escritorio] › tests\reto2\frontend.spec.cjs:58:1 › errores de red y 500 se anuncian sin reemplazarlos por datos ficticios (712ms)
+  ok  1 [escritorio] › tests\reto2\frontend.spec.cjs:4:1 › catálogo, persistencia, login obligatorio, registro y pedido real (5.4s)
+  ok  2 [escritorio] › tests\reto2\frontend.spec.cjs:31:1 › administrador crea, edita y elimina; consulta todas las tablas y publica promociones (7.0s)
+  ok  3 [escritorio] › tests\reto2\frontend.spec.cjs:58:1 › errores de red y 500 se anuncian sin reemplazarlos por datos ficticios (723ms)
   ok  4 [escritorio] › tests\reto2\frontend.spec.cjs:62:1 › el panel ignora respuestas atrasadas y bloquea una sesión vencida (2.4s)
-  ok  5 [escritorio] › tests\reto2\frontend.spec.cjs:90:1 › nueve pantallas accesibles, sin desbordamiento y menú/foco por teclado (17.2s)
-  ok  6 [escritorio] › tests\reto2\frontend.spec.cjs:107:1 › dashboard ERP con datos reales, enlaces de gestión y recuperación de errores (2.3s)
-  ok  7 [escritorio] › tests\reto2\frontend.spec.cjs:118:1 › administración y cliente comparten datos persistidos y actualizan pantallas abiertas (18.9s)
-  ok  8 [movil] › tests\reto2\frontend.spec.cjs:4:1 › catálogo, persistencia, login obligatorio, registro y pedido real (4.3s)
-  ok  9 [movil] › tests\reto2\frontend.spec.cjs:31:1 › administrador crea, edita y elimina; consulta todas las tablas y publica promociones (5.6s)
-  ok 10 [movil] › tests\reto2\frontend.spec.cjs:58:1 › errores de red y 500 se anuncian sin reemplazarlos por datos ficticios (673ms)
-  ok 11 [movil] › tests\reto2\frontend.spec.cjs:62:1 › el panel ignora respuestas atrasadas y bloquea una sesión vencida (2.4s)
-  ok 12 [movil] › tests\reto2\frontend.spec.cjs:90:1 › nueve pantallas accesibles, sin desbordamiento y menú/foco por teclado (16.4s)
-  ok 13 [movil] › tests\reto2\frontend.spec.cjs:107:1 › dashboard ERP con datos reales, enlaces de gestión y recuperación de errores (2.6s)
-  ok 14 [movil] › tests\reto2\frontend.spec.cjs:118:1 › administración y cliente comparten datos persistidos y actualizan pantallas abiertas (16.9s)
+  ok  5 [escritorio] › tests\reto2\frontend.spec.cjs:90:1 › nueve pantallas accesibles, sin desbordamiento y menú/foco por teclado (15.7s)
+  ok  6 [escritorio] › tests\reto2\frontend.spec.cjs:107:1 › dashboard ERP con datos reales, enlaces de gestión y recuperación de errores (2.1s)
+  ok  7 [escritorio] › tests\reto2\frontend.spec.cjs:118:1 › administración y cliente comparten datos persistidos y actualizan pantallas abiertas (16.0s)
+  ok  8 [movil] › tests\reto2\frontend.spec.cjs:4:1 › catálogo, persistencia, login obligatorio, registro y pedido real (3.7s)
+  ok  9 [movil] › tests\reto2\frontend.spec.cjs:31:1 › administrador crea, edita y elimina; consulta todas las tablas y publica promociones (5.7s)
+  ok 10 [movil] › tests\reto2\frontend.spec.cjs:58:1 › errores de red y 500 se anuncian sin reemplazarlos por datos ficticios (661ms)
+  ok 11 [movil] › tests\reto2\frontend.spec.cjs:62:1 › el panel ignora respuestas atrasadas y bloquea una sesión vencida (2.3s)
+  ok 12 [movil] › tests\reto2\frontend.spec.cjs:90:1 › nueve pantallas accesibles, sin desbordamiento y menú/foco por teclado (15.1s)
+  ok 13 [movil] › tests\reto2\frontend.spec.cjs:107:1 › dashboard ERP con datos reales, enlaces de gestión y recuperación de errores (2.5s)
+  ok 14 [movil] › tests\reto2\frontend.spec.cjs:118:1 › administración y cliente comparten datos persistidos y actualizan pantallas abiertas (14.1s)
 
-  14 passed (1.9m)
-(node:45760) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+  14 passed (1.7m)
+(node:53148) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-(node:50568) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:44572) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)

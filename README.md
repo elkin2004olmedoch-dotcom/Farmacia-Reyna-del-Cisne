@@ -85,7 +85,7 @@ El service worker consulta primero en internet los JSON de productos y promocion
 
 Está preparada la configuración opcional de **Render Free + PostgreSQL y Storage de Supabase** en `render.yaml`. Conserva el modo SQLite local y usa un cliente Prisma PostgreSQL independiente, migraciones con RLS e imágenes persistentes en la nube. Consulta [la guía paso a paso](docs/DESPLIEGUE-GRATUITO.md), incluido el traslado privado de usuarios, contraseñas existentes, pedidos y fotos.
 
-**El backend aún no está desplegado:** faltan las cuentas y variables privadas de los servicios. `data/deployment.json` permanece desactivado hasta comprobar el servicio real; después Pages abrirá la misma aplicación que usa el administrador. No se han transferido usuarios ni bases privadas al repositorio. Los planes gratuitos tienen pausas por inactividad y límites; el respaldo PostgreSQL y Storage debe configurarse por separado de las copias SQLite locales.
+**El backend aún no está desplegado:** falta completar la conexión privada de los servicios. `data/deployment.json` permanece desactivado hasta comprobar el servicio real; después Pages abrirá la misma aplicación que usa el administrador. No se han transferido usuarios ni bases privadas al repositorio. Los planes gratuitos tienen pausas por inactividad y límites; el respaldo PostgreSQL y Storage debe configurarse por separado de las copias SQLite locales.
 
 ## Persistencia y consistencia
 
@@ -259,7 +259,7 @@ npm run test:browser
 npm audit
 ~~~
 
-**72 pruebas Node:** API, recursos, migración sobre datos anteriores, imágenes y respaldo/restauración con SQLite temporal; configuración de producción, cliente PostgreSQL, almacenamiento e importación con servicios simulados. **14 pruebas Chrome:** siete recorridos en escritorio/móvil. **34 pruebas del antecedente estático:** incluye sesión bloqueada y enlace Pages al servicio público. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
+**76 pruebas Node:** API, recursos, migración sobre datos anteriores, imágenes y respaldo/restauración con SQLite temporal; configuración de producción, cliente PostgreSQL, almacenamiento e importación con servicios simulados. **14 pruebas Chrome:** siete recorridos en escritorio/móvil. **34 pruebas del antecedente estático:** incluye sesión bloqueada y enlace Pages al servicio público. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
 
 El schema PostgreSQL y la migración se validaron con Prisma; se comprobó el cliente PostgreSQL generado en una instalación sin cliente SQLite generado. No se ha probado una conexión real a Supabase ni un despliegue real en Render: faltan las cuentas y variables privadas. Consulta [el alcance de estas comprobaciones](docs/pruebas/reto2/nube.json).
 
