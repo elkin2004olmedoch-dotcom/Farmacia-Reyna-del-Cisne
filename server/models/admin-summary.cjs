@@ -1,5 +1,6 @@
 const {Prisma}=require('./prisma-client.cjs');
 const db=require('./db.cjs');
+const {ecuadorDay}=require('./inventario.cjs');
 const TIME_ZONE='America/Guayaquil';
 const LOW_STOCK=5;
 const ECUADOR_OFFSET_MS=5*60*60*1000;
@@ -32,18 +33,20 @@ module.exports=async function summary(now=new Date()) {
       tx.producto.count({where:{activo:true}}),
       tx.usuario.count({where:{activo:true,role:'user'}}),
       tx.usuario.count({where:{activo:true,role:'admin'}}),
-      tx.producto.count({where:{activo:true,stock:{lte:LOW_STOCK}}}),
+      tx.producto.count({where:{activo:true,stock:{lte:db.producto.fields.stockMinimo}}}),
       tx.promocion.count({where:visibleCampaigns}),
-      tx.producto.findMany({where:{activo:true,stock:{lte:LOW_STOCK}},select:{id:true,nombre:true,stock:true},orderBy:[{stock:'asc'},{nombre:'asc'},{id:'asc'}],take:10}),
+      tx.producto.findMany({where:{activo:true,stock:{lte:db.producto.fields.stockMinimo}},select:{id:true,nombre:true,stock:true,stockMinimo:true},orderBy:[{stock:'asc'},{nombre:'asc'},{id:'asc'}],take:10}),
       tx.pedido.findMany({select:{id:true,nombre:true,total:true,estado:true,createdAt:true},orderBy:[{createdAt:'desc'},{id:'desc'}],take:5}),
     ]);
     const states=groups.map(group=>({estado:group.estado,cantidad:group._count._all,totalCentavos:cents(group._sum.total)}));
     const total=states.reduce((sum,state)=>({cantidad:sum.cantidad+state.cantidad,totalCentavos:sum.totalCentavos+state.totalCentavos}),{cantidad:0,totalCentavos:0});
     if(!Number.isSafeInteger(total.totalCentavos))throw new RangeError('El total supera el rango de centavos admitido.');
     const trend=periods.map((period,index)=>({periodo:period.periodo,etiqueta:period.etiqueta,cantidad:monthly[index]._count._all,totalCentavos:cents(monthly[index]._sum.total)}));
+    const vencidos=await tx.lote.count({where:{stock:{gt:0},vencimiento:{lt:ecuadorDay(now)},producto:{activo:true}}});
+    const proximos=await tx.lote.count({where:{stock:{gt:0},vencimiento:{gte:ecuadorDay(now),lte:ecuadorDay(new Date(now.getTime()+90*86400000))},producto:{activo:true}}});
     return {
       generadoEn:now.toISOString(),zonaHoraria:TIME_ZONE,umbralStock:LOW_STOCK,
-      indicadores:{pedidosMes:{cantidad:trend[5].cantidad,totalCentavos:trend[5].totalCentavos},pedidosTotales:total,pedidosPendientes:states.find(state=>state.estado==='pendiente')?.cantidad || 0,productosActivos:products,clientesActivos:customers,administradoresActivos:administrators,stockBajo:lowStock,campanasVisibles:campaigns},
+      indicadores:{pedidosMes:{cantidad:trend[5].cantidad,totalCentavos:trend[5].totalCentavos},pedidosTotales:total,pedidosPendientes:states.find(state=>state.estado==='pendiente')?.cantidad || 0,productosActivos:products,clientesActivos:customers,administradoresActivos:administrators,stockBajo:lowStock,campanasVisibles:campaigns,lotesVencidos:vencidos,lotesPorVencer:proximos},
       estados:states,tendencia:trend,alertas:alerts,
       recientes:recent.map(({total,...order})=>({...order,totalCentavos:cents(total)})),
     };

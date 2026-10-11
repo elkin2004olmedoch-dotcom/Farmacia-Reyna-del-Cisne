@@ -1,9 +1,9 @@
 /* Estructura de tienda con la identidad crema y vino de Reina del Cisne. */
 :root { --ink:#302e2b; --muted:#65615c; --line:#e8dfd2; --surface:#fffaf1; --soft:#f4eddf; --brand-red:#b51c36; --brand-dark:#8b142b; --brand-soft:#faeae5; --footer-bg:#681e2a; --footer-muted:#f0dcd2; --serif:'Fraunces',Georgia,serif; }
 body { background:#f4eddf; }
-.site-shell { max-width:1600px; margin:auto; background:var(--surface); }
+.site-shell { width:100%; max-width:none; margin:0; background:var(--surface); }
 h1,h2,h3 { color:var(--ink); font-family:var(--sans); letter-spacing:-.045em; }
-.section-wrap { width:min(1280px,calc(100% - 64px)); }
+.section-wrap { width:calc(100% - 64px); }
 .button { border-radius:9px; box-shadow:none; min-height:48px; font-size:14px; }
 .button:hover { transform:none; }
 .button-primary { color:white; background:var(--brand-red); border:1px solid var(--brand-red); box-shadow:none; }
@@ -15,7 +15,7 @@ h1,h2,h3 { color:var(--ink); font-family:var(--sans); letter-spacing:-.045em; }
 :is(a,button,input,select,textarea,summary):focus-visible { outline:3px solid #bf6b13; outline-offset:4px; }
 [hidden] { display:none !important; }
 .shop-header { background:var(--surface); border-bottom:1px solid var(--line); }
-.shop-header .header-inner { display:flex; flex-wrap:wrap; justify-content:initial; gap:24px; width:min(1280px,calc(100% - 64px)); min-height:88px; }
+.shop-header .header-inner { display:flex; flex-wrap:wrap; justify-content:initial; gap:24px; width:calc(100% - 64px); min-height:88px; }
 .shop-header .brand img { width:190px; max-height:64px; object-fit:contain; }
 .shop-nav { display:flex; gap:24px; font-size:14px; font-weight:700; }
 .shop-nav a[aria-current],.shop-actions a[aria-current]:not(.shop-cart) { color:var(--brand-red); }
@@ -404,3 +404,15 @@ h1,h2,h3 { color:var(--ink); font-family:var(--sans); letter-spacing:-.045em; }
 .business-photo figcaption a:hover { text-decoration:underline; }
 @media(max-width:1000px) { .shop-nav { gap:15px; font-size:13px; } .business-photo > img { height:310px; } .promotion-card { grid-template-columns:1fr; } .promotion-card > img { height:200px; } .promotion-copy { padding:0 24px 26px; } }
 @media(max-width:600px) { .business-photo { width:100%; transform:none; } .business-photo > img { height:265px; } .business-photo figcaption { padding:16px 8px 10px; gap:10px; } .business-photo strong { font-size:19px; } .business-photo span { font-size:10px; } .business-photo a { max-width:90px; } .promotions-grid { grid-template-columns:1fr; gap:16px; } .promotion-card { grid-template-columns:35% 1fr; } .promotion-card > img { height:220px; padding:10px; } .promotion-copy { padding:24px 18px 24px 0; } .promotion-copy h3 { font-size:23px; } .promotions-section { padding:38px 0; } }
+/* Fiscal and pharmaceutical information */
+.tax-note { display:block; font-size:.82rem; color:#48634f; margin:.5rem 0; }
+.prescription-note { padding:.75rem; border-radius:.5rem; background:#fff5d9; color:#4a3913; font-size:.9rem; }
+.prescription-note a { text-decoration:underline; font-weight:600; }
+.pharmaceutical-sheet { margin:1.5rem 0; }
+.pharmaceutical-sheet h2 { font-size:1.1rem; }
+.pharmaceutical-sheet dl { margin:0; }
+.pharmaceutical-sheet dl>div { display:grid; grid-template-columns:minmax(100px,1fr) 2fr; gap:1rem; padding:.5rem 0; border-bottom:1px solid #e0ded6; }
+.pharmaceutical-sheet dt { font-weight:600; }
+.pharmaceutical-sheet dd { margin:0; overflow-wrap:anywhere; }
+.order-invoice { margin:1rem 0; }
+.order-invoice [role=status] { overflow-wrap:anywhere; }

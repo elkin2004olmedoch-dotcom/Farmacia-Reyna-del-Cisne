@@ -1,27 +1,132 @@
 {
-  "fecha": "2026-10-11T16:53:06.299Z",
-  "instalacion": "npm ci + npm run setup desde ZIP: OK",
-  "migracionesAplicadas": [
-    "202610090001_init",
-    "202610090002_seed_marker",
-    "202610090003_commerce"
-  ],
-  "catalogoHTTP": 200,
-  "productos": 18,
-  "loginAdminHTTP": 200,
-  "panelHTTP": 200,
-  "resumenAdminHTTP": 200,
-  "dashboardERP": true,
-  "navegacionAdminPropia": true,
-  "selectoresImagenProductoPromocion": true,
-  "descuentosYEstados": true,
-  "defaultsComercio": true,
-  "uploadSinSesionHTTP": 401,
-  "estadoSinSesionHTTP": 401,
-  "pruebasSinMutaciones": true,
-  "integridadReferencial": true,
-  "archivosPrivadosPublicados": 0,
-  "auditorias": 5,
-  "archivosNubeIncluidos": true,
-  "redireccionPublicaDesactivada": true
+  "generadoEnUTC": "2026-10-11T18:32:32.581Z",
+  "tipo": "Instalación limpia de ZIP provisional con corrección posterior de foco administrativo",
+  "paquete": {
+    "nombre": "Reto2_Olmedo_Elkin.zip",
+    "provisional": true,
+    "entries": 308,
+    "sha256": "256dbb7e509ab7265895a15c15e32f3861f39875379ec573cdd6334bb442b289",
+    "bytes": 13096228,
+    "privateFilesExcluded": true,
+    "safeExtraction": true
+  },
+  "aislamiento": {
+    "carpetaNueva": true,
+    "datosExclusivamenteSinteticos": true,
+    "basePersonalModificada": false,
+    "nubeModificada": false
+  },
+  "instalacion": {
+    "npmCi": true,
+    "setup": true,
+    "migracionesAplicadas": 6,
+    "migraciones": [
+      "202610090001_init",
+      "202610090002_seed_marker",
+      "202610090003_commerce",
+      "202610110004_fiscal_inventory",
+      "202610110005_billing",
+      "202610110006_pharmacy_pvp"
+    ],
+    "modelos": 15,
+    "ivaGeneral": 15
+  },
+  "frontend": {
+    "fuentesCorregidasCopiadas": [
+      "frontend/controllers/admin.js",
+      "frontend/controllers/images.js"
+    ],
+    "recompilado": true,
+    "pantallas": 9
+  },
+  "sri": {
+    "emisionReal": false,
+    "datosEmisorReales": false,
+    "firmaRealUtilizada": false,
+    "opensslDisponible": true,
+    "ambiente": "pruebas"
+  },
+  "verificaciones": {
+    "total": 19,
+    "aprobadas": 19,
+    "fallidas": 0,
+    "comprobaciones": [
+      {
+        "nombre": "Seis migraciones completadas sin errores",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Quince modelos Prisma y tablas persistentes",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Salud y catálogo públicos desde la instalación nueva",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "IVA inicial 15 y campos públicos fiscales",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Administrador generado inicia sesión sin exponer credenciales",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Registro y persistencia de dos cuentas sintéticas",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Producto medicamento guarda descuento 85, PVP y ficha farmacéutica",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "PVP y límite de descuentos protegidos también en SQL",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Proveedor y lote sintéticos quedan conectados al inventario",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Catálogo refleja descuento, PVP, IVA y stock guardados por administrador",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Compra sintética conserva centavos e inventario FEFO",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Administrador confirma el pedido conservando sus importes",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Rutas SRI rechazan visitantes y usuarios sin permisos",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Capacidad OpenSSL y configuración SRI segura accesibles al administrador",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Emisor y borrador SRI exclusivamente sintéticos en ambiente pruebas",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Factura y RIDE visibles sólo al propietario con aviso sin validez",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Emisión bloqueada sin firma, sin comunicación externa ni numeración inventada",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Persistencia real tras desconectar y abrir otro cliente",
+        "resultado": "aprobado"
+      },
+      {
+        "nombre": "Nueve pantallas reconstruidas y recursos administrativos actualizados",
+        "resultado": "aprobado"
+      }
+    ]
+  }
 }

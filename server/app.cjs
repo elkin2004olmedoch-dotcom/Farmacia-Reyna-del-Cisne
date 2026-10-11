@@ -12,10 +12,12 @@ module.exports=function createApp(settings=require('./config.cjs')()) {
   app.use(require('./middleware/logger.cjs'));
   app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'"],styleSrc:["'self'"],imgSrc:["'self'",'data:',...imageOrigins],connectSrc:["'self'",...settings.origins],frameSrc:['https://www.google.com'],objectSrc:["'none'"],baseUri:["'self'"],formAction:["'self'"],upgradeInsecureRequests:settings.production?[]:null}},strictTransportSecurity:settings.production?undefined:false}));
   app.use('/api',(req,res,next)=>{res.setHeader('Cache-Control','no-store');next();},cors({origin(origin,callback){if(!origin || settings.origins.includes(origin))return callback(null,true);callback(new AppError(403,'CORS_FORBIDDEN','Origen no autorizado.'));},credentials:false,methods:['GET','POST','PUT','DELETE','OPTIONS'],allowedHeaders:['Content-Type','Authorization']}));
-  app.use('/api',rateLimit({windowMs:60*1000,limit:300,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Demasiadas solicitudes. Espera un minuto.'))}));
+  const apiLimit=process.env.NODE_ENV==='test' && !settings.production && Number.isInteger(settings.testApiLimit) && settings.testApiLimit>0?settings.testApiLimit:300;
+  app.use('/api',rateLimit({windowMs:60*1000,limit:apiLimit,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Demasiadas solicitudes. Espera un minuto.'))}));
   app.locals.frontendRoot=settings.frontendRoot || path.join(__dirname,'../frontend');
   const {authenticate,roles}=require('./middleware/auth.cjs');
   app.post('/api/admin/imagenes',authenticate(settings),roles('admin'),rateLimit({windowMs:60*1000,limit:10,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'IMAGE_RATE_LIMIT','Espera un minuto antes de subir más imágenes.'))}),express.json({limit:'3mb',strict:true}),require('./middleware/imagevalidation.cjs').imageValidation,require('./controllers/imagenes.cjs'));
+  app.use('/api',require('./routes/sri.cjs')(settings));
   app.use('/api',express.json({limit:'32kb',strict:true}));
   app.use('/api',require('./routes/index.cjs')(settings));
   app.use('/api',(req,res,next)=>next(new AppError(404,'NOT_FOUND','La ruta solicitada no existe.')));

@@ -11,9 +11,9 @@ test('cédula comprueba provincia, tipo, longitud y módulo 10 conservando ceros
   assert.equal(v.validCedula('0102030400'),true);
   for (const id of ['0102030401','0002030400','2502030400','0192030400','010203040','01020304000','abcdefghij','0000000000','0100000008']) assert.equal(v.validCedula(id),false,id);
 });
-test('RUC admite persona natural, sociedad privada y entidad pública con sus verificadores', () => {
-  for (const id of ['0102030400001','1790016919001','1760001550001']) assert.equal(v.validRuc(id),true,id);
-  for (const id of ['0102030401001','1790016918001','1760001560001','1790016919000','1790016919002','1760001551001','1770016919001','9999999999999','1790016919']) assert.equal(v.validRuc(id),false,id);
+test('RUC valida formato y no impone un algoritmo societario que el SRI no exige', () => {
+  for (const id of ['0102030400001','1790016919001','1760001550001','1790016918001','1760001560001','1770016919001']) assert.equal(v.validRuc(id),true,id);
+  for (const id of ['1790016919000','1790016919002','9999999999999','0000000000001','1790016919','17900169190001','179001691x001']) assert.equal(v.validRuc(id),false,id);
 });
 test('correo acepta dominios internacionales y ec y rechaza estructura inválida', () => {
   for (const email of ['nombre@gmail.com','maria+pedido@empresa.com.ec','nombre@outlook.es']) assert.equal(v.validEmail(email),true,email);

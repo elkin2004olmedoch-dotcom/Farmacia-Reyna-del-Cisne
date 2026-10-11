@@ -2,7 +2,8 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
-const MODELS=Object.freeze(['usuario','producto','pedido','pedidoDetalle','promocion','pedidoEstado','semilla']);
+const MODELS=Object.freeze(['usuario','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','semilla']);
+const INITIAL_FISCAL=Object.freeze({id:'iva-general-inicial',tarifaGeneral:15,inicioVigencia:'2024-04-01T05:00:00.000Z',referenciaNormativa:'Ley de Régimen Tributario Interno, art. 65; Decreto Ejecutivo 198; Circular SRI NAC-DGECCGC25-00000006 (vigencia 2026).',actorId:null});
 const UPLOAD_PATTERN=/^assets\/uploads\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.webp$/;
 const STATIC_IMAGE_PATTERN=/^assets\/images\/[a-z0-9-]+\.(?:jpg|png|webp|svg)$/;
 const MAX_BYTES=2*1024*1024;
@@ -52,7 +53,15 @@ function assertSnapshotRelations(snapshot){
   const valid=snapshot.pedido.every(row=>ids.usuario.has(row.userId))
     && snapshot.pedidoDetalle.every(row=>ids.pedido.has(row.pedidoId) && ids.producto.has(row.productoId))
     && snapshot.promocion.every(row=>ids.producto.has(row.productoId))
-    && snapshot.pedidoEstado.every(row=>ids.pedido.has(row.pedidoId) && ids.usuario.has(row.actorId));
+    && snapshot.pedidoEstado.every(row=>ids.pedido.has(row.pedidoId) && ids.usuario.has(row.actorId))
+    && snapshot.configuracionFiscal.every(row=>row.actorId==null || ids.usuario.has(row.actorId))
+    && snapshot.lote.every(row=>ids.producto.has(row.productoId) && (row.proveedorId==null || ids.proveedor.has(row.proveedorId)))
+    && snapshot.pedidoDetalleLote.every(row=>{
+      const detail=snapshot.pedidoDetalle.find(detail=>detail.id===row.detalleId),lot=snapshot.lote.find(lot=>lot.id===row.loteId);
+      return detail && lot && detail.productoId===lot.productoId;
+    })
+    && snapshot.movimientoInventario.every(row=>ids.producto.has(row.productoId) && (row.actorId==null || ids.usuario.has(row.actorId)) && (row.pedidoId==null || ids.pedido.has(row.pedidoId)) && (row.loteId==null || snapshot.lote.some(lot=>lot.id===row.loteId && lot.productoId===row.productoId)))
+    && snapshot.facturaPedido.every(row=>ids.pedido.has(row.pedidoId) && (row.secuencial==null || snapshot.secuenciaFactura.some(counter=>counter.emisorRuc===row.emisorRuc && counter.ambiente===row.ambiente && counter.establecimiento===row.establecimiento && counter.puntoEmision===row.puntoEmision && counter.ultimo>=row.secuencial)));
   if(!valid)fail('SOURCE_RELATIONS','La base local contiene referencias incompletas. No se transferirán registros.');
 }
 function collectUploads(snapshot){
@@ -98,16 +107,20 @@ async function targetCounts(tx){
   for(const model of MODELS)counts[model]=await tx[model].count();
   return counts;
 }
-function assertEmpty(counts){
-  if(MODELS.some(model=>counts[model]!==0))fail('TARGET_NOT_EMPTY','La base PostgreSQL debe estar completamente vacía, incluida Semilla. No se borrarán ni sobrescribirán datos existentes.');
+function isInitialFiscal(row){
+  try{return row && Object.keys(INITIAL_FISCAL).every(key=>key==='inicioVigencia'?new Date(row[key]).toISOString()===INITIAL_FISCAL[key]:row[key]===INITIAL_FISCAL[key]);}catch{return false;}
+}
+async function assertEmpty(tx,counts){
+  if(MODELS.some(model=>model!=='configuracionFiscal' && counts[model]!==0) || counts.configuracionFiscal>1)fail('TARGET_NOT_EMPTY','La base PostgreSQL debe estar vacía, incluida Semilla. Sólo se admite la fila fiscal estándar recién creada por migración; ningún dato de negocio se sobrescribe.');
+  if(counts.configuracionFiscal===1){const rows=await tx.configuracionFiscal.findMany();if(rows.length!==1 || !isInitialFiscal(rows[0]))fail('TARGET_NOT_EMPTY','La configuración fiscal del destino contiene datos propios. No se borrarán ni sobrescribirán.');}
 }
 async function migrate({source,target,apply=false,frontendRoot,storage,inspectImages=inspectUploadFiles}){
   const snapshot=await readSnapshot(source);
   assertSnapshotRelations(snapshot);
   const references=collectUploads(snapshot);
   const origin=Object.fromEntries(MODELS.map(model=>[model,snapshot[model].length]));
-  const destination=await target.$transaction(async tx=>{const counts=await targetCounts(tx);assertEmpty(counts);return counts;},TRANSACTION_OPTIONS);
-  const summary={modo:apply?'aplicar':'simulacion',origen:origin,destino:destination,imagenes:references.length};
+  const destination=await target.$transaction(async tx=>{const counts=await targetCounts(tx);await assertEmpty(tx,counts);return counts;},TRANSACTION_OPTIONS);
+  const summary={modo:apply?'aplicar':'simulacion',origen:origin,destino:destination,imagenes:references.length,firmasCifradas:snapshot.configuracionEmisor.filter(row=>row.certificadoCifrado).length};
   if(!apply)return summary;
   const images=await inspectImages(references,{frontendRoot});
   if(images.length && (!storage?.isCloudStorage?.() || typeof storage.cloudImageExists!=='function' || typeof storage.uploadCloudImage!=='function'))fail('CLOUD_IMAGES','Configura el almacenamiento Supabase antes de transferir imágenes. No se ha guardado ningún registro.');
@@ -119,7 +132,8 @@ async function migrate({source,target,apply=false,frontendRoot,storage,inspectIm
   try{
     await target.$transaction(async tx=>{
       // Recheck inside the write transaction to reject concurrent seeds/imports.
-      assertEmpty(await targetCounts(tx));
+      const counts=await targetCounts(tx);await assertEmpty(tx,counts);
+      if(counts.configuracionFiscal===1 && snapshot.configuracionFiscal.length)await tx.configuracionFiscal.deleteMany({where:{id:INITIAL_FISCAL.id}});
       for(const model of MODELS){
         const rows=snapshot[model];
         for(let offset=0;offset<rows.length;offset+=500)await tx[model].createMany({data:rows.slice(offset,offset+500)});
@@ -129,7 +143,7 @@ async function migrate({source,target,apply=false,frontendRoot,storage,inspectIm
     if(error instanceof MigrationError && !images.length)throw error;
     fail('DATABASE_TRANSFER','La transferencia de registros se revirtió completamente. Pueden quedar imágenes sin referencia; no se publicaron datos de usuarios ni pedidos.');
   }
-  return {...summary,destino:{...origin}};
+  return {...summary,destino:{...origin,configuracionFiscal:origin.configuracionFiscal || destination.configuracionFiscal}};
 }
 function safeError(error){return error instanceof MigrationError?error.message:'No se pudo completar la transferencia. Revisa las conexiones y las migraciones sin compartir contraseñas ni datos privados.';}
 async function runCli({argv=process.argv.slice(2),env=process.env,root=ROOT,log=console.log,createClients,storage}={}){
@@ -150,4 +164,4 @@ async function runCli({argv=process.argv.slice(2),env=process.env,root=ROOT,log=
   }finally{await Promise.allSettled([clients.source.$disconnect(),clients.target.$disconnect()]);}
 }
 if(require.main===module)runCli().catch(error=>{console.error(safeError(error));process.exitCode=1;});
-module.exports={MODELS,MigrationError,parseArgs,sourceFile,configFromEnvironment,readSnapshot,assertSnapshotRelations,collectUploads,inspectUploadFiles,targetCounts,migrate,safeError,runCli};
+module.exports={MODELS,INITIAL_FISCAL,MigrationError,parseArgs,sourceFile,configFromEnvironment,readSnapshot,assertSnapshotRelations,collectUploads,inspectUploadFiles,targetCounts,migrate,safeError,runCli};

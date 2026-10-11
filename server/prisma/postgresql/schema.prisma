@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../../../node_modules/.prisma-farmacia-postgresql"
+  output = "../../../node_modules/.prisma-farmacia-postgresql"
 }
 
 datasource db {
@@ -20,6 +20,22 @@ model Producto {
   activo      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  descuentoPorcentaje Int @default(0)
+  ivaCategoria String @default("general")
+  fundamentoIva String?
+  tipoProducto String @default("cuidado")
+  codigoInterno String? @unique
+  codigoBarras String?
+  laboratorio String?
+  principioActivo String?
+  concentracion String?
+  presentacion String?
+  registroSanitario String?
+  requiereReceta Boolean @default(false)
+  stockMinimo Int @default(5)
+  pvpMaximo Decimal?
+  lotes Lote[]
+  movimientos MovimientoInventario[]
   detalles    PedidoDetalle[]
   promociones Promocion[]
   @@index([activo, categoria])
@@ -37,6 +53,8 @@ model Usuario {
   createdAt    DateTime @default(now())
   pedidos      Pedido[]
   cambiosPedidos PedidoEstado[]
+  configuracionesFiscales ConfiguracionFiscal[]
+  movimientos MovimientoInventario[]
 }
 
 model Pedido {
@@ -44,6 +62,8 @@ model Pedido {
   userId         String
   usuario        Usuario  @relation(fields: [userId], references: [id], onDelete: Restrict)
   total          Decimal
+  baseImponible  Decimal?
+  ivaMonto       Decimal?
   estado         String   @default("pendiente")
   entrega        String
   nombre         String
@@ -60,6 +80,8 @@ model Pedido {
   updatedAt      DateTime @default(now()) @updatedAt
   detalles       PedidoDetalle[]
   historial      PedidoEstado[]
+  movimientos    MovimientoInventario[]
+  factura        FacturaPedido?
   @@unique([userId, requestKey])
   @@index([userId, createdAt])
 }
@@ -75,6 +97,11 @@ model PedidoDetalle {
   precioUnitario Decimal
   precioOriginal Decimal?
   descuentoPorcentaje Int @default(0)
+  ivaPorcentaje Int?
+  baseImponible Decimal?
+  ivaMonto Decimal?
+  totalLinea Decimal?
+  lotes PedidoDetalleLote[]
   @@unique([pedidoId, productoId])
 }
 
@@ -112,4 +139,131 @@ model PedidoEstado {
 model Semilla {
   id        String   @id
   createdAt DateTime @default(now())
+}
+
+model ConfiguracionFiscal {
+  id String @id @default(uuid())
+  tarifaGeneral Int
+  inicioVigencia DateTime @unique
+  referenciaNormativa String
+  actorId String?
+  actor Usuario? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Proveedor {
+  id String @id @default(uuid())
+  nombre String
+  ruc String @unique
+  email String
+  telefono String
+  direccion String
+  activo Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lotes Lote[]
+}
+
+model Lote {
+  id String @id @default(uuid())
+  productoId String
+  producto Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
+  numero String
+  vencimiento String
+  stock Int
+  costoUnitario Decimal
+  proveedorId String?
+  proveedor Proveedor? @relation(fields: [proveedorId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  movimientos MovimientoInventario[]
+  detalles PedidoDetalleLote[]
+  @@unique([productoId, numero])
+  @@index([productoId, vencimiento])
+}
+
+model MovimientoInventario {
+  id String @id @default(uuid())
+  productoId String
+  producto Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  loteId String?
+  lote Lote? @relation(fields: [loteId], references: [id], onDelete: Restrict)
+  actorId String?
+  actor Usuario? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  pedidoId String?
+  pedido Pedido? @relation(fields: [pedidoId], references: [id], onDelete: SetNull)
+  tipo String
+  cantidad Int
+  motivo String
+  createdAt DateTime @default(now())
+  @@index([productoId, createdAt])
+}
+
+model PedidoDetalleLote {
+  id String @id @default(uuid())
+  detalleId String
+  detalle PedidoDetalle @relation(fields: [detalleId], references: [id], onDelete: Cascade)
+  loteId String
+  lote Lote @relation(fields: [loteId], references: [id], onDelete: Restrict)
+  cantidad Int
+  @@unique([detalleId, loteId])
+}
+
+model ConfiguracionEmisor {
+  id String @id @default("principal")
+  ruc String
+  razonSocial String
+  nombreComercial String
+  direccionMatriz String
+  direccionEstablecimiento String
+  establecimiento String @default("001")
+  puntoEmision String @default("001")
+  ambiente String @default("1")
+  obligadoContabilidad Boolean @default(false)
+  softwarePropio Boolean @default(true)
+  rucProveedorSoftware String?
+  certificadoCifrado String?
+  certificadoVenceEn DateTime?
+  certificadoRuc String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SecuenciaFactura {
+  id String @id @default(uuid())
+  emisorRuc String
+  ambiente String
+  establecimiento String
+  puntoEmision String
+  ultimo Int @default(0)
+  @@unique([emisorRuc,ambiente,establecimiento,puntoEmision])
+}
+
+model FacturaPedido {
+  id String @id @default(uuid())
+  pedidoId String @unique
+  pedido Pedido @relation(fields:[pedidoId],references:[id],onDelete:Restrict)
+  estado String @default("BORRADOR")
+  ambiente String
+  emisorRuc String
+  establecimiento String
+  puntoEmision String
+  secuencial Int?
+  claveAcceso String? @unique
+  fechaEmision DateTime?
+  snapshot String
+  xmlBorrador String
+  xmlFirmado String?
+  xmlAutorizado String?
+  numeroAutorizacion String?
+  fechaAutorizacion DateTime?
+  mensajes String @default("[]")
+  ultimoError String?
+  procesandoHasta DateTime?
+  intentos Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([emisorRuc,ambiente,establecimiento,puntoEmision,secuencial])
+  @@index([createdAt])
 }

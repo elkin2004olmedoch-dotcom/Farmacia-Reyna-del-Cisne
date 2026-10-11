@@ -18,6 +18,6 @@ export function imageController(form,prefix) {
   document.getElementById(prefix+'-image-reset')?.addEventListener('click',()=>{sequence++;abort?.abort();pending=false;busy(submit,false);path.value='';input.value='';form.elements.alt.value='';form.elements.alt.required=false;imagePreviewView(prefix,'');});
   return {
     get pending(){return pending;},
-    reset(){sequence++;abort?.abort();pending=false;input.value='';busy(submit,false);if(prefix==='promotion')form.elements.alt.required=Boolean(path.value);imagePreviewView(prefix,path.value);},
+    reset(){sequence++;abort?.abort();pending=false;input.value='';busy(submit,false);if(prefix==='promotion')form.elements.alt.required=Boolean(path.value);if(form.isConnected)imagePreviewView(prefix,path.value);},
   };
 }

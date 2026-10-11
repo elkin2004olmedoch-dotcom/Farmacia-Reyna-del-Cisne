@@ -1,6 +1,13 @@
 const {test,expect}=require('@playwright/test');
 const AxeBuilder=require('@axe-core/playwright').default;
 const tinyPNG=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGP4fGkRVsQwtCQAJ4yZwRji18kAAAAASUVORK5CYII=','base64');
+async function findAdminRow(page,text){
+  const row=page.locator('#admin-table tbody tr').filter({hasText:text});
+  await expect(page.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');
+  while(await row.count()===0 && await page.locator('#admin-prev').isEnabled()){await page.locator('#admin-prev').click();await expect(page.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');}
+  while(await row.count()===0 && await page.locator('#admin-next').isEnabled()){await page.locator('#admin-next').click();await expect(page.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');}
+  await expect(row).toHaveCount(1);return row;
+}
 test('catálogo, persistencia, login obligatorio, registro y pedido real',async({page},testInfo)=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto('/');await expect(page.locator('#featured-products article')).toHaveCount(4);await expect(page.locator('.promotion-card')).toHaveCount(2);
@@ -40,14 +47,14 @@ test('administrador crea, edita y elimina; consulta todas las tablas y publica p
   for(const [key,value] of Object.entries({nombre:name,precio:'6.25',stock:'5',descripcion:'Artículo de verificación',alt:'Vitaminas de prueba'}))await page.locator('#product-'+key).fill(value);
   const imageUpload=page.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/admin/imagenes');await page.locator('#product-image-file').setInputFiles({name:'producto-browser.png',mimeType:'image/png',buffer:tinyPNG});expect((await imageUpload).status()).toBe(201);await expect(page.locator('#product-image-preview')).toBeVisible();await expect.poll(()=>page.locator('#product-image-preview').evaluate(img=>img.naturalWidth)).toBe(8);await expect(page.locator('#product-form [type=submit]')).toBeEnabled();
   await page.locator('#product-form [type=submit]').click();await expect(page.locator('#editor-dialog')).not.toBeVisible();
-  let row=page.locator('#admin-table tr').filter({hasText:name});await row.locator('[data-edit]').click();await page.locator('#product-precio').fill('7.50');await page.locator('#product-form [type=submit]').click();await expect(row).toContainText('$7,50');
+  let row=await findAdminRow(page,name);await row.locator('[data-edit]').click();await page.locator('#product-precio').fill('7.50');await page.locator('#product-form [type=submit]').click();await expect(row).toContainText('$7,50');
   await page.goto('/admin.html');await expect(page.locator('.admin-metric')).toHaveCount(8);await expect(page.locator('#stock-alerts')).toContainText(name);await page.locator('.admin-quick-links a[href*="promociones"]').click();await expect(page.locator('#editor-dialog')).toBeVisible();await expect(page.locator('#editor-title')).toHaveText('Crear promoción');
   for(const [key,value] of Object.entries({titulo:'Campaña browser '+testInfo.project.name,etiqueta:'Vista de prueba',descripcion:'Campaña administrada desde la plataforma'}))await page.locator('#promotion-'+key).fill(value);
-  await page.locator('#promotion-productoId').selectOption('solar');await page.locator('[name=vistaPrevia]').check();await page.locator('#promotion-form [type=submit]').click();await expect(page.locator('#editor-dialog')).not.toBeVisible();await expect(page.locator('#admin-table')).toContainText('Campaña browser');
+  await page.locator('#promotion-productoId').selectOption('solar');await page.locator('[name=vistaPrevia]').check();await page.locator('#promotion-form [type=submit]').click();await expect(page.locator('#editor-dialog')).not.toBeVisible();await expect(await findAdminRow(page,'Campaña browser '+testInfo.project.name)).toContainText('Campaña browser');
   await page.goto('/');await expect(page.locator('.promotion-card').filter({hasText:'Campaña browser '+testInfo.project.name})).toBeVisible();
   await page.goto('/admin.html?tabla=productos');for(const table of ['usuarios','pedidos','detalles','promociones']){await page.locator('#admin-table-choice').selectOption(table);await expect(page.locator('#admin-table')).not.toContainText('passwordHash');await expect(page.locator('#admin-page-info')).toContainText('registros');}
-  const campaign=page.locator('#admin-table tr').filter({hasText:'Campaña browser '+testInfo.project.name});await campaign.locator('[data-edit]').click();await page.locator('#promotion-descripcion').fill('Campaña editada desde administración');await page.locator('#promotion-form [type=submit]').click();await expect(page.locator('#editor-dialog')).not.toBeVisible();await campaign.locator('[data-delete]').click();await page.locator('#confirm-dialog [value=confirm]').click();await expect(campaign).toHaveCount(0);
-  await page.locator('#admin-table-choice').selectOption('productos');row=page.locator('#admin-table tr').filter({hasText:name});await row.locator('[data-delete]').click();await page.locator('#confirm-dialog [value=confirm]').click();await expect(row).toContainText('No');
+  const campaign=await findAdminRow(page,'Campaña browser '+testInfo.project.name);await campaign.locator('[data-edit]').click();await page.locator('#promotion-descripcion').fill('Campaña editada desde administración');await page.locator('#promotion-form [type=submit]').click();await expect(page.locator('#editor-dialog')).not.toBeVisible();await campaign.locator('[data-delete]').click();await page.locator('#confirm-dialog [value=confirm]').click();await expect(campaign).toHaveCount(0);
+  await page.locator('#admin-table-choice').selectOption('productos');row=await findAdminRow(page,name);await row.locator('[data-delete]').click();await page.locator('#confirm-dialog [value=confirm]').click();await expect(row).toContainText('No');
   await page.goto('/catalogo.html');await expect(page.locator('.shop-cart')).toBeHidden();await expect(page.locator('[data-add]').first()).toBeHidden();await page.locator('#catalog-search').fill('solar');await expect(page.locator('[data-add]').first()).toBeHidden();
   await page.goto('/producto.html?id=solar');await expect(page.locator('#detail-add-form')).toBeHidden();
   for(const file of ['cuenta.html','checkout.html']){await page.goto('/'+file);await expect(page).toHaveURL(/admin.html$/);await expect(page.locator('.admin-metric')).toHaveCount(8);}
@@ -164,7 +171,7 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
     for(const [name,value] of Object.entries({nombre:'Cliente Sincronizacion',email,telefono:'0979275988',cedula:'0102030400',password:'ClienteBrowser2026!',confirm:'ClienteBrowser2026!'}))await client.locator('#register-'+name).fill(value);
     await client.locator('#register-terms').check();await client.locator('#register-form [type=submit]').click();await expect(client.locator('#logout')).toBeVisible();
     const clientToken=await client.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'));expect(clientToken).toBeTruthy();expect(clientToken).not.toBe(adminToken);
-    await focus(page);await expect(page.locator('#admin-table')).toContainText(email);await expect(page.locator('#admin-table')).not.toContainText('passwordHash');
+    await focus(page);await expect(await findRow(email)).toContainText(email);await expect(page.locator('#admin-table')).not.toContainText('passwordHash');
 
     // The storefront is already open before the administrator creates or edits anything.
     await client.clock.install();await client.goto('/catalogo.html?q='+encodeURIComponent(productName));await expect(client.locator('#catalog-grid article')).toHaveCount(0);

@@ -1,0 +1,26 @@
+{
+  "fechaUTC": "2026-10-11T18:34:03.228Z",
+  "originalesConservados": {
+    "Usuario": true,
+    "Producto": true,
+    "Pedido": true,
+    "PedidoDetalle": true,
+    "Promocion": true,
+    "PedidoEstado": true,
+    "Semilla": true
+  },
+  "migraciones": [
+    "202610090001_init",
+    "202610090002_seed_marker",
+    "202610090003_commerce",
+    "202610110004_fiscal_inventory",
+    "202610110005_billing",
+    "202610110006_pharmacy_pvp"
+  ],
+  "tarifas": [
+    {
+      "tarifaGeneral": 15,
+      "inicioVigencia": "2024-04-01T05:00:00.000Z"
+    }
+  ]
+}

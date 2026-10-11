@@ -171,7 +171,7 @@ test('descuento vigente mayor coincide entre catálogo y pedido, y su snapshot s
   const id=created.body.data.id;const campaign={titulo:'Descuento real',descripcion:'Condiciones de la campaña de prueba',etiqueta:'Oferta',productoId:id,activa:true,vistaPrevia:false,orden:0,inicio:null,fin:null,descuentoPorcentaje:25,imagen:null,alt:null};
   const campaigns=[];let discountedOrder;
   try {
-    for(const patch of [{},{descuentoPorcentaje:10},{descuentoPorcentaje:80,vistaPrevia:true},{descuentoPorcentaje:90,fin:'2000-01-01T05:00:00Z'},{descuentoPorcentaje:90,inicio:'2099-01-01T05:00:00Z'},{descuentoPorcentaje:90,activa:false}])campaigns.push((await request.post('/api/promociones').set('Authorization',bearer(adminToken)).send({...campaign,...patch}).expect(201)).body.data);
+    for(const patch of [{},{descuentoPorcentaje:10},{descuentoPorcentaje:80,vistaPrevia:true},{descuentoPorcentaje:85,fin:'2000-01-01T05:00:00Z'},{descuentoPorcentaje:85,inicio:'2099-01-01T05:00:00Z'},{descuentoPorcentaje:85,activa:false}])campaigns.push((await request.post('/api/promociones').set('Authorization',bearer(adminToken)).send({...campaign,...patch}).expect(201)).body.data);
     for(const value of [-1,91,2.5,'25',null])await request.post('/api/promociones').set('Authorization',bearer(adminToken)).send({...campaign,descuentoPorcentaje:value}).expect(422);
     for(const patch of [{imagen:'https://example.ec/campana.png',alt:'Campaña externa'},{imagen:'assets/uploads/../images/producto-vitaminas.jpg',alt:'Ruta inválida'},{imagen:productInput.imagen,alt:null}])await request.post('/api/promociones').set('Authorization',bearer(adminToken)).send({...campaign,...patch}).expect(422);
     const custom=(await request.put('/api/promociones/'+campaigns[0].id).set('Authorization',bearer(adminToken)).send({...campaign,imagen:productInput.imagen,alt:'Campaña vitaminas de prueba'}).expect(200)).body.data;
@@ -218,8 +218,12 @@ test('migración commerce conserva pedidos, detalles, campañas y relaciones de 
   const legacyOrder=randomUUID(),legacyDetail=randomUUID(),legacyCampaign=randomUUID(),timestamp='2020-01-02T08:00:00.000Z';
   try {
     for(const migration of ['202610090001_init','202610090002_seed_marker'])for(const statement of fs.readFileSync(path.join(root,'server/prisma/migrations',migration,'migration.sql'),'utf8').split(';').filter(sql=>sql.trim()))await legacy.$executeRawUnsafe(statement);
-    const oldUser=await legacy.usuario.create({data:{id:randomUUID(),nombre:'Cliente anterior',email:'anterior@example.ec',telefono:'+593979275988',passwordHash:'hash-legado',role:'user'}});
-    const oldProduct=await legacy.producto.create({data:{...productInput,id:randomUUID(),stock:6}});
+    // Populate the original schema explicitly: the generated current client may
+    // otherwise include newly added defaults in its INSERT/RETURNING columns.
+    const oldUser={id:randomUUID(),email:'anterior@example.ec',telefono:'+593979275988'};
+    await legacy.$executeRawUnsafe('INSERT INTO Usuario (id,nombre,email,telefono,passwordHash,role,createdAt) VALUES (?,?,?,?,?,?,?)',oldUser.id,'Cliente anterior',oldUser.email,oldUser.telefono,'hash-legado','user',timestamp);
+    const oldProduct={id:randomUUID()};
+    await legacy.$executeRawUnsafe('INSERT INTO Producto (id,nombre,precio,stock,categoria,descripcion,imagen,alt,createdAt,updatedAt) VALUES (?,?,?,?,?,?,?,?,?,?)',oldProduct.id,productInput.nombre,productInput.precio,6,productInput.categoria,productInput.descripcion,productInput.imagen,productInput.alt,timestamp,timestamp);
     await legacy.$executeRawUnsafe('INSERT INTO Pedido (id,userId,total,estado,entrega,nombre,email,telefono,documento,requestKey,fingerprint,createdAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',legacyOrder,oldUser.id,29,'pendiente','pickup','Cliente anterior',oldUser.email,oldUser.telefono,'••••••0400','clave-legado','huella-legado',timestamp);
     await legacy.$executeRawUnsafe('INSERT INTO PedidoDetalle (id,pedidoId,productoId,nombreProducto,cantidad,precioUnitario) VALUES (?,?,?,?,?,?)',legacyDetail,legacyOrder,oldProduct.id,'Nombre histórico',4,7.25);
     await legacy.$executeRawUnsafe('INSERT INTO Promocion (id,titulo,descripcion,etiqueta,productoId,activa,vistaPrevia,orden) VALUES (?,?,?,?,?,?,?,?)',legacyCampaign,'Campaña anterior','Descripción histórica','Vista previa',oldProduct.id,true,true,5);
@@ -232,6 +236,7 @@ test('migración commerce conserva pedidos, detalles, campañas y relaciones de 
     assert.equal(order.createdAt.toISOString(),timestamp);assert.equal(order.updatedAt.toISOString(),timestamp);
     assert.equal(order.detalles[0].id,legacyDetail);assert.equal(order.detalles[0].nombreProducto,'Nombre histórico');assert.equal(order.detalles[0].cantidad,4);assert.equal(Number(order.detalles[0].precioUnitario),7.25);assert.equal(Number(order.detalles[0].precioOriginal),7.25);assert.equal(order.detalles[0].descuentoPorcentaje,0);assert.equal(order.historial.length,0);
     assert.equal(campaign.titulo,'Campaña anterior');assert.equal(campaign.vistaPrevia,true);assert.equal(campaign.descuentoPorcentaje,0);assert.equal(campaign.imagen,null);assert.equal(campaign.alt,null);
+    assert.equal(order.baseImponible,null);assert.equal(order.ivaMonto,null);assert.equal(order.detalles[0].ivaPorcentaje,null);assert.equal(order.detalles[0].baseImponible,null);assert.equal(order.detalles[0].ivaMonto,null);
     assert.equal((await legacy.producto.findUnique({where:{id:oldProduct.id}})).stock,6);assert.equal((await legacy.usuario.findUnique({where:{id:oldUser.id}})).passwordHash,'hash-legado');
     assert.deepEqual(await legacy.$queryRawUnsafe('PRAGMA foreign_key_check'),[]);
   } finally {await legacy.$disconnect();}
@@ -383,7 +388,7 @@ test('seed repetido y adopción de base anterior preservan ediciones, borrados, 
     assert.equal(Number((await db.producto.findUnique({where:{id:savedProduct.id}})).precio),12.34);
     assert.equal((await db.producto.findUnique({where:{id:savedProduct.id}})).nombre,'Semilla editada por administrador');
     assert.equal((await db.producto.findUnique({where:{id:savedInactive.id}})).activo,false);
-    assert.equal((await db.producto.findUnique({where:{id:savedInactive.id}})).stock,0);
+    assert.equal((await db.producto.findUnique({where:{id:savedInactive.id}})).stock,savedInactive.stock);
     assert.equal((await db.promocion.findUnique({where:{id:first.id}})).titulo,'Campaña inicial editada');
     assert.equal((await db.promocion.findUnique({where:{id:first.id}})).activa,false);
     assert.equal(await db.promocion.findUnique({where:{id:removed.id}}),null);

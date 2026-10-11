@@ -51,13 +51,13 @@ npm audit
 | Eliminar producto admin | 204 | Historial conserva precio y nombre |
 | Origen CORS no permitido | 403 | Sin Access-Control-Allow-Origin |
 | JSON inválido | 400 | Sin stacktrace |
-| Cuerpo excesivo | 413 | General 32 KB; parser de imágenes autorizado 3 MB y archivo binario máximo 2 MB |
+| Cuerpo excesivo | 413 | General 32 KB; parsers de imágenes/certificados autorizados 3 MiB y archivo binario máximo 2 MiB |
 | Token expirado/revocado | 401 | Revocación efectiva tras logout |
 
 ## Resultado final observado
 
-- [Pruebas Node](node-tests.txt): 80 aprobadas, cero fallos.
-- [Pruebas Chrome](browser-tests.txt): 14 aprobadas, cero fallos; 1440 y 375 px.
+- [Pruebas Node](node-tests.txt): 133 aprobadas, cero fallos.
+- [Pruebas Chrome](browser-tests.txt): 32 aprobadas, cero fallos; escritorio/móvil y controles adicionales en 320, 768 y 1920 px.
 - [npm audit](npm-audit.json): cero vulnerabilidades reportadas.
 - [Resumen de ejecución](resumen.json): los tres comandos terminaron con código cero.
 - [Portada](capturas/inicio.png), [catálogo escritorio](capturas/catalogo.png) y [catálogo móvil](capturas/catalogo-movil.png): catálogo de trabajo de 18 referencias, sin credenciales ni tokens en pantalla.
@@ -74,7 +74,7 @@ Para regenerar las salidas ejecuta `npm run verify`. Las credenciales de tests c
 
 El schema PostgreSQL y la migración se validaron/generaron con Prisma. Un entorno temporal sin cliente SQLite generado comprobó el cliente PostgreSQL, `Decimal`, precio descontado y aislamiento `Serializable` sin abrir una BD. Las 34 pruebas del antecedente estático también pasan, incluidos el inicio de sesión con almacenamiento bloqueado y el enlace Pages hacia el servicio público. [Alcance de nube](nube.json).
 
-Supabase real ya está conectado: se aplicaron las migraciones, se comprobó RLS en las ocho tablas sin políticas públicas y se importaron un administrador, 18 productos, dos promociones, una semilla y una foto. Las siete tablas coinciden fila por fila con la fuente y la foto conserva SHA-256. Antes del despliegue público, la API ejecutada desde el equipo pasó 17 comprobaciones contra PostgreSQL/Storage reales. Sus registros e imagen sintéticos también fueron retirados. Ese recorrido previo se distingue de las comprobaciones públicas descritas a continuación. [Detalle sin secretos](nube.json).
+En la etapa inicial de conexión de Supabase: se aplicaron las migraciones, se comprobó RLS en las ocho tablas sin políticas públicas y se importaron un administrador, 18 productos, dos promociones, una semilla y una foto. Las siete tablas coinciden fila por fila con la fuente y la foto conserva SHA-256. Antes del despliegue público, la API ejecutada desde el equipo pasó 17 comprobaciones contra PostgreSQL/Storage reales. Sus registros e imagen sintéticos también fueron retirados. Ese recorrido previo se distingue de las comprobaciones públicas descritas a continuación. [Detalle sin secretos](nube.json).
 
 El servicio público [Render Free](https://farmacia-reina-del-cisne.onrender.com/) respondió correctamente a 16 comprobaciones de API: salud PostgreSQL, login administrador conservado, resumen ERP, registro/login cliente, permisos separados, imagen en Storage, edición pública, promoción/descuento, pedido, stock y cancelación repetida. En el navegador real se verificaron las sesiones separadas, el pedido cancelado y una imagen PNG azul elegida desde el panel, convertida a WebP y visible en la ficha del cliente; el precio original USD 14 mostró USD 10,50 con 25 % de promoción. Esos datos eran sintéticos. Un despliegue manual y un reinicio del servicio conservaron las cuentas, campaña, pedido e imágenes; seis comprobaciones posteriores al reinicio compararon filas, hashes, login de ambos roles y ficha/historial. Después se retiraron solo los registros y dos fotos sintéticos y se confirmó otra vez la igualdad de las siete tablas originales y la foto trasladada. Pages tiene activado el origen público. [Portada publicada](capturas/nube-inicio.jpg), [dashboard con datos originales](capturas/nube-admin.jpg) y [detalle sin secretos](nube.json). Estas comprobaciones puntuales no garantizan disponibilidad continua.
 
@@ -82,7 +82,8 @@ La publicación del commit `230322d` terminó correctamente en los dos workflows
 
 ## Instalación desde la entrega
 
-La versión previa del ZIP, comprobada el 11 de octubre antes de activar Pages, se inspeccionó para verificar cinco auditorías, frontend/backend MVC, tres migraciones SQLite, schema/migración PostgreSQL, seed, README, lockfile, .env.example y archivos de nube/traslado. No contenía archivos .env privados, SQLite, respaldos, imágenes personales subidas, claves ni certificados. Se extrajo en una carpeta de comprobación dentro de .publish y se ejecutaron npm ci y npm run setup. Se verificaron catálogo, login admin, panel ERP, selectores de imagen, porcentaje, historial/estados y resumen protegido por HTTP. Las tres migraciones SQLite quedaron aplicadas, los nuevos campos/defaults y las claves foráneas fueron correctos; subir imágenes y cambiar estados sin sesión devolvió 401 sin modificar la base. La copia inicial devolvió 18 productos activos y seis meses de tendencia. En esa copia, Pages todavía tenía el origen desactivado; la instalación limpia comprobó SQLite local. La configuración pública actual se comprobó después y queda documentada en `nube.json`. [Resultado de la copia limpia](zip-verificado.json).
+La entrega provisional se extrajo de forma segura en una carpeta privada nueva. Allí se ejecutaron npm ci y npm run setup: seis migraciones y quince modelos, con datos exclusivamente sintéticos. Pasaron 19 comprobaciones de catálogo, autenticación, IVA, PVP/descuento, proveedores/lotes/FEFO, compra y centavos, reconexión, permisos SRI, borrador/RIDE sin validez y bloqueo de emisión sin firma. Se actualizaron los dos controladores corregidos de foco y se recompiló esa copia antes de comprobar las nueve pantallas. La entrega final se regenera con esos mismos controladores, informes aprobados y documentación actualizada. Excluye datos personales, .env privados, BD, respaldos, claves y certificados P12/PFX/PEM/KEY. [Resultado de la instalación limpia](zip-verificado.json).
+
 
 ## HTTPS de desarrollo
 
@@ -144,3 +145,11 @@ La prueba de recuperación de destino corrupto valida primero el respaldo fuente
 `npm run backup` permite una copia manual de SQLite; fuera de test, en modo SQLite, el servidor respalda al arrancar y cada 24 horas activo. Restaurar exige detenerlo y ejecutar `npm run backup:restore -- --from "carpeta-del-respaldo" --offline`; añadir `--replace` solo si se pretende sustituir una base existente. Las copias son privadas y locales, sin cifrado, firma digital ni almacenamiento externo. SHA-256 comprueba coherencia con el manifiesto, no autenticidad por sí mismo. No se ejecutó una restauración destructiva de la base personal para estas pruebas.
 
 Las actualizaciones son consultas HTTP al volver a la pestaña y cada 30 segundos mientras está visible. Formularios administrativos abiertos y cantidades en edición pausan el refresco correspondiente. No se afirma actualización instantánea entre navegadores ni cobertura de todos los fallos posibles.
+
+## Ampliación fiscal, farmacéutica y SRI
+
+La ejecución final completa aprobó 133 pruebas Node y 32 de navegador, con cero vulnerabilidades de dependencias. Incluye el cierre de sesión administrativa mientras hay un editor abierto, sin errores de foco. Fiscal/inventario prueba restricciones SQL/API, descuentos 85/86, IVA con vigencias, centavos mixtos, PVP, lotes vencidos, reservas FEFO y reposición única. SRI prueba XML contra XSD, firma criptográfica con tres referencias, P12 sintético, cifrado, secuencias/idempotencia, respuestas SOAP simuladas, permisos y descarga. No equivale a autorización ante el SRI.
+
+[Administración fiscal en escritorio](capturas/admin-fiscal-escritorio.png), [móvil](capturas/admin-fiscal-movil.png), [detalle por teclado](capturas/cliente-detalle-accesible-escritorio.png) y [borrador SRI sintético](capturas/facturacion-borrador-escritorio.png) documentan las vistas aisladas de prueba.
+
+Las migraciones reales preservaron todos los registros originales de ambas instalaciones. Se conservan [paridad local](ampliacion-local.json), [paridad de nube y RLS de las 16 tablas](ampliacion-nube.json) y [ocho restricciones de PostgreSQL real](restricciones-postgresql.json). No se publican copias, filas privadas ni credenciales.

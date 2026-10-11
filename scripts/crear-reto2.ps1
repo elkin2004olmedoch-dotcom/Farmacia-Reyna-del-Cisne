@@ -22,7 +22,7 @@ try {
     if ($relative -match '^(server/backups|frontend/assets/uploads)(/|$)') { continue }
     if ($relative -match '(^|/)(test-results|playwright-report)(/|$)') { continue }
     if ($relative -match '(^|/)(\.env($|\.)|node_modules|certificates)(/|$)' -and $relative -ne '.env.example') { continue }
-    if ($relative -match '\.(db|db-journal|db-wal|db-shm|key|pem|log)$') { continue }
+    if ($relative -match '\.(db|db-journal|db-wal|db-shm|key|pem|p12|pfx|log)$') { continue }
     [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, $file.FullName, $relative, [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
   }
 } finally { $archive.Dispose(); $stream.Dispose() }

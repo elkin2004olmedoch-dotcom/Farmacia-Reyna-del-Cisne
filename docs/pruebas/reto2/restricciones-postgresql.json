@@ -1,0 +1,16 @@
+{
+  "fechaUTC": "2026-10-11T18:34:38.876Z",
+  "motor": "PostgreSQL Supabase real",
+  "comprobaciones": {
+    "descuento86": true,
+    "ivaSinFundamento": true,
+    "precioMayorPvp": true,
+    "medicamentoSinFicha": true,
+    "ivaGeneral12": true,
+    "loteExcedeStock": true,
+    "fechaLoteInvalida": true,
+    "descuento85YTarifaCeroConFundamento": true
+  },
+  "transaccionesRevertidas": true,
+  "filasDeUsuarioEditadas": false
+}

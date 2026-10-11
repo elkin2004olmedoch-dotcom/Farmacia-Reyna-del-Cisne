@@ -1,8 +1,20 @@
 # Farmacia Reina del Cisne — Reto 2 Full Stack MVC
 
-Plataforma de farmacia con catálogo, carrito persistente, registro/login, pedidos en base de datos y administración de productos y promociones. Mantiene la fachada del negocio, identidad crema/vino, ubicación, WhatsApp y las 18 referencias anteriores. **Abre la [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) o [inicia sesión](https://farmacia-reina-del-cisne.onrender.com/cuenta.html).**
+Plataforma de farmacia con catálogo, carrito persistente, registro/login, pedidos en base de datos y administración de productos, promociones, proveedores, lotes, inventario, IVA y facturación electrónica SRI. Mantiene la fachada del negocio, identidad crema/vino, ubicación, WhatsApp y las 18 referencias anteriores. **Abre la [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) o [inicia sesión](https://farmacia-reina-del-cisne.onrender.com/cuenta.html).**
 
 **Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite local o PostgreSQL en Supabase, y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.
+
+## Administración de farmacia e impuestos
+
+En [el panel en línea](https://farmacia-reina-del-cisne.onrender.com/admin.html), **Productos** permite cambiar imagen, precio final con IVA, descuento directo de **0 a 85 %**, tarifa general o tarifa 0 % con fundamento legal, ficha farmacéutica, PVP máximo y stock mínimo. Para medicamento se exige PVP, laboratorio, presentación y registro sanitario; el precio final original no puede superar PVP. **Promociones** admite el mismo límite y muestra franja amarilla; cuando coinciden campañas y descuento directo, se usa el mayor porcentaje sin sumarlos.
+
+**Configuración de IVA** registra tarifa general 13, 14 o 15 %, fecha de inicio en hora de Ecuador y referencia normativa. Al 11 de octubre de 2026 rige **15 %**; el feriado turístico de 8 % no se aplica automáticamente a esta farmacia. La clasificación 0 % requiere revisión del producto concreto. Los precios conservan su carácter final: el impuesto se desglosa, no se añade por segunda vez. Carrito y pedido calculan centavos por línea, y el historial conserva la tarifa aplicada. Consulta [fuentes y criterios ecuatorianos](docs/ECUADOR-FARMACIA.md).
+
+**Proveedores**, **Lotes y vencimientos** y **Movimientos de inventario** guardan abastecimiento, caducidad, cantidades, costos y ajustes justificados con administrador/fecha. Las ventas utilizan primero los lotes que vencen antes; las unidades vencidas no se ofrecen. Cancelar devuelve una sola vez las unidades a sus lotes. Los productos con receta piden revisión en la farmacia y no permiten confirmación automática desde el carrito. Los datos farmacéuticos y lotes anteriores no se inventan.
+
+**Facturación SRI** configura emisor, establecimiento, punto de emisión, ambiente, numeración y firma P12/PFX desde el panel. Crea un borrador desde un pedido, verifica comprador y forma de pago, revisa su RIDE y firma/envía al SRI. Conserva respuestas de recepción y autorización, XML, RIDE, numeración y snapshot tributario. El cliente consulta su factura desde Mis pedidos. El ambiente de pruebas y un borrador no tienen validez tributaria; producción exige confirmación específica. La instalación publicada mantiene emisor y firma sin configurar para su revisión. La conexión real, pruebas con la firma del propietario y validación ante SRI se realizarán posteriormente: una factura requiere autorización del SRI en producción para tener validez tributaria. No se ha autorizado una factura real como parte de estas pruebas. Consulta [la guía SRI](docs/SRI-FACTURACION.md).
+
+La tienda ocupa todo el ancho del escritorio y adapta tarjetas/formularios a pantallas pequeñas. Los controles conservan etiquetas, foco visible, mensajes asociados a campos, Tab/Mayús+Tab, Enter/Espacio y Escape. Las tablas amplias tienen desplazamiento propio.
 
 ## Instalación y ejecución
 
@@ -18,7 +30,7 @@ Consulta ADMIN_EMAIL y ADMIN_PASSWORD en tu **archivo privado .env** e inicia se
 
 Los 18 productos comienzan con stock de demostración de 20 unidades y precios de referencia. Confirma los datos comerciales reales con la farmacia. El seed no restaura stock vendido ni sobrescribe ediciones, usuarios o contraseñas existentes. El marcador técnico `Semilla` inicializa el catálogo una sola vez y conserva las promociones eliminadas; al actualizar una base anterior adopta el catálogo inicial existente.
 
-Para actualizar una instalación existente, detén el servidor, ejecuta `npm ci`, `npm run db:generate`, `npm run db:migrate`, `npm run db:seed` y `npm start`. La segunda migración añade el marcador de inicialización; la tercera añade estados/historial, versiones de pedidos, porcentajes e imágenes de campañas. Conserva una copia privada de la BD y de las imágenes subidas antes de migrar; no reemplaces los archivos por datos de demostración. La conversión se prueba también con pedidos anteriores.
+Para actualizar una instalación existente, detén el servidor, ejecuta `npm ci`, `npm run db:generate`, `npm run db:migrate`, `npm run db:seed` y `npm start`. La segunda migración añade el marcador de inicialización; la tercera añade estados/historial, versiones de pedidos, porcentajes e imágenes de campañas. Las migraciones posteriores incorporan fiscalidad, trazabilidad de farmacia y emisión SRI. Se conserva el IVA histórico desconocido como NULL. Conserva una copia privada de la BD y de las imágenes subidas antes de migrar; no reemplaces los archivos por datos de demostración. La conversión se prueba también con pedidos anteriores.
 
 Alternativa manual: copia .env.example a .env, configura valores privados y ejecuta:
 
@@ -55,6 +67,9 @@ server/
     migrations/202610090001_init/migration.sql
     migrations/202610090002_seed_marker/migration.sql
     migrations/202610090003_commerce/migration.sql
+    migrations/202610110004_fiscal_inventory/migration.sql
+    migrations/202610110005_billing/migration.sql
+    migrations/202610110006_pharmacy_pvp/migration.sql
     migrations/migration_lock.toml
     seed.cjs
     postgresql/       schema y migración PostgreSQL con RLS
@@ -91,12 +106,20 @@ La [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) está de
 
 | Entidad | Campos principales |
 |---|---|
-| Producto | id, nombre, precio Decimal, stock, categoría, imagen, activo, createdAt |
+| Producto | precio final, descuento directo 0–85, clasificación/fundamento IVA, ficha farmacéutica, PVP máximo, stock/mínimo, imagen y activo |
 | Usuario | id, email único, nombre, teléfono, passwordHash, role, activo, tokenVersion |
 | Pedido | id, userId FK, total Decimal, entrega, comprador, documento enmascarado, estado, createdAt, updatedAt |
-| PedidoDetalle | id, pedidoId FK, productoId FK, nombre histórico, cantidad, precioUnitario, precioOriginal, descuentoPorcentaje |
+| PedidoDetalle | producto/nombre histórico, cantidad, precios original/final, descuento, base/IVA/tarifa/total histórico |
 | PedidoEstado | pedidoId FK, estado anterior/nuevo, actorId FK y fecha; historial de cambios |
-| Promocion | id, título, etiqueta, productoId FK, publicación, vistaPrevia, orden, inicio, fin, descuentoPorcentaje, imagen/alt propios opcionales |
+| Promocion | producto, publicación/vista previa, vigencia, orden, descuento 0–85 e imagen/alt propios opcionales |
+| ConfiguracionFiscal | tarifa general, vigencia, fundamento normativo, actor y fechas |
+| Proveedor | nombre, RUC, correo/teléfono de Ecuador, dirección y activo |
+| Lote | producto, número, vencimiento, stock, costo y proveedor |
+| MovimientoInventario | producto/lote/pedido, actor, tipo, cantidad, motivo y fecha |
+| PedidoDetalleLote | asignación de cantidades reservadas a lotes |
+| ConfiguracionEmisor | emisor SRI, ambiente/códigos y certificado cifrado |
+| SecuenciaFactura | último secuencial por RUC/ambiente/establecimiento/punto |
+| FacturaPedido | snapshot privado, estado, numeración, clave, XML firmado/autorizado y respuestas SRI |
 
 El carrito guarda IDs/cantidades en localStorage. El servidor lee precio/stock, calcula en centavos y persiste Decimal. Cabecera, detalles y descuento de stock están en una transacción serializable; una línea sin stock revierte todo el pedido.
 
@@ -138,6 +161,20 @@ En rutas protegidas: **Authorization: Bearer &lt;token&gt;**.
 | GET | /api/admin/tablas | admin |
 | GET | /api/admin/resumen | admin; indicadores, alertas y tendencia |
 | POST | /api/admin/imagenes | admin; imagen JPEG/PNG/WebP validada y recodificada |
+| GET | /api/configuracion/fiscal | Público; tarifa vigente |
+| GET/POST | /api/admin/configuracion/fiscal | admin; historial y nueva vigencia |
+| GET/POST | /api/admin/proveedores | admin; listado y creación |
+| PUT | /api/admin/proveedores/:id | admin; edición |
+| GET/POST | /api/admin/lotes | admin; listado e ingreso |
+| GET | /api/admin/inventario/movimientos | admin; historial |
+| POST | /api/admin/inventario/ajustes | admin; entrada/salida justificada |
+| GET/PUT | /api/admin/facturacion/configuracion | admin; emisor y numeración |
+| POST | /api/admin/facturacion/certificado | admin; firma privada P12/PFX |
+| GET/POST | /api/admin/facturacion/facturas | admin; listado y borrador |
+| POST | /api/admin/facturacion/facturas/:id/emitir | admin; firma, envío/consulta SRI |
+| GET | /api/pedidos/:id/factura | propietario del pedido o admin |
+| GET | /api/facturacion/facturas/:id/xml | propietario del pedido o admin |
+| GET | /api/facturacion/facturas/:id/ride | propietario del pedido o admin |
 | GET | /api/salud | Público; prueba BD |
 
 Catálogo: ?q=solar&categoria=cuidado&page=1&pageSize=20. Pedidos/tablas admiten page/pageSize; máximo 100 registros. Tablas admin: productos, usuarios, pedidos, detalles y promociones.
@@ -190,9 +227,9 @@ Tres riesgos de [OWASP Top 10:2025](https://top10.owasp.org/2025/0x00_2025-Intro
 | A05 — Injection | Prisma parametrizado, express-validator, campos permitidos, sanitización, escape HTML, imágenes locales existentes y CSP sin scripts inline |
 | A07 — Authentication Failures | bcrypt 12, secretos privados aleatorios, HS256 con issuer/audience/exp, revocación tokenVersion y límites de intentos |
 
-Controles adicionales: Helmet, API sin caché, cuerpo JSON de 32 KB y excepción de 3 MiB exclusivamente para la subida de imágenes tras autenticar al administrador, paginación y errores centralizados. Config rechaza JWT_SECRET débil, CORS comodín y orígenes HTTP en producción. CORS usa orígenes exactos y no sustituye JWT/roles. Las prácticas siguen la [guía de Express](https://expressjs.com/en/advanced/best-practice-security.html).
+Controles adicionales: Helmet, API sin caché, cuerpo JSON de 32 KB y parsers de 3 MiB exclusivamente para imágenes y certificados después de autenticar al administrador, paginación y errores centralizados. Los certificados se cifran en la BD y nunca se devuelven al navegador. Config rechaza JWT_SECRET débil, CORS comodín y orígenes HTTP en producción. CORS usa orígenes exactos y no sustituye JWT/roles. Las prácticas siguen la [guía de Express](https://expressjs.com/en/advanced/best-practice-security.html).
 
-JWT de 30 minutos en sessionStorage; logout revoca los tokens del usuario. La cédula del registro no se conserva; el documento del pedido se enmascara. No se piden ni guardan tarjeta, CVV o vencimiento. El admin ve datos de entrega necesarios, sin passwordHash ni huellas internas. Logger sin body ni Authorization.
+JWT de 30 minutos en sessionStorage; logout revoca los tokens del usuario. La cédula del registro no se conserva; el documento del pedido se enmascara. No se piden ni guardan tarjeta, CVV o vencimiento. Una factura SRI conserva la identificación completa necesaria en un snapshot privado, con acceso del administrador y del comprador propietario; sus listados muestran identificación enmascarada. El admin ve datos de entrega necesarios, sin passwordHash ni huellas internas. Logger sin body ni Authorization.
 
 .env, BD, dependencias y claves privadas se excluyen de Git/ZIP; el backend publica solo frontend/. El override deepmerge-ts 8.0.0 corrige la alerta transitiva detectada y se verificó con Prisma, migraciones y pruebas. No se declara certificación OWASP.
 
@@ -209,25 +246,25 @@ Abre **https://localhost:3443/**. El certificado self-signed de desarrollo puede
 
 ## Panel administrador
 
-El panel adopta el diseño ERP de la referencia: barra lateral fija por áreas, cabecera compacta, dashboard con tarjetas y tablas de gestión a todo el ancho. Conserva los colores crema/vino de la farmacia. General contiene Dashboard; Inventario, Productos; Ventas, Pedidos de clientes y Detalles; Comercial, Promociones; Administración, Usuarios. “Ver tienda” permite revisar la página pública y “Cerrar sesión” revoca la sesión.
+El panel adopta el diseño ERP de la referencia: barra lateral fija por áreas, cabecera compacta, dashboard con tarjetas y tablas de gestión a todo el ancho. Conserva los colores crema/vino de la farmacia. General contiene Dashboard; Inventario, Productos, Lotes y Movimientos; Compras, Proveedores; Ventas, Pedidos, Detalles y Facturación SRI; Comercial, Promociones; Administración, Usuarios y Configuración de IVA. “Ver tienda” permite revisar la página pública y “Cerrar sesión” revoca la sesión.
 
 `/admin.html` abre el **Dashboard ejecutivo** con ocho indicadores reales: importe de pedidos del mes, importe acumulado, pedidos pendientes, stock bajo, productos activos, clientes activos, administradores y campañas vigentes (incluye vistas previas). Añade alertas de inventario, accesos rápidos, pedidos por estado, tendencia de seis meses y últimos pedidos. Los importes representan pedidos registrados; no son cobros ni facturas.
 
 `GET /api/admin/resumen` genera el resumen en una transacción consistente de Prisma. Calcula dinero en centavos, meses con horario de Ecuador continental (America/Guayaquil), alertas con stock menor o igual a cinco, hasta diez productos en alerta y cinco pedidos recientes. Los meses sin pedidos muestran cero. No altera datos ni necesita otra migración.
 
-Los accesos “Nuevo producto” y “Nueva promoción” abren sus formularios reales; las tarjetas llevan a las tablas correspondientes. El menú móvil usa fondo superpuesto, bloquea el contenido cubierto y mantiene el foco dentro del menú; Escape o tocar el fondo lo cierra y devuelve el foco. Un error del resumen ofrece Reintentar, sin métricas ficticias. Esta adaptación utiliza las funciones actuales; proveedores, nómina, facturación fiscal y contabilidad no forman parte de esta versión.
+Los accesos “Nuevo producto” y “Nueva promoción” abren sus formularios reales; las tarjetas llevan a las tablas correspondientes. El menú móvil usa fondo superpuesto, bloquea el contenido cubierto y mantiene el foco dentro del menú; Escape o tocar el fondo lo cierra y devuelve el foco. Un error del resumen ofrece Reintentar, sin métricas ficticias. La ampliación incorpora proveedores, inventario farmacéutico y facturación electrónica SRI. Nómina y contabilidad general siguen fuera del alcance acordado.
 
 El cliente dispone de carrito, checkout y “Mis pedidos”. En la sesión admin, las acciones de compra se ocultan al revisar la tienda; /cuenta.html y /checkout.html llevan al panel y /pedidos.html abre todos los pedidos de clientes. Los enlaces /admin.html?tabla=productos, promociones, pedidos, usuarios o detalles seleccionan la sección correspondiente; valores desconocidos abren Productos. La API mantiene los permisos user/admin de pedidos exigidos por la rúbrica; la interfaz separa las tareas de cada rol.
 
-En **Productos → Editar**, pulsa el selector de imagen, elige un JPG, PNG o WebP y revisa la vista previa. Guarda el producto para publicar el cambio. Admite hasta 2 MiB y 16 millones de píxeles; el servidor verifica el contenido, rechaza animaciones/SVG y recodifica WebP de hasta 1600 px sin metadatos. En modo local, las imágenes quedan en `frontend/assets/uploads/` con UUID generado por el servidor; en modo nube, se guardan en Supabase Storage conservando esa referencia y se sirven mediante una redirección pública. La subida exige admin antes de leer el JSON grande; tiene límite propio de diez intentos por minuto y el resto de la API conserva su límite de 32 KB.
+En **Productos → Editar**, pulsa el selector de imagen, elige un JPG, PNG o WebP y revisa la vista previa. Guarda el producto para publicar el cambio. Admite hasta 2 MiB y 16 millones de píxeles; el servidor verifica el contenido, rechaza animaciones/SVG y recodifica WebP de hasta 1600 px sin metadatos. En modo local, las imágenes quedan en `frontend/assets/uploads/` con UUID generado por el servidor; en modo nube, se guardan en Supabase Storage conservando esa referencia y se sirven mediante una redirección pública. La subida exige admin antes de leer el JSON grande; tiene límite propio de diez intentos por minuto. La carga privada del certificado tiene su propio parser autorizado; las demás rutas conservan 32 KB.
 
-En **Promociones**, carga una imagen propia o pulsa “Usar imagen del producto”. Configura **Descuento (%)**, de 0 a 90, publicación y fechas. Una franja amarilla muestra el porcentaje; el catálogo y la ficha presentan precio anterior tachado y precio rebajado. Solo campañas activas, vigentes y sin vista previa aplican descuento. Si coinciden varias, se aplica el mayor porcentaje y no se acumulan. El servidor calcula en centavos: por ejemplo, $7,50 con 25 % queda en $5,63. El carrito usa ese precio y el pedido guarda precio original, porcentaje y precio final históricos. Cambiar o eliminar la campaña no altera pedidos anteriores.
+En **Promociones**, carga una imagen propia o pulsa “Usar imagen del producto”. Configura **Descuento (%)**, de 0 a 85, publicación y fechas. Una franja amarilla muestra el porcentaje; el catálogo y la ficha presentan precio anterior tachado y precio rebajado. Solo campañas activas, vigentes y sin vista previa aplican descuento. Si coinciden varias, se aplica el mayor porcentaje y no se acumulan. El servidor calcula en centavos: por ejemplo, $7,50 con 25 % queda en $5,63. El carrito usa ese precio y el pedido guarda precio original, porcentaje y precio final históricos. Cambiar o eliminar la campaña no altera pedidos anteriores.
 
 Las fechas tienen inicio inclusivo y fin exclusivo. El panel utiliza la hora del dispositivo y envía ISO con zona. Las dos campañas iniciales siguen como vistas previas, sin descuentos vigentes inventados. Una imagen propia de campaña requiere descripción accesible.
 
 En **Pedidos de clientes → Gestionar estado**, sigue pendiente → confirmado → preparado → entregado. Puedes cancelar desde pendiente, confirmado o preparado; entregado y cancelado son estados finales. La cancelación devuelve las cantidades al inventario exactamente una vez, dentro de la transacción de cambio de estado. El historial conserva quién hizo cada transición y cuándo; el cliente ve el estado e historial en “Mis pedidos”. Los cambios requieren `esperadoUpdatedAt`: una edición simultánea devuelve 409 para revisar los datos actuales.
 
-Usuarios y detalles son tablas de consulta: no se modifican hashes, roles ni líneas históricas. Los pedidos admiten exclusivamente las transiciones previstas; sus importes y artículos no se reescriben. Las cinco tablas requieren JWT/rol admin, independientemente del enlace visible en la UI.
+Usuarios y detalles son tablas de consulta: no se modifican hashes, roles ni líneas históricas. Los pedidos admiten exclusivamente las transiciones previstas; sus importes y artículos no se reescriben. Las tablas administrativas requieren JWT/rol admin, independientemente del enlace visible en la UI.
 
 ## Respaldos y restauración
 
@@ -259,9 +296,9 @@ npm run test:browser
 npm audit
 ~~~
 
-**80 pruebas Node:** API, recursos, migración sobre datos anteriores, imágenes y respaldo/restauración con SQLite temporal; configuración de producción, cliente PostgreSQL, almacenamiento e importación con servicios simulados. **14 pruebas Chrome:** siete recorridos en escritorio/móvil. **34 pruebas del antecedente estático:** incluye sesión bloqueada y enlace Pages al servicio público. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
+**133 pruebas Node:** API, fiscalidad, PVP, lotes/FEFO, migración histórica, firma/XML/SOAP SRI simulado, imágenes, respaldo y configuración de producción. **32 pruebas Chrome:** dieciséis recorridos en escritorio/móvil, con comprobaciones adicionales a 320, 768 y 1920 px, teclado y axe. **34 pruebas del antecedente estático:** incluye sesión bloqueada y enlace Pages al servicio público. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración. Las suites SRI utilizan datos y certificados sintéticos; no autorizan comprobantes reales.
 
-El schema PostgreSQL y su migración se aplicaron a Supabase real. Se comprobó RLS en las ocho tablas sin políticas públicas, conservación de filas/hashes e imágenes. Además de las 17 comprobaciones previas desde el equipo contra Supabase, la API pública de Render pasó 16 comprobaciones; el navegador verificó administrador, cliente y edición de imagen/precio, y seis comprobaciones confirmaron la conservación de datos tras reiniciar el servicio. Solo se retiraron las cuentas, pedidos, productos, campañas e imágenes sintéticos; las siete tablas originales y la foto mantienen igualdad con la fuente. Las pruebas repetibles Node/Chrome usan entornos aislados. Consulta [el alcance de estas comprobaciones](docs/pruebas/reto2/nube.json).
+La etapa inicial de conexión PostgreSQL/Storage comprobó autenticación, imágenes, edición, promociones, pedidos y reinicio de Render. Sus datos sintéticos se retiraron y su [evidencia histórica](docs/pruebas/reto2/nube.json) se conserva por separado. La ampliación actual aplicó las seis migraciones en SQLite y PostgreSQL, conserva todos los campos y filas originales de cada instalación y verifica RLS sin políticas públicas en las 16 tablas de Supabase. Ocho comprobaciones nativas de PostgreSQL probaron descuentos, IVA, PVP y lotes dentro de transacciones revertidas. No se reimportaron ni eliminaron cuentas o pedidos reales. Consulta [evidencia local](docs/pruebas/reto2/ampliacion-local.json), [evidencia de nube](docs/pruebas/reto2/ampliacion-nube.json) y [restricciones PostgreSQL](docs/pruebas/reto2/restricciones-postgresql.json).
 
 Se cubren JWT admin, creación admin, user 403, catálogo, carrito persistente, pedido en BD y admin ve todos los pedidos. También stock concurrente, reversión, idempotencia, revocación, CORS, validación ecuatoriana, sanitización, errores de red/500 y CRUD de campañas. Las pruebas de navegador comprueban login por rol, navegación administrativa sin compras, enlaces de sección, redirecciones, vista de tienda sin carrito para admin y cierre de sesión; compras y accesibilidad de cuenta/historial se prueban con un cliente. El panel ignora respuestas atrasadas al cambiar de tabla, bloquea acciones durante la carga y borra el contenido administrativo/cierra diálogos cuando vence la sesión.
 

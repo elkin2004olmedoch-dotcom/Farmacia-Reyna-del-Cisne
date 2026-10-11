@@ -81,3 +81,10 @@ El controlador administrativo coordina el diálogo de estado y llama al modelo c
 ## Límites
 
 El frontend usa JavaScript puro con módulos ES y no requiere un bundler. El generador sobrescribe los nueve HTML generados: deben editarse sus plantillas para conservar cambios. El diseño ERP corresponde a las funciones actuales de la farmacia, sin implementar módulos adicionales del ERP de referencia. La existencia de MVC no demuestra por sí sola que una aplicación sea segura; la revisión de permisos está en el informe 04.
+
+
+## Ampliación de farmacia, fiscalidad y SRI
+
+Se mantienen las capas: fiscal/inventario/SRI tienen rutas, controladores HTTP y modelos independientes en servidor; billing separa modelo API, vistas y eventos en frontend. Las vistas siguen sin Fetch ni registro de eventos. El catálogo y carrito comparten precios finales del servidor y el cliente desglosa los mismos centavos por línea. El panel muestra módulos ERP propios y la tienda utiliza esos datos persistidos. El constructor de pruebas puede ampliar cuotas exclusivamente con NODE_ENV=test y producción desactivada; producción conserva sus límites y hay una regresión que lo comprueba.
+
+Evidencia: resources.test.cjs, rate-limits.test.cjs, customer-pricing.test.cjs y recorridos admin/clientes/billing. La configuración y firma reales del emisor siguen siendo datos privados de instalación; no se incluyen en fuente.

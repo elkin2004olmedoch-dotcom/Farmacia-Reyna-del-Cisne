@@ -10,7 +10,10 @@ module.exports=config=> {
   const products=require('../controllers/productos.cjs');
   const orders=require('../controllers/pedidos.cjs');
   const promos=require('../controllers/promociones.cjs');
-  const limiter=rateLimit({windowMs:15*60*1000,limit:20,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Demasiados intentos. Espera unos minutos.'))});
+  const fiscal=require('../controllers/fiscal.cjs');
+  const inventory=require('../controllers/inventario.cjs');
+  const authLimit=process.env.NODE_ENV==='test' && !config.production && Number.isInteger(config.testAuthLimit) && config.testAuthLimit>0?config.testAuthLimit:20;
+  const limiter=rateLimit({windowMs:15*60*1000,limit:authLimit,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Demasiados intentos. Espera unos minutos.'))});
   router.post('/auth/register',limiter,...V.register,authController.register);
   router.post('/auth/login',limiter,...V.login,authController.login);
   router.get('/auth/me',auth,authController.me);
@@ -28,6 +31,16 @@ module.exports=config=> {
   router.post('/promociones',auth,admin,...V.promotion,V.validated,promos.create);
   router.put('/promociones/:id',auth,admin,V.id,...V.promotion,V.validated,promos.update);
   router.delete('/promociones/:id',auth,admin,V.id,V.validated,promos.remove);
+  router.get('/configuracion/fiscal',fiscal.current);
+  router.get('/admin/configuracion/fiscal',auth,admin,fiscal.history);
+  router.post('/admin/configuracion/fiscal',auth,admin,...V.fiscal,V.validated,fiscal.create);
+  router.get('/admin/proveedores',auth,admin,...V.pagination,inventory.suppliers);
+  router.post('/admin/proveedores',auth,admin,...V.supplier,V.validated,inventory.createSupplier);
+  router.put('/admin/proveedores/:id',auth,admin,V.id,...V.supplier,V.validated,inventory.updateSupplier);
+  router.get('/admin/lotes',auth,admin,...V.inventoryPagination,inventory.lots);
+  router.post('/admin/lotes',auth,admin,...V.lot,V.validated,inventory.createLot);
+  router.get('/admin/inventario/movimientos',auth,admin,...V.inventoryPagination,inventory.movements);
+  router.post('/admin/inventario/ajustes',auth,admin,...V.adjustment,V.validated,inventory.adjust);
   router.get('/admin/tablas',auth,admin,query('tabla').isIn(['productos','usuarios','pedidos','detalles','promociones']),...V.pagination,require('../controllers/admin.cjs'));
   router.get('/admin/resumen',auth,admin,require('../controllers/admin-summary.cjs'));
   router.get('/salud',require('../controllers/salud.cjs'));

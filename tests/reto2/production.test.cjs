@@ -119,9 +119,10 @@ test('PostgreSQL conserva todos los modelos locales y habilita RLS sin política
   const prisma = path.resolve(__dirname, '../../server/prisma');
   const sqlite = fs.readFileSync(path.join(prisma, 'schema.prisma'), 'utf8');
   const postgres = fs.readFileSync(path.join(prisma, 'postgresql/schema.prisma'), 'utf8');
-  assert.equal(postgres.slice(postgres.indexOf('model Producto')), sqlite.slice(sqlite.indexOf('model Producto')));
+  assert.equal(postgres.slice(postgres.indexOf('model Producto')).replaceAll('\r\n','\n').trim(), sqlite.slice(sqlite.indexOf('model Producto')).replaceAll('\r\n','\n').trim());
   assert.match(postgres, /output\s*=\s*"\.\.\/\.\.\/\.\.\/node_modules\/\.prisma-farmacia-postgresql"/);
-  const sql = fs.readFileSync(path.join(prisma, 'postgresql/migrations/202610110001_initial/migration.sql'), 'utf8');
+  const migrations=path.join(prisma,'postgresql/migrations');
+  const sql=fs.readdirSync(migrations,{withFileTypes:true}).filter(entry=>entry.isDirectory()).sort((a,b)=>a.name.localeCompare(b.name)).map(entry=>fs.readFileSync(path.join(migrations,entry.name,'migration.sql'),'utf8')).join('\n');
   const models = [...sqlite.matchAll(/^model (\w+) \{/gm)].map(match => match[1]);
   for (const table of [...models, '_prisma_migrations']) assert.ok(sql.includes(`ALTER TABLE "${table}" ENABLE ROW LEVEL SECURITY;`));
   assert.ok(!/CREATE\s+POLICY/i.test(sql));
@@ -146,7 +147,14 @@ test('precios, cliente y seed usan PostgreSQL aunque el cliente SQLite predeterm
   vm.runInNewContext(fs.readFileSync(path.join(directory, 'prisma-client.cjs'), 'utf8'), selector);
   const selected = selector.module.exports;
   assert.equal(selected, pg);
-  const prices = {module: {exports: {}}, require: requested => requested === './prisma-client.cjs' ? selected : stub};
+  const prices = {module: {exports: {}}, require: requested => {
+    if(requested==='./prisma-client.cjs')return selected;
+    // This test isolates provider selection; fiscal and FEFO behavior are covered
+    // against the real isolated database in fiscal-inventory.test.cjs.
+    if(requested==='./fiscal.cjs')return {inclusiveTax:()=>({})};
+    if(requested==='./inventario.cjs')return {sellableStock:()=>0};
+    return stub;
+  }};
   vm.runInNewContext(fs.readFileSync(path.join(directory, 'prices.cjs'), 'utf8'), prices);
   const discounted = prices.module.exports.effectivePrice({id: 'p', precio: '4.50', activo: true}, [{id: 'promo', activa: true, vistaPrevia: false, descuentoPorcentaje: 20, orden: 0}]);
   assert.equal(discounted.precio.toFixed(2), '3.60');

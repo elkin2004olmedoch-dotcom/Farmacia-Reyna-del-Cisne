@@ -71,7 +71,7 @@ El editor asigna su registro e ID únicamente después de confirmar que la apert
 
 ## Controles de comercio, imágenes y recuperación
 
-Cambiar estado exige administrador y `esperadoUpdatedAt`; la transición válida se comprueba de nuevo en una transacción Serializable. La actualización es condicional por ID/estado/versión. Cancelar repone stock y escribe el evento con actor en esa transacción; un reintento no produce otra reposición. El cliente no puede gestionar estados ni enviar precios/descuentos en el carrito. El porcentaje válido se obtiene exclusivamente de campañas persistidas, vigentes y fuera de vista previa.
+Cambiar estado exige administrador y `esperadoUpdatedAt`; la transición válida se comprueba de nuevo en una transacción Serializable. La actualización es condicional por ID/estado/versión. Cancelar repone stock y escribe el evento con actor en esa transacción; un reintento no produce otra reposición. El cliente no puede gestionar estados ni enviar precios/descuentos en el carrito. El porcentaje válido se obtiene de productos persistidos y campañas vigentes, fuera de vista previa; se aplica el mayor sin sumarlos y hasta 85 %.
 
 La ruta de imágenes autentica y verifica rol antes de analizar el cuerpo grande. Comprueba base64, extensión y firma, decodifica con Sharp, limita píxeles/dimensiones y rechaza animación. Se recodifica como WebP sin metadatos con nombre UUID nuevo, sin sobrescribir archivos. La referencia persistida debe cumplir el patrón canónico y existir: en modo local resuelve dentro de la carpeta autorizada; en nube se comprueba en Supabase Storage. Una promoción con imagen propia exige texto alternativo. La validación del frontend mejora el mensaje, pero el servidor vuelve a comprobar todo.
 
@@ -91,3 +91,14 @@ Las copias se guardan fuera del contenido estático y no tienen endpoint de desc
 ## Límites y operación
 
 El certificado self-signed sirve para desarrollo y genera advertencia de confianza. Producción requiere certificado confiable, origen HTTPS y configuración de proxy cuando corresponda. Los límites usan memoria por instancia; varias instancias requieren un almacén común. SessionStorage sigue accesible ante XSS. No hay recuperación de contraseña, MFA, verificación de correo ni gestión de roles. El backup implementado es local y exige operación privada: no incluye cifrado, firma digital, copia externa ni garantía frente a pérdida del disco. La comprobación offline reconoce los servidores registrados por esta aplicación; el operador debe detener también otros procesos que escriban en la base.
+
+
+## Seguridad de los nuevos módulos
+
+Proveedor, lotes, ajustes, tarifas, configuración del emisor y emisión exigen JWT/administrador en servidor. Los porcentajes y existencias tienen validación de interfaz/API y restricciones SQL. Los formularios no permiten concederse roles. Cédula verifica formato y dígito; RUC valida estructura sin imponer un algoritmo empresarial que SRI no exige, ni afirmar inscripción real.
+
+Certificado y contraseña se cifran con AES-256-GCM, clave HKDF separada por dominio, sal e IV aleatorios; respuestas/listados/logs no incluyen material privado. La contraseña de importación viaja a OpenSSL por entorno del proceso hijo y PKCS12 por stdin; sin PEM privado en disco de operación. Entradas base64 canónicas, límite exacto 2 MiB, tiempo/memoria acotados, RSA 2048+, correspondencia clave/certificado y vencimiento. No se utilizó la dependencia vulnerable node-forge. Firma y alteración se verifican criptográficamente; XML limita tamaño y rechaza DTD/entidades; SOAP usa únicamente endpoints HTTPS oficiales sin redirecciones.
+
+XML/RIDE sólo para administrador o dueño del pedido. La identificación completa necesaria para factura vive en snapshot privado; los listados la enmascaran. Cambiar el RUC retira la firma anterior. Certificado, contraseña y archivos P12/PFX/PEM/KEY se excluyen de Git/ZIP. Los campos del navegador se vacían al terminar; esto no promete borrado criptográfico de memoria JavaScript.
+
+Todas las tablas PostgreSQL, incluidas las 15 entidades y _prisma_migrations, requieren RLS sin políticas públicas; el servidor utiliza credenciales privadas. Las pruebas temporales pueden aumentar cuotas sólo fuera de producción, y se verifica que producción siga limitada. Evidencia: rate-limits.test.cjs, production.test.cjs, sri-api.test.cjs, sri-crypto.test.cjs y npm-audit.json. La confianza y autorización real del emisor requieren pruebas con su firma ante SRI, no un certificado sintético.

@@ -1,0 +1,4 @@
+-- Existing amounts remain intact; incomplete prior metadata is not invented.
+ALTER TABLE "Producto" ADD COLUMN "pvpMaximo" DECIMAL(65,30) CHECK("pvpMaximo" IS NULL OR ("pvpMaximo">0 AND "pvpMaximo"<=100000 AND "pvpMaximo"*100=round("pvpMaximo"*100)));
+ALTER TABLE "Producto" ADD CONSTRAINT "Producto_pvp_medication_check" CHECK(("pvpMaximo" IS NULL OR "precio"<="pvpMaximo") AND ("tipoProducto"!='medicamento' OR ("pvpMaximo" IS NOT NULL AND "registroSanitario" IS NOT NULL AND length(btrim("registroSanitario"))>0 AND "laboratorio" IS NOT NULL AND length(btrim("laboratorio"))>0 AND "presentacion" IS NOT NULL AND length(btrim("presentacion"))>0))) NOT VALID;
+ALTER TABLE "Proveedor" ADD CONSTRAINT "Proveedor_ruc_formato_check" CHECK("ruc" ~ '^[0-9]{10}001$' AND cast(left("ruc",10) AS bigint)%1111111111!=0) NOT VALID;

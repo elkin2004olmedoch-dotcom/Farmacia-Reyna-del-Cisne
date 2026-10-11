@@ -41,7 +41,7 @@ GET de producto y catálogo añade `precioOriginal`, `descuentoPorcentaje` y `pr
 
 PUT de estado acepta exclusivamente `{estado, esperadoUpdatedAt}`. La versión es obligatoria y se valida como fecha ISO con zona. La respuesta incluye `updatedAt`, `detalles` e `historial`; se conserva la ocultación de `requestKey`/`fingerprint`. `409 ORDER_CHANGED` indica versión vencida; `409 INVALID_ORDER_TRANSITION` indica una secuencia no permitida. Repetir el estado alcanzado devuelve 200 con `replayed: true`, sin repetir historial ni reposición de stock. La creación idempotente también recupera el estado actual del mismo pedido, incluso si ya fue entregado o cancelado.
 
-POST de imágenes acepta `{archivo: base64 puro, nombreOriginal}`. Solo admite JPEG, PNG o WebP de hasta 2 MB binarios y 16 millones de píxeles, sin animación. El servidor comprueba firma/formato, recodifica sin metadatos y devuelve `{imagen, ancho, alto}` con ruta UUID `.webp`. Esta ruta tiene parser JSON de 3 MB y límite propio de 10 solicitudes por minuto después de JWT/rol; el resto de la API conserva 32 KB. El backend no acepta URLs externas, SVG subido ni rutas arbitrarias.
+POST de imágenes acepta `{archivo: base64 puro, nombreOriginal}`. Solo admite JPEG, PNG o WebP de hasta 2 MB binarios y 16 millones de píxeles, sin animación. El servidor comprueba firma/formato, recodifica sin metadatos y devuelve `{imagen, ancho, alto}` con ruta UUID `.webp`. Esta ruta tiene parser JSON de 3 MB y límite propio de 10 solicitudes por minuto después de JWT/rol; la carga privada de certificados también tiene parser autorizado de 3 MiB; las demás rutas conservan 32 KB. El backend no acepta URLs externas, SVG subido ni rutas arbitrarias.
 
 Los respaldos SQLite y su restauración son operaciones CLI de servidor, mediante `npm run backup` y `npm run backup:restore`; no cubren PostgreSQL ni Supabase Storage. No se añade una ruta HTTP para descargar bases ni restaurarlas desde una sesión comercial.
 
@@ -67,3 +67,23 @@ La paginación limita el tamaño a 100 filas. Auth, usuarios y administración n
 ## Hallazgos y límites
 
 Se añadieron parámetros validados, respuestas uniformes, límites de cuerpo, controles de duplicación y códigos distintos para sesión y permisos. El historial representa pedidos registrados y sus estados operativos, no cobros. El DELETE de producto es lógico. La API incluye gestión del estado logístico; el pago continúa coordinándose con la farmacia, sin pasarela bancaria ni facturación fiscal.
+
+
+## API de farmacia, IVA y facturación
+
+| Contrato | Permisos y validación |
+| --- | --- |
+| GET /api/configuracion/fiscal | Tarifa vigente pública, sin credenciales. |
+| GET/POST /api/admin/configuracion/fiscal | Admin; tarifa13/14/15, fecha Ecuador y referencia normativa; historial. |
+| GET/POST/PUT /api/admin/proveedores | Admin; RUC de13 dígitos terminado 001, correo y teléfonoEC; no checksum societario universal. |
+| GET/POST /api/admin/lotes | Admin; producto/proveedor existentes, lote único por producto, caducidad real y cantidades enteras. |
+| GET /api/admin/inventario/movimientos | Admin; movimientos trazables y paginación. |
+| POST /api/admin/inventario/ajustes | Admin; entrada/salida, lote opcional, cantidad y motivo; nunca stock negativo. |
+| GET/PUT /api/admin/facturacion/configuracion | Admin; datos del emisor, ambiente confirmado y numeración sólo hacia adelante. |
+| POST /api/admin/facturacion/certificado | Admin antes del parser de 3 MiB; certificado PKCS12 máximo 2 MiB, contraseña privada. |
+| GET/POST /api/admin/facturacion/facturas | Admin; listado/borrador con pedido, comprador y forma de pago real. |
+| POST /api/admin/facturacion/facturas/:id/emitir | Admin; firma, recepción/consulta oficial y confirmación específica en producción. |
+| GET /api/pedidos/:id/factura | Comprador propietario o admin;404 evita revelar otros pedidos. |
+| GET /api/facturacion/facturas/:id/xml o ride | Comprador propietario o admin, sesión obligatoria. |
+
+422 para descuentos 86%, tarifas no admitidas o datos inválidos;409 para receta pendiente, conflictos de versión/stock, pedido con lote vencido, certificado ausente, conciliación fiscal o cancelación de pedido ya facturado. Los estados SRI conservan DEVUELTA/NO_AUTORIZADA/EN_PROCESO/ERROR; una respuesta HTTP correcta no implica AUTORIZADA. No se envió ninguna factura real como parte de la auditoría. Evidencia: suites fiscal-inventory, sri-api y sri-crypto; contrato completo en SRI-FACTURACION.md.

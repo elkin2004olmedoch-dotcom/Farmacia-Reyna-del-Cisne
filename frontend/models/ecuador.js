@@ -44,16 +44,9 @@
   }
   function validRuc(value) {
     const id = clean(value);
-    if (!/^\d{10}001$/.test(id)) return false;
-    const province = Number(id.slice(0, 2));
-    if (!((province >= 1 && province <= 24) || province === 30)) return false;
-    const type = Number(id[2]);
-    if (type < 6) return validCedula(id.slice(0, 10));
-    const weights = type === 6 ? [3, 2, 7, 6, 5, 4, 3, 2] : type === 9 ? [4, 3, 2, 7, 6, 5, 4, 3, 2] : null;
-    if (!weights || (type === 6 && id[9] !== '0')) return false;
-    const remainder = weights.reduce((sum, weight, i) => sum + Number(id[i]) * weight, 0) % 11;
-    const check = remainder === 0 ? 0 : 11 - remainder;
-    return check < 10 && check === Number(id[weights.length]);
+    // SRI does not prescribe a checksum for every RUC. Registration is checked
+    // in the official registry; this validates format without inventing one.
+    return /^\d{10}001$/.test(id) && !/^(\d)\1{9}/.test(id);
   }
   const provinces = ['Azuay', 'Bolívar', 'Cañar', 'Carchi', 'Chimborazo', 'Cotopaxi', 'El Oro', 'Esmeraldas', 'Galápagos', 'Guayas', 'Imbabura', 'Loja', 'Los Ríos', 'Manabí', 'Morona Santiago', 'Napo', 'Orellana', 'Pastaza', 'Pichincha', 'Santa Elena', 'Santo Domingo de los Tsáchilas', 'Sucumbíos', 'Tungurahua', 'Zamora Chinchipe'];
   const provinceCodes = { Azuay:'01', Bolívar:'02', Cañar:'03', Carchi:'04', Cotopaxi:'05', Chimborazo:'06', 'El Oro':'07', Esmeraldas:'08', Guayas:'09', Imbabura:'10', Loja:'11', 'Los Ríos':'12', Manabí:'13', 'Morona Santiago':'14', Napo:'15', Pastaza:'16', Pichincha:'17', Tungurahua:'18', 'Zamora Chinchipe':'19', Galápagos:'20', Sucumbíos:'21', Orellana:'22', 'Santo Domingo de los Tsáchilas':'23', 'Santa Elena':'24' };
@@ -81,7 +74,7 @@
     const errors = validateBuyer({ ...values, address: values.delivery === 'pickup' ? 'Retiro en farmacia' : values.address });
     if (!validEmail(values.email)) errors.email = 'Escribe un correo electrónico válido.';
     if (!['cedula', 'ruc'].includes(values.documentType)) errors.documentType = 'Selecciona cédula o RUC.';
-    else if (!(values.documentType === 'ruc' ? validRuc(values.document) : validCedula(values.document))) errors.document = values.documentType === 'ruc' ? 'RUC inválido: revisa los 13 dígitos y su verificador.' : 'Cédula inválida: revisa los 10 dígitos y su verificador.';
+    else if (!(values.documentType === 'ruc' ? validRuc(values.document) : validCedula(values.document))) errors.document = values.documentType === 'ruc' ? 'Escribe el RUC de 13 dígitos terminado en 001. La inscripción se comprueba en el SRI.' : 'Cédula inválida: revisa los 10 dígitos y su verificador.';
     if (!['pickup', 'delivery'].includes(values.delivery)) errors.delivery = 'Selecciona retiro o entrega por coordinar.';
     if (values.delivery === 'delivery') {
       if (!provinces.includes(values.province)) errors.province = 'Selecciona una de las 24 provincias de Ecuador.';

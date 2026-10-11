@@ -9,6 +9,7 @@ function errorHandler(error, req, res, next) {
   if (error.code==='P2002') { status=409;code='CONFLICT';message='El registro ya existe.'; }
   if (error.code==='P2025') { status=404;code='NOT_FOUND';message='No se encontró el registro.'; }
   if (error.code==='P2003') { status=409;code='RELATION_CONFLICT';message='El registro tiene referencias asociadas.'; }
+  if (error.code==='P2004') { status=422;code='DATABASE_CONSTRAINT';message='Los datos no cumplen las reglas de la base de datos. Revisa cantidades, porcentajes y fechas.'; }
   if (['P2034','P2028','P1008'].includes(error.code)) { status=409;code='RETRY_ORDER';message='La disponibilidad cambió. Revisa el carrito e intenta nuevamente.'; }
   if (error.type==='entity.parse.failed') { status=400;code='INVALID_JSON';message='El cuerpo JSON no es válido.'; }
   if (error.type==='entity.too.large') { status=413;code='BODY_TOO_LARGE';message='La solicitud supera el tamaño permitido.'; }
