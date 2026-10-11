@@ -11,6 +11,12 @@ function validImagePath(value,frontendRoot=FRONTEND_ROOT){
   if(typeof value!=='string' || !(IMAGE_PATTERN.test(value) || UPLOAD_PATTERN.test(value)))return false;
   try{const uploaded=UPLOAD_PATTERN.test(value);const root=fs.realpathSync(uploaded?uploadsDirectory(frontendRoot):frontendRoot);const file=fs.realpathSync(uploaded?path.join(root,path.basename(value)):path.resolve(root,value));return contained(root,file) && fs.statSync(file).isFile();}catch(_){return false;}
 }
+async function validImagePathAsync(value,frontendRoot=FRONTEND_ROOT){
+  if(typeof value!=='string' || !(IMAGE_PATTERN.test(value) || UPLOAD_PATTERN.test(value)))return false;
+  const {isCloudStorage,cloudImageExists}=require('../models/cloudimages.cjs');
+  if(UPLOAD_PATTERN.test(value) && isCloudStorage())return cloudImageExists(value);
+  return validImagePath(value,frontendRoot);
+}
 function imageValidation(req,res,next){
   try{
     const body=req.body;
@@ -23,4 +29,4 @@ function imageValidation(req,res,next){
     req.imageInput={buffer,nombreOriginal};next();
   }catch(error){next(error);}
 }
-module.exports={validImagePath,imageValidation,FRONTEND_ROOT,UPLOAD_PATTERN,MAX_BYTES,contained,uploadsDirectory};
+module.exports={validImagePath,validImagePathAsync,imageValidation,FRONTEND_ROOT,UPLOAD_PATTERN,MAX_BYTES,contained,uploadsDirectory};

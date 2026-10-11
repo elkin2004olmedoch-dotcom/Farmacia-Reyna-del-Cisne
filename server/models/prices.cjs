@@ -1,4 +1,4 @@
-const {Prisma}=require('@prisma/client');
+const {Prisma}=require('./prisma-client.cjs');
 
 function visibleWhere(now=new Date()) {
   return {activa:true,producto:{activo:true},AND:[{OR:[{inicio:null},{inicio:{lte:now}}]},{OR:[{fin:null},{fin:{gt:now}}]}]};

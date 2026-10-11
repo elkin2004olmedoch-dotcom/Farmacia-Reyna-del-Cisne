@@ -8,9 +8,11 @@
   },
   "scripts": {
     "setup": "node scripts/setup-reto2.cjs",
+    "setup:production": "node scripts/setup-production.cjs",
     "start": "node server/index.cjs",
     "dev": "node --watch server/index.cjs",
     "db:generate": "prisma generate --schema server/prisma/schema.prisma",
+    "db:generate:postgres": "prisma generate --schema server/prisma/postgresql/schema.prisma",
     "db:migrate": "prisma migrate deploy --schema server/prisma/schema.prisma",
     "db:seed": "node server/prisma/seed.cjs",
     "db:studio": "prisma studio --schema server/prisma/schema.prisma",

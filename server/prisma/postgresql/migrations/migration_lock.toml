@@ -1,0 +1,2 @@
+# This provider is independent of the local SQLite migrations.
+provider = "postgresql"

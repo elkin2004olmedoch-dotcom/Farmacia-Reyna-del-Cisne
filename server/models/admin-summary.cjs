@@ -1,4 +1,4 @@
-const {Prisma}=require('@prisma/client');
+const {Prisma}=require('./prisma-client.cjs');
 const db=require('./db.cjs');
 const TIME_ZONE='America/Guayaquil';
 const LOW_STOCK=5;

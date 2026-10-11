@@ -8,7 +8,7 @@ const tasks=[
   ['browser-tests',[process.execPath,['node_modules/@playwright/test/cli.js','test','--config','tests/reto2/playwright.config.cjs']]],
   ['npm-audit',[process.execPath,[process.env.npm_execpath || require.resolve('npm/bin/npm-cli.js'),'audit','--json']]],
 ];
-const summary={fecha:'2026-10-09',node:process.version,resultados:[]};
+const summary={fecha:new Date().toISOString(),node:process.version,resultados:[]};
 for(const [name,[command,args]] of tasks){
   const result=spawnSync(command,args,{encoding:'utf8',maxBuffer:10*1024*1024});
   const output=(result.stdout || '')+(result.stderr || '');fs.writeFileSync(path.join(folder,name+(name==='npm-audit'?'.json':'.txt')),output);

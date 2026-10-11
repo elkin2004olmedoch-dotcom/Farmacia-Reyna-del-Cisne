@@ -2,7 +2,7 @@
 
 Plataforma de farmacia con catálogo, carrito persistente, registro/login, pedidos en base de datos y administración de productos y promociones. Mantiene la fachada del negocio, identidad crema/vino, ubicación, WhatsApp y las 18 referencias anteriores.
 
-**Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.
+**Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite local o PostgreSQL en Supabase, y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.
 
 ## Instalación y ejecución
 
@@ -57,13 +57,16 @@ server/
     migrations/202610090003_commerce/migration.sql
     migrations/migration_lock.toml
     seed.cjs
-scripts/            instalación, frontend, HTTPS y ZIP
-tests/reto2/        API, recursos y navegador
+    postgresql/       schema y migración PostgreSQL con RLS
+scripts/            instalación local/nube, traslado, frontend, HTTPS y ZIP
+tests/reto2/        API, recursos, nube, traslado y navegador
 docs/
   REQUISITOS-RETO-2.txt
+  DESPLIEGUE-GRATUITO.md
   auditorias/reto2/  cinco auditorías completas
   pruebas/reto2/     evidencias y resultados
 .env.example
+render.yaml
 package.json
 package-lock.json
 ~~~
@@ -77,6 +80,12 @@ Los HTML, js/ y assets/ raíz conservan el Reto 1 como antecedente; su README es
 El enlace GitHub Pages de este repositorio publica la tienda estática de la raíz. Sus productos se leen de `data/productos.json`; las ediciones del administrador local se guardan en SQLite e imágenes locales, por lo que requieren una publicación explícita para aparecer allí. Para actualización automática entre administrador y clientes en internet, despliega la aplicación MVC completa con Node.js, base de datos e imágenes persistentes y utiliza ese mismo servidor para ambos roles. La ficha pública de Alcohol antiséptico incorpora la imagen seleccionada localmente mediante una copia pública versionada; las cuentas y pedidos permanecen privados.
 
 El service worker consulta primero en internet los JSON de productos y promociones y guarda la última respuesta correcta para uso sin conexión. Las imágenes nuevas usan un nombre versionado y cada cambio de recursos debe actualizar la versión de caché del service worker para reemplazar las copias anteriores.
+
+### Publicar gratis la aplicación completa
+
+Está preparada la configuración opcional de **Render Free + PostgreSQL y Storage de Supabase** en `render.yaml`. Conserva el modo SQLite local y usa un cliente Prisma PostgreSQL independiente, migraciones con RLS e imágenes persistentes en la nube. Consulta [la guía paso a paso](docs/DESPLIEGUE-GRATUITO.md), incluido el traslado privado de usuarios, contraseñas existentes, pedidos y fotos.
+
+**El backend aún no está desplegado:** faltan las cuentas y variables privadas de los servicios. `data/deployment.json` permanece desactivado hasta comprobar el servicio real; después Pages abrirá la misma aplicación que usa el administrador. No se han transferido usuarios ni bases privadas al repositorio. Los planes gratuitos tienen pausas por inactividad y límites; el respaldo PostgreSQL y Storage debe configurarse por separado de las copias SQLite locales.
 
 ## Persistencia y consistencia
 
@@ -210,7 +219,7 @@ Los accesos “Nuevo producto” y “Nueva promoción” abren sus formularios 
 
 El cliente dispone de carrito, checkout y “Mis pedidos”. En la sesión admin, las acciones de compra se ocultan al revisar la tienda; /cuenta.html y /checkout.html llevan al panel y /pedidos.html abre todos los pedidos de clientes. Los enlaces /admin.html?tabla=productos, promociones, pedidos, usuarios o detalles seleccionan la sección correspondiente; valores desconocidos abren Productos. La API mantiene los permisos user/admin de pedidos exigidos por la rúbrica; la interfaz separa las tareas de cada rol.
 
-En **Productos → Editar**, pulsa el selector de imagen, elige un JPG, PNG o WebP y revisa la vista previa. Guarda el producto para publicar el cambio. Admite hasta 2 MiB y 16 millones de píxeles; el servidor verifica el contenido, rechaza animaciones/SVG y recodifica WebP de hasta 1600 px sin metadatos. Las imágenes quedan en `frontend/assets/uploads/` con UUID generado por el servidor. La subida exige admin antes de leer el JSON grande; tiene límite propio de diez intentos por minuto y el resto de la API conserva su límite de 32 KB.
+En **Productos → Editar**, pulsa el selector de imagen, elige un JPG, PNG o WebP y revisa la vista previa. Guarda el producto para publicar el cambio. Admite hasta 2 MiB y 16 millones de píxeles; el servidor verifica el contenido, rechaza animaciones/SVG y recodifica WebP de hasta 1600 px sin metadatos. En modo local, las imágenes quedan en `frontend/assets/uploads/` con UUID generado por el servidor; en modo nube, se guardan en Supabase Storage conservando esa referencia y se sirven mediante una redirección pública. La subida exige admin antes de leer el JSON grande; tiene límite propio de diez intentos por minuto y el resto de la API conserva su límite de 32 KB.
 
 En **Promociones**, carga una imagen propia o pulsa “Usar imagen del producto”. Configura **Descuento (%)**, de 0 a 90, publicación y fechas. Una franja amarilla muestra el porcentaje; el catálogo y la ficha presentan precio anterior tachado y precio rebajado. Solo campañas activas, vigentes y sin vista previa aplican descuento. Si coinciden varias, se aplica el mayor porcentaje y no se acumulan. El servidor calcula en centavos: por ejemplo, $7,50 con 25 % queda en $5,63. El carrito usa ese precio y el pedido guarda precio original, porcentaje y precio final históricos. Cambiar o eliminar la campaña no altera pedidos anteriores.
 
@@ -222,7 +231,7 @@ Usuarios y detalles son tablas de consulta: no se modifican hashes, roles ni lí
 
 ## Respaldos y restauración
 
-El servidor crea un respaldo al arrancar y cada 24 horas mientras permanece activo. Conserva las siete copias completas más recientes en `server/backups/`. Cada carpeta contiene un snapshot SQLite mediante `VACUUM INTO`, las imágenes subidas referenciadas por productos/campañas y un manifiesto de tamaños y SHA-256. Un fallo de copia se anuncia en el servidor sin presentar un respaldo incompleto como válido.
+En modo **SQLite local**, el servidor crea un respaldo al arrancar y cada 24 horas mientras permanece activo. Conserva las siete copias completas más recientes en `server/backups/`. Cada carpeta contiene un snapshot SQLite mediante `VACUUM INTO`, las imágenes subidas referenciadas por productos/campañas y un manifiesto de tamaños y SHA-256. Un fallo de copia se anuncia en el servidor sin presentar un respaldo incompleto como válido. Estos comandos no respaldan PostgreSQL ni Storage; configura sus copias privadas siguiendo la guía de despliegue.
 
 Respaldo manual:
 
@@ -250,7 +259,9 @@ npm run test:browser
 npm audit
 ~~~
 
-**37 pruebas Node:** API, recursos, migración sobre datos anteriores, imágenes y respaldo/restauración con BD temporal. **14 pruebas Chrome:** siete recorridos en escritorio/móvil. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
+**72 pruebas Node:** API, recursos, migración sobre datos anteriores, imágenes y respaldo/restauración con SQLite temporal; configuración de producción, cliente PostgreSQL, almacenamiento e importación con servicios simulados. **14 pruebas Chrome:** siete recorridos en escritorio/móvil. **34 pruebas del antecedente estático:** incluye sesión bloqueada y enlace Pages al servicio público. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración.
+
+El schema PostgreSQL y la migración se validaron con Prisma; se comprobó el cliente PostgreSQL generado en una instalación sin cliente SQLite generado. No se ha probado una conexión real a Supabase ni un despliegue real en Render: faltan las cuentas y variables privadas. Consulta [el alcance de estas comprobaciones](docs/pruebas/reto2/nube.json).
 
 Se cubren JWT admin, creación admin, user 403, catálogo, carrito persistente, pedido en BD y admin ve todos los pedidos. También stock concurrente, reversión, idempotencia, revocación, CORS, validación ecuatoriana, sanitización, errores de red/500 y CRUD de campañas. Las pruebas de navegador comprueban login por rol, navegación administrativa sin compras, enlaces de sección, redirecciones, vista de tienda sin carrito para admin y cierre de sesión; compras y accesibilidad de cuenta/historial se prueban con un cliente. El panel ignora respuestas atrasadas al cambiar de tabla, bloquea acciones durante la carga y borra el contenido administrativo/cierra diálogos cuando vence la sesión.
 
@@ -276,5 +287,5 @@ Genera **entrega/Reto2_Olmedo_Elkin.zip** con frontend/backend MVC, schema/migra
 
 ## Límites prácticos
 
-SQLite sirve para esta entrega; muchas escrituras requieren evaluar otro motor. Rate limit en memoria de una instancia. Los respaldos automáticos requieren el servidor activo y espacio disponible; no se envían a servicios externos. No se implementan pasarela bancaria, logística automática, MFA, recuperación de clave ni verificación de correo. El administrador actualiza los estados; el pago y la entrega se coordinan con la farmacia. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
+SQLite sirve para la instalación local; PostgreSQL está preparado para la nube. Rate limit en memoria de una instancia. Los respaldos automáticos SQLite requieren el servidor activo y espacio disponible; no se envían a servicios externos. Render y Supabase gratuitos tienen límites y pausas por inactividad. No se implementan pasarela bancaria, logística automática, MFA, recuperación de clave ni verificación de correo. El administrador actualiza los estados; el pago y la entrega se coordinan con la farmacia. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
 

@@ -28,6 +28,11 @@
     const bits = await global.crypto.subtle.deriveBits({ name: 'PBKDF2', salt: new TextEncoder().encode(salt), iterations: 210000, hash: 'SHA-256' }, key, 256);
     return encode(new Uint8Array(bits));
   }
+  function saveSession(email, message) {
+    if (write('session', email, true)) return;
+    memory.delete('session');
+    throw new Error(message);
+  }
   async function register(values) {
     const errors = global.Farmacia.validation.validateRegistration(values);
     if (Object.keys(errors).length) throw new Error('Revisa los datos del registro.');
@@ -38,13 +43,13 @@
     const hash = await passwordHash(values.password, salt);
     const user = { name: values.name.trim(), surname: values.surname.trim(), email, phone: global.Farmacia.validation.normalizePhone(values.phone), salt, hash };
     if (!write('accounts', [...users, user])) throw new Error('El navegador bloqueó el almacenamiento. Permítelo para guardar la cuenta.');
-    write('session', email, true);
+    saveSession(email, 'Tu cuenta se guardó, pero el navegador no permitió guardar la sesión. Permite el almacenamiento del sitio e inicia sesión de nuevo.');
     return currentUser();
   }
   async function login(email, password) {
     const user = accounts().find(x => x.email === email.trim().toLowerCase());
     if (!user || await passwordHash(password, user.salt) !== user.hash) throw new Error('El correo o la contraseña no coinciden con una cuenta de este navegador.');
-    write('session', user.email, true);
+    saveSession(user.email, 'El navegador no permitió guardar tu sesión. Permite el almacenamiento del sitio e intenta iniciar sesión de nuevo.');
     return currentUser();
   }
   const logout = () => write('session', null, true);

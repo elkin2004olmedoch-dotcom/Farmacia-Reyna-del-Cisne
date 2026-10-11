@@ -1,0 +1,36 @@
+{
+  "fecha": "2026-10-11T16:47:41.793Z",
+  "pruebas": {
+    "servidorNode": 72,
+    "navegadorChrome": 14,
+    "antecedenteEstatico": 34,
+    "vulnerabilidadesNpm": 0
+  },
+  "sqliteTemporalReal": true,
+  "postgresql": {
+    "schemaValidado": true,
+    "migracionGenerada": true,
+    "clienteGeneradoSinClienteSqlite": true,
+    "decimalYAislamientoVerificadosSinBD": true,
+    "conexionRealComprobada": false
+  },
+  "storage": {
+    "servidorHttpSimulado": true,
+    "autorizacionAdmin": true,
+    "webpValidado": true,
+    "imagenesPublicasSinClaves": true,
+    "cargasRealesASupabase": 0
+  },
+  "traslado": {
+    "clientesSimulados": true,
+    "idsYHashesConservados": true,
+    "reintentoSinDuplicados": true,
+    "datosPersonalesTransferidos": false
+  },
+  "despliegue": {
+    "renderCreado": false,
+    "supabaseCreado": false,
+    "pagesAppOrigin": null
+  },
+  "limite": "Faltan cuentas y variables privadas. Activar Pages solo después de verificar el backend real y completar el traslado privado."
+}

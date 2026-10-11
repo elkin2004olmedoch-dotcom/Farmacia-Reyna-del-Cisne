@@ -3,10 +3,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const { webcrypto } = require('node:crypto');
-function environment() {
-  const stored=new Map(); const session=new Map();
+function environment({stored=new Map(),session=new Map(),blockSession=false}={}) {
   const area=map=>({getItem:key=>map.get(key)??null,setItem:(key,value)=>map.set(key,value)});
-  const ctx=vm.createContext({crypto:webcrypto,TextEncoder,localStorage:area(stored),sessionStorage:area(session),Farmacia:{validation:require('../js/validation'),cart:require('../js/cart'),view:{money:n=>'$'+(n/100).toFixed(2)},storage:{saveCart:items=>stored.set('cart',JSON.stringify(items))}}});
+  const sessionArea=blockSession?{getItem(){throw new Error('Storage blocked');},setItem(){throw new Error('Storage blocked');}}:area(session);
+  const ctx=vm.createContext({crypto:webcrypto,TextEncoder,localStorage:area(stored),sessionStorage:sessionArea,Farmacia:{validation:require('../js/validation'),cart:require('../js/cart'),view:{money:n=>'$'+(n/100).toFixed(2)},storage:{saveCart:items=>stored.set('cart',JSON.stringify(items))}}});
   vm.runInContext(fs.readFileSync('js/commerce.js','utf8'),ctx);
   return { api:ctx.Farmacia.commerce,stored,session };
 }
@@ -21,6 +21,30 @@ test('cuenta local usa hash con sal, no conserva contraseña ni cédula y valida
   api.logout(); assert.equal(api.currentUser(),null);
   await assert.rejects(()=>api.login(profile.email,'Incorrecta123'),/no coinciden/);
   await api.login('CLIENTE@example.ec','Prueba123'); assert.equal(api.currentUser().name,'Cliente');
+});
+
+test('registro conserva la cuenta y avisa si no puede guardar la sesión sin activar una sesión temporal',async()=>{
+  const {api,stored,session}=environment({blockSession:true});
+  await assert.rejects(()=>api.register(profile),/Tu cuenta se guardó.*no permitió guardar la sesión/);
+  assert.equal(api.currentUser(),null);
+  assert.equal(JSON.parse(stored.get('farmacia-shop-accounts')).length,1);
+  const afterNavigation=environment({stored,session,blockSession:true});
+  assert.equal(afterNavigation.api.currentUser(),null);
+  const enabled=environment({stored,session});
+  await enabled.api.login(profile.email,profile.password);
+  assert.equal(enabled.api.currentUser().email,profile.email);
+});
+
+test('login con contraseña correcta rechaza una sesión bloqueada y permite reintentarlo al habilitar almacenamiento',async()=>{
+  const {api,stored,session}=environment();
+  await api.register(profile);api.logout();
+  const blocked=environment({stored,session,blockSession:true});
+  await assert.rejects(()=>blocked.api.login(profile.email,profile.password),/no permitió guardar tu sesión/);
+  assert.equal(blocked.api.currentUser(),null);
+  assert.equal(environment({stored,session,blockSession:true}).api.currentUser(),null);
+  const enabled=environment({stored,session});
+  await enabled.api.login(profile.email,profile.password);
+  assert.equal(enabled.api.currentUser().email,profile.email);
 });
 test('registro de pedido valida datos y no guarda ni envía PAN, CVV, vencimiento o documento completo',()=>{
   const {api,stored}=environment(); const card={holder:'Cliente Prueba',cardNumber:'4000 0021 8000 0000',expiry:'12/34',cvv:'987'};

@@ -4,6 +4,8 @@
 
 Comprobar que el Reto 1 se transforma en una aplicación cliente-servidor con separación real de datos, renderizado y eventos. Se inspeccionaron dependencias, estructura, flujo HTTP, pantallas ERP, conexión entre sesiones, estados de pedidos, descuentos y carga de imágenes. `tests/reto2/resources.test.cjs` verifica recursos y evita Fetch/eventos en vistas y consultas Prisma directas en controladores. Las ejecuciones Node, navegador y auditoría de dependencias se registran en `docs/pruebas/reto2/`; los conteos corresponden a la última ejecución completa allí conservada.
 
+La opción de nube conserva estas capas: Render ejecuta Express, `server/prisma/postgresql/` define el schema y cliente PostgreSQL independientes, y `server/models/cloudimages.cjs` adapta Storage de Supabase. El recorrido real verificado usa SQLite temporal; almacenamiento e importación de nube se probaron con servicios simulados. El despliegue sigue pendiente, según el [alcance de las comprobaciones](../../pruebas/reto2/nube.json).
+
 ## Matriz de subpuntos
 
 | Requisito | Implementación | Evidencia | Resultado |
@@ -29,7 +31,7 @@ sequenceDiagram
   participant Ruta as Express route + middleware
   participant HTTP as Backend controller
   participant Datos as Backend model + Prisma
-  participant BD as SQLite
+  participant BD as SQLite local
   Cliente->>Controlador: Confirmar pedido
   Controlador->>Modelo: orders.create(carrito, comprador)
   Modelo->>Ruta: POST /api/pedidos + Bearer

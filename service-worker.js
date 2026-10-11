@@ -1,7 +1,8 @@
 'use strict';
 
-const CACHE_NAME = 'farmacia-reina-shell-v4-product-photo-d13f81e66a94';
+const CACHE_NAME = 'farmacia-reina-shell-v5-cloud-ready';
 const APP_FILES = [
+  'js/live-site.js', 'data/deployment.json',
   'assets/images/producto-alcohol-antiseptico-d13f81e66a94.webp',
   'assets/images/producto-tabletas-blister.svg',
   'assets/images/producto-medicamento-liquido.svg',
@@ -59,7 +60,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || url.origin !== self.location.origin
     || !url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
 
-  if (/\/data\/(productos|promociones)\.json$/.test(url.pathname)) {
+  if (/\/data\/(productos|promociones|deployment)\.json$/.test(url.pathname)) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       try {

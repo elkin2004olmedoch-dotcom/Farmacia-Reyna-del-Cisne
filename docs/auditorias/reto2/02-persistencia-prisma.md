@@ -4,6 +4,8 @@
 
 Verificar entidades, relaciones, migraciones, seed, pedidos, estados, precios e imágenes persistidas. Las pruebas usan SQLite temporal, aplican las mismas migraciones de entrega y abren otro PrismaClient para comprobar persistencia. Se verificó además la migración commerce sobre filas anteriores y su integridad referencial. Los resultados completos se conservan en `docs/pruebas/reto2/`.
 
+Se preparó también PostgreSQL en Supabase con schema, migración y cliente Prisma independientes. El traslado privado conserva IDs, hashes, fechas, decimales y referencias de imágenes, exige destino vacío y requiere `--apply`; la simulación no escribe. La configuración omite el seed inicial con `SKIP_INITIAL_SEED=true` hasta importar. Estas comprobaciones usan clientes simulados, además de validar el schema y generar el cliente PostgreSQL; no se ha conectado a Supabase ni desplegado en Render. Véase el [alcance de las pruebas de nube](../../pruebas/reto2/nube.json).
+
 ## Matriz de subpuntos
 
 | Entidad / requisito 2.1 | Campos y relaciones | Evidencia | Resultado |
@@ -16,7 +18,7 @@ Verificar entidades, relaciones, migraciones, seed, pedidos, estados, precios e 
 | PedidoEstado | Pedido y actor FK, estado anterior/nuevo y fecha | Historial inicial y transiciones administrativas; una sola cancelación | Implementado |
 | Carrito frontend | Solo identificadores y cantidades en localStorage | Recarga del navegador conserva selección | Implementado |
 | Pedido final en BD | Cabecera y detalles en una transacción Prisma | Pedido sigue existiendo con otro cliente de BD | Implementado |
-| Motor relacional | SQLite, alternativa aceptada por el estudiante | `provider = "sqlite"` y archivo real | Implementado con motor alternativo |
+| Motor relacional | SQLite local, alternativa aceptada por el estudiante; PostgreSQL opcional en nube | Archivo SQLite real; schema/migración y cliente PostgreSQL validados | SQLite comprobado; nube preparada sin despliegue real |
 | Migraciones y seed | `202610090001_init`, `202610090002_seed_marker`, `202610090003_commerce`, `seed.cjs` | Base nueva y migración histórica; seed conserva el estado administrativo | Implementado |
 | Resumen administrativo | Agregados de Producto, Usuario, Pedido y Promocion ya persistidos | `server/models/admin-summary.cjs`, endpoint protegido y pruebas del resumen | Implementado sin nuevas entidades ni migraciones |
 | Semilla | ID de inicialización y `createdAt`; sin datos personales ni exposición en las tablas del panel | Marca `catalogo-inicial-v1`, detección del catálogo previo y prueba de seed repetido | Implementado como metadato de instalación |
@@ -58,7 +60,7 @@ La aplicación de esta migración en la base de trabajo se realizó con respaldo
 
 ## Respaldo y recuperación
 
-`models/backups.cjs` usa `VACUUM INTO` para una copia SQLite consistente, que incluye las entidades, historial, marca de seed y metadatos de migración. Copia también las imágenes UUID referidas por Producto y Promocion. Cada carpeta privada de `server/backups/` contiene base, imágenes y un manifiesto con tamaños y SHA-256; se verifican `integrity_check`, claves foráneas y referencias. La copia se publica después de completarse y conserva las siete más recientes. Fuera de test se ejecuta al arrancar el servidor y cada 24 horas mientras permanece activo.
+`models/backups.cjs` usa `VACUUM INTO` para una copia SQLite consistente, que incluye las entidades, historial, marca de seed y metadatos de migración. Copia también las imágenes UUID referidas por Producto y Promocion. Cada carpeta privada de `server/backups/` contiene base, imágenes y un manifiesto con tamaños y SHA-256; se verifican `integrity_check`, claves foráneas y referencias. La copia se publica después de completarse y conserva las siete más recientes. En modo SQLite, fuera de test se ejecuta al arrancar el servidor y cada 24 horas mientras permanece activo. PostgreSQL omite estas copias: su base y los objetos de Storage requieren respaldos privados separados.
 
 `npm run backup` crea una copia manual. La restauración requiere servidor detenido y `npm run backup:restore -- --from "carpeta-del-respaldo" --offline`; si la base destino existe exige además `--replace` y genera primero una copia de ella. Se validan archivos/manifiesto y la integridad antes de publicar la base. Las imágenes usan UUID inmutable; si un archivo existente difiere, se rechaza en lugar de sobrescribirlo. Pruebas temporales verifican recuperación de usuarios/hash/versiones, pedidos/detalles/historial, imágenes y retención; no sustituyen una restauración operativa en el servidor desplegado.
 
@@ -95,5 +97,5 @@ Casos específicos: registro con hash, CRUD persistido, total servidor, pedido c
 - Cerrado: una edición abierta podía restaurar stock anterior a una compra; el editor envía la versión y el modelo rechaza el conflicto sin modificar la fila.
 - Cerrado: repetir setup podía recrear una campaña inicial eliminada; la marca de seed conserva el catálogo existente y adopta bases anteriores sin duplicarlo.
 - El PUT sin `esperadoUpdatedAt` conserva la compatibilidad del contrato previo y no aplica el control de versión. Los consumidores externos que quieran proteger sus ediciones deben enviar ese campo.
-- SQLite tiene un solo escritor concurrente; una operación a mayor escala requiere evaluar un motor servidor y migración explícita. El respaldo implementado es local: no hay copia externa, cifrado ni protección frente a pérdida del disco completo. Cambiar solo DATABASE_URL no cambia el proveedor.
+- SQLite tiene un solo escritor concurrente. La opción PostgreSQL usa un cliente distinto seleccionado por DATABASE_URL; exige generar ese cliente, aplicar sus propias migraciones y trasladar los datos explícitamente. El respaldo implementado es SQLite local: no hay copia externa, cifrado ni protección frente a pérdida del disco completo, y no cubre PostgreSQL ni Storage.
 - SQL Server no se instaló ni se presenta como probado. Se implementó el motor alternativo autorizado.

@@ -1,6 +1,6 @@
 # Evidencias del Reto 2
 
-Las pruebas se ejecutan contra SQLite real con las migraciones y el seed de entrega. Cada ejecución usa una BD temporal separada de `server/prisma/farmacia.db`; no prueba un mock de persistencia ni modifica datos personales de trabajo.
+Las pruebas de API y navegador se ejecutan contra SQLite real con las migraciones y el seed de entrega, en una BD temporal separada de `server/prisma/farmacia.db`. Las pruebas adicionales de nube usan un servidor HTTP de almacenamiento simulado y clientes de importación simulados. No modifican datos personales de trabajo ni conectan a una cuenta real de Supabase.
 
 ## Reproducir
 
@@ -56,7 +56,7 @@ npm audit
 
 ## Resultado final observado
 
-- [Pruebas Node](node-tests.txt): 37 aprobadas, cero fallos.
+- [Pruebas Node](node-tests.txt): 72 aprobadas, cero fallos.
 - [Pruebas Chrome](browser-tests.txt): 14 aprobadas, cero fallos; 1440 y 375 px.
 - [npm audit](npm-audit.json): cero vulnerabilidades reportadas.
 - [Resumen de ejecución](resumen.json): los tres comandos terminaron con código cero.
@@ -68,9 +68,17 @@ npm audit
 
 Para regenerar las salidas ejecuta `npm run verify`. Las credenciales de tests corresponden a bases temporales y no son las claves aleatorias del administrador de trabajo. La API y el navegador no usan datos personales reales en esas pruebas.
 
+## Preparación de despliegue gratuito
+
+`production.test.cjs` cubre variables privadas, SSL, origen HTTPS, selección del cliente/namespace Prisma y seed con cliente PostgreSQL. `cloudimages.test.cjs` y `cloudroutes.test.cjs` cubren autorización, conversión WebP, subida, redirección pública, imágenes inexistentes, límites, timeout, CSP y errores sin credenciales. `cloudmigration.test.cjs` comprueba importación repetible, conflictos, conservación de IDs/hashes/pedidos y preparación de imágenes mediante clientes simulados.
+
+El schema PostgreSQL y la migración se validaron/generaron con Prisma. Un entorno temporal sin cliente SQLite generado comprobó el cliente PostgreSQL, `Decimal`, precio descontado y aislamiento `Serializable` sin abrir una BD. Las 34 pruebas del antecedente estático también pasan, incluidos el inicio de sesión con almacenamiento bloqueado y el enlace Pages hacia el servicio público. [Alcance de nube](nube.json).
+
+Render y Supabase todavía no están conectados. No se ejecutó la importación sobre datos reales ni se probó una BD PostgreSQL remota. `data/deployment.json` conserva `appOrigin: null`; el enlace de Pages se activará después de comprobar el servicio real y sus cuentas.
+
 ## Instalación desde la entrega
 
-El ZIP se inspeccionó para verificar cinco auditorías, frontend/backend MVC, tres migraciones, seed, README, lockfile y .env.example. No contenía archivos .env privados, SQLite, respaldos, imágenes personales subidas, claves ni certificados. Se extrajo en una carpeta de comprobación dentro de .publish y se ejecutaron npm ci y npm run setup. Se verificaron catálogo, login admin, panel ERP, selectores de imagen, porcentaje, historial/estados y resumen protegido por HTTP. Las tres migraciones quedaron aplicadas, los nuevos campos/defaults y las claves foráneas fueron correctos; subir imágenes y cambiar estados sin sesión devolvió 401 sin modificar la base. La copia inicial devolvió 18 productos activos y seis meses de tendencia. [Resultado de la copia limpia](zip-verificado.json).
+El ZIP se inspeccionó para verificar cinco auditorías, frontend/backend MVC, tres migraciones SQLite, schema/migración PostgreSQL, seed, README, lockfile, .env.example y archivos de nube/traslado. No contenía archivos .env privados, SQLite, respaldos, imágenes personales subidas, claves ni certificados. Se extrajo en una carpeta de comprobación dentro de .publish y se ejecutaron npm ci y npm run setup. Se verificaron catálogo, login admin, panel ERP, selectores de imagen, porcentaje, historial/estados y resumen protegido por HTTP. Las tres migraciones SQLite quedaron aplicadas, los nuevos campos/defaults y las claves foráneas fueron correctos; subir imágenes y cambiar estados sin sesión devolvió 401 sin modificar la base. La copia inicial devolvió 18 productos activos y seis meses de tendencia. La configuración de Pages siguió desactivada; esta instalación limpia no conectó a PostgreSQL. [Resultado de la copia limpia](zip-verificado.json).
 
 ## HTTPS de desarrollo
 
@@ -129,6 +137,6 @@ El respaldo usa `VACUUM INTO` para una SQLite consistente y copia imágenes refe
 
 La prueba de recuperación de destino corrupto valida primero el respaldo fuente. Si el destino presenta corrupción SQLite identificada y no permite una copia consistente, conserva sus bytes originales en una carpeta privada `recovery-<fecha>-<uuid>`, incluidos DB y WAL/SHM existentes, con tamaños y SHA-256. Su manifiesto la identifica como recuperación forense, no como respaldo restaurable; no se poda automáticamente. Solo después se publica la base válida. Si falla esa conservación, se aborta sin reemplazar el destino; errores de permisos o espacio no activan una recuperación genérica. La prueba comprueba igualdad byte por byte y la recuperación posterior, sin destruir datos de trabajo reales.
 
-`npm run backup` permite una copia manual; fuera de test el servidor respalda al arrancar y cada 24 horas activo. Restaurar exige detenerlo y ejecutar `npm run backup:restore -- --from "carpeta-del-respaldo" --offline`; añadir `--replace` solo si se pretende sustituir una base existente. Las copias son privadas y locales, sin cifrado, firma digital ni almacenamiento externo. SHA-256 comprueba coherencia con el manifiesto, no autenticidad por sí mismo. No se ejecutó una restauración destructiva de la base personal para estas pruebas.
+`npm run backup` permite una copia manual de SQLite; fuera de test, en modo SQLite, el servidor respalda al arrancar y cada 24 horas activo. Restaurar exige detenerlo y ejecutar `npm run backup:restore -- --from "carpeta-del-respaldo" --offline`; añadir `--replace` solo si se pretende sustituir una base existente. Las copias son privadas y locales, sin cifrado, firma digital ni almacenamiento externo. SHA-256 comprueba coherencia con el manifiesto, no autenticidad por sí mismo. No se ejecutó una restauración destructiva de la base personal para estas pruebas.
 
 Las actualizaciones son consultas HTTP al volver a la pestaña y cada 30 segundos mientras está visible. Formularios administrativos abiertos y cantidades en edición pausan el refresco correspondiente. No se afirma actualización instantánea entre navegadores ni cobertura de todos los fallos posibles.

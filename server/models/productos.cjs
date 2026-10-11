@@ -1,5 +1,5 @@
 const db = require('./db.cjs');
-const {Prisma}=require('@prisma/client');
+const {Prisma}=require('./prisma-client.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 const {discountWhere,effectivePrice}=require('./prices.cjs');
 module.exports = {

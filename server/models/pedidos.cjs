@@ -1,5 +1,5 @@
 const {createHash}=require('node:crypto');
-const {Prisma}=require('@prisma/client');
+const {Prisma}=require('./prisma-client.cjs');
 const db=require('./db.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 const {discountWhere,effectivePrice}=require('./prices.cjs');

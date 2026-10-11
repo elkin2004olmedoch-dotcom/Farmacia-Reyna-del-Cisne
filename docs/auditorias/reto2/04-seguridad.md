@@ -4,6 +4,8 @@
 
 Revisar autenticación, autorización, entradas, transporte, exposición de datos e integridad. Se probaron JWT inválido/vencido/revocado, roles, registro manipulado, documentos/precios/cantidades, CORS, cuerpos y errores. El alcance incluye dashboard, ediciones concurrentes, cambios de estado, descuentos, carga de imágenes y recuperación. Las ejecuciones completas y `npm audit` se conservan en `docs/pruebas/reto2/`; HTTPS local se comprobó mediante `/api/salud`.
 
+La opción Render/Supabase incorpora controles de configuración, RLS y almacenamiento; las pruebas adicionales usan servicios simulados, mientras API y navegador usan SQLite real temporal. El despliegue y la conexión real a Supabase están pendientes: el [alcance de nube](../../pruebas/reto2/nube.json) no presenta esas comprobaciones como una auditoría del servicio publicado.
+
 ## Matriz de subpuntos
 
 | Requisito | Control concreto | Evidencia | Resultado |
@@ -28,7 +30,7 @@ La numeración corresponde a [OWASP Top 10:2025](https://top10.owasp.org/2025/0x
 | Riesgo | Amenaza concreta en la farmacia | Mitigación y prueba |
 |---|---|---|
 | A01 — Broken Access Control | Un cliente crea productos, ve usuarios, consulta pedidos ajenos o accede al resumen global | Roles en servidor; registro rechaza role; identidad tomada de JWT y BD; mis pedidos filtra userId; `/api/admin/resumen` aplica JWT y admin; pruebas 401/403 y segundo usuario sin pedidos |
-| A05 — Injection | Entradas introducen SQL, HTML o rutas peligrosas | Prisma parametrizado; tipos/listas/límites; limpieza de texto; escape antes de HTML; imágenes locales existentes; CSP sin scripts inline; pruebas de nombre con etiquetas, imagen javascript e identificador malicioso |
+| A05 — Injection | Entradas introducen SQL, HTML o rutas peligrosas | Prisma parametrizado; tipos/listas/límites; limpieza de texto; escape antes de HTML; referencias de imagen canónicas verificadas en disco o Storage; CSP sin scripts inline; pruebas de nombre con etiquetas, imagen javascript e identificador malicioso |
 | A07 — Authentication Failures | Contraseña filtrada, token alterado o sesiones que sobreviven al logout | bcrypt 12; secreto privado aleatorio; HS256 explícito, exp/issuer/audience; revocación tokenVersion; límite de intentos; contraseña no aparece en respuestas ni logs; tokens inválidos/vencidos/revocados 401 |
 
 Las prácticas de TLS, entrada validada y cabeceras siguen la orientación de [seguridad de Express](https://expressjs.com/en/advanced/best-practice-security.html). Las sesiones con JWT de 30 minutos y sesión en sessionStorage son una decisión de este proyecto; no se usa cookie de autenticación automática.
@@ -42,6 +44,8 @@ Las prácticas de TLS, entrada validada y cabeceras siguen la orientación de [s
 - Cédula de registro: no persistida. Documento del pedido: últimos cuatro dígitos, resto enmascarado. No existen campos bancarios en la compra real.
 - Los administradores ven datos de entrega necesarios, sin passwordHash ni claves de reintento. Logger sin request body ni Authorization.
 - Configuración privada, SQLite, certificados, node_modules, `server/backups/` e imágenes UUID de trabajo se excluyen de Git y ZIP. El archivo de configuración de ejemplo no contiene claves reales.
+- DATABASE_URL, JWT_SECRET y SUPABASE_SERVICE_ROLE_KEY se configuran solo en el entorno privado del servidor; no se envían al navegador ni se incorporan a Git o ZIP. Las migraciones PostgreSQL habilitan RLS sin políticas de acceso público para las tablas de la farmacia.
+- El bucket público de Supabase se reserva para imágenes WebP. Las cuentas, hashes y pedidos permanecen en PostgreSQL privado; las escrituras de imágenes pasan por Express con JWT/rol y una clave de servidor, sin sobrescribir UUID.
 
 ## Controles del dashboard y separación de roles
 
@@ -67,7 +71,7 @@ El editor asigna su registro e ID únicamente después de confirmar que la apert
 
 Cambiar estado exige administrador y `esperadoUpdatedAt`; la transición válida se comprueba de nuevo en una transacción Serializable. La actualización es condicional por ID/estado/versión. Cancelar repone stock y escribe el evento con actor en esa transacción; un reintento no produce otra reposición. El cliente no puede gestionar estados ni enviar precios/descuentos en el carrito. El porcentaje válido se obtiene exclusivamente de campañas persistidas, vigentes y fuera de vista previa.
 
-La ruta de imágenes autentica y verifica rol antes de analizar el cuerpo grande. Comprueba base64, extensión y firma, decodifica con Sharp, limita píxeles/dimensiones y rechaza animación. Se recodifica como WebP sin metadatos con nombre UUID nuevo, sin sobrescribir archivos. La ruta persistida debe existir, resolver dentro de la carpeta autorizada y cumplir el patrón local. Una promoción con imagen propia exige texto alternativo. La validación del frontend mejora el mensaje, pero el servidor vuelve a comprobar todo.
+La ruta de imágenes autentica y verifica rol antes de analizar el cuerpo grande. Comprueba base64, extensión y firma, decodifica con Sharp, limita píxeles/dimensiones y rechaza animación. Se recodifica como WebP sin metadatos con nombre UUID nuevo, sin sobrescribir archivos. La referencia persistida debe cumplir el patrón canónico y existir: en modo local resuelve dentro de la carpeta autorizada; en nube se comprueba en Supabase Storage. Una promoción con imagen propia exige texto alternativo. La validación del frontend mejora el mensaje, pero el servidor vuelve a comprobar todo.
 
 Las copias se guardan fuera del contenido estático y no tienen endpoint de descarga/restauración. El archivo SQLite incluye hashes de contraseñas y datos operativos: debe conservarse privado como la base original. Se validan tamaños y SHA-256 contra el manifiesto, firma SQLite, integridad y referencias antes de restaurar. SHA-256 detecta cambios respecto al manifiesto; no es una firma de autenticidad ni cifrado. La restauración requiere `--offline`, ausencia de servidor registrado activo y, para reemplazar una base, `--replace` con respaldo previo. No se publican copias ni credenciales en la entrega.
 

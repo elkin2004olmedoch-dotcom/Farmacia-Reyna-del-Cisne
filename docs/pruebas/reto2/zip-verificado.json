@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-10-09",
+  "fecha": "2026-10-11T16:53:06.299Z",
   "instalacion": "npm ci + npm run setup desde ZIP: OK",
   "migracionesAplicadas": [
     "202610090001_init",
@@ -21,5 +21,7 @@
   "pruebasSinMutaciones": true,
   "integridadReferencial": true,
   "archivosPrivadosPublicados": 0,
-  "auditorias": 5
+  "auditorias": 5,
+  "archivosNubeIncluidos": true,
+  "redireccionPublicaDesactivada": true
 }

@@ -2,7 +2,7 @@ require('../config.cjs')();
 const fs=require('node:fs');
 const path=require('node:path');
 const bcrypt=require('bcrypt');
-const {Prisma}=require('@prisma/client');
+const {Prisma}=require('../models/prisma-client.cjs');
 const db=require('../models/db.cjs');
 async function seed() {
   const password=process.env.ADMIN_PASSWORD || '';

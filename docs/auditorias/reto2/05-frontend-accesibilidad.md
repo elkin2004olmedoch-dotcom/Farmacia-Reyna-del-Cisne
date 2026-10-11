@@ -4,6 +4,8 @@
 
 Comprobar el flujo catálogo → carrito → login → pedido → historial y administración, con pantallas abiertas conectadas a la persistencia. Las pruebas usan Chrome en 1440×1000 y 375×900, errores simulados y axe-core sobre las nueve pantallas. La ampliación incluye estados, descuentos e imágenes; resultados completos en `docs/pruebas/reto2/`. Se conservan fachada, identidad crema/vino, categorías, mapa, WhatsApp y las 18 referencias iniciales.
 
+Las 14 pruebas de navegador usan Express y SQLite real en una base temporal. La opción de nube está preparada con PostgreSQL y Storage, pero sus pruebas adicionales usan servicios simulados; no se ha desplegado en Render ni conectado a Supabase real. El [alcance de nube](../../pruebas/reto2/nube.json) documenta esa diferencia. Para compartir datos publicados, ambos roles deben abrir la misma aplicación pública; una SQLite local independiente no se sincroniza con ella.
+
 ## Matriz de subpuntos
 
 | Requisito | Implementación | Evidencia de navegador | Resultado |
@@ -59,7 +61,7 @@ El diálogo de estado muestra la secuencia disponible y los eventos registrados.
 
 El editor de producto/campaña permite escoger JPEG, PNG o WebP del equipo. Se anuncia progreso/error, se deshabilita guardar durante carga y se presenta una vista previa de la ruta persistida. Secuencia y AbortController descartan respuestas de selecciones anteriores o de un editor cerrado. La carga no publica por sí sola: guardar el registro enlaza la imagen. Producto exige texto alternativo; campaña con imagen propia también lo exige y permite quitarla para reutilizar la imagen del producto. El límite visual de 2 MB se vuelve a validar en servidor.
 
-La gestión de respaldo no se mezcla con el recorrido de compra: el servidor crea copias privadas automáticamente y ofrece comandos CLI de respaldo/restauración con operación offline, descritos en los informes 02 y 04.
+La gestión de respaldo no se mezcla con el recorrido de compra: en modo SQLite el servidor crea copias privadas automáticamente y ofrece comandos CLI de respaldo/restauración con operación offline, descritos en los informes 02 y 04. En PostgreSQL esos comandos no cubren la base ni Storage; sus respaldos privados se gestionan por separado.
 
 El caso `administración y cliente comparten datos persistidos y actualizan pantallas abiertas` comprueba cambios de producto/promoción, lectura del cliente, filtros/formulario, compra, stock y panel. Los casos ampliados cubren estados, cancelación, descuento e imagen en ambos tamaños. Node comprueba además reconexión, snapshots, cancelación concurrente, migración anterior, seed y respaldo/restauración. Los conteos aprobados proceden de la ejecución completa conservada en evidencia.
 

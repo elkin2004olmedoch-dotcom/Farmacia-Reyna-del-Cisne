@@ -4,7 +4,8 @@ function config() {
   const secret = process.env.JWT_SECRET || '';
   if (secret.length < 32 || secret.startsWith('REEMPLAZAR')) throw new Error('Configura JWT_SECRET con al menos 32 caracteres aleatorios.');
   if (!process.env.DATABASE_URL) throw new Error('Configura DATABASE_URL.');
-  const origins = (process.env.CORS_ORIGIN || '').split(',').map(value=>value.trim()).filter(Boolean);
+  const renderOrigin=/^https:\/\/[a-z0-9][a-z0-9-]*\.onrender\.com\/?$/.test(process.env.RENDER_EXTERNAL_URL || '')?process.env.RENDER_EXTERNAL_URL.replace(/\/$/,''):'';
+  const origins = (process.env.CORS_ORIGIN || renderOrigin).split(',').map(value=>value.trim()).filter(Boolean);
   if (!origins.length || origins.some(value=>value==='*' || !/^https?:\/\/[^/]+$/.test(value))) throw new Error('CORS_ORIGIN debe contener orígenes exactos sin comodines ni rutas.');
   const production = process.env.NODE_ENV === 'production';
   if (production && origins.some(origin=>!origin.startsWith('https://'))) throw new Error('En producción CORS_ORIGIN requiere HTTPS.');

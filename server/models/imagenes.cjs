@@ -4,6 +4,7 @@ const {randomUUID}=require('node:crypto');
 const sharp=require('sharp');
 const {AppError}=require('../middleware/errors.cjs');
 const {FRONTEND_ROOT,MAX_BYTES,contained,uploadsDirectory}=require('../middleware/imagevalidation.cjs');
+const {isCloudStorage,uploadCloudImage}=require('./cloudimages.cjs');
 let processing=0;
 module.exports=async function saveImage({buffer,nombreOriginal},{frontendRoot=FRONTEND_ROOT}={}){
   if(processing>=2)throw new AppError(429,'IMAGE_BUSY','Estamos procesando otras imágenes. Intenta nuevamente en unos segundos.');
@@ -23,10 +24,15 @@ module.exports=async function saveImage({buffer,nombreOriginal},{frontendRoot=FR
       result=await image.rotate().resize({width:1600,height:1600,fit:'inside',withoutEnlargement:true}).webp({quality:85}).toBuffer({resolveWithObject:true});
       if(result.data.length>MAX_BYTES)throw new Error('La imagen procesada excede el tamaño permitido.');
     }catch(_){throw new AppError(422,'IMAGE_INVALID','No se pudo validar la imagen. Usa JPEG, PNG o WebP sin animación, hasta 2 MB y 16 millones de píxeles.');}
+    const name=randomUUID()+'.webp';const imagen='assets/uploads/'+name;
+    if(isCloudStorage()){
+      await uploadCloudImage(imagen,result.data);
+      return {imagen,ancho:result.info.width,alto:result.info.height};
+    }
     const root=await fs.realpath(frontendRoot);const directory=uploadsDirectory(root);
     await fs.mkdir(directory,{recursive:true});
     if(!(process.env.NODE_ENV==='test' && process.env.UPLOAD_DIR) && !contained(root,await fs.realpath(directory)))throw new Error('El directorio de imágenes no es válido.');
-    const name=randomUUID()+'.webp';await fs.writeFile(path.join(directory,name),result.data,{flag:'wx',mode:0o600});
-    return {imagen:'assets/uploads/'+name,ancho:result.info.width,alto:result.info.height};
+    await fs.writeFile(path.join(directory,name),result.data,{flag:'wx',mode:0o600});
+    return {imagen,ancho:result.info.width,alto:result.info.height};
   }finally{processing--;}
 };
