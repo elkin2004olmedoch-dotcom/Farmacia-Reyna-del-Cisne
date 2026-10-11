@@ -1,6 +1,7 @@
 const {AppError}=require('../middleware/errors.cjs');
 const {UPLOAD_PATTERN,MAX_BYTES}=require('../middleware/imagevalidation.cjs');
 const REQUEST_TIMEOUT_MS=8000;
+const MAX_ERROR_BYTES=4096;
 
 function isCloudStorage(){return process.env.IMAGE_STORAGE==='supabase';}
 function storageError(){return new AppError(503,'IMAGE_STORAGE_UNAVAILABLE','No se pudo guardar o consultar la imagen. Intenta nuevamente.');}
@@ -44,11 +45,43 @@ async function cloudImageExists(reference){
   if(!filename(reference) || !isCloudStorage())return false;
   const {origin,bucket}=configuration();
   try{
-    const response=await fetch(origin+'/storage/v1/object/public/'+bucket+'/'+filename(reference),{method:'HEAD',redirect:'error',signal:AbortSignal.timeout(REQUEST_TIMEOUT_MS)});
+    const url=origin+'/storage/v1/object/public/'+bucket+'/'+filename(reference);
+    const signal=AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+    const response=await fetch(url,{method:'HEAD',redirect:'error',signal});
     if(response.status===404)return false;
+    // Some Storage versions return HTTP 400 for an absent object. HEAD has no
+    // error body, so confirm the exact missing-object error before accepting it.
+    if(response.status===400){
+      const detail=await fetch(url,{method:'GET',redirect:'error',signal});
+      try{
+        if(detail.ok)return validImageResponse(detail);
+        if(![400,404].includes(detail.status) || !/^application\/json(?:\s*;|$)/i.test(detail.headers.get('content-type') || ''))throw storageError();
+        const error=await readStorageError(detail);
+        if(error.code==='NoSuchKey' || (String(error.statusCode)==='404' && error.error==='not_found' && error.message==='Object not found'))return false;
+        throw storageError();
+      }finally{if(detail.body && !detail.body.locked)await detail.body.cancel();}
+    }
     if(!response.ok)throw storageError();
-    const bytes=Number(response.headers.get('content-length'));
-    return /^image\/webp(?:\s*;|$)/i.test(response.headers.get('content-type') || '') && Number.isSafeInteger(bytes) && bytes>0 && bytes<=MAX_BYTES;
+    return validImageResponse(response);
   }catch(_){throw storageError();}
+}
+function validImageResponse(response){
+  const bytes=Number(response.headers.get('content-length'));
+  return /^image\/webp(?:\s*;|$)/i.test(response.headers.get('content-type') || '') && Number.isSafeInteger(bytes) && bytes>0 && bytes<=MAX_BYTES;
+}
+async function readStorageError(response){
+  if(!response.body || Number(response.headers.get('content-length'))>MAX_ERROR_BYTES)throw storageError();
+  const reader=response.body.getReader();
+  const chunks=[];let bytes=0;
+  try{
+    for(;;){
+      const {done,value}=await reader.read();if(done)break;
+      bytes+=value.byteLength;if(bytes>MAX_ERROR_BYTES)throw storageError();
+      chunks.push(Buffer.from(value));
+    }
+    const error=JSON.parse(Buffer.concat(chunks,bytes).toString('utf8'));
+    if(!error || typeof error!=='object' || Array.isArray(error))throw storageError();
+    return error;
+  }finally{await reader.cancel();reader.releaseLock();}
 }
 module.exports={isCloudStorage,getPublicImageUrl,uploadCloudImage,cloudImageExists};

@@ -26,6 +26,23 @@ before(async()=>{
     if(mode==='timeout')return;
     if(mode==='redirect'){res.writeHead(302,{Location:origin+'/unexpected'});return res.end();}
     if(mode==='provider-error'){res.writeHead(500,{'content-type':'application/json'});return res.end(JSON.stringify({error:secret+' '+origin}));}
+    if(mode.startsWith('fallback-')){
+      if(req.method==='HEAD'){res.writeHead(400,{'content-type':'application/json'});return res.end();}
+      if(mode==='fallback-redirect'){res.writeHead(302,{Location:origin+'/unexpected'});return res.end();}
+      if(mode==='fallback-existing'){res.writeHead(200,{'content-type':'image/webp','content-length':4});return res.end('webp');}
+      const errors={
+        'fallback-legacy-missing':{statusCode:'404',error:'not_found',message:'Object not found'},
+        'fallback-modern-missing':{code:'NoSuchKey',message:'Object not found'},
+        'fallback-bucket':{statusCode:'404',error:'not_found',message:'Bucket not found'},
+        'fallback-denied':{statusCode:'403',code:'AccessDenied',message:secret+' '+origin},
+        'fallback-invalid':{statusCode:'400',code:'InvalidRequest',message:secret+' '+origin},
+        'fallback-unknown':{statusCode:'404',error:'not_found'},
+      };
+      const body=mode==='fallback-malformed'?'invalid-json':JSON.stringify(errors[mode] || {statusCode:'404',error:'not_found',message:'Object not found',extra:'x'.repeat(5000)});
+      const headers={'content-type':mode==='fallback-html'?'text/html':'application/json'};
+      if(mode==='fallback-oversized-length')headers['content-length']=Buffer.byteLength(body);
+      res.writeHead(400,headers);res.write(body);return res.end();
+    }
     if(req.method==='POST'){
       const chunks=[];for await(const chunk of req)chunks.push(chunk);request.body=Buffer.concat(chunks);
       if(objects.has(req.url)){res.writeHead(400);return res.end('Asset Already Exists');}
@@ -87,6 +104,37 @@ test('Secret key tiene prioridad y autentica solo por apikey; consultas pública
   delete process.env.SUPABASE_SERVICE_ROLE_KEY;await uploadCloudImage(reference(),Buffer.from('no-legacy-key'));
   assert.equal(requests.at(-1).headers.apikey,modernSecret);assert.equal(requests.at(-1).headers.authorization,undefined);
   mode='provider-error';await assert.rejects(uploadCloudImage(reference(),Buffer.from('webp')),safeStorageError);
+});
+
+test('HEAD 400 confirma ausencia con el error de objeto exacto en GET público',async()=>{
+  configured();process.env.SUPABASE_SECRET_KEY=modernSecret;
+  for(const variant of ['fallback-legacy-missing','fallback-modern-missing']){
+    mode=variant;const baseline=requests.length;
+    assert.equal(await cloudImageExists(reference()),false);
+    const calls=requests.slice(baseline);assert.deepEqual(calls.map(call=>call.method),['HEAD','GET']);assert.equal(calls[0].url,calls[1].url);
+    for(const call of calls){assert.equal(call.headers.apikey,undefined);assert.equal(call.headers.authorization,undefined);}
+  }
+  mode='normal';const baseline=requests.length;assert.equal(await cloudImageExists(reference()),false);assert.equal(requests.length,baseline+1);
+});
+
+test('HEAD 400 no confunde falta de bucket, permisos o petición inválida con objeto ausente',async()=>{
+  configured();
+  for(const variant of ['fallback-bucket','fallback-denied','fallback-invalid','fallback-unknown']){
+    mode=variant;await assert.rejects(cloudImageExists(reference()),safeStorageError);
+  }
+});
+
+test('confirmación GET limita errores a 4 KiB y rechaza JSON malformado o contenido ajeno',async()=>{
+  configured();
+  for(const variant of ['fallback-oversized-length','fallback-oversized-chunked','fallback-malformed','fallback-html']){
+    mode=variant;await assert.rejects(cloudImageExists(reference()),safeStorageError);
+  }
+});
+
+test('confirmación GET preserva un objeto aparecido tras HEAD y no sigue redirecciones',async()=>{
+  configured();mode='fallback-existing';assert.equal(await cloudImageExists(reference()),true);
+  mode='fallback-redirect';const baseline=requests.length;await assert.rejects(cloudImageExists(reference()),safeStorageError);
+  assert.equal(requests.length,baseline+2);assert.equal(requests.some(request=>request.url==='/unexpected'),false);
 });
 
 test('clave moderna malformada o Publishable key se rechaza sin respaldo silencioso ni petición remota',async()=>{
