@@ -34,3 +34,4 @@ frontend/assets/uploads/
 **/appsettings.Local.json
 **/appsettings.local.json
 *.env
+.worktrees/
