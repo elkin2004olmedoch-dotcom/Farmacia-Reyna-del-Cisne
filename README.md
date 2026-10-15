@@ -1,5 +1,14 @@
 # Farmacia Reina del Cisne — Reto 2 Full Stack MVC
 
+## Mascotas animadas para el bot
+
+Farmi, Boti y Goti son compañeros pixel art con nueve gestos cada uno. El widget se carga en las páginas públicas y reacciona al carrito, permite cambiar de personaje y ofrece accesos a búsqueda, pedidos, horario y contacto.
+
+- Prueba la demostración autónoma con las instrucciones de [entrega/mascotas-v3](entrega/mascotas-v3/README.md).
+- La vista conjunta animada está en [tres-en-accion.gif](entrega/mascotas-v3/previews/tres-en-accion.gif).
+- Los atlases finales y sus estados están descritos en [manifest.json](entrega/mascotas-v3/sprites/manifest.json).
+- Para regenerar los recursos se necesita Python 3.12 y Pillow: `py -3.12 entrega/mascotas-v3/fuentes/empaquetar_sprites.py --strict`.
+
 Plataforma de farmacia con catálogo, carrito persistente, registro/login, pedidos en base de datos y administración de productos, promociones, proveedores, lotes, inventario, IVA y facturación electrónica SRI. Mantiene la fachada del negocio, identidad crema/vino, ubicación, WhatsApp y las 18 referencias anteriores. **Abre la [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) o [inicia sesión](https://farmacia-reina-del-cisne.onrender.com/cuenta.html).**
 
 **Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite local o PostgreSQL en Supabase, y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.

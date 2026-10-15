@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#13231e">
+  <title>Compañeros · Farmacia Reina del Cisne</title>
+  <link rel="stylesheet" href="demo.css">
+  <link rel="stylesheet" href="demo-responsive.css">
+  <script src="demo.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="#"><span class="brand-cross" aria-hidden="true">✚</span><span>Reina del Cisne<small>FARMACIA · COMPAÑEROS</small></span></a><span class="local-badge"><i></i> Vista previa local</span></header>
+  <main>
+    <div class="intro"><div><p class="eyebrow">UN POQUITO DE COMPAÑÍA</p><h1>Pequeños. Expresivos.<br><span>Siempre a tu lado.</span></h1><p class="lede">Elige a tu compañero de farmacia y juega con sus gestos.</p></div><div class="intro-note"><span aria-hidden="true">✦</span><p>Tres personalidades.<br>Una misma forma de cuidar.</p></div></div>
+    <div class="workspace">
+      <section class="companion-panel" aria-label="Compañero interactivo">
+        <div class="panel-heading"><div><span class="tiny-label">TU COMPAÑERO</span><h2 id="character-name">Goti</h2></div><button type="button" class="icon-button" id="pause" aria-pressed="false" aria-label="Pausar animación">Ⅱ</button></div>
+        <div class="stage" id="stage"><span id="state-label" class="state-label"><i></i> En reposo</span><div class="stage-halo" aria-hidden="true"></div><div class="stage-floor" aria-hidden="true"></div><canvas id="actor" width="760" height="370" tabindex="0" role="button" aria-label="Mascota: pulsa para saltar, arrastra para caminar. Usa las flechas o la barra espaciadora."></canvas><div class="target" id="target" hidden aria-hidden="true"></div><span class="stage-hint">Tócame · arrástrame · hazme saltar</span></div>
+        <div class="character-choices" id="characters" aria-label="Elegir compañero"></div>
+        <div class="character-caption"><p id="personality">Alegre, tranquilo y muy expresivo.</p><span id="asset-status" class="asset-status">Cargando gestos…</span></div>
+      </section>
+      <aside class="chat-panel" aria-label="Demostración del bot"><div class="chat-heading"><span class="assistant-dot" aria-hidden="true">✚</span><div><h2>Tu farmacia, cerquita</h2><p>Prueba cómo reacciona tu compañero</p></div></div><div class="chat-messages" id="messages" role="log" aria-label="Mensajes" aria-live="polite"><div class="message bot">¡Hola! Soy tu compañero de farmacia. Puedo ayudarte a buscar productos o a preparar un pedido. <span>Esta conversación es una demostración local.</span></div></div><div class="quick-actions"><button type="button" data-message="Quiero buscar un producto">Buscar un producto <span>↗</span></button><button type="button" data-message="Quiero preparar mi pedido">Preparar pedido <span>↗</span></button><button type="button" data-message="Quiero consultar el horario">Consultar horario <span>↗</span></button></div><form id="chat-form"><label for="chat-input" class="sr-only">Escribe un mensaje</label><input id="chat-input" name="message" autocomplete="off" maxlength="240" placeholder="Escríbele a tu compañero…"><button type="submit" aria-label="Enviar mensaje">↑</button></form><p class="demo-note">Demo de atención comercial. No consulta inventario real.</p></aside>
+    </div>
+    <section class="motion-panel" aria-labelledby="motion-title"><div class="motion-heading"><div><p class="eyebrow">MÍRALOS EN ACCIÓN</p><h2 id="motion-title">Un gesto para cada momento</h2></div><button type="button" id="play-all" class="secondary-button">▶ Ver todos los gestos</button></div><div class="state-buttons" id="states"></div><p id="action-description" class="action-description">Respira, parpadea y te acompaña mientras navegas.</p></section>
+    <section class="proof-panel" aria-labelledby="proof-title"><div><p class="eyebrow">ANIMACIÓN REAL</p><h2 id="proof-title">Todos sus gestos, en un vistazo</h2><p>La secuencia muestra los fotogramas de cada estado.</p><a id="download-gif" class="text-link" href="#" download hidden>Descargar animación GIF ↗</a><a id="contact-link" class="text-link" href="#" target="_blank" rel="noopener" hidden>Ver todos los fotogramas ↗</a></div><div class="proof-player"><img id="proof-gif" alt="Secuencia de todos los gestos del compañero seleccionado" hidden><p id="proof-pending">Preparando la secuencia de gestos…</p><span id="proof-name">Goti · 9 estados</span></div></section>
+    <footer>Hechos para la Farmacia Reina del Cisne <span>Farmi · Boti · Goti</span></footer>
+  </main>
+  <div id="toast" role="status" class="toast" hidden></div>
+</body>
+</html>

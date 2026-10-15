@@ -1,0 +1,77 @@
+{
+  "ok": true,
+  "checks": [
+    "dynamic store initialization",
+    "three companions with nine integrated states each",
+    "character selection across pages",
+    "real cart.add and cart:changed event reaction",
+    "thinking before response",
+    "correct opening hours",
+    "WhatsApp link",
+    "catalogue query link",
+    "checkout and orders links",
+    "close and Escape",
+    "widget panel and launcher fit 11 phone, tablet, desktop and landscape viewports",
+    "all 9 store pages have no horizontal overflow at those 11 sizes",
+    "store CSP",
+    "no browser errors"
+  ],
+  "responsiveViewports": [
+    [
+      320,
+      568
+    ],
+    [
+      360,
+      640
+    ],
+    [
+      390,
+      844
+    ],
+    [
+      560,
+      800
+    ],
+    [
+      768,
+      1024
+    ],
+    [
+      820,
+      800
+    ],
+    [
+      1024,
+      768
+    ],
+    [
+      1440,
+      900
+    ],
+    [
+      1920,
+      1080
+    ],
+    [
+      667,
+      375
+    ],
+    [
+      844,
+      390
+    ]
+  ],
+  "responsivePages": [
+    "index.html",
+    "catalogo.html",
+    "producto.html",
+    "comparar.html",
+    "checkout.html",
+    "cuenta.html",
+    "pedidos.html",
+    "ayuda.html",
+    "admin.html"
+  ],
+  "fixture": "Existing frontend and final frontend/assets/mascotas resources. Store catalogue fixture is empty; widget uses its real local module and no mocked widget API. Cart addition runs the real cart model in isolated browser storage."
+}

@@ -1,0 +1,1930 @@
+{
+  "schema": "farmacia-companions-1",
+  "generatedAt": "2026-10-15T04:28:26.428691+00:00",
+  "cell": {
+    "width": 192,
+    "height": 208
+  },
+  "complete": true,
+  "characters": [
+    {
+      "id": "farmi",
+      "name": "Farmi",
+      "kind": "Tu pequeño farmacéutico",
+      "color": "#9ad9a2",
+      "personality": "Atento, curioso y siempre listo para ayudarte.",
+      "portrait": "art/farmi-base.png",
+      "atlas": "sprites/farmi.png",
+      "states": {
+        "idle": {
+          "label": "En reposo",
+          "durations": [
+            280,
+            110,
+            110,
+            140,
+            140,
+            320
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/farmi/idle.gif",
+          "sourceSha256": [
+            "9f2659ba5431891dd2cfcae7d1a91a0928da7df72598b8e4f347817e87e3503f",
+            "cc1e4590b1b88c168ea6b986068ecc6ae16c52bd167b95fae4d5091ae17b6833",
+            "9b16b17b975af405244f7ac8a428a7c394e1d3cf2b59501c9ae89e835ee3ed43",
+            "b67b9cbf991474f1871fcc431e70f5c9f0a1fd33c27d09fc661f329d8d9b87a4",
+            "9d6a704761cbd46c94c104baa6a4bd1f65d1b27c0c3fab4cdb16e722df8f69a0",
+            "4e94f279c2e93efa61e7291e9d1aea9a2af3ac9dae565053a02eb0cb2fe1505c"
+          ],
+          "normalizedSha256": [
+            "7eac495690af8081d1433988c5ad9052aa80481a54ae3f71c691b83a26ccefea",
+            "88f04873202b0f0ed45ea3a2cbf755589066f043b8cee8b54cddf0fb93d5c25c",
+            "017ada3597803fa8551a2081264af68e206d280cf3d0a21e756c66d5cde9f8ca",
+            "1de08b8f93b050799cffb7e6de42f403c1d4c9cd2ca06c9dd6987d428d93fe61",
+            "40b0328dc9d96faf0e08c74db970bc468fa4be82489b619d925dd5a85860b3a1",
+            "4154f846c61a7bf6101c89811f76566813d19f70061019f5eb4f919e18fb0f89"
+          ]
+        },
+        "running-right": {
+          "label": "Caminar a la derecha",
+          "durations": [
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            220
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1152,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1344,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/farmi/running-right.gif",
+          "sourceSha256": [
+            "80535b6853e01cee088041aa2f59b0f4546bec8f3153d5337ecbda48b55cffcc",
+            "b6c3f7e976eff7e38a5a5b1b5db4e8fd2dfe4041dc739dc584ad3fe249cad3de",
+            "9d6a0ae1887d43dd81ce4b14bbab8ebb071e06cb2d491a4bf01f7e7ea44f75a2",
+            "a2bfa885b9cdfa44dac36d61b15bdfbb5b23d0caee9bc6f325b9fde7872646dc",
+            "2a1a9d36cf5ad9c6a3ca56ecb2fcdb480d6e2b3a426c7fde6541b78dab7e1a2a",
+            "7b3cc5b8bfb05705eb68853cdc2777f34d083c031389d04028d1ad8c07d0368b",
+            "73d3cbdbd35df2af10f0ef0d35b461fe15312e456f1f643ff184e7851254bced",
+            "a6a2cc7bf35fcc174d3791183d6f60620a52fd306b870bf0a739e5ddb14aec44"
+          ],
+          "normalizedSha256": [
+            "e3cb158d76d5904bd5e0e472762358ee27b6c76b12d9052c1f76a6799d75eb6c",
+            "793679af55b9241f0db129a06036c0426314a42b207f8fb3d69f07a31103d3c8",
+            "7bb4d9ed2abfc36ef8253708147d2a50fadd2b56584b1f5984a3befb5dcecead",
+            "095b6a31ff30727f16eed354c216d1f923fdf65b995765e88266666566487978",
+            "bffe910ec586cfa03c8d1c56a169ad4fd9c5e2ddba8c507d230a968eb2df9b4f",
+            "8a7583baff8090ccd62e8e389858b173b17909d550a0380a2f3839a79fb6833a",
+            "963aa41b640816f12803db9101900a02c1013197ba42db0994b22e7017054fdf",
+            "1a98eb3517c41ad804dfbe7d4a1f6ea917682e6f4a6b8f964bd55de2873766e0"
+          ]
+        },
+        "running-left": {
+          "label": "Caminar a la izquierda",
+          "durations": [
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            220
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1152,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1344,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/farmi/running-left.gif",
+          "sourceSha256": [
+            "8437374e9f26618779ae84a771bd76c2c92b8f7bf3439b33365d31e30cb059c7",
+            "7c0d27076b0032a7b91366b924f9fb297bffb3cff058a1f6ca39cbf96c8e143b",
+            "8287b56e41ef89c6b3736ecdfb31017139b37ecf3ef6cfc03b992f1514825e25",
+            "45e2e73de82d6860f8d7106c496656782f0a2e531865d4a054adb7525d9e899a",
+            "fc09442d4f735907932293fc82ee81c62c7cd4691662e9294b8d802f2d9cf5a4",
+            "f22a2b0aa6bc249593f94dfddf888e384271e7b78313ab7fc2805e3a4a06a7f1",
+            "a622db9241ac35fa411c128c50982bccd0a7de8420c24bf180cfb3b7751069f2",
+            "03d489b0ad635ce29711a58f444b6c2a1acef298aac2448d2c6fd314ff657da2"
+          ],
+          "normalizedSha256": [
+            "2c051e62dc86369155047f786dda9e57505391029041b6e94b63d784ec81c784",
+            "7bd884a94fd2e87bdb65106ffcb7537408f7844fdd5b28d78b2133618de363ba",
+            "7ed57972ab2e03954cbc1ceae937a67780a20806e1a6d09840ef8c4471a56c94",
+            "3fb734bf97d9bd7fbbad1c69d3000016506ae494404677597ef9a5a47e940b9e",
+            "60793ef239f9aaaccaa11714a5f354a624d99da473c67469b7f5db8b4cbd269b",
+            "eba82494c114c19f2fae855f07c000beeaaf085d7206c95dd3ddfdc075f1c1d5",
+            "1edd7ea8e68280cda66e844a9ecabf9240f66ad20788f7b92d92b22ffaf4e0ad",
+            "14613291d8a09e05ebfbbbe0dc88973532e3daf37bf7df97c5958f23bc3dccc8"
+          ]
+        },
+        "waving": {
+          "label": "Saludar",
+          "durations": [
+            140,
+            140,
+            140,
+            280
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/farmi/waving.gif",
+          "sourceSha256": [
+            "f94706bd0677dc5f728387e20b00e1a1249df54eb9ae25a3a9d16ab6f0b6eb0e",
+            "9cb5bc61ddb6ea67cc581ba3715c745f19f55282f7501ed6277fa60bbcc658d9",
+            "d2a6ab5efa08cd028681df2c7e69851170cbbf927918370760c0cc7099072775",
+            "11e0192c12dc087c9dfc19e149696627cf495f616366394b4f30615dbf52ce01"
+          ],
+          "normalizedSha256": [
+            "ef237b17ed3c47d43a236a0ad52f3957d3e6d1023a806eea541764036e7508f6",
+            "24538e2431426a1e1b2bc0775c34130468aa3f4e079db383399837fb7eadadd5",
+            "e7563a83615282644f255b75040ce697240a3258e3a463acc88b1966bf61cfe4",
+            "de4eebc932e56ec5e944b2f8a5db45a9330968f1943150ed0707d6a2b8dec43e"
+          ]
+        },
+        "jumping": {
+          "label": "Saltar",
+          "durations": [
+            140,
+            140,
+            140,
+            140,
+            280
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/farmi/jumping.gif",
+          "sourceSha256": [
+            "2cf15ea00223e142be049fee0711be8daf0bc1edc399191c6e9eb4429303290c",
+            "4688ea30cdf0ea4fe0b4860c319c6381bb2120f4f34736871d348f177791f8ce",
+            "f2c844d92bb4b1fcc29660124698544b3771b7925f1d0c514439a30acbfeed1d",
+            "8ca35f46e7bd1573dc82dcfb8744818d38cf7d42868440b66596d4d38b4438dc",
+            "2afd05ecd5210ab349bb00e20f1188866b015b4118e40fe19cdf31f49e1fb255"
+          ],
+          "normalizedSha256": [
+            "d05a26f31e67f5008b940500c4cb366fb1762fe6531e4f67b8d54a2d2abfe0ac",
+            "84b1c519794d76eb0c807016470f9916e888f6d73fffaded346f91309fb0aff2",
+            "2bcfe80864a0752e452e6cd34a975fe00ddf3dd76a20b2745c7c3520c1764018",
+            "abad608cea12b8ad3526f10340290d5f6721ff0114910381a450555b9b42cb04",
+            "2b913b06c7765cfabee786dec91d8553083b31b6effa2a5f7e9f66e84dfddf3c"
+          ]
+        },
+        "failed": {
+          "label": "Algo salió mal",
+          "durations": [
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            240
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1152,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1344,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/farmi/failed.gif",
+          "sourceSha256": [
+            "2301af532c535eef4c145c32164cce0981599f9bcdb5405a1c9ab0c685c66e64",
+            "9a6c4cf9e6f1d8e590ac9a6a0041552921138fd93d949a43581a3f130e64fa0b",
+            "bc17a60bdc4c7de3e60a8e133c60be7977596bbfe6e086233978682e4200f597",
+            "1f6dc26c9553070e09ecbaedf6a51ce309028d55496569253b7bd38ca7b8e024",
+            "eedb89159a45d5b192278f162958a53c6eb9ba175109003dd934358782d38177",
+            "fdd37cedc6a61f43234210e50b909c58f99d8cad75e7e0e203547a7a58154bac",
+            "703aafaa73107c1b50f74db9824b19c0298fc0a6cb6d7481cdac395051a0272e",
+            "003151055e2f193acce2d6ca9952e2a0907c99d100a824a7d76754bf0ce35052"
+          ],
+          "normalizedSha256": [
+            "fbf69e1ffa475c4b4ad4086bc5a1def7d207d5319ab7012403ac91d84881de8e",
+            "0e2356cba2ebbd5fc8ace6520953794559ca894998395828228a6d214e6a19fc",
+            "b78ec664e78410fd1f0a0d11f4f89777c222e0a8da9ba30d54200d2ef02a3b9a",
+            "91d633c6b461af4056a53eb7432f609d7382fae1ed96ec5cfbd129561e580955",
+            "2f5a1aaa730979d7a41f0905752688741032554b7910990e4efa72070cef2ed6",
+            "5f93ea3f1e76ff5a558c5ef0f4ee36676d1d1a53a2a5ce4b42a19bf57cd97839",
+            "9c77b4823453566ee88abe5be84311969a5c40d6ccdf2f5f87703f52613a4aae",
+            "1eaf54917ca27ded12bd63bada91b4c6a17e91da07d2438b7f3f635b8c8e96d9"
+          ]
+        },
+        "waiting": {
+          "label": "Esperar tu respuesta",
+          "durations": [
+            150,
+            150,
+            150,
+            150,
+            150,
+            260
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/farmi/waiting.gif",
+          "sourceSha256": [
+            "f645afa7c580371c07473a45be50bab16ee1747c04246d504d1f0a4aeaf4fb3b",
+            "645b82c5365a66508869e15d0739a4e244e70890d04b68cd84cf46ba9495a6e4",
+            "6d7ad2ecf8a0ee850c294ace6bd9bfcd61fa9e9b6218d4fc9d5daf6ef2bdc68c",
+            "4816c08ff48a9c3726b8a12461eabe237ab55f6589984359432a30fb6b8c78a2",
+            "6ceb5c650abe4a3c48699aba98df9a06c5b45244b4e405aaf7b9c77c23052d16",
+            "b12b5752dbcea79f032ad20c51f681444a483f1d1210b0b0a061b7ddc54f8c81"
+          ],
+          "normalizedSha256": [
+            "7cd20fcecb62a022dfddaa900cb867092cd70d4b44a51ff01ad3d6aeb723befd",
+            "d66d4103167e768809c545556a300454bd78d474549e1ce757ba0b2a0e79e543",
+            "209852d4281029580e031d6e335c2a5ae7622f8ed32ad423b286b81080736002",
+            "9a056012ead3cb88f4aba47fe07a39af0d22e79301806113922f16b7a28766b1",
+            "d1182cd297b01a5d36446ecba458343fb299b93950ee112f91b82476789cc86e",
+            "1848c78977ff0f910002bdc3283b52c0b690c01ee4fc76c85e4b3265da572430"
+          ]
+        },
+        "running": {
+          "label": "Pensar y trabajar",
+          "durations": [
+            120,
+            120,
+            120,
+            120,
+            120,
+            220
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/farmi/running.gif",
+          "sourceSha256": [
+            "908e424d101b5e49f3d0ded6f7564335574dd6a507bd4397eab54fa48d26b1da",
+            "d6870c4b71b8bc854903d85a1ac753472678412d0e8dc77c83c80c79110191fb",
+            "5f8e234dd87e1922933fa266bf089392f81e53c41c1b6b7d561ca3fe5602cad7",
+            "3edd302ffd9a5688d9fb047118928432ed8c7127ae193acb714c912193ff293a",
+            "9aa05895c32a0a3942bd05168ffab9a7394414e837a6112b152a46692a5c3ca3",
+            "e1f960e875ea775493f13d3ebd5bc6db9a28669b5c5bea139dc8dc4444bcc82b"
+          ],
+          "normalizedSha256": [
+            "3d9f390229c306a64b84e3ea3c3671a34fd3984b637fec322f94ad9027067c54",
+            "42e676fcb9e04f526dcc1d5e4b85519d09476deccc5da2ee82d7da784a479c5a",
+            "6740db58aba3e7b721df561224577469c0604c29fafebbb139e766e5fcc50f2e",
+            "083e8b523a02855b9db51552f9b51b4aef0b7902dc160b4117fb335167ec1282",
+            "422ec204cb36180fbdfc23d31793e8e0aae11f795296fbf946ae6d91a48a84d6",
+            "b6a3d26318aa40bab9af8100e524e044d08fb5d0d03cb0b57d979f94d5e801e2"
+          ]
+        },
+        "review": {
+          "label": "Revisar el pedido",
+          "durations": [
+            150,
+            150,
+            150,
+            150,
+            150,
+            280
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/farmi/review.gif",
+          "sourceSha256": [
+            "4caf589ac07419c0be005a1f2dc8c3f9cc1cfe54436798270343d3d153d3e0ca",
+            "63890039d05c240f593bcc937b3be1791f671f01b0898c8957cdae2dce68154f",
+            "ee6c277a5c4cc781c9c60f880c2e60609efb4c9b1812d8a7c3a9d3d40b146dc0",
+            "fee60b33e6c1c0000f95d5549a4bf9118ccefd4329269fe34821fdbc03f5f210",
+            "f59b6063debefe5251f9d1a888b8288a8c1591a48b04578bf26a5bceb482a54d",
+            "374e799b59b69a1e0751160c15589f3a080d9cb647851693048221e039c0172e"
+          ],
+          "normalizedSha256": [
+            "a094ff9168475b8196ebf037d6db777a39aeec7d7c5ce83a8b980b0dd0bd4e8c",
+            "08dab00b0b1808f72bc29b442f021c7d40a9b3170654d44c5abc8d67a6c098c3",
+            "bf2bb1948832d266b4b3a8224d1c46d98e8c7196a1f9cfd2d2369654630bbec1",
+            "e4e5ebaa2551f8beb9afd2bac91bd6c8af9d54ba7126920f8f74a407be9686b7",
+            "bdf0828ca2ae5f076e88957226039f68f559cd71b021143a6f731c59c5625f1d",
+            "26f0f3d5a2b269e0a7e7bd540b5d870361b225d16c6065d29eb28aef235795cd"
+          ]
+        }
+      },
+      "complete": true,
+      "contactSheet": "previews/farmi/contacto.png",
+      "allStatesGif": "previews/farmi/todas.gif",
+      "registration": "runs/farmi/qa/registration.json",
+      "registrationOk": true,
+      "atlasSha256": "6d8617c82d718f1975c1d71bc3f01f05ed4ab7d6149c189bdbb5e39a58a8e37a",
+      "jumpTransitionGif": "previews/farmi/salto-transicion.gif"
+    },
+    {
+      "id": "boti",
+      "name": "Boti",
+      "kind": "Tu frasquito de confianza",
+      "color": "#ffb8b6",
+      "personality": "Cariñoso y organizado. Le encanta preparar pedidos.",
+      "portrait": "art/boti-base.png",
+      "atlas": "sprites/boti.png",
+      "states": {
+        "idle": {
+          "label": "En reposo",
+          "durations": [
+            280,
+            110,
+            110,
+            140,
+            140,
+            320
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/boti/idle.gif",
+          "sourceSha256": [
+            "bd9a8b35a4750fd3f184e1254b0aecbc54d49f956eac05f0d8e143bdcc65e20d",
+            "85bda02a135d8f5e8872a1a2bebc917e07ff42f45d69f3853d862390d5fa1f5f",
+            "0fdfb9a98e3b47ec2bc285412f955d67213fa8b6a79db5ec6e2de94b8190d6e0",
+            "cfe60c1b85079f7b88e41e377d6493b6eb8194ae9b76eefe08d2ba8b536fac92",
+            "7114a49dd2595e04a932715e91bfe9e2cd95b73a290f86e48dd479cf7023dadb",
+            "e6d6b6a097ecf37f54471e63e4da507b2c78243de05fe23bad8ea487ad97fdb9"
+          ],
+          "normalizedSha256": [
+            "e067d337209e771d6d3157839e787a5ef785f285bfa456f7ff3594fb768a042d",
+            "4baab57ad56623c65474d3420568709f658d6d7a0ac9d5bc39b6c3bfc5c65d61",
+            "304df989afd0dd775fddd34fb509ba1f7597f4189b4753c4e43449082a4789f9",
+            "2359d236919c0fb3082d08db8b2ee6b05c5f3b2b6cf490b86857b1ab8c355745",
+            "90eb2a9e66598e2b510f3db36f45c1f100008c929c7c5e3bc9052c8f9671e145",
+            "1608d978d496e30d65ca17e3f0391b04330cd39c044f06d4b9c18cdb07980c27"
+          ]
+        },
+        "running-right": {
+          "label": "Caminar a la derecha",
+          "durations": [
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            220
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1152,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1344,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/boti/running-right.gif",
+          "sourceSha256": [
+            "8fd3baa8eb1379be108a08a4052fa3fdbcf42f4a9990957a5c7c5666da7e1b29",
+            "f977c12afa5609f49d57c0785474ca7f302ddb4bfb4380876d6229c8307a1cc9",
+            "3f3d6c475d269885cf958449d788f8e543664982c745d7383bea468a864ca0eb",
+            "f4fe92af0a9093ee5d73d609f737a0a53b1a45b036c0df1d37765af267d3af22",
+            "f4b6cd747ed2f207ecbc03e14711d8c1daeaafb358b2dced24826efbb28b11bd",
+            "78253f763eedbaa58ab5ae91adae3f730f9d57dfe776279aab90fa260e0e0640",
+            "55b4f7451bfcf06ad2f01a4ccbd6cd68856438f7724f590a69f5ce990509f14c",
+            "e1e5b2a93caacaf6e0837f2a6bd50def695a8cc539680d9be7c11827b8a5c390"
+          ],
+          "normalizedSha256": [
+            "0c55cbcab9862b104a7a8094323cf8c0aa9653afb36c567cd547f10375ecfe2b",
+            "50558771746d75e642f1af21246d45ebc5ac97169b567905575dc0552552268b",
+            "da246a6517408e4bb9e8e0f7f5e53a31b6fe0031fefa55455d82871023a086a2",
+            "56815230e4b2d5aca947aadb0bc4a9101078a7be71b8e3b7ce4f311c29f5a456",
+            "f8c374c38bcc9117a4ec5c0adbdafcbce80ff77feeef747aa7059b1a2d78e7dd",
+            "ab188d2e029ca1cbbc8a874ddf2aeee740984609e3a3c8c16811a2487968962d",
+            "d4e64edb8eb534d94db943420772a9f709ae142437b25effafb7095ae5d9d9d6",
+            "2700f41c39772f873a9035335bee06a1fac6ded8632e823e17edcc6f81a9bae9"
+          ]
+        },
+        "running-left": {
+          "label": "Caminar a la izquierda",
+          "durations": [
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            220
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1152,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1344,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/boti/running-left.gif",
+          "sourceSha256": [
+            "423ed4f5bd447da507305f29d7484fa48e6846da9c058cb5bfd74546327fc6c6",
+            "bf361ed4abb6ae76db0c7a7426906d63e898abf2202e2990a4ac64ae5667db71",
+            "f1ac2335dcbd0ff18e6baa324b8e8559fa123b6537681c09cfd801f322638dbf",
+            "fa48a6d5cac678d37e5e80cc04405e34938645c48ea056a26ddfd263ec13b616",
+            "5fa24f0179b27f6ecd7d66dc3ff30e096a7e59162523cf1bfc914a23828a9d8f",
+            "73d1600026e412a76209d4e445746bdbb4717fd29ace0378f6db0ea78d9771d4",
+            "5f7b350862e86f13ee2abd13cf3bedb0bd6f3e262e3586c7c8a8757054d7f527",
+            "462042599f039f6adc8a46e69fb09c2f235be2ec15575792c412935e4e6ceb0f"
+          ],
+          "normalizedSha256": [
+            "4ea1527e189f81792c4588db06c78aa0191ad88db9035cf1a490a0135f30b91b",
+            "09dfc47992c69b927fba1d068f5b06f64f2457ee168a4856e3a959502cbe1f3e",
+            "085999e56c95f6f346700381b51eb5a28bef30c8298edec9e53f7795bace8251",
+            "b24bfee10accdff923e44bf9b1be60bacf2df34731af24650e47bebd8025e374",
+            "49ecf25a5de5939eb6076a6d0b69cf011c2a0b1374fea26e4feb13e5eb09a0fb",
+            "73de6fb9272c4b57e88089c0ce5e83b3f585d4eba60656fa1297c1718ab04e57",
+            "4b57311b34421a2c846f2c01b093088d9c0afdd4a99691590f56156a252c1fee",
+            "6949e2f8381e7d6f94aea785fc6268a77703c0683685a70c39d5eaee4cc2c757"
+          ]
+        },
+        "waving": {
+          "label": "Saludar",
+          "durations": [
+            140,
+            140,
+            140,
+            280
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/boti/waving.gif",
+          "sourceSha256": [
+            "bd3749b1138e90e7adfa110bf6c169ca4ec635ed5efa99521c9bcf14210767b1",
+            "ac32000fd6b5733f54df681363c17055abb63b18fa9c16f734f2d01c1059c33e",
+            "143344539bb69618e85760c5164b3fe8478ac588a9437a04c1503866f14abaa7",
+            "bad692c32a0f92ecafe1965ead017da88695767d843b5aafbf9fb7dfa232d5d4"
+          ],
+          "normalizedSha256": [
+            "8c0f664b11ce431cc38765d4c5bfb110c616db94f055b9549949c2a17c2f441d",
+            "15b49f79cc30020de84313be1b842f6101eda614e27a0ce85916109b0083d291",
+            "677afbd0f8c77b30101659eb7b14655581de351aaa42c3126940a0dfce981641",
+            "374708a15e6fa9d6ce81f6c541a701ad5fee02855b5e45ca16a37af980a348cd"
+          ]
+        },
+        "jumping": {
+          "label": "Saltar",
+          "durations": [
+            140,
+            140,
+            140,
+            140,
+            280
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/boti/jumping.gif",
+          "sourceSha256": [
+            "33909ac47813e7f615046aaaed6a38872c901af7c382e92dd4cc23d016ccbb0a",
+            "61c9d838cf351a6959d23039e2e079dd42479a65e2c61cf0f2e53f81a8de41cf",
+            "12e1ea94bc9ff6a6d0c4787aedaaa09257cee40de91e74e48fb184e801fd6fd1",
+            "abad99eeff79d959300ab2c4f241690a9afe8ec847a24b31878cf4efda33e9f3",
+            "eafd0baaf04a11d5476b325ffc0679230df27f75832b9115bc56c58e9b6ad1dc"
+          ],
+          "normalizedSha256": [
+            "745ff8c12d882ed4075de20b8f4b906ac13989c95b40acb9e87eb0fd7f1236bd",
+            "c8f7c869c6d1bdffdc1c6844443594dc892eeeaa741ce651816081bf6046e05a",
+            "a1d64bccd6ed0c06746465687a8388011650f56cef806a5bb8f4eec1f3e317d7",
+            "512cce6a6c27fbface55fc544cc44dfd404bf3c4b592a25b2e34f27bab7f18ae",
+            "262417360ca34b55ba6542c7fecab176ce8aa8fbe802dd189dd3e82e4694a402"
+          ]
+        },
+        "failed": {
+          "label": "Algo salió mal",
+          "durations": [
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            240
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1152,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1344,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/boti/failed.gif",
+          "sourceSha256": [
+            "9c2e5e2dc251577c28dbe7632ece9537d065720bd57c4687c8a2e2f211add136",
+            "98c74ed8cd2d123ae6016ad8f9c895a1cc74b67413c82c4e2a2894bbf8cc13b9",
+            "2f9d991d4833577ec3ea1fd43a5cceea9e58f846f0f27977886871e4ff693ed1",
+            "578d3febfc08b224d3e6184c28ca448ea40c75a0b0726f47c5f5833b1eace05b",
+            "5d76b089f5ce37959c809a598f8b2c32ece031ebf26517343742097345b393ed",
+            "bfcd292aa4e03e5a7d0ec585d4df155b3021d9ba2bc355f878686a0f891c3876",
+            "aa733469e760c4d1079fafe34b45e26e489867fba4bda10267ae84d9e3865020",
+            "af0cf76dd3f8831d3e8ec5e7302c3323cc97b09afad4b7a422d5ece7cbf68293"
+          ],
+          "normalizedSha256": [
+            "a6b75067583d125ee44f4e9c8e7b304675d2f12e3ebbf01ae57e48758a04a768",
+            "fe440db57b321c71e4aab1a15aaa2589e87401a53a71b4792123c906587fb0ea",
+            "913386050611806561360529d3fdf5e5faec66f161f3827066cb80b04ca4b46a",
+            "3f83b5137c2e922718eecaaa0dc6c7d77057b6b0be3672e85efb4bf19c3f15d0",
+            "0fac17e913a18ddaaaf443c2407d0a1504d7d93df36f8f55de9955a58bad536e",
+            "6f2f4745c7e117e40213ac79b0f9ac037ea37981356e4f0b1c78694fc8d90c9e",
+            "7eef1fb2c04ee944ed17e1d8801c99a4bc400de52d9a37f36c1950a181e8a29e",
+            "4e2b76309c189b81d1d56b3663039c88032dafbba37e133758a41212981f6ec0"
+          ]
+        },
+        "waiting": {
+          "label": "Esperar tu respuesta",
+          "durations": [
+            150,
+            150,
+            150,
+            150,
+            150,
+            260
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/boti/waiting.gif",
+          "sourceSha256": [
+            "dac72b8e51fdbf390565bd6a25a802ead46fc8a4c1e2d84bbf41c02f1dfc2132",
+            "6f40d0d32d6fe7ef9fcff4823e300a589537ed0ad8708dfcee55c19b0ea5b0bb",
+            "cfc76b020ecffc8c27e9c6294f648ec52ea27d30c3ac2dbf398deb2b49ba7ea4",
+            "460a83446d7dfad2c2a5800b6082d2c44689749af2e92eb8ea6e75d308acfd76",
+            "f49b8460d2385c268eb77c4e12f6d9ced21e2ac340a258aaebc44b729f9f156f",
+            "4e34add72e1b8eca2ab40dd3c42a007e2f1afc60d729c77c7879e11d20aba37a"
+          ],
+          "normalizedSha256": [
+            "c810baa7a89229a036e4954056910b17681867c3d779acf6be54456ff914c896",
+            "bf85222af375df495a2deabfec0d21ce0686c7de82c869798c189a63dbc44bba",
+            "5269af07450a4cb812a13bf704dc516accd625db4c85654134133f69e51bc6a5",
+            "f62bebbfad9cad7b8a077b0e16c6fae6bfb802731d878b749b796e59b58c1704",
+            "0f88ff3da58d8edbef11a2b0adccdddebd00c8c6ad6437ebdabba2b48142418e",
+            "10b979beb322039c29dcb70821bc48656634816b78f1318a5be799dfe0e127ae"
+          ]
+        },
+        "running": {
+          "label": "Pensar y trabajar",
+          "durations": [
+            120,
+            120,
+            120,
+            120,
+            120,
+            220
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/boti/running.gif",
+          "sourceSha256": [
+            "0494cbbc2d054f04c3f6da0d692653eccbc48057eb734d576b01721bb8bbfab9",
+            "534c4201a6cefe6bd4cfe7d13a5af3d13bcfdcb073c1fe45bbbfb1be85bc55c9",
+            "a279544f9fd861b2441e26143b585c89e08b0288516aad212b36d78c6d753334",
+            "c38f109e1c18887a06500acee974d84c0f869615bd5550ceb52c16b970666cb6",
+            "773f180fda57c0863c0ecb40dc1a73474f7c2d1ca224c93fd8af94f17f258043",
+            "fa2cd40667c245c7b90d15d168557f51bc50e724f180fed8d0d9a66a65a7422e"
+          ],
+          "normalizedSha256": [
+            "f59c43c216ec34ce9eb9da0a5727a99aed2d45e494aa2c2ff94d84427fd256ad",
+            "e55e71cb37d05177aa6ae7b71b626adf9925244b337f843014c697eaacad787d",
+            "902385ac047988dd76461d1e334e768703e1b210891f1f92e9cc30e1bba272ab",
+            "7dde9bbed25f2c9ed367b11c1fe6ac8684084026f071d3409167b6e3af59e1a9",
+            "ce497ba3e0c39076fdd3ae7a226ac03e4d70d6f08723f488af524b028546fba4",
+            "23ed302949d3c8340c28055a4cf0350df9866f873434f0a17c4a95836732934d"
+          ]
+        },
+        "review": {
+          "label": "Revisar el pedido",
+          "durations": [
+            150,
+            150,
+            150,
+            150,
+            150,
+            280
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/boti/review.gif",
+          "sourceSha256": [
+            "ab62b4908012c7173b26893ca575f7d9129b0b41867ec0bc0c4e9dafbf43b7c8",
+            "1f763fa887cfa523b6a9a684fd1130b5cc0bbafd87fbaeef964f36dbee5d022c",
+            "aa8cbdaffcc961bc288e6dda15b895977859765abcc77ca6928bac422e9132ff",
+            "547bdeecfc9795f6e563005c6362ab59fea74305eaf2f21d2d73201b617b86fe",
+            "442865c164d181372f3514691a8192e3e5f3462a0773a2c31511c0ff8a5c418f",
+            "2363c4c7658c4411897db60ad476f9c5bf722a638b9616d41c465a3138d8e830"
+          ],
+          "normalizedSha256": [
+            "d62bb18de2e4cbebde3b8e376483600ab254cf4df057470e38dfc8a2cfb88141",
+            "e243959b6d85b9780a3bd49c0da71c7260b36f2c465d288a346dbd508ad1548d",
+            "d2b8bbab3dee8e3d7464de6571869924f5bbfcba9cecd2e2cc3d42fd05e3ab6c",
+            "7545a30c3c02984e738d348ff5786a9988affd55c7773855e66a066975227bc2",
+            "2144248855ab9b6efa85e0f1b0b6d3928e60384fe34de32d51840c4f417b56de",
+            "2f4236af88a6fc0893d211fe8b88a672c58e4132043754387f7586e15907ea06"
+          ]
+        }
+      },
+      "complete": true,
+      "contactSheet": "previews/boti/contacto.png",
+      "allStatesGif": "previews/boti/todas.gif",
+      "registration": "runs/boti/qa/registration.json",
+      "registrationOk": true,
+      "atlasSha256": "ecc6ec344f646778ac1f3d6e2133c4ac214d606e14db81438dafca6aa23efbe2",
+      "jumpTransitionGif": "previews/boti/salto-transicion.gif"
+    },
+    {
+      "id": "goti",
+      "name": "Goti",
+      "kind": "Una gotita de buena energía",
+      "color": "#8fddf2",
+      "personality": "Alegre, tranquilo y muy expresivo.",
+      "portrait": "art/goti-base.png",
+      "atlas": "sprites/goti.png",
+      "states": {
+        "idle": {
+          "label": "En reposo",
+          "durations": [
+            280,
+            110,
+            110,
+            140,
+            140,
+            320
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 0,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/goti/idle.gif",
+          "sourceSha256": [
+            "1c8dd0013b9cad2ff0330a08652fb2f1135339598985cbb3a0225dc78de101e1",
+            "315ef10334724afebad5b1d69c80cca525a0d1e0012064c91698cb59c9952754",
+            "c1037d9700c30639d858357f555e6d989a68905731b59ab2c9bb06909c8c0f10",
+            "4afd164feaea240721941bd55cf9cec9c8aa95a330fff73ec3a44fccc2d7229d",
+            "bf6cfbb6a6ddcec2a1df150f988ce6132d7b4b330b7ca07287667f50f37a02e5",
+            "6908ad2fa5307a5bfe3ec9e3f55053421365752d375f8f85f164bbd1461a549f"
+          ],
+          "normalizedSha256": [
+            "6c92c56689e1bc9fd262cfe7875005de41b16b074ce33f9bc14e221dcb37a81f",
+            "6441d844202e44ea5ce717d9202eb9c03b6c086e4bbbaf89b2224c958522bd00",
+            "a00ef82fb59ff0a55a8772b638db44281d264e127c0f1ed313dbe67d8ec1dd68",
+            "c668e66629a30209eaa5a38435dda95603200e92a935178267e6006ffde9cf66",
+            "5c6326f4844928c1d200eba35ae2703f1cda656aab484580f0f5ffadc77b35b0",
+            "54682650552d88a2a0c271a6881e6a76287269fc3e9bfa53dfb2c5ec67e0d3ae"
+          ]
+        },
+        "running-right": {
+          "label": "Caminar a la derecha",
+          "durations": [
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            220
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1152,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1344,
+              "y": 208,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/goti/running-right.gif",
+          "sourceSha256": [
+            "0daec3c8258989319c52b702e6218f33024b8804617b55719ef0c18ca750f4f5",
+            "d12cef6e197003236c66b25e3e54587dc66594b3fa90aa4df421545ea5166654",
+            "450e004229bf47dddb38ff6ed40f7a0483c372bb506ca7bc3c082df707f6683b",
+            "5c28951d7c93c850112c33a687fbab081cba43a64842ce55ca477b886e3e52c5",
+            "d08cbb4e20869c3b61627dabc8451a120efdc9681aae41b6790cfe44d1b1d25d",
+            "738132b94b2e9ee87be759c7a4f4430224a2a1259168cec7cab06173ac5c4a3d",
+            "818bdf0053af2c166c3cced106eb071a4a597ed16f21728089486b2199a5e4d6",
+            "a7928973b9b2470b7a530312a75f164e64699877108d388159b057060b1775f4"
+          ],
+          "normalizedSha256": [
+            "8ba9cd11b01877c2de358874a477474aa98164f17320cd23feb73cde5be4f4e3",
+            "5a01cdc32fcec13cdc4cab79f7b58dfb1de5c01fc713bca7330b35825125a1b5",
+            "99fded97d371bb62bf0d72e8f081dfa3ec0ca80bad05417e00273c55433b3b09",
+            "3e50481b69347abb1defcf20e088b92362073aaf13cdf7fd8a199821e7b3c4d8",
+            "4c25c668cda6ad3b13719e9754a63f1b1ffe5951bafc7ca414ba6f257c9439e7",
+            "3175b85eb098b38712b6cd3da0649172027ef58f395ce5c7c5c0bdaed864329c",
+            "72b61e8190941bfd8b4b7d249c441776b41d9119559beab9b4a1e45642ad4c06",
+            "d93f6ef160b7d3f2570ffcb9b6108676790ca2e851869e97df153494dc54ec3d"
+          ]
+        },
+        "running-left": {
+          "label": "Caminar a la izquierda",
+          "durations": [
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            120,
+            220
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1152,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1344,
+              "y": 416,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/goti/running-left.gif",
+          "sourceSha256": [
+            "14bd7150e2886ccea12cc20ac00f1213cc62c18f77af3cf278df444f1c6fa3a4",
+            "e093977e061dbdf37b1b53f96a28696e197f3e6898a48a8b831680baa165a3db",
+            "bdcc863fbb523ef7dd4d5e2da0ece4cf115c2fdb5feedd4bb13b6ecd8b654a80",
+            "12586d6c36eaf66e0200b7f762ca5996e694d7b0aeea25d6e5850c600d2a73fd",
+            "d08d7d2a4aa44155f03fb2bd0e5e8ac6364eab79fde62e30798a0135b3fdc07b",
+            "2454f7c836074218b1c3065c3edec5cc66cfa8b689292d90db36a7cbf72d2066",
+            "e3922686e3d861c62667b9df27091ca35f069975a7e99d7416ba1cbd1d55535b",
+            "d5374dd3cbae8186ac316cfc291e369243b7124eb25c44af865a31c031df23ed"
+          ],
+          "normalizedSha256": [
+            "201755daa913faede7a11046ed9fdba64ab3894306f35a355e04790dd5388ea8",
+            "7a7be209ba1610dda07eaf76dd7a22d8512529944f9546db8319f0817afd57b0",
+            "2fe6ca0dfa5ad81e13c5799c399794dc3431138e6ad5b0afed69db15dd6eeca9",
+            "1c225e8340881f46b48a34888b0a9c2bfac71a1c948712c95dd7b7d92c134e90",
+            "95780c225b27ee5b179b35481f51c910dbf51de45e0a147fec712987d5a5a030",
+            "056ba9518b2530133988d6377e740b3b6758775245bcfb2d107df748ca75fe15",
+            "3ca741c0f58026fa4c9aa2f592fc4e80fc89ae7f939158e1c6a75c14ce352c89",
+            "6be829586c82c03b32001fb0d2435f13fdfe7080bc3265db3e5b758523e51854"
+          ]
+        },
+        "waving": {
+          "label": "Saludar",
+          "durations": [
+            140,
+            140,
+            140,
+            280
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 624,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/goti/waving.gif",
+          "sourceSha256": [
+            "c6bbee6ac1067bb1b5762295e8ebd56461fdd3d085efaa8de8dc3d63553d5f16",
+            "3dcfe260f24a27a70210bcecc4cdbcdc04733c8861025393394de7bfa64e3d6f",
+            "8cf973656dc727beda128dbc63b100f0291a9a76cc48cf0e3d8431d895a85fab",
+            "2c8f63d4bf90b00e3f874546e85de86ee0507bab46160964a623cfbc9f6cf6f1"
+          ],
+          "normalizedSha256": [
+            "83b101cce0507f51cbdff18581a8ee15e51ffa8891a65fbc9094418fd756f791",
+            "73ca24b639836f3f9d4db4b5309bfbf419b2704ef03de0bbc0b20aa0771eda3f",
+            "3b60a7528801b48a51fa44b58fb371857eee45c5d60fb54702667482e218a675",
+            "1c1f64c28f8ef7b5ae729decb88af58f636c04a07e6df6dae7479657dbf9f61b"
+          ]
+        },
+        "jumping": {
+          "label": "Saltar",
+          "durations": [
+            140,
+            140,
+            140,
+            140,
+            280
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 832,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/goti/jumping.gif",
+          "sourceSha256": [
+            "849639333530a432c6ebae7fc70af5e73fc80bae082ca24ebcc3ee7a7e0c95ff",
+            "3d51de9fddfb400b55452e0751e75cb9a0f1cbc0b9d57e1743bc5cdfa944fbf7",
+            "915454ac8537643973a88bf3c2a999adcf0bdb45be85bc7673886f4e49b2543c",
+            "67c8ee5ef4ecfab0e4490c4c58aca952c4c0520d414bce7a4cfe1d361e55fd62",
+            "5cb4ac98a24e6e8e6c58e394b757cf90edc7ba48487a11552da61801b2d3d479"
+          ],
+          "normalizedSha256": [
+            "d3c231b365dc8a3cf37cec1371053141790e1c29e2a439178f62882c2b712cf6",
+            "f1fcb0fe433754fa059b9ceeedd217350cf3d11dcbf8c3fdeb59797488689a30",
+            "1bace8e82f98d7cd5ab40d63f09336e8eae18777c1f1d589e380ae4e8ab64089",
+            "5146422f4bd8b9a142c84d2a1964269da2720430870a44b5519bd204455a0a21",
+            "049a3a0af96b60959ad2f85a083605ccbfaf8c96ded02c56547ebffd50478c79"
+          ]
+        },
+        "failed": {
+          "label": "Algo salió mal",
+          "durations": [
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            140,
+            240
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1152,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 1344,
+              "y": 1040,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/goti/failed.gif",
+          "sourceSha256": [
+            "729c0a96a664239366a5e4909ecb7e683a354a96aa4ff1f224363a7bae91ff34",
+            "418b4b803091d259ab4a0f66095f68a5dfba2a6b28450021aaf326f2144f20d8",
+            "125d00327259fa2809d0e00d4b6d7b06c5c8a69c7f2f40260179a03b5382105b",
+            "81bff4d86dfa4e45a677908ccd655d46cd9ee9a84c0af3941a5ac426c88b7052",
+            "459b9b20323dabc6d6db701b41466427da835573a3d611e40be8d6c5831a30c0",
+            "0ac665069c69f4299c42b0f4add8a0c521054f10bef267cf19d53c389db4a50e",
+            "37bcd61d84fc9f5a59e2f6ae5c461bd1434cea380202625c8a23c94a63bcac2a",
+            "b1c484d65f8859412c4d0171c27754cd697e0432c8133db3eb8281715df532a2"
+          ],
+          "normalizedSha256": [
+            "84837ed85a871f5b039e8f465b9b3741aae5f5a33f0e28fbfe7e8a7d3858c97e",
+            "c4b425b5577678966d5f71a44f3ba3bf72dc6105364bc1a88c6471419cd0e581",
+            "44e2f500556c75e050c3f9c537ebc6b0a1ee537c0aded485748117a4faf146dd",
+            "12473b7f0c82bc4b538b68a0a2a8aa21faa29ba47387d03044fe5859271aaacb",
+            "7147e194d24614c986169f93d45556c392058a2278ed34a8668810f4d389aaa4",
+            "4ceabc6e69d6ab7141ca06994e80cdf57a1da315959e529dc0291e854059ca12",
+            "036e8b46a2579c10b52d362843d52f2f89192a8d4328ac8b00d281bc1c45018d",
+            "83e880c8faf4eb9ade4df29149e71cc2a2bcaa1a9aed8a9356fd9790fb31ee23"
+          ]
+        },
+        "waiting": {
+          "label": "Esperar tu respuesta",
+          "durations": [
+            150,
+            150,
+            150,
+            150,
+            150,
+            260
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1248,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/goti/waiting.gif",
+          "sourceSha256": [
+            "c7e455a95d3c011ed8025771bf6e7c32fb355c113901848353a963386d3c2c29",
+            "a2d50c5ca43a8ad30f34748fec587cd95c7227f46395820e893b0d43616d832f",
+            "91a14fad6693e6620749e50017930c75cbe369d007e7019e0acaf4f1968c42ec",
+            "5814a121648fa7cb1bb0765a384e5813936146358b04607db816b4ee1a72216c",
+            "140c9a5c403fb8287a15f12def9347f54aead0532c83fb8a88aef11843444f7f",
+            "3841af048f92471f0dba0f17eb85d32ec9f033204719616e39c3219fa4f0311f"
+          ],
+          "normalizedSha256": [
+            "602cb5c4e400f44e85c16a444600ba680c3d265a1a479367c524f750abd067ba",
+            "97cfbf7090787f3e821a831077758d8fa05ac19ba3b14a934b9eff57d85fecef",
+            "44ea055e79e6312cbf4481a0c836ab916885ab229e667226de1b62bbfd4d9f17",
+            "87219782a066149fb3780e8df112d49c3414a8e17d2081b8d8063fe684e9f438",
+            "dd43b56f856bda5943fe6948b66928bdef81a00efec7015d0e1a948bff7722b1",
+            "20a4196f6f44d1efc8199a0c089a1e74fc645aae896b44e8687a29fb37ec8a9f"
+          ]
+        },
+        "running": {
+          "label": "Pensar y trabajar",
+          "durations": [
+            120,
+            120,
+            120,
+            120,
+            120,
+            220
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1456,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/goti/running.gif",
+          "sourceSha256": [
+            "aa5dd7d1ade0ba6ea410663cda244d1977c78a0f2c4016b3e42a3260cc621c78",
+            "ed7bc69d148575428ada092d0ef3aed707e9a53197bf31bb2a9692ae0f6f8be9",
+            "b59eda3b91742913abce65f4077c119cdec3e82c709f8b8589f96b4cd2288d83",
+            "2ddf3f0ec8a39dc84275a09610bb642fa7ff3c6a63a20103a2608c2f6d2cc91a",
+            "fcb38599e122341406f451cb5353f02ce9a50494c73df96caf41769be1185253",
+            "09cff03b3921ae11e6b2a77cdd88dc60baa0fa723a862f987a6f3a5deac91cfd"
+          ],
+          "normalizedSha256": [
+            "219a16054f043998f454e36bf3fbff736a5a9b0e27124519094d6f2ae19e4ef4",
+            "b8ff4d97c2e37cd04ad12432ff4475055b37682cef6dd80ecafb1fc542c4501c",
+            "2e4efce1eddbeb289c6e46784f3155c1f6a963317f38acf33e67fc3d4933c76e",
+            "958d2e3b8223cd78f748a37166c3ee93311b90efac47273b020b34d307508c90",
+            "b34ffaf9a124dae67816f763a3787a72077f5b6374296ddf555b4f2ae243a526",
+            "ced16f56b2bb78f3df789faaab7aa3c3bbe76a9e9169c03d9e0b46dbf1c6c210"
+          ]
+        },
+        "review": {
+          "label": "Revisar el pedido",
+          "durations": [
+            150,
+            150,
+            150,
+            150,
+            150,
+            280
+          ],
+          "frames": [
+            {
+              "x": 0,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 192,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 384,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 576,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 768,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            },
+            {
+              "x": 960,
+              "y": 1664,
+              "width": 192,
+              "height": 208
+            }
+          ],
+          "gif": "previews/goti/review.gif",
+          "sourceSha256": [
+            "a86b05cfa213c95548f4aa0f56ec31c8b63b5e99638e9dafcb29542be2c39b89",
+            "18b7d2dfc98026359b72fdb1f140dc95d4e99af4ce1fea6108a34325dbbd841e",
+            "2b26e448e14f74d145534541d1e89fa1f7f54f27b632e731d6d3a451a413ee99",
+            "1a259f42e63eebcaf9572b3c7cf2807c6e23e78a1d49fe2d9902fc8e22566740",
+            "f97c4909b9f450b4b97ae3d009664dac1446db2bf75825b99bfda9a1494f272b",
+            "def0c1d02ae074d12ce4f19cd6cd728e975ec1a229ff604378195c52738a6503"
+          ],
+          "normalizedSha256": [
+            "0cab34e595a74ac3ff6cecb1a3cc6d7ba4d5ca91d41e264f201fd86593ab07bb",
+            "da7fd12eb4cf3134873d974eb63a7ec247fe9dc286e5275c43f577c2456a6022",
+            "70e30bc23a943245ebba9e81132aee935d239d4a88df518c7e1c888f37ead96c",
+            "c8c68ac312f486f8ea4e06181876ac0c6f01daaad3f2acb1a1a66dd02cffda4d",
+            "0fd6e2e8b7e01d12d94c68cc7f41e6d13e4bc1864564165780070d3efa3ee686",
+            "725ea34488da8d3b1e83daa7449a06b6ce0bb4d630a37c697b8ec2f95c6b7b30"
+          ]
+        }
+      },
+      "complete": true,
+      "contactSheet": "previews/goti/contacto.png",
+      "allStatesGif": "previews/goti/todas.gif",
+      "registration": "runs/goti/qa/registration.json",
+      "registrationOk": true,
+      "atlasSha256": "9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+      "jumpTransitionGif": "previews/goti/salto-transicion.gif"
+    }
+  ],
+  "comparisonPreview": "previews/tres-companeros.png",
+  "issues": []
+}
