@@ -3,6 +3,7 @@ import './ecuador.js';
 export const administration={
   summary:()=>request('/admin/resumen'),
   table:(name,page=1)=>request(['proveedores','lotes','movimientos'].includes(name)?`/admin/${name==='movimientos'?'inventario/movimientos':name}?page=${page}&pageSize=20`:`/admin/tablas?tabla=${encodeURIComponent(name)}&page=${page}&pageSize=20`),
+  async products(){const items=[];let page=1,total=Infinity;while(items.length<total){const data=await request(`/admin/tablas?tabla=productos&page=${page++}&pageSize=100`);items.push(...data.items);total=data.total;if(!data.items.length)break;}return items;},
   saveProduct:(values,id)=>request('/productos'+(id?'/'+encodeURIComponent(id):''),{method:id?'PUT':'POST',body:values}),
   removeProduct:id=>request('/productos/'+encodeURIComponent(id),{method:'DELETE'}),
   savePromotion:(values,id)=>request('/promociones'+(id?'/'+encodeURIComponent(id):''),{method:id?'PUT':'POST',body:values}),

@@ -10,6 +10,7 @@ import {dashboardView,dashboardLoadingView,dashboardErrorView} from '../views/ad
 import {watchUpdates,preserveFocus} from './updates.js';
 import {imageController} from './images.js';
 import {billingController} from './billing.js';
+import {adminCompanionController} from './admin-companion.js';
 
 const editableSections=['productos','promociones','proveedores','lotes','movimientos'];
 const sectionForms={productos:'product-form',promociones:'promotion-form',proveedores:'supplier-form',lotes:'lot-form',movimientos:'movement-form'};
@@ -137,6 +138,7 @@ export async function adminController() {
   for(const button of document.querySelectorAll('[data-state-close]'))button.addEventListener('click',()=>stateDialog.close());
   for(const button of document.querySelectorAll('[data-editor-close]'))button.addEventListener('click',()=>dialog.close());
   await render();
+  adminCompanionController({refresh:()=>render({silent:true})});
   const refresh=watchUpdates(()=>render({silent:true}),{canRefresh:()=>auth.isAdmin && !document.querySelector('dialog[open]') && !document.querySelector('#admin-area [aria-busy=true]')});
   dialog.addEventListener('close',()=>{lotRequest++;openingId++;productImage.reset();promoImage.reset();if(!auth.isAdmin || !dialog.isConnected)return;(previousFocus?.isConnected?previousFocus:document.getElementById('admin-create'))?.focus();void refresh();});
   stateDialog.addEventListener('close',()=>{if(!auth.isAdmin || !stateDialog.isConnected)return;if(stateFocus?.isConnected)stateFocus.focus();void refresh();});
