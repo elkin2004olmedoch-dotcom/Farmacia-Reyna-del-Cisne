@@ -4,7 +4,10 @@ __pycache__/
 *.log
 .publish/
 .playwright-mcp/
-entrega/
+entrega/*
+!entrega/mascotas-v3/
+!entrega/mascotas-v3/**
+entrega/mascotas-v3/**/__pycache__/
 node_modules/
 .env
 .env.*

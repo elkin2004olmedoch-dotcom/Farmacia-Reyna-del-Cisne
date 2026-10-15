@@ -1,0 +1,70 @@
+{
+  "ok": true,
+  "complete": true,
+  "characterStates": [
+    {
+      "id": "farmi",
+      "states": [
+        "idle",
+        "running-right",
+        "running-left",
+        "waving",
+        "jumping",
+        "failed",
+        "waiting",
+        "running",
+        "review"
+      ]
+    },
+    {
+      "id": "boti",
+      "states": [
+        "idle",
+        "running-right",
+        "running-left",
+        "waving",
+        "jumping",
+        "failed",
+        "waiting",
+        "running",
+        "review"
+      ]
+    },
+    {
+      "id": "goti",
+      "states": [
+        "idle",
+        "running-right",
+        "running-left",
+        "waving",
+        "jumping",
+        "failed",
+        "waiting",
+        "running",
+        "review"
+      ]
+    }
+  ],
+  "testedCharacter": "boti",
+  "statesAvailable": [
+    "idle",
+    "running-right",
+    "running-left",
+    "waving",
+    "jumping",
+    "failed",
+    "waiting",
+    "running",
+    "review"
+  ],
+  "checks": [
+    "three companions and every available state",
+    "persistent selection",
+    "animated pixels",
+    "pause",
+    "walking movement",
+    "chat and thinking",
+    "mobile layout",
+    "no browser errors"
+  ]
+}

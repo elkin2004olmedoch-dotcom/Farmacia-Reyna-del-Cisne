@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "checks": [
+    "dynamic store initialization",
+    "three companions with nine integrated states each",
+    "character selection across pages",
+    "real cart.add and cart:changed event reaction",
+    "thinking before response",
+    "correct opening hours",
+    "WhatsApp link",
+    "catalogue query link",
+    "checkout and orders links",
+    "close and Escape",
+    "mobile bounds",
+    "store CSP",
+    "no browser errors"
+  ],
+  "fixture": "Existing frontend and final frontend/assets/mascotas resources. Store catalogue fixture is empty; widget uses its real local module and no mocked widget API. Cart addition runs the real cart model in isolated browser storage."
+}

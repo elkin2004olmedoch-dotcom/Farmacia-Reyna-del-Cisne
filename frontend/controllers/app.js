@@ -12,6 +12,7 @@ async function initialize() {
   const page=document.body.dataset.page;
   if(auth.isAdmin && ['account','checkout','orders'].includes(page)){location.replace(page==='orders'?'admin.html?tabla=pedidos':'admin.html');return;}
   layoutController();contactController();
+  if(page!=='admin' && !auth.isAdmin)import('./mascota.js').then(({mascotaController})=>mascotaController()).catch(()=>{});
   try{await controllers[page]?.();}catch(error){message(error.message,true,true);document.querySelectorAll('[data-loading]').forEach(el=>el.textContent='No se pudieron cargar los datos. Intenta nuevamente.');}
 }
 initialize();
