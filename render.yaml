@@ -3,6 +3,8 @@ services:
     name: farmacia-reina-del-cisne
     runtime: node
     plan: free
+    branch: main
+    autoDeployTrigger: commit
     buildCommand: npm ci --include=dev && npm run setup:production
     startCommand: npm start
     healthCheckPath: /api/salud
