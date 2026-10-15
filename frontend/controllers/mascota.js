@@ -5,6 +5,7 @@ const STORED_MOTION='farmacia-motion';
 function stored(key){try{return localStorage.getItem(key);}catch(_){return null;}}
 function remember(key,value){try{localStorage.setItem(key,value);}catch(_){}}
 function cartCount(){try{const mvc=JSON.parse(localStorage.getItem('farmacia-mvc-carrito')||'{}');const local=JSON.parse(localStorage.getItem('farmacia-reina-cart')||'{}');return [...Object.values(mvc),...Object.values(local?.items||{})].reduce((sum,value)=>sum+(Number.isInteger(value)&&value>0?value:0),0);}catch(_){return 0;}}
+function pageContext(){const path=location.pathname.split('/').pop()||'index.html',page=document.body.dataset.page,section=location.hash.slice(1),map={'index.html':page==='home'?'home':'home','catalogo.html':'catalog','producto.html':'product','comparar.html':'compare','checkout.html':'checkout','cuenta.html':'account','pedidos.html':'orders','ayuda.html':'help'};if(path==='index.html'&&['servicios','promos','ubicacion','contacto','featured-title'].includes(section))return section==='promos'?'promotions':section==='ubicacion'||section==='contacto'?'contact':'home';return map[path]||({'home':'home','catalog':'catalog','product':'product','compare':'compare','checkout':'checkout','account':'account','orders':'orders','help':'help'}[page]||'home');}
 
 /** A small, local store-navigation helper. Messages never leave this module. */
 export async function mascotaController(){
@@ -15,7 +16,7 @@ export async function mascotaController(){
   const root=host.attachShadow({mode:'open'});
   root.append(style,responsiveStyle);
   const template=document.createElement('template');
-  template.innerHTML=`<div class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">TU COMPAÑERO DE FARMACIA</span><h2 id="title">Goti te acompaña</h2><p>Ayuda para navegar y preparar tu compra</p></div><button class="close" id="close" aria-label="Cerrar ayuda" type="button">×</button></header><div class="preferences"><label>Compañero<select id="character"><option value="farmi">Farmi</option><option value="boti">Boti</option><option value="goti">Goti</option></select></label><button id="motion" type="button" aria-pressed="false">Pausar movimiento</button></div><div class="messages" id="messages" role="log" aria-label="Ayuda de la farmacia" aria-live="polite"></div><nav class="shortcuts" aria-label="Accesos de ayuda"><button type="button" data-intent="productos">Buscar producto</button><button type="button" data-intent="carrito">Mi carrito</button><button type="button" data-intent="horario">Horario</button></nav><form id="form"><label for="input" class="sr-only">¿Qué necesitas?</label><input id="input" maxlength="180" autocomplete="off" placeholder="¿Qué necesitas?" required><button type="submit" aria-label="Enviar consulta">↑</button></form><p class="local-note">Guía local de la tienda · tus mensajes no se envían</p></section><div class="bubble" id="bubble" role="status" hidden></div><button class="avatar" id="avatar" type="button" aria-label="Haz saltar a Goti"><canvas id="canvas" width="192" height="208" aria-hidden="true"></canvas></button><button class="launcher" id="launcher" type="button" aria-expanded="false" aria-controls="panel"><span class="online" aria-hidden="true"></span><span id="launcher-label">¿Te ayudo?</span><span aria-hidden="true">↗</span></button></div>`;
+  template.innerHTML=`<div class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">TU COMPAÑERO DE FARMACIA</span><h2 id="title">Goti te acompaña</h2><p>Ayuda para navegar y preparar tu compra</p></div><button class="close" id="close" aria-label="Cerrar ayuda" type="button">×</button></header><div class="preferences"><label>Compañero<select id="character"><option value="farmi">Farmi</option><option value="boti">Boti</option><option value="goti">Goti</option></select></label><button id="motion" type="button" aria-pressed="false">Pausar movimiento</button></div><div class="messages" id="messages" role="log" aria-label="Ayuda de la farmacia" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Preguntas rápidas de esta sección"></nav><form id="form"><label for="input" class="sr-only">¿Qué necesitas?</label><input id="input" maxlength="180" autocomplete="off" placeholder="¿Qué necesitas?" required><button type="submit" aria-label="Enviar consulta">↑</button></form><p class="local-note">Guía local de la tienda · tus mensajes no se envían</p></section><div class="bubble" id="bubble" role="status" hidden></div><button class="avatar" id="avatar" type="button" aria-label="Haz saltar a Goti"><canvas id="canvas" width="192" height="208" aria-hidden="true"></canvas></button><button class="launcher" id="launcher" type="button" aria-expanded="false" aria-controls="panel"><span class="online" aria-hidden="true"></span><span id="launcher-label">¿Te ayudo?</span><span aria-hidden="true">↗</span></button></div>`;
   root.append(template.content.cloneNode(true));document.body.append(host);
   const find=selector=>root.querySelector(selector);
   const canvas=find('#canvas'),context=canvas.getContext('2d');
@@ -25,6 +26,38 @@ export async function mascotaController(){
   let manifest=null,state='idle',frame=0,elapsed=0,remaining=Infinity,lastTime=0,offset=0;
   let replyTimer=null,bubbleTimer=null,refreshTimer=null,requestVersion=0;
   let lastCartCount=cartCount();
+  const quickQuestions={
+    home:[['¿Qué productos tienen?','productos'],['¿Cómo hago mi pedido?','carrito'],['¿Dónde queda la farmacia?','ubicacion']],
+    catalog:[['Buscar un producto','productos'],['Ver cuidado personal','categoria:cuidado'],['Ver mamá y bebé','categoria:bebe'],['Comparar productos','comparar']],
+    product:[['¿Qué información tiene este producto?','detalle'],['¿Cómo agrego al carrito?','agregar'],['¿Puedo comparar alternativas?','comparar']],
+    promotions:[['¿Cómo aplican los descuentos?','promociones'],['Ver productos en oferta','productos'],['Consultar disponibilidad','whatsapp']],
+    compare:[['¿Qué debo comparar?','comparar'],['Buscar otro producto','productos'],['Revisar mi carrito','carrito']],
+    checkout:[['¿Cómo cambio cantidades?','cantidades'],['¿Cómo completo mi pedido?','pedido'],['Hablar con la farmacia','whatsapp']],
+    account:[['¿Cómo creo mi cuenta?','registro'],['¿Para qué necesito una cuenta?','cuenta'],['Comprar sin cuenta','invitado']],
+    orders:[['¿Cómo reviso el estado?','estado pedido'],['¿Necesitas ayuda con una entrega?','whatsapp'],['Volver al catálogo','productos']],
+    help:[['¿Cuál es el horario?','horario'],['Contactar por WhatsApp','whatsapp'],['Buscar un producto','productos']],
+    contact:[['¿Cuál es el horario?','horario'],['Abrir ubicación','ubicacion'],['Contactar por WhatsApp','whatsapp']],
+  };
+  let currentContext=pageContext();
+  let currentSignature=pageContext();
+  function productName(){return document.querySelector('#product-detail h1')?.textContent.trim()||document.querySelector('h1')?.textContent.trim()||'este producto';}
+  function contextSignature(){const context=pageContext();return context==='product'?`${context}:${productName()}`:context;}
+  function refreshQuickQuestions(){
+    currentContext=pageContext();
+    currentSignature=contextSignature();
+    const options=[...(quickQuestions[currentContext]||quickQuestions.home)];
+    if(currentContext==='product'&&document.querySelector('#product-detail h1'))options[0]=[`Info de ${productName().slice(0,25)}`,'detalle'];
+    const nav=find('#shortcuts');nav.replaceChildren();
+    for(const [label,intent] of options){const button=document.createElement('button');button.type='button';button.setAttribute('data-quick-question',intent);button.textContent=label;button.addEventListener('click',()=>runQuickQuestion(intent));nav.append(button);}
+  }
+  function runQuickQuestion(intent){
+    if(intent.startsWith('categoria:')){location.href=`catalogo.html?category=${encodeURIComponent(intent.split(':')[1])}`;return;}
+    if(intent==='agregar'){const target=document.querySelector('#detail-add-button, #detail-add-form, [data-add]');target?.scrollIntoView({behavior:'smooth',block:'center'});target?.focus();}
+    if(intent==='carrito'){const target=document.querySelector('.shop-cart');target?.setAttribute('aria-label','Abrir mi carrito');}
+    if(intent==='comparar'){document.querySelector('#compare-picks')?.scrollIntoView({behavior:'smooth',block:'center'});}
+    const actions={productos:'Quiero buscar productos',carrito:'Quiero revisar mi carrito',horario:'¿Cuál es el horario?',ubicacion:'¿Dónde queda la farmacia?',comparar:'Quiero comparar productos',promociones:'¿Cómo funcionan las promociones?',agregar:'¿Cómo agrego este producto al carrito?',detalle:'¿Qué información tiene este producto?',cantidades:'¿Cómo cambio las cantidades de mi pedido?',pedido:'¿Cómo completo mi pedido?',registro:'¿Cómo creo una cuenta?',cuenta:'¿Para qué necesito una cuenta?',invitado:'¿Puedo comprar sin cuenta?','estado pedido':'¿Cómo reviso el estado de mis pedidos?',whatsapp:'Quiero contactar por WhatsApp'};
+    send(actions[intent]||intent);
+  }
 
   function image(src){if(!images.has(src)){const value=new Image();value.src=new URL(src,ASSETS).href;images.set(src,value);}return images.get(src);}
   function character(){return manifest?.characters.find(item=>item.id===selected);}
@@ -55,6 +88,7 @@ export async function mascotaController(){
     bubbleTimer=setTimeout(()=>{find('#bubble').hidden=true;},4000);
   }
   function open(value){
+    refreshQuickQuestions();
     find('#panel').hidden=!value;find('#launcher').setAttribute('aria-expanded',String(value));
     find('#launcher-label').textContent=value?'Cerrar ayuda':'¿Te ayudo?';
     if(value){find('#bubble').hidden=true;setState('waving',{loops:1});find('#input').focus();}
@@ -69,6 +103,17 @@ export async function mascotaController(){
   const whatsapp={label:'Hablar con la farmacia ↗',href:'https://wa.me/593979275988',external:true};
   function answer(text){
     const normalized=text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');
+    const context=pageContext();
+    if(/informacion tiene este producto|info de |detalles del producto/.test(normalized)&&context==='product')return{state:'review',text:`${productName()}. ${document.querySelector('#product-detail .shop-lead')?.textContent.trim()||'Revisa su descripción y presentación en esta ficha.'} Confirma la disponibilidad con la farmacia.`,actions:[{label:'Ver ficha del producto',href:'#product-detail'},whatsapp]};
+    if(/agrego.*carrito|añadir.*carrito/.test(normalized)&&context==='product')return{state:'review',text:'Elige la cantidad en esta ficha y pulsa «Añadir al carrito». Si el producto requiere receta, coordina la revisión con el farmacéutico.',actions:[{label:'Ir a cantidad y añadir',href:'#product-detail'},whatsapp]};
+    if(/comparar|alternativas/.test(normalized)&&context==='product')return{state:'review',text:`Puedes comparar ${productName()} con otros productos: vuelve al catálogo, marca hasta cuatro opciones y abre Comparar.`,actions:[{label:'Ver productos similares',href:'catalogo.html'},{label:'Abrir comparación',href:'comparar.html'}]};
+    if(/descuento|promocion|oferta/.test(normalized)&&context==='promotions')return{state:'review',text:'Las promociones vigentes aparecen en esta sección y el descuento se refleja en los productos participantes. Consulta disponibilidad y precio final con la farmacia.',actions:[{label:'Ver promociones',href:'#promos'},whatsapp]};
+    if(/cambiar cantidades|cantidades/.test(normalized)&&context==='checkout')return{state:'review',text:'En cada producto del carrito usa + o − para ajustar unidades. El resumen y el total se actualizan antes de completar el pedido.',actions:[{label:'Ir al contenido del carrito',href:'#checkout-items'}]};
+    if(/completo mi pedido|comprar sin cuenta|invitado|\bpedido\b/.test(normalized)&&context==='checkout')return{state:'review',text:'Revisa los productos y cantidades, continúa para completar los datos de entrega y coordina el pedido con la farmacia. Si hace falta, inicia sesión en este paso.',actions:[{label:'Revisar productos y cantidades',href:'#checkout-items'},{label:'Continuar con mi pedido',href:'#checkout-next'},whatsapp]};
+    if(/completo mi pedido|pedido/.test(normalized)&&context==='checkout')return{state:'review',text:'Primero revisa las cantidades del carrito y pulsa «Continuar» para completar tus datos y coordinar el pedido con la farmacia.',actions:[{label:'Revisar productos y cantidades',href:'#checkout-items'},{label:'Continuar',href:'#checkout-next'},whatsapp]};
+    if(/creo una cuenta|necesito una cuenta/.test(normalized)&&context==='account')return{state:'review',text:'La cuenta de esta tienda te permite conservar tus datos y revisar los pedidos vinculados. Pulsa «Crear cuenta» en esta pantalla para registrarte.',actions:[{label:'Crear cuenta',href:'#show-register'},{label:'Iniciar sesión',href:'#login-panel'}]};
+    if(/revisar el estado|estado de mis pedidos/.test(normalized)&&context==='orders')return{state:'review',text:'En esta sección aparece el estado de tus pedidos cuando iniciaste sesión con la cuenta usada al comprarlos. Si necesitas coordinar la entrega, escribe a la farmacia.',actions:[{label:'Ver mis pedidos',href:'#orders-list'},whatsapp]};
+    if(/categor|cuidado personal|mama y bebe/.test(normalized)&&context==='catalog')return{state:'review',text:'Puedes filtrar el catálogo por categoría y ordenar por precio. También puedes buscar por nombre o descripción.',actions:[{label:'Ir a filtros',href:'#contenido'}]};
     if(/dosis|sintoma|tratamiento|me duele|que (tomo|tomar)|embaraz|diagnostic/.test(normalized))return{state:'waiting',text:'Para orientación sobre síntomas, dosis o tratamientos, consulta al profesional de la farmacia. Puedo ayudarte a encontrar el catálogo y los datos de contacto.',actions:[whatsapp]};
     if(/horario|abren|cierran|hora/.test(normalized))return{state:'review',text:'La farmacia atiende de lunes a sábado, de 08:00 a 19:00. Puedes confirmar la atención por WhatsApp antes de visitarnos.',actions:[{label:'Ver ubicación',href:'index.html#ubicacion'},whatsapp]};
     if(/whatsapp|telefono|contact|ubicacion|direccion/.test(normalized))return{state:'waving',text:'Puedes escribir a la farmacia al +593 97 927 5988. Allí te ayudarán a confirmar disponibilidad, pago y entrega.',actions:[whatsapp,{label:'Ver ubicación',href:'index.html#ubicacion'}]};
@@ -122,7 +167,10 @@ export async function mascotaController(){
   find('#character').addEventListener('change',event=>setCharacter(event.target.value));
   find('#motion').addEventListener('click',()=>setPaused(!paused));
   find('#form').addEventListener('submit',event=>{event.preventDefault();send(find('#input').value);});
-  root.querySelectorAll('[data-intent]').forEach(button=>button.addEventListener('click',()=>send(button.dataset.intent)));
+  refreshQuickQuestions();
+  const questionObserver=new MutationObserver(()=>{const next=contextSignature();if(next!==currentSignature||find('#shortcuts').children.length===0)refreshQuickQuestions();});
+  questionObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
+  window.addEventListener('hashchange',refreshQuickQuestions);
   window.addEventListener('farmacia:cart',()=>{
     const count=cartCount();
     if(count>lastCartCount){setState('jumping',{loops:1});sayBubble('¡Producto añadido! Puedes revisarlo en tu carrito.');}
