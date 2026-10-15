@@ -31,6 +31,8 @@ La tienda ocupa todo el ancho del escritorio y adapta tarjetas/formularios a pan
 
 ## Instalación y ejecución
 
+Para presentar el sistema con un recorrido breve de administrador a comprador, sigue la [guía de demostración del Reto 2](docs/DEMOSTRACION-RETO2.md).
+
 ~~~powershell
 npm ci
 npm run setup
