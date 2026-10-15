@@ -1,0 +1,38 @@
+/* Mobile viewport, notch and touch refinements for the floating store helper. */
+:host{right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px))}
+.avatar,.launcher,.close,.preferences button,.shortcuts button,form button{touch-action:manipulation}
+
+@media(max-width:600px){
+  .panel{max-height:calc(100dvh - 158px - env(safe-area-inset-top,0px));width:min(360px,calc(100vw - 24px))}
+  .messages{min-height:72px;max-height:min(220px,34dvh)}
+  .preferences{gap:6px;padding-inline:12px}
+  .preferences button{font-size:10px}
+  .shortcuts{padding-inline:12px}
+  .shortcuts button{flex:1 1 auto;min-height:36px}
+  form{margin-inline:12px}
+  input{font-size:16px}
+  .local-note{margin-bottom:max(10px,env(safe-area-inset-bottom,0px))}
+}
+
+@media(max-width:360px){
+  :host{right:max(8px,env(safe-area-inset-right,0px));bottom:max(8px,env(safe-area-inset-bottom,0px))}
+  .avatar,.avatar canvas{width:70px;height:76px}
+  .launcher{gap:6px;padding-inline:10px;font-size:10px}
+  .panel{bottom:122px;width:calc(100vw - 16px);max-width:calc(100vw - 16px);border-radius:16px}
+  .panel header{padding:13px}
+  .panel h2{font-size:17px}
+  .preferences{font-size:9px}
+  .preferences select{max-width:82px}
+  .bubble{right:78px;max-width:calc(100vw - 104px);width:170px}
+}
+
+@media(max-height:520px) and (orientation:landscape){
+  .avatar,.avatar canvas{width:66px;height:72px}
+  .launcher{min-height:32px;padding-block:5px}
+  .panel{position:fixed;left:max(10px,env(safe-area-inset-left,0px));right:max(10px,env(safe-area-inset-right,0px));bottom:calc(78px + env(safe-area-inset-bottom,0px));width:auto;max-width:none;max-height:calc(100dvh - 92px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));border-radius:14px}
+  .panel header{padding:10px 13px}
+  .preferences{padding-block:7px}
+  .messages{min-height:54px;max-height:20dvh;padding-block:8px}
+  .shortcuts{padding-bottom:7px}
+  .local-note{margin-block:5px 7px}
+}

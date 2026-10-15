@@ -55,11 +55,16 @@ const fs = require('node:fs');
     assert.match(await page.locator('#messages').innerText(), /disponibilidad/, 'chat gives the local catalogue demonstration response');
     await page.evaluate(() => MascotaFarmacia.setCharacter('goti'));
     await page.screenshot({ path: path.join(output, 'demo-escritorio.png'), fullPage: true });
+    const responsiveViewports = [[320,568],[360,640],[390,844],[560,800],[768,1024],[820,800],[1024,768],[1440,900],[1920,1080],[667,375],[844,390]];
+    for (const [width,height] of responsiveViewports) {
+      await page.setViewportSize({ width, height });
+      const layout = await page.evaluate(() => ({ documentWidth: document.documentElement.scrollWidth, bodyWidth: document.body.scrollWidth, actionRight: document.querySelector('#play-all').getBoundingClientRect().right }));
+      assert.ok(layout.documentWidth <= width && layout.bodyWidth <= width && layout.actionRight <= width + 1, `demo fits ${width}x${height}: ${JSON.stringify(layout)}`);
+    }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.screenshot({ path: path.join(output, 'demo-movil.png'), fullPage: true });
-    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'mobile has no horizontal overflow');
     assert.deepEqual(issues, [], 'no uncaught browser errors');
-    const result = { ok: true, complete: characterStates.complete, characterStates: characterStates.states, testedCharacter: 'boti', statesAvailable: states, checks: ['three companions and every available state', 'persistent selection', 'animated pixels', 'pause', 'walking movement', 'chat and thinking', 'mobile layout', 'no browser errors'] };
+    const result = { ok: true, complete: characterStates.complete, characterStates: characterStates.states, testedCharacter: 'boti', statesAvailable: states, responsiveViewports, checks: ['three companions and every available state', 'persistent selection', 'animated pixels', 'pause', 'walking movement', 'chat and thinking', '11 phone, tablet, desktop and landscape viewports without horizontal overflow', 'no browser errors'] };
     fs.writeFileSync(path.join(output, 'prueba-demo.json'), JSON.stringify(result, null, 2));
     console.log(JSON.stringify(result, null, 2));
   } finally {

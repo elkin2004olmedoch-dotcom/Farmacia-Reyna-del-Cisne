@@ -24,6 +24,7 @@ Los nueve botones permiten probar reposo, saludo, salto, caminata en ambas direc
 - `previews/{personaje}/contacto.png`: todos los fotogramas, etiquetados.
 - `previews/empaquetado.json`: comprobación del empaquetado.
 - `index.html`, `demo.css`, `demo.js`: reproductor sin dependencias ni recursos de red.
+- `demo-responsive.css`, `frontend/assets/mascotas/widget-responsive.css`: ajustes fluidos para móviles estrechos, tabletas, escritorio, muescas y pantallas horizontales de poca altura.
 
 Los originales se conservan. Antes de componer el atlas, el empaquetador aplica una sola transformación a cada fila, compartida por todos sus fotogramas. Usa el primer fotograma de cada estado para igualar el tamaño entre reposo y salto y fijar una línea de suelo común. Calcula un tamaño que deje espacio a todas las poses y a la altura del salto, sin recortar ni volver a centrar cada pose por separado. `registration.json` deja constancia de los límites y de la transición al salto.
 

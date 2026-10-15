@@ -65,11 +65,33 @@ const server=http.createServer((request,response)=>{
     await page.getByRole('button',{name:'¿Te ayudo?'}).click();
     const bounds=await page.locator('farmacia-mascota #panel').boundingBox();
     assert.ok(bounds.x>=0&&bounds.x+bounds.width<=390&&bounds.y>=0&&bounds.y+bounds.height<=844,'widget fits mobile viewport');
+    const responsiveViewports=[[320,568],[360,640],[390,844],[560,800],[768,1024],[820,800],[1024,768],[1440,900],[1920,1080],[667,375],[844,390]];
+    for(const [width,height] of responsiveViewports){
+      await page.setViewportSize({width,height});
+      const panel=await page.locator('farmacia-mascota #panel').boundingBox();
+      const launcher=await page.locator('farmacia-mascota #launcher').boundingBox();
+      assert.ok(panel.x>=0&&panel.x+panel.width<=width&&panel.y>=0&&panel.y+panel.height<=height,`helper panel fits ${width}x${height}: ${JSON.stringify(panel)}`);
+      assert.ok(launcher.x>=0&&launcher.x+launcher.width<=width&&launcher.y>=0&&launcher.y+launcher.height<=height,`helper launcher fits ${width}x${height}`);
+    }
+    const responsivePages=['index.html','catalogo.html','producto.html','comparar.html','checkout.html','cuenta.html','pedidos.html','ayuda.html','admin.html'];
+    const pageOverflow=[];
+    for(const route of responsivePages){
+      await page.goto(`${origin}/${route}`,{waitUntil:'domcontentloaded'});
+      for(const [width,height] of responsiveViewports){
+        await page.setViewportSize({width,height});
+        const overflow=await page.evaluate(()=>({documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth}));
+        if(overflow.documentWidth>width||overflow.bodyWidth>width)pageOverflow.push({route,width,height,...overflow});
+      }
+    }
+    assert.deepEqual(pageOverflow,[],'store pages fit phone, tablet, desktop and landscape widths without horizontal overflow');
+    await page.goto(`${origin}/catalogo.html`,{waitUntil:'domcontentloaded'});
+    await page.setViewportSize({width:390,height:844});
+    await page.getByRole('button',{name:'¿Te ayudo?'}).click();
     await page.screenshot({path:path.join(root,'previews/widget-tienda-movil.png'),fullPage:false});
     await page.setViewportSize({width:1365,height:900});
     await page.screenshot({path:path.join(root,'previews/widget-tienda-escritorio.png'),fullPage:false});
     assert.deepEqual(errors,[],'no browser exceptions');assert.deepEqual(csp,[],'works under store Content Security Policy');
-    const result={ok:true,checks:['dynamic store initialization','three companions with nine integrated states each','character selection across pages','real cart.add and cart:changed event reaction','thinking before response','correct opening hours','WhatsApp link','catalogue query link','checkout and orders links','close and Escape','mobile bounds','store CSP','no browser errors'],fixture:'Existing frontend and final frontend/assets/mascotas resources. Store catalogue fixture is empty; widget uses its real local module and no mocked widget API. Cart addition runs the real cart model in isolated browser storage.'};
+    const result={ok:true,checks:['dynamic store initialization','three companions with nine integrated states each','character selection across pages','real cart.add and cart:changed event reaction','thinking before response','correct opening hours','WhatsApp link','catalogue query link','checkout and orders links','close and Escape','widget panel and launcher fit 11 phone, tablet, desktop and landscape viewports','all 9 store pages have no horizontal overflow at those 11 sizes','store CSP','no browser errors'],responsiveViewports,responsivePages,fixture:'Existing frontend and final frontend/assets/mascotas resources. Store catalogue fixture is empty; widget uses its real local module and no mocked widget API. Cart addition runs the real cart model in isolated browser storage.'};
     fs.writeFileSync(path.join(root,'previews/prueba-widget.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
   }finally{await browser.close();server.close();}
 })().catch(error=>{console.error(error);server.close();process.exitCode=1;});
