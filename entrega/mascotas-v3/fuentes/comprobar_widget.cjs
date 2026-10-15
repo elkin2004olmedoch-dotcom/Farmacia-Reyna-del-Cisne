@@ -77,6 +77,7 @@ const server=http.createServer((request,response)=>{
     const pageOverflow=[];
     for(const route of responsivePages){
       await page.goto(`${origin}/${route}`,{waitUntil:'domcontentloaded'});
+      if(route!=='admin.html')assert.equal(await page.locator('header .shop-cart svg').count(),1,`${route} keeps the shopping cart icon`);
       for(const [width,height] of responsiveViewports){
         await page.setViewportSize({width,height});
         const overflow=await page.evaluate(()=>({documentWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth}));
