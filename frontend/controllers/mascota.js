@@ -1,12 +1,10 @@
-import {events} from '../models/events.js';
-import {cart} from '../models/cart.js';
-
 const ASSETS=new URL('../assets/mascotas/',import.meta.url);
 const PEOPLE={farmi:'Farmi',boti:'Boti',goti:'Goti'};
 const STORED_CHARACTER='farmacia-companion';
 const STORED_MOTION='farmacia-motion';
 function stored(key){try{return localStorage.getItem(key);}catch(_){return null;}}
 function remember(key,value){try{localStorage.setItem(key,value);}catch(_){}}
+function cartCount(){try{const mvc=JSON.parse(localStorage.getItem('farmacia-mvc-carrito')||'{}');const local=JSON.parse(localStorage.getItem('farmacia-reina-cart')||'{}');return [...Object.values(mvc),...Object.values(local?.items||{})].reduce((sum,value)=>sum+(Number.isInteger(value)&&value>0?value:0),0);}catch(_){return 0;}}
 
 /** A small, local store-navigation helper. Messages never leave this module. */
 export async function mascotaController(){
@@ -26,7 +24,7 @@ export async function mascotaController(){
   let paused=stored(STORED_MOTION)==='paused'||(stored(STORED_MOTION)===null && matchMedia('(prefers-reduced-motion: reduce)').matches);
   let manifest=null,state='idle',frame=0,elapsed=0,remaining=Infinity,lastTime=0,offset=0;
   let replyTimer=null,bubbleTimer=null,refreshTimer=null,requestVersion=0;
-  let lastCartCount=cart.payload().reduce((sum,item)=>sum+item.cantidad,0);
+  let lastCartCount=cartCount();
 
   function image(src){if(!images.has(src)){const value=new Image();value.src=new URL(src,ASSETS).href;images.set(src,value);}return images.get(src);}
   function character(){return manifest?.characters.find(item=>item.id===selected);}
@@ -125,8 +123,8 @@ export async function mascotaController(){
   find('#motion').addEventListener('click',()=>setPaused(!paused));
   find('#form').addEventListener('submit',event=>{event.preventDefault();send(find('#input').value);});
   root.querySelectorAll('[data-intent]').forEach(button=>button.addEventListener('click',()=>send(button.dataset.intent)));
-  events.addEventListener('cart:changed',()=>{
-    const count=cart.payload().reduce((sum,item)=>sum+item.cantidad,0);
+  window.addEventListener('farmacia:cart',()=>{
+    const count=cartCount();
     if(count>lastCartCount){setState('jumping',{loops:1});sayBubble('¡Producto añadido! Puedes revisarlo en tu carrito.');}
     else if(count!==lastCartCount)setState('review',{loops:1});
     lastCartCount=count;

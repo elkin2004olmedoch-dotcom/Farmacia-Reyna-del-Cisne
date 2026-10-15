@@ -1,8 +1,11 @@
 'use strict';
 
-const CACHE_NAME = 'farmacia-reina-shell-cloud-2d6191ff05d0';
+const CACHE_NAME = 'farmacia-reina-shell-cloud-2d6191ff05d1';
 const APP_FILES = [
-  'js/live-site.js', 'data/deployment.json',
+  'js/mascota.js', 'frontend/controllers/mascota.js',
+  'frontend/assets/mascotas/widget.css', 'frontend/assets/mascotas/widget-responsive.css',
+  'frontend/assets/mascotas/sprites/manifest.json',
+  'frontend/assets/mascotas/sprites/goti.png', 'frontend/assets/mascotas/sprites/farmi.png', 'frontend/assets/mascotas/sprites/boti.png',
   'assets/images/producto-alcohol-antiseptico-d13f81e66a94.webp',
   'assets/images/producto-tabletas-blister.svg',
   'assets/images/producto-medicamento-liquido.svg',
