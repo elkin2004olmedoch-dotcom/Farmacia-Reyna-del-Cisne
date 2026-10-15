@@ -1,4 +1,5 @@
 const ASSETS=new URL('../assets/mascotas/',import.meta.url);
+import {classifyMascotaQuestion} from './mascota-scope.mjs';
 const PEOPLE={farmi:'Farmi',boti:'Boti',goti:'Goti'};
 const STORED_CHARACTER='farmacia-companion';
 const STORED_MOTION='farmacia-motion';
@@ -41,6 +42,7 @@ export async function mascotaController(){
   let currentContext=pageContext();
   let currentSignature=pageContext();
   function productName(){return document.querySelector('#product-detail h1')?.textContent.trim()||document.querySelector('h1')?.textContent.trim()||'este producto';}
+  function knownProductNames(){return [...document.querySelectorAll('#catalog-grid h3, #featured-products h3, #product-detail h1, #checkout-items h2')].map(node=>node.textContent.trim()).filter(Boolean);}
   function contextSignature(){const context=pageContext();return context==='product'?`${context}:${productName()}`:context;}
   function refreshQuickQuestions(){
     currentContext=pageContext();
@@ -104,6 +106,10 @@ export async function mascotaController(){
   function answer(text){
     const normalized=text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');
     const context=pageContext();
+    const scope=classifyMascotaQuestion(text,knownProductNames());
+    if(/^(hola|buenas|gracias|ayuda|productos)[!.? ]*$/.test(normalized))return{state:'waving',text:`¡Hola! Soy ${PEOPLE[selected]}. Puedo guiarte con productos, carrito, pedidos, horarios y contacto de la farmacia. ¿Qué necesitas?`,actions:[{label:'Ver catálogo',href:'catalogo.html'},{label:'Mi carrito',href:'checkout.html'}]};
+    if(scope==='medical')return{state:'waiting',text:'No puedo indicar diagnósticos, dosis ni tratamientos. Consulta al farmacéutico o a un profesional de salud. Para revisar disponibilidad, puedes contactar a la farmacia.',actions:[whatsapp]};
+    if(scope==='off-topic')return{state:'waiting',text:'Solo puedo ayudarte con la tienda de la farmacia: productos, precios y disponibilidad, carrito, pedidos, horarios y contacto. ¿Qué producto buscas?',actions:[{label:'Abrir catálogo',href:'catalogo.html'},{label:'Contactar la farmacia',...whatsapp}]};
     if(/informacion tiene este producto|info de |detalles del producto/.test(normalized)&&context==='product')return{state:'review',text:`${productName()}. ${document.querySelector('#product-detail .shop-lead')?.textContent.trim()||'Revisa su descripción y presentación en esta ficha.'} Confirma la disponibilidad con la farmacia.`,actions:[{label:'Ver ficha del producto',href:'#product-detail'},whatsapp]};
     if(/agrego.*carrito|añadir.*carrito/.test(normalized)&&context==='product')return{state:'review',text:'Elige la cantidad en esta ficha y pulsa «Añadir al carrito». Si el producto requiere receta, coordina la revisión con el farmacéutico.',actions:[{label:'Ir a cantidad y añadir',href:'#product-detail'},whatsapp]};
     if(/comparar|alternativas/.test(normalized)&&context==='product')return{state:'review',text:`Puedes comparar ${productName()} con otros productos: vuelve al catálogo, marca hasta cuatro opciones y abre Comparar.`,actions:[{label:'Ver productos similares',href:'catalogo.html'},{label:'Abrir comparación',href:'comparar.html'}]};
@@ -114,12 +120,10 @@ export async function mascotaController(){
     if(/creo una cuenta|necesito una cuenta/.test(normalized)&&context==='account')return{state:'review',text:'La cuenta de esta tienda te permite conservar tus datos y revisar los pedidos vinculados. Pulsa «Crear cuenta» en esta pantalla para registrarte.',actions:[{label:'Crear cuenta',href:'#show-register'},{label:'Iniciar sesión',href:'#login-panel'}]};
     if(/revisar el estado|estado de mis pedidos/.test(normalized)&&context==='orders')return{state:'review',text:'En esta sección aparece el estado de tus pedidos cuando iniciaste sesión con la cuenta usada al comprarlos. Si necesitas coordinar la entrega, escribe a la farmacia.',actions:[{label:'Ver mis pedidos',href:'#orders-list'},whatsapp]};
     if(/categor|cuidado personal|mama y bebe/.test(normalized)&&context==='catalog')return{state:'review',text:'Puedes filtrar el catálogo por categoría y ordenar por precio. También puedes buscar por nombre o descripción.',actions:[{label:'Ir a filtros',href:'#contenido'}]};
-    if(/dosis|sintoma|tratamiento|me duele|que (tomo|tomar)|embaraz|diagnostic/.test(normalized))return{state:'waiting',text:'Para orientación sobre síntomas, dosis o tratamientos, consulta al profesional de la farmacia. Puedo ayudarte a encontrar el catálogo y los datos de contacto.',actions:[whatsapp]};
     if(/horario|abren|cierran|hora/.test(normalized))return{state:'review',text:'La farmacia atiende de lunes a sábado, de 08:00 a 19:00. Puedes confirmar la atención por WhatsApp antes de visitarnos.',actions:[{label:'Ver ubicación',href:'index.html#ubicacion'},whatsapp]};
     if(/whatsapp|telefono|contact|ubicacion|direccion/.test(normalized))return{state:'waving',text:'Puedes escribir a la farmacia al +593 97 927 5988. Allí te ayudarán a confirmar disponibilidad, pago y entrega.',actions:[whatsapp,{label:'Ver ubicación',href:'index.html#ubicacion'}]};
     if(/mis pedidos|estado.{0,15}pedido|seguir.{0,15}pedido/.test(normalized))return{state:'review',text:'En Mis pedidos puedes revisar tus compras y seguir su estado. Inicia sesión con la cuenta con la que confirmaste el pedido.',actions:[{label:'Ver mis pedidos',href:'pedidos.html'},{label:'Ir a mi cuenta',href:'cuenta.html'}]};
     if(/carrito|pedido|pagar|pago|entrega|comprar/.test(normalized))return{state:'review',text:'Añade los productos al carrito, revisa las cantidades e inicia sesión para confirmar tu pedido. El pago y la entrega se coordinan directamente con la farmacia.',actions:[{label:'Revisar mi carrito',href:'checkout.html'},{label:'Ver mis pedidos',href:'pedidos.html'},whatsapp]};
-    if(/^(hola|buenas|gracias|ayuda|productos)[!.? ]*$/.test(normalized))return{state:'waving',text:`¡Hola! Soy ${PEOPLE[selected]}. Puedo guiarte al catálogo, a tu carrito, a tus pedidos o al horario de la farmacia. ¿Qué producto buscas?`,actions:[{label:'Ver catálogo',href:'catalogo.html'},{label:'Mi carrito',href:'checkout.html'}]};
     const query=text.replace(/^(hola[, ]*)?(quiero |necesito |puedes |por favor )*(buscar |busca |encontrar |un producto[: ]*|producto[: ]*)/i,'').trim().slice(0,100)||text.slice(0,100);
     return{state:'waiting',text:`Puedes buscar «${query}» en el catálogo. Allí verás las presentaciones y los precios publicados. Confirma con la farmacia cualquier duda de disponibilidad o receta.`,actions:[{label:`Buscar ${query}`,href:`catalogo.html?q=${encodeURIComponent(query)}`},whatsapp]};
   }
