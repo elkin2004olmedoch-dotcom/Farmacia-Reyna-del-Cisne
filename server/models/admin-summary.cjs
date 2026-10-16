@@ -27,7 +27,7 @@ module.exports=async function summary(now=new Date()) {
   const visibleCampaigns={activa:true,producto:{activo:true},AND:[{OR:[{inicio:null},{inicio:{lte:now}}]},{OR:[{fin:null},{fin:{gt:now}}]}]};
   // All counts, balances and lists describe the same database snapshot.
   return db.$transaction(async tx=> {
-    const [groups,monthly,products,customers,administrators,lowStock,campaigns,alerts,recent]=await Promise.all([
+    const [groups,monthly,products,customers,administrators,lowStock,campaigns,alerts,recent,catalogProducts,bestSellerTotals]=await Promise.all([
       tx.pedido.groupBy({by:['estado'],_count:{_all:true},_sum:{total:true},orderBy:{estado:'asc'}}),
       Promise.all(periods.map(({start,end})=>tx.pedido.aggregate({where:{createdAt:{gte:start,lt:end}},_count:{_all:true},_sum:{total:true}}))),
       tx.producto.count({where:{activo:true}}),
@@ -37,7 +37,17 @@ module.exports=async function summary(now=new Date()) {
       tx.promocion.count({where:visibleCampaigns}),
       tx.producto.findMany({where:{activo:true,stock:{lte:db.producto.fields.stockMinimo}},select:{id:true,nombre:true,stock:true,stockMinimo:true},orderBy:[{stock:'asc'},{nombre:'asc'},{id:'asc'}],take:10}),
       tx.pedido.findMany({select:{id:true,nombre:true,total:true,estado:true,createdAt:true},orderBy:[{createdAt:'desc'},{id:'desc'}],take:5}),
+      tx.producto.findMany({select:{id:true,nombre:true,categoria:true}}),
+      tx.pedidoDetalle.groupBy({by:['productoId'],where:{pedido:{estado:{in:['confirmado','preparado','entregado']}}},_sum:{cantidad:true}}),
     ]);
+    const unitsByProduct=new Map(bestSellerTotals.map(item=>[item.productoId,item._sum.cantidad || 0]));
+    const bestSellersByCategory=new Map();
+    for(const product of catalogProducts) {
+      if(!bestSellersByCategory.has(product.categoria))bestSellersByCategory.set(product.categoria,[]);
+      const unidadesVendidas=unitsByProduct.get(product.id) || 0;
+      if(unidadesVendidas)bestSellersByCategory.get(product.categoria).push({id:product.id,nombre:product.nombre,unidadesVendidas});
+    }
+    const bestSellers=[...bestSellersByCategory].sort(([a],[b])=>a.localeCompare(b,'es-EC')).map(([categoria,productos])=>({categoria,productos:productos.sort((a,b)=>b.unidadesVendidas-a.unidadesVendidas || a.nombre.localeCompare(b.nombre,'es-EC') || a.id.localeCompare(b.id)).slice(0,3)}));
     const states=groups.map(group=>({estado:group.estado,cantidad:group._count._all,totalCentavos:cents(group._sum.total)}));
     const total=states.reduce((sum,state)=>({cantidad:sum.cantidad+state.cantidad,totalCentavos:sum.totalCentavos+state.totalCentavos}),{cantidad:0,totalCentavos:0});
     if(!Number.isSafeInteger(total.totalCentavos))throw new RangeError('El total supera el rango de centavos admitido.');
@@ -47,7 +57,7 @@ module.exports=async function summary(now=new Date()) {
     return {
       generadoEn:now.toISOString(),zonaHoraria:TIME_ZONE,umbralStock:LOW_STOCK,
       indicadores:{pedidosMes:{cantidad:trend[5].cantidad,totalCentavos:trend[5].totalCentavos},pedidosTotales:total,pedidosPendientes:states.find(state=>state.estado==='pendiente')?.cantidad || 0,productosActivos:products,clientesActivos:customers,administradoresActivos:administrators,stockBajo:lowStock,campanasVisibles:campaigns,lotesVencidos:vencidos,lotesPorVencer:proximos},
-      estados:states,tendencia:trend,alertas:alerts,
+      estados:states,tendencia:trend,alertas:alerts,masVendidosPorCategoria:bestSellers,
       recientes:recent.map(({total,...order})=>({...order,totalCentavos:cents(total)})),
     };
   },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable,maxWait:10000,timeout:15000});

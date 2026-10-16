@@ -261,6 +261,37 @@ test('resumen ejecutivo exige admin y expone solo indicadores y listas públicas
   for(const row of data.recientes)assert.deepEqual(Object.keys(row).sort(),['createdAt','estado','id','nombre','totalCentavos']);
   for(const privateField of ['passwordHash','fingerprint','requestKey','documento','telefono','email'])assert.ok(!JSON.stringify(data).includes(privateField));
 });
+test('resumen ordena los productos más vendidos por categoría y cuenta confirmados, preparados y entregados',async()=>{
+  const summary=require('../../server/models/admin-summary.cjs');
+  const user=await db.usuario.create({data:{nombre:'Cliente ranking',email:`ranking-${randomUUID()}@example.ec`,telefono:'0979275988',passwordHash:'hash-test'}});
+  const products=[];const orderIds=[];
+  try {
+    for(const [nombre,categoria] of [['Ranking A','bienestar'],['Ranking B','bienestar'],['Ranking C','bienestar'],['Ranking D','bienestar'],['Sin ventas','auditoria-sin-ventas']])products.push(await db.producto.create({data:{...productInput,id:randomUUID(),nombre,categoria,stock:20}}));
+    const [a,b,c,d]=products;
+    const orders=[
+      {estado:'confirmado',items:[[a,2],[b,5]]},
+      {estado:'preparado',items:[[a,3],[c,2]]},
+      {estado:'entregado',items:[[b,1],[d,1]]},
+      {estado:'pendiente',items:[[a,50]]},
+      {estado:'cancelado',items:[[c,50]]},
+    ];
+    for(const order of orders) {
+      const created=await db.pedido.create({data:{userId:user.id,total:0,estado:order.estado,entrega:'pickup',nombre:user.nombre,email:user.email,telefono:user.telefono,documento:'••••••0400',requestKey:randomUUID(),fingerprint:randomUUID(),detalles:{create:order.items.map(([product,cantidad])=>({productoId:product.id,nombreProducto:product.nombre,cantidad,precioUnitario:5}))}}});
+      orderIds.push(created.id);
+    }
+    const data=await summary();
+    const wellness=data.masVendidosPorCategoria.find(category=>category.categoria==='bienestar');
+    assert.deepEqual(wellness.productos.map(({id,unidadesVendidas})=>({id,unidadesVendidas})),[
+      {id:b.id,unidadesVendidas:6},{id:a.id,unidadesVendidas:5},{id:c.id,unidadesVendidas:2},
+    ]);
+    assert.deepEqual(data.masVendidosPorCategoria.find(category=>category.categoria==='auditoria-sin-ventas').productos,[]);
+  } finally {
+    await db.pedidoDetalle.deleteMany({where:{pedidoId:{in:orderIds}}});
+    await db.pedido.deleteMany({where:{id:{in:orderIds}}});
+    await db.producto.deleteMany({where:{id:{in:products.map(product=>product.id)}}});
+    await db.usuario.delete({where:{id:user.id}});
+  }
+});
 test('resumen usa centavos, seis meses ecuatorianos, vigencia real y límites de alertas y pedidos',async()=>{
   const summary=require('../../server/models/admin-summary.cjs');
   const now=new Date('2030-01-01T04:30:00Z'); // Still December 31 in Ecuador.
