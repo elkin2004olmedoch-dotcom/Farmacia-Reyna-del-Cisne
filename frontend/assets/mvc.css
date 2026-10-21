@@ -33,7 +33,8 @@ button.text-link:disabled { color:var(--muted); cursor:not-allowed; }
 .mvc-image-dialog img { max-height:65vh; width:100%; object-fit:contain; }
 .form-field .field-error:not([hidden]) { display:block; }
 .table-scroll { border:1px solid var(--line); border-radius:12px; }
-body[data-session-role="admin"] [data-customer-only] { display:none !important; }
+body[data-session-role="admin"] [data-customer-only],
+body[data-session-pending] [data-customer-only] { display:none !important; }
 /* Administración ERP: navegación propia y espacio de trabajo independiente. */
 .admin-page { --admin-sidebar-width:232px; --admin-bg:#faf8f3; --admin-panel:#fff; --admin-border:#e5dfd5; --admin-muted:#65605b; --admin-sidebar-bg:#f7f4ed; background:var(--admin-bg); }
 .admin-page .site-shell { max-width:none; min-height:100dvh; overflow:clip; background:var(--admin-bg); }

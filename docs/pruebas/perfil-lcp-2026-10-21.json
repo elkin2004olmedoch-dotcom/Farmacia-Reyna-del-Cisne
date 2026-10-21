@@ -1,0 +1,972 @@
+{
+  "date": "2026-10-21T16:36:36.936Z",
+  "commit": "07706e6",
+  "scope": "Warm API laboratory only; no product source, deployment, accounts or public services changed by the profiling experiments.",
+  "historicalObservation": {
+    "constrainedFcpMs": {
+      "coupled": 624,
+      "pages": 1484
+    },
+    "constrainedLcpMs": {
+      "coupled": 4948,
+      "pages": 5816
+    },
+    "limitation": "The earlier capture did not record proxy phases. Its exact causal decomposition cannot be reconstructed retrospectively."
+  },
+  "methodology": {
+    "node": "v24.15.0",
+    "chrome": "Installed Chrome 155.0.8059.86",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "profile": "10 Mbps download / 5 Mbps upload / 40 ms CDP latency; no CPU throttling",
+    "database": "Same temporary SQLite fixture within each paired run; connected before navigating",
+    "contexts": "New context per navigation; browser cache disabled; service workers and all third-party page requests blocked",
+    "order": "coupled then pages, three pairs per untraced run; no other suites or benchmarks during acquisition",
+    "clock": "Navigation Timing for paint/resource metrics; monotonic CDP timestamps for network phases",
+    "trace": "Separate instrumented observations; not substituted for the untraced comparison",
+    "baseline": {
+      "files": 86,
+      "manifestSha256": "1c44b4d1c6181af1e6b3d34570ea2be9a4ac62930b3f2d74dd698176334e5a7f",
+      "zip": "TEMP/farmacia-cloudflare-20261021-originales.zip",
+      "zipSha256": "0429315df31460cc46368e161c522bed11bca194dfdf03019caf916e302a9a1c",
+      "harnessSourceSha256": "1f25fdd4ea0e4b3635e9cad87eaae860df83e0ab0adc37386520c2bdf485379a"
+    }
+  },
+  "runs": [
+    {
+      "experiment": "observe",
+      "trace": true,
+      "directLoopback": false,
+      "samples": [
+        {
+          "variant": "coupled",
+          "sample": 0,
+          "documentProxyLookupMs": 727.8,
+          "documentRequestSendStartMs": 728.7,
+          "documentTtfbMs": 11,
+          "htmlResponseEndMs": 795.5,
+          "fcpMs": 1496,
+          "lcpMs": 5652,
+          "productsReadyMs": 2201.5,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 5594,
+            "renderTimeMs": 5652,
+            "renderAfterLoadMs": 58
+          },
+          "hero": {
+            "startMs": 799.07,
+            "responseMs": 876.27,
+            "endMs": 5590.92
+          },
+          "renderBlockingCssEndMs": 1129.5,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 1136.1,
+            "lastResponseEndMs": 1988.3
+          },
+          "coreScripts": {
+            "count": 29,
+            "lastResponseEndMs": 2117.9
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "coupled",
+          "sample": 1,
+          "documentProxyLookupMs": 831.46,
+          "documentRequestSendStartMs": 832.15,
+          "documentTtfbMs": 3.3,
+          "htmlResponseEndMs": 899.3,
+          "fcpMs": 1492,
+          "lcpMs": 5748,
+          "productsReadyMs": 2273.7,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 5710.3,
+            "renderTimeMs": 5748,
+            "renderAfterLoadMs": 37.7
+          },
+          "hero": {
+            "startMs": 901.78,
+            "responseMs": 979.3,
+            "endMs": 5707.56
+          },
+          "renderBlockingCssEndMs": 1239,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 1246.1,
+            "lastResponseEndMs": 2061.7
+          },
+          "coreScripts": {
+            "count": 29,
+            "lastResponseEndMs": 2191.3
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "coupled",
+          "sample": 2,
+          "documentProxyLookupMs": 826.68,
+          "documentRequestSendStartMs": 827.39,
+          "documentTtfbMs": 3.4,
+          "htmlResponseEndMs": 890.9,
+          "fcpMs": 1488,
+          "lcpMs": 5712,
+          "productsReadyMs": 2321.3,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 5676,
+            "renderTimeMs": 5712,
+            "renderAfterLoadMs": 36
+          },
+          "hero": {
+            "startMs": 894.8,
+            "responseMs": 969.5,
+            "endMs": 5673.12
+          },
+          "renderBlockingCssEndMs": 1216.3,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 1223.9,
+            "lastResponseEndMs": 2061.7
+          },
+          "coreScripts": {
+            "count": 29,
+            "lastResponseEndMs": 2243.1
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "pages",
+          "sample": 0,
+          "documentProxyLookupMs": 845.87,
+          "documentRequestSendStartMs": 846.39,
+          "documentTtfbMs": 4.2,
+          "htmlResponseEndMs": 913.4,
+          "fcpMs": 1496,
+          "lcpMs": 5804,
+          "productsReadyMs": 2266.7,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 5764.5,
+            "renderTimeMs": 5804,
+            "renderAfterLoadMs": 39.5
+          },
+          "hero": {
+            "startMs": 915.25,
+            "responseMs": 1115.48,
+            "endMs": 5761.33
+          },
+          "renderBlockingCssEndMs": 1241.4,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 1247.8,
+            "lastResponseEndMs": 1849.7
+          },
+          "coreScripts": {
+            "count": 30,
+            "lastResponseEndMs": 2163.4
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "pages",
+          "sample": 1,
+          "documentProxyLookupMs": 842.99,
+          "documentRequestSendStartMs": 843.8,
+          "documentTtfbMs": 3.4,
+          "htmlResponseEndMs": 907.5,
+          "fcpMs": 1540,
+          "lcpMs": 5800,
+          "productsReadyMs": 2237.5,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 5749.6,
+            "renderTimeMs": 5800,
+            "renderAfterLoadMs": 50.4
+          },
+          "hero": {
+            "startMs": 909.25,
+            "responseMs": 1112.38,
+            "endMs": 5746.8
+          },
+          "renderBlockingCssEndMs": 1272.1,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 1278.8,
+            "lastResponseEndMs": 1898.3
+          },
+          "coreScripts": {
+            "count": 30,
+            "lastResponseEndMs": 2148.2
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "pages",
+          "sample": 2,
+          "documentProxyLookupMs": 845.13,
+          "documentRequestSendStartMs": 845.89,
+          "documentTtfbMs": 2.8,
+          "htmlResponseEndMs": 909,
+          "fcpMs": 1492,
+          "lcpMs": 5732,
+          "productsReadyMs": 2323,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 5695.3,
+            "renderTimeMs": 5732,
+            "renderAfterLoadMs": 36.7
+          },
+          "hero": {
+            "startMs": 911.3,
+            "responseMs": 983.24,
+            "endMs": 5692.35
+          },
+          "renderBlockingCssEndMs": 1228.6,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 1235.6,
+            "lastResponseEndMs": 2077.2
+          },
+          "coreScripts": {
+            "count": 30,
+            "lastResponseEndMs": 2239.5
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        }
+      ],
+      "medians": {
+        "coupled": {
+          "documentProxyLookupMs": 826.68,
+          "htmlResponseEndMs": 890.9,
+          "fcpMs": 1492,
+          "lcpMs": 5712,
+          "productsReadyMs": 2273.7
+        },
+        "pages": {
+          "documentProxyLookupMs": 845.13,
+          "htmlResponseEndMs": 909,
+          "fcpMs": 1496,
+          "lcpMs": 5800,
+          "productsReadyMs": 2266.7
+        }
+      }
+    },
+    {
+      "experiment": "observe-light",
+      "trace": false,
+      "directLoopback": false,
+      "samples": [
+        {
+          "variant": "coupled",
+          "sample": 0,
+          "documentProxyLookupMs": 821.82,
+          "documentRequestSendStartMs": 822.99,
+          "documentTtfbMs": 9,
+          "htmlResponseEndMs": 888.6,
+          "fcpMs": 1560,
+          "lcpMs": 5764,
+          "productsReadyMs": 2256.4,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 5700.5,
+            "renderTimeMs": 5764,
+            "renderAfterLoadMs": 63.5
+          },
+          "hero": {
+            "startMs": 890.48,
+            "responseMs": 964.71,
+            "endMs": 5697.84
+          },
+          "renderBlockingCssEndMs": 1224.1,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 1230.6,
+            "lastResponseEndMs": 2048.1
+          },
+          "coreScripts": {
+            "count": 29,
+            "lastResponseEndMs": 2175.7
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "coupled",
+          "sample": 1,
+          "documentProxyLookupMs": 0,
+          "documentRequestSendStartMs": 0.33,
+          "documentTtfbMs": 2.3,
+          "htmlResponseEndMs": 61.5,
+          "fcpMs": 612,
+          "lcpMs": 4952,
+          "productsReadyMs": 1372.1,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 4906.3,
+            "renderTimeMs": 4952,
+            "renderAfterLoadMs": 45.7
+          },
+          "hero": {
+            "startMs": 59.09,
+            "responseMs": 251.93,
+            "endMs": 4903.94
+          },
+          "renderBlockingCssEndMs": 377.2,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 383.9,
+            "lastResponseEndMs": 987.6
+          },
+          "coreScripts": {
+            "count": 29,
+            "lastResponseEndMs": 1286.1
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "coupled",
+          "sample": 2,
+          "documentProxyLookupMs": 875.68,
+          "documentRequestSendStartMs": 876.19,
+          "documentTtfbMs": 2.3,
+          "htmlResponseEndMs": 937.2,
+          "fcpMs": 1504,
+          "lcpMs": 5828,
+          "productsReadyMs": 2251.7,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 5792.3,
+            "renderTimeMs": 5828,
+            "renderAfterLoadMs": 35.7
+          },
+          "hero": {
+            "startMs": 937.1,
+            "responseMs": 1133.4,
+            "endMs": 5789.49
+          },
+          "renderBlockingCssEndMs": 1260.8,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 1267.3,
+            "lastResponseEndMs": 1863.5
+          },
+          "coreScripts": {
+            "count": 29,
+            "lastResponseEndMs": 2162.7
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "pages",
+          "sample": 0,
+          "documentProxyLookupMs": 0,
+          "documentRequestSendStartMs": 0.61,
+          "documentTtfbMs": 2.8,
+          "htmlResponseEndMs": 60.2,
+          "fcpMs": 636,
+          "lcpMs": 4960,
+          "productsReadyMs": 1364.7,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 4912,
+            "renderTimeMs": 4960,
+            "renderAfterLoadMs": 48
+          },
+          "hero": {
+            "startMs": 60.49,
+            "responseMs": 254.6,
+            "endMs": 4909.63
+          },
+          "renderBlockingCssEndMs": 383.8,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 390,
+            "lastResponseEndMs": 1002
+          },
+          "coreScripts": {
+            "count": 30,
+            "lastResponseEndMs": 1276.4
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "pages",
+          "sample": 1,
+          "documentProxyLookupMs": 872.6,
+          "documentRequestSendStartMs": 872.97,
+          "documentTtfbMs": 2.2,
+          "htmlResponseEndMs": 934.4,
+          "fcpMs": 1484,
+          "lcpMs": 5756,
+          "productsReadyMs": 2337.6,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 5711.3,
+            "renderTimeMs": 5756,
+            "renderAfterLoadMs": 44.7
+          },
+          "hero": {
+            "startMs": 933.84,
+            "responseMs": 998.99,
+            "endMs": 5708.6
+          },
+          "renderBlockingCssEndMs": 1244.2,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 1250.8,
+            "lastResponseEndMs": 2086.7
+          },
+          "coreScripts": {
+            "count": 30,
+            "lastResponseEndMs": 2256.8
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "pages",
+          "sample": 2,
+          "documentProxyLookupMs": 849.31,
+          "documentRequestSendStartMs": 852.24,
+          "documentTtfbMs": 2.8,
+          "htmlResponseEndMs": 913.7,
+          "fcpMs": 1460,
+          "lcpMs": 5748,
+          "productsReadyMs": 2319,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 5705.3,
+            "renderTimeMs": 5748,
+            "renderAfterLoadMs": 42.7
+          },
+          "hero": {
+            "startMs": 915.39,
+            "responseMs": 988.08,
+            "endMs": 5702.62
+          },
+          "renderBlockingCssEndMs": 1229.5,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 1236.7,
+            "lastResponseEndMs": 2074.9
+          },
+          "coreScripts": {
+            "count": 30,
+            "lastResponseEndMs": 2238.1
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        }
+      ],
+      "medians": {
+        "coupled": {
+          "documentProxyLookupMs": 821.82,
+          "htmlResponseEndMs": 888.6,
+          "fcpMs": 1504,
+          "lcpMs": 5764,
+          "productsReadyMs": 2251.7
+        },
+        "pages": {
+          "documentProxyLookupMs": 849.31,
+          "htmlResponseEndMs": 913.7,
+          "fcpMs": 1460,
+          "lcpMs": 5748,
+          "productsReadyMs": 2319
+        }
+      }
+    },
+    {
+      "experiment": "direct-light",
+      "trace": false,
+      "directLoopback": true,
+      "samples": [
+        {
+          "variant": "coupled",
+          "sample": 0,
+          "documentProxyLookupMs": 0,
+          "documentRequestSendStartMs": 0.84,
+          "documentTtfbMs": 10.5,
+          "htmlResponseEndMs": 69.1,
+          "fcpMs": 724,
+          "lcpMs": 4932,
+          "productsReadyMs": 1432.7,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 4871.9,
+            "renderTimeMs": 4932,
+            "renderAfterLoadMs": 60.1
+          },
+          "hero": {
+            "startMs": 69.47,
+            "responseMs": 142.32,
+            "endMs": 4868.83
+          },
+          "renderBlockingCssEndMs": 397.1,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 403.8,
+            "lastResponseEndMs": 1220
+          },
+          "coreScripts": {
+            "count": 29,
+            "lastResponseEndMs": 1352.4
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "coupled",
+          "sample": 1,
+          "documentProxyLookupMs": 0,
+          "documentRequestSendStartMs": 0.44,
+          "documentTtfbMs": 2.7,
+          "htmlResponseEndMs": 62.5,
+          "fcpMs": 608,
+          "lcpMs": 4896,
+          "productsReadyMs": 1473.7,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 4855.1,
+            "renderTimeMs": 4896,
+            "renderAfterLoadMs": 40.9
+          },
+          "hero": {
+            "startMs": 62.36,
+            "responseMs": 134.48,
+            "endMs": 4852.07
+          },
+          "renderBlockingCssEndMs": 376.5,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 383.2,
+            "lastResponseEndMs": 1225.5
+          },
+          "coreScripts": {
+            "count": 29,
+            "lastResponseEndMs": 1395.1
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "coupled",
+          "sample": 2,
+          "documentProxyLookupMs": 0,
+          "documentRequestSendStartMs": 0.39,
+          "documentTtfbMs": 3,
+          "htmlResponseEndMs": 64.3,
+          "fcpMs": 648,
+          "lcpMs": 4924,
+          "productsReadyMs": 1430.6,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 4882.4,
+            "renderTimeMs": 4924,
+            "renderAfterLoadMs": 41.6
+          },
+          "hero": {
+            "startMs": 66.81,
+            "responseMs": 144.03,
+            "endMs": 4879.7
+          },
+          "renderBlockingCssEndMs": 400.9,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 407.8,
+            "lastResponseEndMs": 1224.9
+          },
+          "coreScripts": {
+            "count": 29,
+            "lastResponseEndMs": 1351
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "pages",
+          "sample": 0,
+          "documentProxyLookupMs": 0,
+          "documentRequestSendStartMs": 0.88,
+          "documentTtfbMs": 3.2,
+          "htmlResponseEndMs": 65.4,
+          "fcpMs": 616,
+          "lcpMs": 4892,
+          "productsReadyMs": 1480.4,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 4853.8,
+            "renderTimeMs": 4892,
+            "renderAfterLoadMs": 38.2
+          },
+          "hero": {
+            "startMs": 65.39,
+            "responseMs": 146.07,
+            "endMs": 4851.03
+          },
+          "renderBlockingCssEndMs": 379,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 386.1,
+            "lastResponseEndMs": 1233.8
+          },
+          "coreScripts": {
+            "count": 30,
+            "lastResponseEndMs": 1400.3
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "pages",
+          "sample": 1,
+          "documentProxyLookupMs": 0,
+          "documentRequestSendStartMs": 0.41,
+          "documentTtfbMs": 2.7,
+          "htmlResponseEndMs": 60.5,
+          "fcpMs": 628,
+          "lcpMs": 4952,
+          "productsReadyMs": 1378.9,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 4902.6,
+            "renderTimeMs": 4952,
+            "renderAfterLoadMs": 49.4
+          },
+          "hero": {
+            "startMs": 62.39,
+            "responseMs": 261.82,
+            "endMs": 4899.75
+          },
+          "renderBlockingCssEndMs": 383.2,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 389.8,
+            "lastResponseEndMs": 991.6
+          },
+          "coreScripts": {
+            "count": 30,
+            "lastResponseEndMs": 1289.1
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "pages",
+          "sample": 2,
+          "documentProxyLookupMs": 0,
+          "documentRequestSendStartMs": 0.62,
+          "documentTtfbMs": 2.7,
+          "htmlResponseEndMs": 68.5,
+          "fcpMs": 648,
+          "lcpMs": 4952,
+          "productsReadyMs": 1386.2,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 4919.9,
+            "renderTimeMs": 4952,
+            "renderAfterLoadMs": 32.1
+          },
+          "hero": {
+            "startMs": 68.47,
+            "responseMs": 265.9,
+            "endMs": 4916.92
+          },
+          "renderBlockingCssEndMs": 394.8,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 401.4,
+            "lastResponseEndMs": 1001.2
+          },
+          "coreScripts": {
+            "count": 30,
+            "lastResponseEndMs": 1300.4
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        }
+      ],
+      "medians": {
+        "coupled": {
+          "documentProxyLookupMs": 0,
+          "htmlResponseEndMs": 64.3,
+          "fcpMs": 648,
+          "lcpMs": 4924,
+          "productsReadyMs": 1432.7
+        },
+        "pages": {
+          "documentProxyLookupMs": 0,
+          "htmlResponseEndMs": 65.4,
+          "fcpMs": 628,
+          "lcpMs": 4952,
+          "productsReadyMs": 1386.2
+        }
+      }
+    },
+    {
+      "experiment": "direct-trace",
+      "trace": true,
+      "directLoopback": true,
+      "samples": [
+        {
+          "variant": "coupled",
+          "sample": 0,
+          "documentProxyLookupMs": 0,
+          "documentRequestSendStartMs": 0.54,
+          "documentTtfbMs": 9.6,
+          "htmlResponseEndMs": 67.6,
+          "fcpMs": 796,
+          "lcpMs": 4972,
+          "productsReadyMs": 1401.3,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 4912,
+            "renderTimeMs": 4972,
+            "renderAfterLoadMs": 60
+          },
+          "hero": {
+            "startMs": 69.11,
+            "responseMs": 271.38,
+            "endMs": 4908.65
+          },
+          "renderBlockingCssEndMs": 429.7,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 437.3,
+            "lastResponseEndMs": 1039.7
+          },
+          "coreScripts": {
+            "count": 29,
+            "lastResponseEndMs": 1316.2
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        },
+        {
+          "variant": "pages",
+          "sample": 0,
+          "documentProxyLookupMs": 0,
+          "documentRequestSendStartMs": 0.66,
+          "documentTtfbMs": 3.9,
+          "htmlResponseEndMs": 67.3,
+          "fcpMs": 624,
+          "lcpMs": 4964,
+          "productsReadyMs": 1373.7,
+          "lcp": {
+            "element": "IMG",
+            "path": "/assets/images/farmacia-fachada-reina.webp",
+            "size": 225120,
+            "loadTimeMs": 4919.4,
+            "renderTimeMs": 4964,
+            "renderAfterLoadMs": 44.6
+          },
+          "hero": {
+            "startMs": 67.83,
+            "responseMs": 266.19,
+            "endMs": 4916.68
+          },
+          "renderBlockingCssEndMs": 393.5,
+          "fonts": {
+            "count": 4,
+            "firstRequestMs": 400.5,
+            "lastResponseEndMs": 985.9
+          },
+          "coreScripts": {
+            "count": 30,
+            "lastResponseEndMs": 1286.4
+          },
+          "longTasks": {
+            "count": 0,
+            "totalMs": 0
+          }
+        }
+      ],
+      "medians": {
+        "coupled": {
+          "documentProxyLookupMs": 0,
+          "htmlResponseEndMs": 67.6,
+          "fcpMs": 796,
+          "lcpMs": 4972,
+          "productsReadyMs": 1401.3
+        },
+        "pages": {
+          "documentProxyLookupMs": 0,
+          "htmlResponseEndMs": 67.3,
+          "fcpMs": 624,
+          "lcpMs": 4964,
+          "productsReadyMs": 1373.7
+        }
+      }
+    }
+  ],
+  "traces": [
+    {
+      "file": "direct-trace-coupled-0-trace.json",
+      "bytes": 29020979,
+      "sha256": "4bc26219f4e88386c7535da22c4070ddaa40575682fb2d81bf11fa17d7f4ff3a"
+    },
+    {
+      "file": "direct-trace-pages-0-trace.json",
+      "bytes": 28794795,
+      "sha256": "e08bbf5406e1037306c565aa1d7ee7a071d142c5d19c655f1d916422d140a609"
+    },
+    {
+      "file": "observe-coupled-0-trace.json",
+      "bytes": 29342145,
+      "sha256": "71f625e883158de2fb26d9082c838ef323051bfc54bdc279c733c195909c5077"
+    },
+    {
+      "file": "observe-coupled-1-trace.json",
+      "bytes": 29745072,
+      "sha256": "ae0f44101ff1cee9d9e8d6f6b1296427bb60fe09b8c588c7326be9dec826ac7e"
+    },
+    {
+      "file": "observe-coupled-2-trace.json",
+      "bytes": 29617979,
+      "sha256": "b027255771c168c5d0040d0a06403afebdf08870602fb0cdcd850968fafe84a8"
+    },
+    {
+      "file": "observe-pages-0-trace.json",
+      "bytes": 29588949,
+      "sha256": "0ba395cfed088412d587cd51a98e7b8def9053c9ad02a03b4c01cc0309fa0095"
+    },
+    {
+      "file": "observe-pages-1-trace.json",
+      "bytes": 29836055,
+      "sha256": "854672de477027d0e5cd5937d14ef8673d7f7dd02c409661e59dbfddf9f1a373"
+    },
+    {
+      "file": "observe-pages-2-trace.json",
+      "bytes": 29493207,
+      "sha256": "b551b7065e161231d3cdc6a7a6e02c1866cc0aa9982abb1124f45e8ca3bd0750"
+    }
+  ],
+  "traceDirectory": "TEMP/farmacia-warm-profile-679cb96ebb0a4686b6fcc93bb1d7e34b",
+  "findings": [
+    {
+      "id": "PROFILE-01",
+      "finding": "Slow cases in both products coincide with about 0.82-0.88 seconds in the CDP proxy-resolution phase before DNS/connect/send. Fast cases in either product have zero proxy delay.",
+      "causalControl": "Disabling proxy resolution only for the temporary loopback Chrome removed that delay in all six untraced control navigations."
+    },
+    {
+      "id": "PROFILE-02",
+      "finding": "With direct loopback, median constrained LCP is 4924 ms coupled and 4952 ms Pages; FCP is 648 ms and 628 ms. The prior 868 ms product difference did not persist under the controlled network setup.",
+      "limitation": "Three pairs do not establish equivalence or user percentiles; the historical 868 ms observation is retained as recorded."
+    },
+    {
+      "id": "PROFILE-03",
+      "finding": "The final LCP candidate in all 20 observations is the same facade WebP, 225120 visible pixels. There were no observed browser long tasks over 50 ms. Resource discovery and hero completion shift with the initial document delay; the data do not justify a frontend import, font or rendering rewrite."
+    }
+  ],
+  "recommendation": "Record the proxy phase separately and use the explicit direct-loopback switch only for local comparative measurements. Do not alter user/system proxy settings, infer Cloudflare performance from this local test, or change product frontend code on the basis of the earlier confounded difference.",
+  "apiAbsenceEvidence": {
+    "source": "docs/pruebas/separacion-frontend-2026-10-21.json",
+    "newAbsenceProbes": false,
+    "preservedPriorObservations": {
+      "delayedApi30s": {
+        "pagesFcpMs": 1160,
+        "pagesProductsReadyMs": 31225.7
+      },
+      "unresponsiveApi25s": {
+        "coupledHtmlReceived": false,
+        "pagesFcpMs": 1200,
+        "pagesProductCards": 0
+      }
+    },
+    "limitation": "Existing cold/offline evidence is not a new run with the direct-loopback control."
+  },
+  "validation": {
+    "temporaryDriver": "20 instrumented/controlled warm navigations completed before changing the repository harness",
+    "updatedHarness": "Syntax and CLI argument helpers checked; no additional browser run while backend tests are active",
+    "productChanges": false
+  }
+}

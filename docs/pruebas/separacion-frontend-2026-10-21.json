@@ -1,0 +1,1110 @@
+{
+  "date": "2026-10-21T16:14:57.675Z",
+  "node": "v24.15.0",
+  "chrome": "155.0.8059.86",
+  "baseline": {
+    "capturedAt": "2026-10-21T16:12:00.514Z",
+    "root": "C:\\Users\\Elkin\\Downloads\\Farmacia-Reyna-del-Cisne-main (1)\\Farmacia-Reyna-del-Cisne-main\\frontend",
+    "files": 86,
+    "sha256": "1c44b4d1c6181af1e6b3d34570ea2be9a4ac62930b3f2d74dd698176334e5a7f",
+    "manifest": [
+      {
+        "path": "admin.html",
+        "bytes": 36823,
+        "sha256": "f54d222e4df5c749b91100c993bd743444c3916ae6ea32bf04f26113fb976751"
+      },
+      {
+        "path": "assets/accesibilidad.css",
+        "bytes": 18205,
+        "sha256": "b4a2b260ccab424908f0f6cc261adb3672a8bc456f7dab78f9c2eee60ea7b71f"
+      },
+      {
+        "path": "assets/fonts/fuente-1.ttf",
+        "bytes": 48280,
+        "sha256": "b0ae3e89a7d3ef2b1838bb4b1ceb0b17cc3435af061eee809d76aa623ff116e9"
+      },
+      {
+        "path": "assets/fonts/fuente-2.ttf",
+        "bytes": 48308,
+        "sha256": "376427b5322148d8de1e03f263bcca4935a2d60ba71d9f94f4947ab664c711ae"
+      },
+      {
+        "path": "assets/fonts/fuente-3.ttf",
+        "bytes": 48280,
+        "sha256": "b79a2ea7a38f33fd96a282fadb9ce97626bb0724a44d21075859f0e50239993a"
+      },
+      {
+        "path": "assets/fonts/fuente-4.ttf",
+        "bytes": 48200,
+        "sha256": "2a8e7f713ee79fbccdef3cef5c787aff47580299f7da60144961e7db2ec08211"
+      },
+      {
+        "path": "assets/fonts/fuente-5.ttf",
+        "bytes": 71632,
+        "sha256": "ff7cf63717c27756df857ca12045a83522569f7b561bedaff813a25274eb263f"
+      },
+      {
+        "path": "assets/fonts/fuente-6.ttf",
+        "bytes": 71588,
+        "sha256": "f0a9d39b9f14079c55070189562da36c794f824cbcf514b50a0ad0ef20c69379"
+      },
+      {
+        "path": "assets/images/farmacia-5.jpg",
+        "bytes": 74265,
+        "sha256": "d27fd9359d2ec6dfed82eeb8cce6b94d9d1b40864273d7b40902a74c91011ae1"
+      },
+      {
+        "path": "assets/images/farmacia-6.jpg",
+        "bytes": 72880,
+        "sha256": "985018a4b2f35bebdc4011666506c0317ae56b2816128b91e2f8592f78d5c096"
+      },
+      {
+        "path": "assets/images/farmacia-7.jpg",
+        "bytes": 72697,
+        "sha256": "53ddc1b77a25eb2337415fdb67ed623324f57af1eda536851e94d53810f1ff7d"
+      },
+      {
+        "path": "assets/images/farmacia-8.jpg",
+        "bytes": 32368,
+        "sha256": "21eb52bebd7f9e543d926dbb0be9da54e7edf5810ef07901b4a5d6adfabc8156"
+      },
+      {
+        "path": "assets/images/farmacia-9.jpg",
+        "bytes": 217975,
+        "sha256": "297628cedac9d9ea2138607aec76870a167992e470c45800d9fe3b48cb27c007"
+      },
+      {
+        "path": "assets/images/farmacia-fachada-reina.png",
+        "bytes": 2650904,
+        "sha256": "c3e431ff314c110aa28b73b105854e589bf223c3f54c7b2188e5f09633bd18c8"
+      },
+      {
+        "path": "assets/images/farmacia-fachada-reina.webp",
+        "bytes": 1647804,
+        "sha256": "ed21c9a79c08aceadedae9984c453a6b784e43f74ee1be4680525cd8d20ad4d8"
+      },
+      {
+        "path": "assets/images/logo-reina-del-cisne.png",
+        "bytes": 507362,
+        "sha256": "4932c3048bb1ac5a458b767c5c0087804753e75dba704688dae51e6956fd989d"
+      },
+      {
+        "path": "assets/images/producto-alcohol-antiseptico-d13f81e66a94.webp",
+        "bytes": 39056,
+        "sha256": "d13f81e66a94b02d67372782af123f982b080da8cd9289195317b7bb5c1f3f64"
+      },
+      {
+        "path": "assets/images/producto-alcohol-antiseptico.svg",
+        "bytes": 625,
+        "sha256": "eb9de3b1ed5760adf496dc210af8991a27677794f6da1ddc69aa72727073ec73"
+      },
+      {
+        "path": "assets/images/producto-algodon.svg",
+        "bytes": 589,
+        "sha256": "5919c6d740db49cb799461281533b8d854211b4b95d29a0459a44f3eb22423bf"
+      },
+      {
+        "path": "assets/images/producto-bebe-pigeon.png",
+        "bytes": 520392,
+        "sha256": "8a3915cc8d8e694c0bcbb4d51d2d6f5e7080e76d79c0c4541f938138dcf840f4"
+      },
+      {
+        "path": "assets/images/producto-botiquin.jpg",
+        "bytes": 32368,
+        "sha256": "21eb52bebd7f9e543d926dbb0be9da54e7edf5810ef07901b4a5d6adfabc8156"
+      },
+      {
+        "path": "assets/images/producto-curitas-adhesivas.svg",
+        "bytes": 622,
+        "sha256": "d7c912d03867153250b4f2ff8dddf0c04b4fc2bc2cd74facbccd20aab1bedd89"
+      },
+      {
+        "path": "assets/images/producto-frasco-tabletas.svg",
+        "bytes": 614,
+        "sha256": "2b5ebed566425e296952d61f81cc6cf933a8c8dbe7434169ff767a72769dfc0a"
+      },
+      {
+        "path": "assets/images/producto-gasas-esteriles.svg",
+        "bytes": 597,
+        "sha256": "4f6bb3a0fabf9ce8f134eb1acdcb71eb21582710be46bf31c85757ad7a67d238"
+      },
+      {
+        "path": "assets/images/producto-gel-antibacterial.svg",
+        "bytes": 623,
+        "sha256": "d2dddbd6c03df6ddacb5d66c80c7998e5cac93f2e8da370df882a94b01f90ef3"
+      },
+      {
+        "path": "assets/images/producto-generico-referencia.svg",
+        "bytes": 611,
+        "sha256": "9aef01d485df63e9fc8180022defeb536727496a6099b0d5f116cbe9788f1968"
+      },
+      {
+        "path": "assets/images/producto-mascarillas.svg",
+        "bytes": 621,
+        "sha256": "65f55e07e03f3a911d75915de16b2bdc1e5b5805d986b7360c5fde1658c5a172"
+      },
+      {
+        "path": "assets/images/producto-medicamento-liquido.svg",
+        "bytes": 625,
+        "sha256": "aa38dd1a6f0082f101e60ac6e7fa851d3c530fbf63c0068ba0eeb8bd882cbe35"
+      },
+      {
+        "path": "assets/images/producto-solar-eucerin.png",
+        "bytes": 400364,
+        "sha256": "6f74945b6502f1012f63c067fb93881565d4d300ca09eb7d5db8168237be061d"
+      },
+      {
+        "path": "assets/images/producto-solucion-salina.svg",
+        "bytes": 621,
+        "sha256": "eccb7e697bead46b031aa351140cd92e95ea8d4f25f640eb79817448f077eb30"
+      },
+      {
+        "path": "assets/images/producto-tabletas-blister.svg",
+        "bytes": 1762,
+        "sha256": "3d9bebfa9db791d9ebe4e44002479db5fa1752aba6effbea1499958699ca3457"
+      },
+      {
+        "path": "assets/images/producto-termometro-digital.svg",
+        "bytes": 589,
+        "sha256": "1df61c11ecd38d50e65bc5288ae0bc6de9582c2f8116a44fe8de2b7cfd6e5794"
+      },
+      {
+        "path": "assets/images/producto-toallitas-bebe.svg",
+        "bytes": 601,
+        "sha256": "e0417ea5fee0d0c7ad526150aa6572b68d1684f61c409699c106224aba97e8b6"
+      },
+      {
+        "path": "assets/images/producto-venda-elastica.svg",
+        "bytes": 512,
+        "sha256": "779c57a31a69137dfee712728502b29e66fcf76ccee3f9f58986c2fbbadb3e4c"
+      },
+      {
+        "path": "assets/images/producto-vitaminas.jpg",
+        "bytes": 53086,
+        "sha256": "e32dca71a2852269499137d6d71981872f37a7fc8780cbc5e0bb9d5b8f32ca41"
+      },
+      {
+        "path": "assets/mascotas/art/boti-base.png",
+        "bytes": 686402,
+        "sha256": "1c665eba86a0c3bb7aa82d4eb58b5e21534859e8026cb92d2bdc940cec700bd5"
+      },
+      {
+        "path": "assets/mascotas/art/farmi-base.png",
+        "bytes": 800903,
+        "sha256": "67a197aad68aed9ddb37982ddb42b600996a5ccd82ff1c0d7cb8aedd0bb4a045"
+      },
+      {
+        "path": "assets/mascotas/art/goti-base.png",
+        "bytes": 682107,
+        "sha256": "6e772f5344ee41dea0c8c949073d2a2e87336aa34f7cf5ad371852b21d1d8d55"
+      },
+      {
+        "path": "assets/mascotas/sprites/boti.png",
+        "bytes": 1319994,
+        "sha256": "ecc6ec344f646778ac1f3d6e2133c4ac214d606e14db81438dafca6aa23efbe2"
+      },
+      {
+        "path": "assets/mascotas/sprites/farmi.png",
+        "bytes": 1639099,
+        "sha256": "6d8617c82d718f1975c1d71bc3f01f05ed4ab7d6149c189bdbb5e39a58a8e37a"
+      },
+      {
+        "path": "assets/mascotas/sprites/goti.png",
+        "bytes": 1513527,
+        "sha256": "9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d"
+      },
+      {
+        "path": "assets/mascotas/sprites/manifest.json",
+        "bytes": 64510,
+        "sha256": "8b405171e7769a0d04425c88c73975ab1469960f6a86bade5b9a47135caf47a1"
+      },
+      {
+        "path": "assets/mascotas/widget.css",
+        "bytes": 4796,
+        "sha256": "2a934c29e7670caf9739473272bb4e0fac393491d7d9200df8bd2cc1aba0b684"
+      },
+      {
+        "path": "assets/mvc.css",
+        "bytes": 26376,
+        "sha256": "087aa543d2fd24494f009bac7f415f26e65bdb03751b3041c06882800820ac93"
+      },
+      {
+        "path": "assets/shop.css",
+        "bytes": 37524,
+        "sha256": "ea945b36b4e3d1ad19220fefe72ad62661da31d00eca9d9e188078b1d0d8fca1"
+      },
+      {
+        "path": "assets/styles.css",
+        "bytes": 46853,
+        "sha256": "e00227845480abb7c9cd9cbf2a799f22a4f234a1845763135bbb98c81f2b23e5"
+      },
+      {
+        "path": "assets/vendor/bootstrap-grid.min.css",
+        "bytes": 51795,
+        "sha256": "e670c73068b27d91e5dd45de3ee84b0d047d9dc3df051d4725e64b5f224d576e"
+      },
+      {
+        "path": "assets/vendor/fonts.css",
+        "bytes": 956,
+        "sha256": "6ddf948cb6757a4be67ba0867057e6db6301d78d98c4ccf18f96fe69833b5f50"
+      },
+      {
+        "path": "ayuda.html",
+        "bytes": 6031,
+        "sha256": "3acde52a2163bf481080ba797e7994277100ded21e495e5cab7bb2b16f5fff9d"
+      },
+      {
+        "path": "catalogo.html",
+        "bytes": 5145,
+        "sha256": "45f2db895d9e3144ca3909f4a187ef7e4000583038d068893a9f1cae45e998cb"
+      },
+      {
+        "path": "checkout.html",
+        "bytes": 8848,
+        "sha256": "481aa6a485853f324f4f912d556efea0661eb867887f58e22ad0b8fce9487f3a"
+      },
+      {
+        "path": "comparar.html",
+        "bytes": 4358,
+        "sha256": "9f8249e12b55072625959189e759ca00474f867b2d343354ed612fbc469b17be"
+      },
+      {
+        "path": "controllers/account.js",
+        "bytes": 3165,
+        "sha256": "a163b95d6c02bca007fe4c1e64b0b53ed67d8a3c56ee45e715f1d0e47b449800"
+      },
+      {
+        "path": "controllers/admin.js",
+        "bytes": 17734,
+        "sha256": "d2119943141b5ebdf60a92a15591a9911eb999bc869d4fe5d06863be54f8756b"
+      },
+      {
+        "path": "controllers/app.js",
+        "bytes": 1809,
+        "sha256": "18257d3d47f9ee15cf6afb268267beeb0dd0f107fd46225dd7bc8fc6ee0d851e"
+      },
+      {
+        "path": "controllers/billing.js",
+        "bytes": 12610,
+        "sha256": "bef846549070b48c972be4a31eaa569eee47e29e5b2f43c5070b948bc94e2bf5"
+      },
+      {
+        "path": "controllers/catalog.js",
+        "bytes": 7141,
+        "sha256": "ab37186b54686b7efb813843c2add0f356a780883de92fd6231938f1a87ccc8f"
+      },
+      {
+        "path": "controllers/checkout.js",
+        "bytes": 6477,
+        "sha256": "14704764808d456172b2ffa8a1b7ccfbcbafef6bba93292efc28b210a005f1d6"
+      },
+      {
+        "path": "controllers/contact.js",
+        "bytes": 1008,
+        "sha256": "012c65a3eecaa35dfff4f10ad1e3a9fb728501efe07b9494a0fdcd915594fe29"
+      },
+      {
+        "path": "controllers/dialog.js",
+        "bytes": 309,
+        "sha256": "f3c0f79a341c8ab1bd51a32ec3c0cadfacdd2432bbd637afb8567a91ec482991"
+      },
+      {
+        "path": "controllers/images.js",
+        "bytes": 2091,
+        "sha256": "67f711adb201744869c0d05f10e2f9b232416df93a9f78ad3ac9773607f1b770"
+      },
+      {
+        "path": "controllers/layout.js",
+        "bytes": 3952,
+        "sha256": "42d19cfc36e455ba28db2309518cf4aa782e85683925b229a13d3f57caeedb9d"
+      },
+      {
+        "path": "controllers/mascota.js",
+        "bytes": 13307,
+        "sha256": "d4a25d112bca203a1d0b6334a90e3165b05ed08e76d6147d1a28b72962c7d7e6"
+      },
+      {
+        "path": "controllers/updates.js",
+        "bytes": 2480,
+        "sha256": "37e57cea25dd6809182e51a7c49b464db66880eebe53b9c819c62339bed17daf"
+      },
+      {
+        "path": "cuenta.html",
+        "bytes": 8321,
+        "sha256": "f2ebbeebeb1d2c9164259e6e6956f576dd82586a5997445e59341f395ec8ea91"
+      },
+      {
+        "path": "index.html",
+        "bytes": 17422,
+        "sha256": "22b32f4684a668b33240b1a0642e7c8429ed68998840f00f627ebc5b6d32222f"
+      },
+      {
+        "path": "models/admin.js",
+        "bytes": 6617,
+        "sha256": "1df7dbc0d2e21ca7dcbfb51bb58dc1d974ed3176204d836dcfc7fa72bbe3c2e7"
+      },
+      {
+        "path": "models/api.js",
+        "bytes": 1462,
+        "sha256": "0d937194c5f18d19156f0cce470694f2a4868a8f97389f46fe5f039dbe26d329"
+      },
+      {
+        "path": "models/auth.js",
+        "bytes": 920,
+        "sha256": "b4717d9b771383720adadcb51b50c464e9e12cdbb0898e7b6260c3f18bd04812"
+      },
+      {
+        "path": "models/billing.js",
+        "bytes": 1875,
+        "sha256": "e2c26298bac1068c17d2fb0f92d415cb2d4da98421315a213c3182d7f34d07d6"
+      },
+      {
+        "path": "models/cart.js",
+        "bytes": 1891,
+        "sha256": "4ab11536d8e9e9e3925f8bd3ade528e729c014462f305758f9b71a22850eacf3"
+      },
+      {
+        "path": "models/catalog.js",
+        "bytes": 597,
+        "sha256": "84645f7d9237c8e6c7a9e530bc5188a4114f333399e7b0b5c27a906e23f289b5"
+      },
+      {
+        "path": "models/ecuador.js",
+        "bytes": 8549,
+        "sha256": "5ccbcafe68001ddd2611f178651043b333a78bea3c77e377a0185c50bffa84b8"
+      },
+      {
+        "path": "models/events.js",
+        "bytes": 375,
+        "sha256": "0fac6ade46dbdc5530452770e1fb5288b232de2a5ad7514202d0ae4c067e09c8"
+      },
+      {
+        "path": "models/orders.js",
+        "bytes": 961,
+        "sha256": "e019b04bb6e3e43bbe47f7ec2b84b7b94953e97f35d3ce8a4560d5352e3fa2e8"
+      },
+      {
+        "path": "models/pricing.js",
+        "bytes": 1070,
+        "sha256": "65e35b51059fc19864df86fae6d6409841fb827549d90878f0518ee5a02d4005"
+      },
+      {
+        "path": "models/promotion-publication.js",
+        "bytes": 2120,
+        "sha256": "423efb2364908a627f85b43a482950df57d593ac5175da3a02d67ae53f7e8a3a"
+      },
+      {
+        "path": "pedidos.html",
+        "bytes": 4486,
+        "sha256": "d3db548040637ffd307ec04270046843b0083c93494759eb5684b31ef7678883"
+      },
+      {
+        "path": "producto.html",
+        "bytes": 4335,
+        "sha256": "09f267b6b2b46a38bf00dfce17fb2c7a9ee48a3219da2c93093a8b2ebed7f7f5"
+      },
+      {
+        "path": "views/admin-dashboard.js",
+        "bytes": 9438,
+        "sha256": "7a846a2e50c2d130dd232586cd88460358a8afd4e621378dfedd98a7baa3a37b"
+      },
+      {
+        "path": "views/admin.js",
+        "bytes": 14781,
+        "sha256": "c96d46ff91f0fb472a83c34c8c09d31d1d0519dc58a6eef332d7e0756a5bba94"
+      },
+      {
+        "path": "views/billing.js",
+        "bytes": 9527,
+        "sha256": "7078a54eebbc36a0fee15c607fa7b7d67eac6356957333fb1654420481dffd34"
+      },
+      {
+        "path": "views/common.js",
+        "bytes": 2599,
+        "sha256": "01d26904fd85702e2d5432615630eb7b38fb4c5f556fcaf169177af97249dc12"
+      },
+      {
+        "path": "views/layout.js",
+        "bytes": 1850,
+        "sha256": "58f4830958facfad8c47e4dcc55b0b3b338a17a16a8f7a72059cd75f75f4ce5c"
+      },
+      {
+        "path": "views/orders.js",
+        "bytes": 10262,
+        "sha256": "bb10cdb5f1c5181051c29bc9d80ebf6157bd39f635a3cc0b085de0236902e753"
+      },
+      {
+        "path": "views/products.js",
+        "bytes": 6685,
+        "sha256": "48e6249060b2b2f5159723da3ba3c9ca4fd960c0ed10eb1a01d35efb20abced2"
+      }
+    ],
+    "reproduction": "This is the source version present before synchronization, frozen for this run. After the source changes, restore the baseline ZIP separately and pass its frontend directory with --baseline-root."
+  },
+  "methodology": {
+    "database": "One shared temporary SQLite fixture, migrated/seeded; connect measured before browsing",
+    "connectMs": 15.84,
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "cache": "disabled; fresh context per sample",
+    "serviceWorkers": "blocked",
+    "thirdParties": "all blocked, including Maps",
+    "origins": "two loopback listeners on ephemeral ports; API CORS allows exactly both",
+    "activeSamples": 3,
+    "constrainedProfile": "10Mbps down,5Mbps up,40ms latency; no CPU throttle",
+    "cold": "gateway withholds all coupled requests or only separated API for30s; process/SQLite stay alive",
+    "offline": "gateway accepts HTTP requests without responding; it does not abort them",
+    "lcp": "last observed candidate, not final LCP; cold/offline windows35s/25s with no click/focus/input",
+    "menuReady": "MutationObserver sees data-session-role written by layout; functional clicks tested separately",
+    "bytes": "sum of CDP Network.loadingFinished.encodedDataLength for allowed origins, including document; pending/failed responses are incomplete, not total traffic",
+    "requestCount": "allowed-origin CDP requests, including document; external blocked requests counted separately",
+    "scope": "Local static-host model, not Cloudflare CDN/TLS/cache performance or measured Render cold start"
+  },
+  "artifact": {
+    "files": 89,
+    "bytes": 13813307
+  },
+  "samples": [
+    {
+      "variant": "coupled",
+      "scenario": "active",
+      "profile": "local",
+      "sample": 0,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 1888.51,
+      "documentTtfbMs": 11.6,
+      "htmlReadyMs": 844.2,
+      "fcpMs": 1272,
+      "lcpLastObserved": {
+        "startTime": 1272,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 1283.9,
+      "productsReadyMs": 1257.1,
+      "menuReadyMs": 1211.1,
+      "observedUntilMs": 1879.1,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 58,
+      "requestCount": 58,
+      "encodedBytesObserved": 6841797,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "pages",
+      "scenario": "active",
+      "profile": "local",
+      "sample": 0,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 1901.09,
+      "documentTtfbMs": 4,
+      "htmlReadyMs": 878.2,
+      "fcpMs": 1204,
+      "lcpLastObserved": {
+        "startTime": 1236,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 1252.3,
+      "productsReadyMs": 1316.4,
+      "menuReadyMs": 1249.6,
+      "observedUntilMs": 1894,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 59,
+      "requestCount": 59,
+      "encodedBytesObserved": 6835360,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "coupled",
+      "scenario": "active",
+      "profile": "local",
+      "sample": 1,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 1049.9,
+      "documentTtfbMs": 3,
+      "htmlReadyMs": 9.6,
+      "fcpMs": 388,
+      "lcpLastObserved": {
+        "startTime": 388,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 413.7,
+      "productsReadyMs": 475.2,
+      "menuReadyMs": 411.3,
+      "observedUntilMs": 1041.9,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 58,
+      "requestCount": 58,
+      "encodedBytesObserved": 6841797,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "pages",
+      "scenario": "active",
+      "profile": "local",
+      "sample": 1,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 1060.08,
+      "documentTtfbMs": 3.1,
+      "htmlReadyMs": 11.4,
+      "fcpMs": 400,
+      "lcpLastObserved": {
+        "startTime": 400,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 410.4,
+      "productsReadyMs": 474,
+      "menuReadyMs": 407.7,
+      "observedUntilMs": 1053.3,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 59,
+      "requestCount": 59,
+      "encodedBytesObserved": 6835360,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "coupled",
+      "scenario": "active",
+      "profile": "local",
+      "sample": 2,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 1073.12,
+      "documentTtfbMs": 2.7,
+      "htmlReadyMs": 9.2,
+      "fcpMs": 396,
+      "lcpLastObserved": {
+        "startTime": 396,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 436.6,
+      "productsReadyMs": 497.3,
+      "menuReadyMs": 434.1,
+      "observedUntilMs": 1065.3,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 58,
+      "requestCount": 58,
+      "encodedBytesObserved": 6841797,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "pages",
+      "scenario": "active",
+      "profile": "local",
+      "sample": 2,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 1862.5,
+      "documentTtfbMs": 3,
+      "htmlReadyMs": 873.1,
+      "fcpMs": 1224,
+      "lcpLastObserved": {
+        "startTime": 1224,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 1229.7,
+      "productsReadyMs": 1288.4,
+      "menuReadyMs": 1227.1,
+      "observedUntilMs": 1855.2,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 59,
+      "requestCount": 59,
+      "encodedBytesObserved": 6835360,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "coupled",
+      "scenario": "active",
+      "profile": "10Mbps-40ms",
+      "sample": 0,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 6659.21,
+      "documentTtfbMs": 3,
+      "htmlReadyMs": 496.4,
+      "fcpMs": 1104,
+      "lcpLastObserved": {
+        "startTime": 5380,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 5657,
+      "productsReadyMs": 1826.5,
+      "menuReadyMs": 1746.8,
+      "observedUntilMs": 6651.3,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 58,
+      "requestCount": 58,
+      "encodedBytesObserved": 6841797,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "pages",
+      "scenario": "active",
+      "profile": "10Mbps-40ms",
+      "sample": 0,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 7121.57,
+      "documentTtfbMs": 2.7,
+      "htmlReadyMs": 926.5,
+      "fcpMs": 1476,
+      "lcpLastObserved": {
+        "startTime": 5816,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 6081.2,
+      "productsReadyMs": 2232.7,
+      "menuReadyMs": 2153.1,
+      "observedUntilMs": 7113.7,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 59,
+      "requestCount": 59,
+      "encodedBytesObserved": 6835360,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "coupled",
+      "scenario": "active",
+      "profile": "10Mbps-40ms",
+      "sample": 1,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 6213.25,
+      "documentTtfbMs": 2.9,
+      "htmlReadyMs": 60.1,
+      "fcpMs": 624,
+      "lcpLastObserved": {
+        "startTime": 4880,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 5216.9,
+      "productsReadyMs": 1498.6,
+      "menuReadyMs": 1425.9,
+      "observedUntilMs": 6205.9,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 58,
+      "requestCount": 58,
+      "encodedBytesObserved": 6841797,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "pages",
+      "scenario": "active",
+      "profile": "10Mbps-40ms",
+      "sample": 1,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 7070.76,
+      "documentTtfbMs": 2.6,
+      "htmlReadyMs": 941,
+      "fcpMs": 1488,
+      "lcpLastObserved": {
+        "startTime": 5828,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 6083.6,
+      "productsReadyMs": 2241.1,
+      "menuReadyMs": 2157.6,
+      "observedUntilMs": 7065.2,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 59,
+      "requestCount": 59,
+      "encodedBytesObserved": 6835360,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "coupled",
+      "scenario": "active",
+      "profile": "10Mbps-40ms",
+      "sample": 2,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 6196.36,
+      "documentTtfbMs": 2.1,
+      "htmlReadyMs": 58.4,
+      "fcpMs": 608,
+      "lcpLastObserved": {
+        "startTime": 4948,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 5206.3,
+      "productsReadyMs": 1360.7,
+      "menuReadyMs": 1281.7,
+      "observedUntilMs": 6190.5,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 58,
+      "requestCount": 58,
+      "encodedBytesObserved": 6841797,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "pages",
+      "scenario": "active",
+      "profile": "10Mbps-40ms",
+      "sample": 2,
+      "simulationDelayMs": null,
+      "observationWindowMs": null,
+      "elapsedMs": 7071.59,
+      "documentTtfbMs": 2.2,
+      "htmlReadyMs": 939.8,
+      "fcpMs": 1484,
+      "lcpLastObserved": {
+        "startTime": 5760,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 6082,
+      "productsReadyMs": 2337.2,
+      "menuReadyMs": 2261.4,
+      "observedUntilMs": 7066.1,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 59,
+      "requestCount": 59,
+      "encodedBytesObserved": 6835360,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "coupled",
+      "scenario": "cold",
+      "profile": "local",
+      "sample": 0,
+      "simulationDelayMs": 30000,
+      "observationWindowMs": 35000,
+      "elapsedMs": 35007.87,
+      "documentTtfbMs": 29112.9,
+      "htmlReadyMs": 29999.1,
+      "fcpMs": 30316,
+      "lcpLastObserved": {
+        "startTime": 30336,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 30344.9,
+      "productsReadyMs": 30411.1,
+      "menuReadyMs": 30342.4,
+      "observedUntilMs": 35001.5,
+      "productCards": 4,
+      "statusVisible": false,
+      "resourceTimingEntries": 58,
+      "requestCount": 58,
+      "encodedBytesObserved": 6841797,
+      "unfinishedRequests": 0,
+      "requestErrors": [],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "pages",
+      "scenario": "cold",
+      "profile": "local",
+      "sample": 0,
+      "simulationDelayMs": 30000,
+      "observationWindowMs": 35000,
+      "elapsedMs": 35005.44,
+      "documentTtfbMs": 2.9,
+      "htmlReadyMs": 884.1,
+      "fcpMs": 1160,
+      "lcpLastObserved": {
+        "startTime": 1192,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 1203.1,
+      "productsReadyMs": 31225.7,
+      "menuReadyMs": 1200.7,
+      "observedUntilMs": 34999.9,
+      "productCards": 4,
+      "statusVisible": true,
+      "resourceTimingEntries": 63,
+      "requestCount": 63,
+      "encodedBytesObserved": 6835360,
+      "unfinishedRequests": 0,
+      "requestErrors": [
+        {
+          "type": "Fetch",
+          "code": "net::ERR_ABORTED"
+        },
+        {
+          "type": "Fetch",
+          "code": "net::ERR_ABORTED"
+        },
+        {
+          "type": "Fetch",
+          "code": "net::ERR_ABORTED"
+        },
+        {
+          "type": "Fetch",
+          "code": "net::ERR_ABORTED"
+        }
+      ],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    },
+    {
+      "variant": "coupled",
+      "scenario": "offline",
+      "profile": "local",
+      "sample": 0,
+      "simulationDelayMs": null,
+      "observationWindowMs": 25000,
+      "elapsedMs": 25002.29,
+      "documentTtfbMs": null,
+      "htmlReadyMs": null,
+      "fcpMs": null,
+      "lcpLastObserved": null,
+      "loadMs": null,
+      "productsReadyMs": null,
+      "menuReadyMs": null,
+      "observedUntilMs": null,
+      "productCards": null,
+      "statusVisible": null,
+      "resourceTimingEntries": null,
+      "requestCount": 1,
+      "encodedBytesObserved": 0,
+      "unfinishedRequests": 1,
+      "requestErrors": [],
+      "navigationErrors": [
+        "NAVIGATION_TIMEOUT"
+      ],
+      "pageErrors": [],
+      "blockedThirdParty": 0
+    },
+    {
+      "variant": "pages",
+      "scenario": "offline",
+      "profile": "local",
+      "sample": 0,
+      "simulationDelayMs": null,
+      "observationWindowMs": 25000,
+      "elapsedMs": 25007.45,
+      "documentTtfbMs": 2,
+      "htmlReadyMs": 885.1,
+      "fcpMs": 1200,
+      "lcpLastObserved": {
+        "startTime": 1200,
+        "size": 225120,
+        "tag": "IMG"
+      },
+      "loadMs": 1222.3,
+      "productsReadyMs": null,
+      "menuReadyMs": 1219.9,
+      "observedUntilMs": 25002.1,
+      "productCards": 0,
+      "statusVisible": true,
+      "resourceTimingEntries": 57,
+      "requestCount": 57,
+      "encodedBytesObserved": 5818065,
+      "unfinishedRequests": 0,
+      "requestErrors": [
+        {
+          "type": "Fetch",
+          "code": "net::ERR_ABORTED"
+        },
+        {
+          "type": "Fetch",
+          "code": "net::ERR_ABORTED"
+        },
+        {
+          "type": "Fetch",
+          "code": "net::ERR_ABORTED"
+        },
+        {
+          "type": "Fetch",
+          "code": "net::ERR_ABORTED"
+        }
+      ],
+      "navigationErrors": [],
+      "pageErrors": [],
+      "blockedThirdParty": 1
+    }
+  ],
+  "verification": {
+    "node": {
+      "command": "npm test",
+      "passed": 170,
+      "failed": 0,
+      "skipped": 0
+    },
+    "historical": {
+      "command": "npm run test:reto1",
+      "passed": 34,
+      "failed": 0
+    },
+    "browserRegression": {
+      "files": [
+        "frontend.spec.cjs",
+        "performance.spec.cjs",
+        "order-tracking.spec.cjs",
+        "billing.spec.cjs"
+      ],
+      "stats": {
+        "startTime": "2026-10-21T16:01:38.239Z",
+        "duration": 230976.206,
+        "expected": 36,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "fullBrowserSuite": false
+    },
+    "browserSeparated": {
+      "config": "tests/reto2/pages.config.cjs",
+      "stats": {
+        "startTime": "2026-10-21T16:01:38.340Z",
+        "duration": 91304.868,
+        "expected": 20,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    "scope": {
+      "changed": [
+        ".env.example",
+        ".gitignore",
+        "docs/RENDIMIENTO.md",
+        "frontend/controllers/catalog.js",
+        "frontend/controllers/layout.js",
+        "frontend/index.html",
+        "frontend/models/api.js",
+        "frontend/models/billing.js",
+        "frontend/views/admin.js",
+        "frontend/views/products.js",
+        "package.json",
+        "scripts/build-frontend.cjs",
+        "server/app.cjs",
+        "server/config.cjs"
+      ],
+      "added": [
+        "docs/DEPLOY_CLOUDFLARE.md",
+        "docs/SEPARACION_FRONTEND_BACKEND.md",
+        "docs/pruebas/separacion-frontend-2026-10-21.json",
+        "frontend/config.js",
+        "scripts/build-pages.cjs",
+        "scripts/measure-pages.cjs",
+        "tests/reto2/api-client.test.cjs",
+        "tests/reto2/cross-origin.test.cjs",
+        "tests/reto2/pages-build.test.cjs",
+        "tests/reto2/pages-server.cjs",
+        "tests/reto2/pages.config.cjs",
+        "tests/reto2/pages.spec.cjs",
+        "tests/reto2/static-urls.test.cjs"
+      ],
+      "removed": [],
+      "restoredTestCaptures": [
+        "docs/pruebas/reto2/capturas/facturacion-borrador-escritorio.png",
+        "docs/pruebas/reto2/capturas/facturacion-borrador-movil.png",
+        "docs/pruebas/reto2/capturas/seguimiento-pedidos-cancelado-escritorio.png",
+        "docs/pruebas/reto2/capturas/seguimiento-pedidos-cancelado-movil.png",
+        "docs/pruebas/reto2/capturas/seguimiento-pedidos-preparado-escritorio.png",
+        "docs/pruebas/reto2/capturas/seguimiento-pedidos-preparado-movil.png"
+      ],
+      "originalSourceUnchangedBeforeSync": true
+    },
+    "deployed": false,
+    "infrastructureChanged": false,
+    "newDependencies": false,
+    "schemaOrMigrationChanges": false,
+    "privateDatabaseQueried": false,
+    "publicImageOrigin": "Pending explicit public storage origin before enabling redirected images; no wildcard allowed.",
+    "originalWorkspaceRetest": {
+      "files": [
+        "api-client.test.cjs",
+        "cross-origin.test.cjs",
+        "pages-build.test.cjs",
+        "static-urls.test.cjs"
+      ],
+      "passed": 31,
+      "failed": 0,
+      "sourceFilesIdenticalToReviewedBranch": true
+    },
+    "deliveredArtifact": {
+      "files": 89,
+      "bytes": 13813376,
+      "maxFileBytes": 2650904,
+      "apiOrigin": "https://farmacia-reina-del-cisne.onrender.com",
+      "imageOrigin": "",
+      "publicImageOriginPending": true,
+      "privateFileScan": "passed",
+      "generatedInOriginalWorkspace": true
+    }
+  }
+}

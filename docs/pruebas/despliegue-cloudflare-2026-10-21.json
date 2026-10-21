@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-21",
+  "phase": "authorized-test-deployment",
+  "status": "prepared-not-deployed",
+  "repository": "elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne",
+  "baselineCommit": "1e5580596e89d0bac591a773210e99b220fd0dd0",
+  "frontendBranch": "codex/separacion-cloudflare",
+  "backendPatchCommit": "75aee3e67ca0e807e8047f5e53e9e9769275cac2",
+  "previousRender": {
+    "serviceId": "srv-db5sg2ss728c738t3n6g",
+    "url": "https://farmacia-reina-del-cisne.onrender.com",
+    "plan": "Free",
+    "region": "Virginia (US East)",
+    "branch": "main",
+    "autoDeploy": "On Commit",
+    "deployedCommit": "1e5580596e89d0bac591a773210e99b220fd0dd0",
+    "buildCommand": "npm ci --include=dev && npm run setup:production",
+    "startCommand": "npm start",
+    "healthCheck": "/api/salud",
+    "corsOriginVariable": "not listed in service environment; current fallback is RENDER_EXTERNAL_URL",
+    "skipInitialSeed": true,
+    "imageStorage": "supabase",
+    "publicImageOrigin": "https://xjxnnqasikxlytjaxjdt.supabase.co",
+    "publicBucket": "farmaciaproductos"
+  },
+  "artifact": {
+    "files": 94,
+    "bytes": 13852372,
+    "modulesChecked": 34,
+    "missingRelativeImports": 0
+  },
+  "checks": {
+    "integratedNode": 177,
+    "historical": 38,
+    "backendMinimalNode": 144,
+    "browser": {
+      "sameOrigin": 54,
+      "twoOrigins": 20
+    }
+  },
+  "actions": [],
+  "limitations": [
+    "Test URL not created yet",
+    "No production database writes or public load testing",
+    "No DNS or paid plan changes"
+  ]
+}

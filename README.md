@@ -322,10 +322,11 @@ La BD, respaldos e imágenes de trabajo se excluyen de Git/ZIP. Conserva `server
 ~~~powershell
 npm test
 npm run test:browser
+npx playwright test --config tests/reto2/pages.config.cjs
 npm audit
 ~~~
 
-**136 pruebas Node:** API, fiscalidad, PVP, lotes/FEFO, migración histórica, firma/XML/SOAP SRI simulado, imágenes, respaldo, publicación de campañas y configuración de producción. **40 pruebas Chrome:** recorridos en escritorio/móvil, con comprobaciones adicionales a 320, 768 y 1920 px, teclado, axe y descuento consistente desde administrador hasta pedido. Las pruebas estáticas verifican las páginas de GitHub Pages, los recursos y la integración de mascotas. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración. Las suites SRI utilizan datos y certificados sintéticos; no autorizan comprobantes reales.
+**177 pruebas Node:** API, fiscalidad, PVP, lotes/FEFO, migración histórica, firma/XML/SOAP SRI simulado, imágenes, respaldo, publicación de campañas y configuración de producción. **54 pruebas Chrome en el mismo origen:** recorridos en escritorio/móvil, con comprobaciones adicionales a 320, 768 y 1920 px, teclado, axe y descuento consistente desde administrador hasta pedido. **20 pruebas Chrome entre orígenes** cubren Pages/API, roles, carga/error, imágenes y descargas privadas. **38 pruebas históricas** verifican las páginas de GitHub Pages, los recursos y la integración de mascotas. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración. Las suites SRI utilizan datos y certificados sintéticos; no autorizan comprobantes reales.
 
 El agente C# se prueba por separado con `dotnet test services/inventory-agent/tests/InventoryAgent.Tests.csproj --configuration Release` y .NET SDK 10. Las pruebas HTTP y de canales simulan los envíos. Las pruebas de PostgreSQL exigen la variable privada `INVENTORY_AGENT_TEST_CONNECTION`, crean esquemas temporales propios y los retiran al finalizar; sin esa variable se omiten explícitamente. El workflow [inventory-agent.yml](.github/workflows/inventory-agent.yml) utiliza PostgreSQL 17 independiente de la farmacia. Consulta [los resultados del agente](docs/pruebas/reto2/inventory-agent-results.json).
 
@@ -361,3 +362,9 @@ Genera **entrega/Reto2_Olmedo_Elkin.zip** con frontend/backend MVC, schema/migra
 
 SQLite sirve para la instalación local; la aplicación pública utiliza PostgreSQL y Storage de Supabase. Rate limit en memoria de una instancia. Los respaldos automáticos SQLite requieren el servidor activo y espacio disponible; no cubren los servicios de nube. Render y Supabase gratuitos tienen límites y pausas por inactividad, sin garantía de disponibilidad continua. El nuevo agente todavía requiere cuentas, plantillas y configuración privada: para Gmail SMTP necesita alojamiento siempre activo con puertos SMTP disponibles; Render Free bloquea esos puertos. No se implementan pasarela bancaria, logística automática, MFA, recuperación de clave ni verificación de correo. El administrador actualiza los estados; el pago y la entrega se coordinan con la farmacia. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
 
+
+## Frontend estático independiente de Render
+
+La rama prepara un artefacto MVC para Cloudflare Pages mediante `npm run build:pages`, sin sustituir la tienda histórica de GitHub Pages. Conserva la API y la autorización en Express, el asistente administrativo, las estadísticas por categoría y las mascotas contextuales. La configuración pública permite un origen API exacto y las imágenes subidas permanecen en el backend/almacenamiento.
+
+Consulta el [plan y límites de la separación](docs/SEPARACION_FRONTEND_BACKEND.md), la [guía de Pages](docs/DEPLOY_CLOUDFLARE.md), el [diagnóstico de rendimiento](docs/RENDIMIENTO.md) y la [auditoría inicial](docs/AUDITORIA_INICIAL.md). Las evidencias de rendimiento anteriores proceden de la copia local auditada. La integración conserva las funciones adicionales del historial remoto y pasó las suites completas Node, históricas y de navegador; el detalle está en la [verificación de integración](docs/pruebas/integracion-cloudflare-2026-10-21.json).

@@ -16,6 +16,8 @@ const storeHeader=header.replace('class="shop-cart"','class="shop-cart" data-cus
 const storeFooter=footer.replace('<p><a href="pedidos.html">','<p data-customer-only><a href="pedidos.html">');
 const pagination=prefix=>`<nav class="pagination" aria-label="Paginación"><button id="${prefix}-prev" class="button button-outline">Anterior</button><span id="${prefix}-page-info" role="status"></span><button id="${prefix}-next" class="button button-outline">Siguiente</button></nav>`;
 let home=fs.readFileSync('index.html','utf8').match(/<main[^>]*>[\s\S]*?<\/main>/)[0].replace(/<main[^>]*>/,'').replace(/<\/main>$/,'');
+home=home.replace('assets/images/farmacia-fachada-reina.png','assets/images/farmacia-fachada-reina.webp');
+home=home.replace('id="featured-products"></div>','id="featured-products" data-loading aria-live="polite">Cargando productos…</div>');
 home=home.replace(/<noscript>[\s\S]*?<\/noscript>/g,'').replace('Tus datos se guardan solo en este navegador para que puedas continuar después. No se envían hasta que abras WhatsApp.','Tus datos no se envían hasta que abras WhatsApp y confirmes el mensaje.').replace('Borrar datos guardados','Limpiar formulario').replace('Puedes preparar tu pedido y enviarlo por WhatsApp. Las cuentas, opiniones y pagos con tarjeta son una demostración local; el sitio no realiza cobros reales.','Puedes registrarte, iniciar sesión y confirmar tu pedido. El pago y la entrega se coordinan directamente con la farmacia.').replace('Estamos preparando nuevas campañas para ti.','Cargando promociones…');
 const pages={
   'index.html':['home','Farmacia Reina del Cisne',home],

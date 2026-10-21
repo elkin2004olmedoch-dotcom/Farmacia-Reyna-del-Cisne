@@ -143,7 +143,7 @@ export async function mascotaController(){
     try{
       const response=await fetch(new URL('sprites/manifest.json',ASSETS),{cache:'no-cache'});
       if(!response.ok)return;const next=await response.json();if(next.schema!=='farmacia-companions-1')return;
-      manifest=next;for(const item of next.characters){item.imagePath=`${item.atlas}?v=${item.atlasSha256||next.generatedAt}`;image(item.imagePath);}
+      manifest=next;for(const item of next.characters){item.imagePath=`${item.atlas}?v=${item.atlasSha256||next.generatedAt}`;}
       if(next.complete && refreshTimer){clearInterval(refreshTimer);refreshTimer=null;}
       if(!clip())setState('idle');
     }catch(_){/* Store navigation remains usable if sprite resources are unavailable. */}

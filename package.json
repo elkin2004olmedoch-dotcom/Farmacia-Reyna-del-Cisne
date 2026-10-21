@@ -25,7 +25,8 @@
     "package": "powershell -ExecutionPolicy Bypass -File scripts/crear-reto2.ps1",
     "cert:dev": "node scripts/create-dev-cert.cjs",
     "start:https": "node scripts/https-dev.cjs",
-    "verify": "node scripts/verify-reto2.cjs"
+    "verify": "node scripts/verify-reto2.cjs",
+    "build:pages": "node scripts/build-pages.cjs"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",

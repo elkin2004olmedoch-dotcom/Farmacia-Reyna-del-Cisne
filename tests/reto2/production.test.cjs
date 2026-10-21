@@ -159,7 +159,7 @@ test('precios, cliente y seed usan PostgreSQL aunque el cliente SQLite predeterm
   const discounted = prices.module.exports.effectivePrice({id: 'p', precio: '4.50', activo: true}, [{id: 'promo', activa: true, vistaPrevia: false, descuentoPorcentaje: 20, orden: 0}]);
   assert.equal(discounted.precio.toFixed(2), '3.60');
   assert.equal(discounted.precioOriginal.toFixed(2), '4.50');
-  const db = {module: {exports: {}}, require: requested => requested === './prisma-client.cjs' ? selected : stub};
+  const db = {module: {exports: {}}, require: requested => requested === '../diagnostics.cjs' ? require('../../server/diagnostics.cjs') : requested === './prisma-client.cjs' ? selected : stub};
   vm.runInNewContext(fs.readFileSync(path.join(directory, 'db.cjs'), 'utf8'), db);
   assert.equal(db.module.exports.provider, 'postgresql');
   let isolation;
@@ -199,6 +199,7 @@ test('arranque remoto omite respaldos SQLite y el arranque local los conserva', 
       process: {env: {DATABASE_URL: url}, on() {}},
       console: {info() {}, error() {}},
       require: requested => {
+        if (requested === './diagnostics.cjs') return require('../../server/diagnostics.cjs');
         if (requested === 'node:fs') return {};
         if (requested === 'node:http' || requested === 'node:https') return {createServer: () => ({listen() {listens++;}, close() {}})};
         if (requested === './config.cjs') return () => ({port: 3000, host: '0.0.0.0'});
