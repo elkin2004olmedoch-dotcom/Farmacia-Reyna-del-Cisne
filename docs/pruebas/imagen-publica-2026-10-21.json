@@ -1,0 +1,54 @@
+{
+  "scope": "Two authorized sequential HEAD checks of one public product image. Exact destination validated before Supabase request; no redirects followed, authentication, listing, keys, database access, writes, browser, or performance benchmark.",
+  "startedAt": "2026-10-21T16:56:48.437632+00:00",
+  "finishedAt": "2026-10-21T16:56:49.280070+00:00",
+  "requestCount": 2,
+  "tlsVerification": "Python default CA chain and hostname verification enabled",
+  "records": [
+    {
+      "requestNumber": 1,
+      "method": "HEAD",
+      "surface": "Render public upload",
+      "path": "/assets/uploads/62113271-4b00-4b07-bb3e-92419a0c405b.webp",
+      "at": "2026-10-21T16:56:48.466380+00:00",
+      "credentialsSent": false,
+      "status": 302,
+      "headers": {
+        "content-length": "0",
+        "cross-origin-resource-policy": "cross-origin",
+        "location": "https://xjxnnqasikxlytjaxjdt.supabase.co/storage/v1/object/public/farmaciaproductos/62113271-4b00-4b07-bb3e-92419a0c405b.webp",
+        "cache-control": "public, max-age=86400",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "916face4-5222-446c-be45-6813b06b714e",
+        "server": "cloudflare"
+      },
+      "checks": {
+        "expected302": true,
+        "corpCrossOrigin": true,
+        "exactExpectedPublicLocation": true,
+        "redirectNotAutomaticallyFollowed": true
+      }
+    },
+    {
+      "requestNumber": 2,
+      "method": "HEAD",
+      "surface": "Supabase public image",
+      "path": "/storage/v1/object/public/farmaciaproductos/62113271-4b00-4b07-bb3e-92419a0c405b.webp",
+      "at": "2026-10-21T16:56:48.785427+00:00",
+      "credentialsSent": false,
+      "status": 200,
+      "headers": {
+        "content-type": "image/webp",
+        "content-length": "39056",
+        "cache-control": "private, no-cache",
+        "etag": "\"63a40227a395af534a621a93b4651069\"",
+        "server": "cloudflare"
+      },
+      "checks": {
+        "expected200": true,
+        "imageWebp": true,
+        "noAuthenticationUsed": true
+      }
+    }
+  ]
+}

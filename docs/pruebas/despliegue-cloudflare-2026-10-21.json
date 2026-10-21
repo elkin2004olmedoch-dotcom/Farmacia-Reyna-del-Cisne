@@ -1,7 +1,7 @@
 {
   "date": "2026-10-21",
   "phase": "authorized-test-deployment",
-  "status": "prepared-not-deployed",
+  "status": "test-deployment-verified",
   "repository": "elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne",
   "baselineCommit": "1e5580596e89d0bac591a773210e99b220fd0dd0",
   "frontendBranch": "codex/separacion-cloudflare",
@@ -36,12 +36,178 @@
     "browser": {
       "sameOrigin": 54,
       "twoOrigins": 20
+    },
+    "staticPublicHttp": 18,
+    "backendReadonlyHttp": 10,
+    "realPublicImageHeads": 2,
+    "publicBrowser": {
+      "passed": 5,
+      "failed": 0,
+      "mutationsBlocked": 0,
+      "commercialWrites": 0,
+      "firstAttempt": "The initial mobile harness navigated away before the asynchronous stock check completed. The harness now waits for cart acknowledgement; all five scenarios were rerun and passed without changing product code.",
+      "delayedApi": {
+        "delayMs": 30000,
+        "shellAndMenuReadyMs": 1330,
+        "cardsReadyBeforeContextCleanupMs": 31616,
+        "simulation": "Only the test browser held API traffic; Render remained available to other clients"
+      },
+      "axe": "No automated WCAG 2 A/AA and 2.1 A/AA violations on the public home at 1440 and 375 px, with third-party frame traffic blocked; not a complete accessibility certification"
+    },
+    "integratedTotal": 289,
+    "publicPerformance": {
+      "navigations": 6,
+      "pairs": 3,
+      "html200": 6,
+      "cardsPerNavigation": 4,
+      "errors": 0,
+      "pendingRequests": 0,
+      "commercialWrites": 0
     }
   },
-  "actions": [],
+  "actions": [
+    "Pushed tested frontend branch preserving history; main untouched",
+    "Created Git-integrated Pages project on free plan and deployed test URL",
+    "Disabled automatic Pages previews of unrelated branches",
+    "Saved exact CORS_ORIGIN only; existing secret variables untouched",
+    "Manually deployed minimal CORP backend commit on existing service",
+    "Verified public HTML/modules/security headers/CORS/barriers/storage and five browser scenarios"
+  ],
   "limitations": [
-    "Test URL not created yet",
-    "No production database writes or public load testing",
-    "No DNS or paid plan changes"
-  ]
+    "Authenticated customer/admin, order/stock/billing writes and ownership tested with temporary SQLite fixtures, not production data",
+    "No payment gateway exists; no real SRI issuance, payments or commercial orders",
+    "No DNS, main domain or paid plan changes",
+    "Render Free API may suspend after inactivity; static independence does not remove backend startup latency",
+    "Valid production-account write flows were intentionally not exercised; only local fixtures cover them",
+    "Pages test URL verified; main domain/DNS and commercial activation not promoted",
+    "Render Auto-Deploy remains Off after manual specific-commit deployment; integrate minimal patch into chosen backend branch before future promotion",
+    "Git push events were reported degraded by Cloudflare during setup; initial Git build succeeded, future delivery during provider incident not inferred"
+  ],
+  "pages": {
+    "url": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "deploymentUrl": "https://8c4a0c9e.farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "deploymentId": "8c4a0c9e-710e-40f4-b50e-f1b5f850745e",
+    "commit": "28cbed850d242d0a0f268613c5057a70577af186",
+    "branch": "codex/separacion-cloudflare",
+    "automaticBranchDeployments": true,
+    "automaticOtherBranchPreviews": false,
+    "buildCommand": "node scripts/build-pages.cjs",
+    "rootDirectory": "",
+    "outputDirectory": "dist/pages",
+    "node": "24.15.0",
+    "skipDependencyInstall": true,
+    "artifactFiles": 94,
+    "artifactBytesLinux": 13847992,
+    "headerRules": 1,
+    "functions": false
+  },
+  "render": {
+    "url": "https://farmacia-reina-del-cisne.onrender.com",
+    "deployId": "dep-dbceq0uktt5c73f6satg",
+    "commit": "75aee3e67ca0e807e8047f5e53e9e9769275cac2",
+    "status": "Live",
+    "duration": "1m06s",
+    "configuredBranch": "main",
+    "autoDeploy": "Off; confirmed in Settings after specific-commit deployment",
+    "corsOrigin": "https://farmacia-reina-del-cisne.onrender.com,https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "node": "22.23.4 (existing NODE_VERSION=22)",
+    "schemaChanges": false,
+    "seedSkipped": true,
+    "buildPipeline": "existing setup:production ran migrate deploy with unchanged schema/migrations",
+    "startupEvidence": {
+      "deploying": "2026-10-21 16:49:41 UTC",
+      "npmStart": "2026-10-21 16:49:57 UTC",
+      "httpListening": "2026-10-21 16:50:02 UTC",
+      "firstHealthExpressMs": 528,
+      "nextHealthExpressMs": 61,
+      "interpretation": "Controlled deployment, not a measured idle wake. Health includes Prisma/network/query work; it is not pure SQL duration."
+    }
+  },
+  "performance": {
+    "publicActiveApi": {
+      "samplesPerVariant": 3,
+      "addedNetworkProfile": "10 Mbps down / 5 Mbps up / 40 ms CDP in addition to real network; no CPU throttle",
+      "render": {
+        "ttfbMs": 169.4,
+        "htmlReadyMs": 1149.2,
+        "fcpMs": 1856,
+        "lcpMs": 9368,
+        "cardsReadyMs": 2625.1,
+        "menuReadyMs": 2418.1,
+        "encodedBytes": 10363422,
+        "requests": 64,
+        "proxyMs": [
+          821.77,
+          861.3,
+          866.06
+        ]
+      },
+      "pages": {
+        "ttfbMs": 126.6,
+        "htmlReadyMs": 1161.9,
+        "fcpMs": 1856,
+        "lcpMs": 5828,
+        "cardsReadyMs": 2476.6,
+        "menuReadyMs": 2159.4,
+        "encodedBytes": 6408284,
+        "requests": 63,
+        "proxyMs": [
+          0,
+          847.84,
+          876.55
+        ]
+      },
+      "limits": [
+        "Fresh anonymous contexts/cache disabled; real CDN cache not controlled",
+        "Normal browser system proxy variable, recorded and not subtracted",
+        "API already active; no measured idle wake or field p75",
+        "Frontend optimizations and hosting combined; no single-provider causal percentage"
+      ]
+    },
+    "historicalRegression": "Controlled direct-loopback profile no longer reproduced the 868 ms gap; original samples lacked proxy phase and remain preserved"
+  },
+  "readiness": {
+    "testUrl": "published and verified",
+    "additionalMonthlyCostUsd": 0,
+    "mainGitBranchChanged": false,
+    "dnsChanged": false,
+    "mainDomainChanged": false,
+    "newCommercialActivation": false,
+    "schemaOrMigrationFilesChanged": false,
+    "secretsChanged": false,
+    "rollbackDocument": "docs/DEPLOY_CLOUDFLARE.md",
+    "futurePromotion": "Requires owner approval for domain/DNS or real commercial activation; backend patch/auto-deploy workflow recorded"
+  },
+  "evidenceFiles": [
+    {
+      "path": "docs/pruebas/pages-http-publico-2026-10-21.json",
+      "bytes": 21964,
+      "sha256": "d031afad940ed3d681156baf199444ab550d2df76ce2cff8b3eb836924518053"
+    },
+    {
+      "path": "docs/pruebas/render-cors-publico-2026-10-21.json",
+      "bytes": 12972,
+      "sha256": "146ccd34b20ced02737358e1d485ceb9d5323158c568dae206e088bca35b19c7"
+    },
+    {
+      "path": "docs/pruebas/imagen-publica-2026-10-21.json",
+      "bytes": 2054,
+      "sha256": "40403d0b9673bcb5bf5f9023df3984a80b0fae79c7bf043a7dd948f6b159178b"
+    },
+    {
+      "path": "docs/pruebas/pages-navegador-publico-2026-10-21.json",
+      "bytes": 5174,
+      "sha256": "62835c5f88e9400744a26eaf76799faa828c590297ba6013de34ef2a44ba362d"
+    },
+    {
+      "path": "docs/pruebas/comparacion-publica-render-pages-2026-10-21.json",
+      "bytes": 570688,
+      "sha256": "cd4313a45423c71a7d64307f74cce889a50403c8ac17983c7594299531ce5d5d"
+    }
+  ],
+  "publicScreenshot": {
+    "path": "docs/pruebas/pages-portada-publicada-2026-10-21.png",
+    "sha256": "e56a643c6f28fd0546c380c316dc30c45466321d0210879ad7b230d5555d4d72",
+    "scope": "Anonymous public landing-page viewport; additional read-only visual verification, outside six benchmark navigations"
+  }
 }

@@ -338,3 +338,40 @@ node scripts/measure-pages.cjs remoto-integrado-directo --baseline-root $baselin
 ```
 
 Son tres pares locales con API caliente, sin CDN, TLS ni tráfico real de Render/Cloudflare. No se repitieron los casos de API demorada o sin respuesta, ni se interpreta este LCP observado como un percentil de usuarios reales.
+
+## Comparación de las URLs publicadas
+
+Después de la autorización autónoma se publicó y verificó [Pages de prueba](https://farmacia-reyna-del-cisne-pruebas.pages.dev/), código `28cbed8`, frente a [Render existente](https://farmacia-reina-del-cisne.onrender.com/), backend mínimo `75aee3e`. Render sigue sirviendo su frontend anterior. No se cambió el dominio principal ni DNS. La configuración y reversión están en [DEPLOY_CLOUDFLARE.md](DEPLOY_CLOUDFLARE.md).
+
+Se realizaron **seis navegaciones secuenciales, tres pares Render/Pages**, desde las 17:00 UTC del 2026-10-21. Chrome 155.0.8059.86, Node 24.15.0, escritorio 1440×1000, contexto anónimo nuevo y caché desactivada por muestra, service workers bloqueados, sin límite de CPU ni traza. Se mantuvo el proxy normal del navegador, sin alterar el sistema ni aplicar el control loopback a destinos públicos. La limitación CDP añade 40 ms a la red real, con 10 Mbps de descarga y 5 Mbps de subida; no sustituye la latencia real ni controla las cachés de borde. Las suites estuvieron cerradas.
+
+Solo se permitieron los orígenes exactos Render, Pages y Supabase. Se bloquearon terceros, incluido Maps, y cualquier método distinto de GET/HEAD/OPTIONS. No hubo login, cuentas, pagos, pedidos ni cambios de stock. La observación no usó clicks ni foco que cortaran LCP. Las seis muestras tuvieron HTML 200, cuatro tarjetas, cero errores de página/navegación/solicitudes/HTTP y cero solicitudes pendientes; Chrome terminó cerrado.
+
+| Mediana de tres muestras | Render publicado | Pages publicado |
+| --- | ---: | ---: |
+| TTFB documento (`responseStart-requestStart`) | 169,4 ms | 126,6 ms |
+| HTML recibido desde inicio de navegación (`responseEnd`) | 1.149,2 ms | 1.161,9 ms |
+| FCP | 1.856 ms | 1.856 ms |
+| Último candidato LCP | 9.368 ms | 5.828 ms |
+| Cuatro tarjetas disponibles | 2.625,1 ms | 2.476,6 ms |
+| Estado del menú disponible | 2.418,1 ms | 2.159,4 ms |
+| Bytes CDP observados de los orígenes permitidos | 10.363.422 | 6.408.284 |
+| Solicitudes permitidas | 64 | 63 |
+
+El elemento LCP fue la misma fachada, 225.120 píxeles visibles, PNG en el frontend anterior y WebP en el integrado. La mejora observada combina recursos optimizados, eliminación de precargas de atlas inactivos y entrega desde Pages; no aísla cada causa. No hubo tareas largas de más de 50 ms. Ambos HTML usaron HTTP/2 y Brotli; Render respondió con caché DYNAMIC y Pages con revalidación. Las API conservaron no-store.
+
+La fase de proxy del documento fue 821,77/861,30/866,06 ms en Render y 0/847,84/876,55 ms en Pages. **No se restó ni corrigió esa demora**. El TTFB de la tabla la excluye; los relojes de HTML, FCP y LCP la incluyen. Tres pares, red real variable, API ya utilizada y CDN sin controlar no permiten inferir un p75, equivalencia estadística, el tiempo de despertar de Render ni un porcentaje causal de mejora por proveedor. FCP no mejoró en esta muestra y el LCP de 5,83 s con red limitada sigue dejando margen de optimización; no se promete 1–2 s de LCP.
+
+El [JSON público saneado](pruebas/comparacion-publica-render-pages-2026-10-21.json), SHA-256 `cd4313a45423c71a7d64307f74cce889a50403c8ac17983c7594299531ce5d5d`, conserva las seis navegaciones, waterfall, candidatos LCP y cabeceras técnicas permitidas, sin cuerpos, cookies, tokens o datos personales. El recorder de esta comprobación quedó en TEMP; no se añade un segundo benchmark al producto.
+
+### Disponibilidad, registros y estado final
+
+Cinco escenarios funcionales pasaron en la URL publicada: escritorio, móvil, API abortada, API retenida durante 30 s y sesión inválida. En la retención, shell y menú estuvieron disponibles a los **1.330 ms**; las cuatro tarjetas se observaron a los 31.616 ms tras liberar tráfico. Es una muestra funcional distinta, sin la limitación de red del benchmark: no se compara directamente con sus medianas ni representa un arranque en frío real. Con API abortada se mantuvo portada navegable y error accesible sin productos inventados. Las interceptaciones afectaron solo al navegador de prueba, sin suspender Render ni hacer carga agresiva. Hubo cero escrituras remotas y cero infracciones CSP observadas. Los resultados están en [la evidencia del navegador](pruebas/pages-navegador-publico-2026-10-21.json).
+
+Los logs del despliegue controlado Render registraron inicio a las 16:49:41 UTC, `npm start` a las 16:49:57 y escucha HTTP a las 16:50:02. El despliegue terminó Live en 1 min 6 s. Express registró el primer health en 528 ms y el siguiente en 61 ms; incluyen Prisma/red/consulta, no SQL puro. Se ejecutó el pipeline previo de migrate deploy sin nuevas migraciones y se confirmó seed omitido. Este reinicio planificado no demuestra un nuevo despertar por inactividad. No se añadieron servicios ni cambios de base para obtener más telemetría. Las limitaciones de atribución SQL y del episodio histórico se mantienen.
+
+Confirmado: estáticos independientes de la API, CORS exacto, CORP de uploads públicos corregido, imagen Supabase real 200, módulos MJS preservados, rutas privadas excluidas del artefacto y APIs sin caché. La comparación nueva no reproduce la regresión histórica de 868 ms al controlar loopback; tampoco permite reconstruir retrospectivamente sus fases. El LCP público observado disminuyó y el backend lento ya no retiene el HTML de Pages.
+
+Pendiente: medir un episodio real de suspensión con timestamps correlacionados de navegador/Render si vuelve a ocurrir; no se provocó una suspensión ni se midió su frecuencia. Las operaciones dinámicas siguen dependiendo de Render Free y pueden esperar su arranque. Antes de una promoción de dominio se debe integrar el parche mínimo en la rama de backend elegida y resolver Auto-Deploy, actualmente Off tras el despliegue por commit. Las cuentas válidas, permisos, ownership, escrituras y facturación se probaron con fixtures temporales, no con datos privados de producción; no se activó pasarela ni emisión SRI.
+
+Verificación integrada: **177 Node, 38 históricas, 54 navegador de un origen y 20 entre orígenes**, sin fallos ni omitidos; 18 GET estáticos, 10 comprobaciones API de solo lectura, dos HEAD de una imagen real y cinco escenarios públicos aprobados. La [evidencia de despliegue](pruebas/despliegue-cloudflare-2026-10-21.json) registra los servicios, commits, configuración, límites y reversión. Coste adicional contratado: **USD 0/mes**. No se tocaron DNS, dominio principal, secretos ni datos comerciales.

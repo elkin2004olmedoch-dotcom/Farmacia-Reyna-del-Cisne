@@ -13,6 +13,8 @@ Plataforma de farmacia con catálogo, carrito persistente, registro/login, pedid
 
 **Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite local o PostgreSQL en Supabase, y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.
 
+**Frontend independiente de prueba:** [Cloudflare Pages](https://farmacia-reyna-del-cisne-pruebas.pages.dev/) sirve los estáticos y consulta la API Render existente. Se verificaron 289 casos locales y cinco escenarios públicos; no se modificaron dominio principal, DNS ni datos comerciales. Configuración, límites y reversión en [DEPLOY_CLOUDFLARE.md](docs/DEPLOY_CLOUDFLARE.md), y mediciones en [RENDIMIENTO.md](docs/RENDIMIENTO.md#comparación-de-las-urls-publicadas).
+
 **Agente de reposición:** servicio adicional en C#/.NET 10, PostgreSQL/Npgsql y MailKit, con revisión diaria, auditoría, correo al proveedor y aprobación del gerente por Telegram/WhatsApp. El código y la arquitectura están en [services/inventory-agent](services/inventory-agent/) y [su guía de configuración](docs/AGENTE-INVENTARIO.md). Comienza desactivado; los envíos reales y el alojamiento de este servicio requieren completar la configuración privada del negocio.
 
 ## Administración de farmacia e impuestos

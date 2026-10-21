@@ -4,17 +4,19 @@
 
 El 2026-10-21 el propietario autorizó configurar y publicar una URL de prueba Pages con integración Git y ajustar el servicio Render existente. Esa autorización sustituye las restricciones de publicación de la fase local descrita más abajo. No incluye cambios de dominio/DNS, contratación, pagos reales, pedidos comerciales, eliminación de datos ni módulos nuevos.
 
-- [ ] Perfilar la regresión con caché vacía, red limitada, candidato LCP, waterfall y trazas. Aislar una causa por experimento antes de corregir; comparar con las mismas condiciones y conservar la evidencia desfavorable previa.
-- [ ] Integrar los cambios sobre el historial real de GitHub, en `codex/separacion-cloudflare`, conservando las funciones remotas de ayuda contextual y administración. No reemplazar el repositorio por el snapshot ni actualizar main.
-- [ ] Generar únicamente el artefacto estático con `scripts/build-pages.cjs`, origen API existente y origen público exacto de imágenes; revisar CSP, rutas, 404 y ausencia de archivos privados.
-- [ ] Crear Pages Git con raíz del repositorio, comando `node scripts/build-pages.cjs` y salida `dist/pages`. Conservar planes gratuitos, sin Workers ni cambios DNS. Solicitar al propietario solo autenticación/verificaciones indispensables.
-- [ ] Configurar CORS con los orígenes exactos Render y Pages, sin alterar credenciales. Verificar primero si el backend desplegado necesita cambios de código; evitar builds/migraciones innecesarios.
-- [ ] Ejecutar suites Node, históricas y todas las specs de navegador en bases temporales, con directorios de resultados separados. Las escrituras comerciales y pruebas de ownership usan fixtures locales; las comprobaciones públicas no modifican datos existentes.
-- [ ] Verificar la URL desplegada, recursos, API, restricciones, navegación móvil y disponibilidad del shell con API bloqueada en el navegador de prueba. Documentar métricas reales separadas de simulaciones, resultados, costes y reversión. Mantener Render y el dominio actual operativos.
+- [x] Perfilar la regresión con caché vacía, red limitada, candidato LCP, waterfall y trazas. Aislar una causa por experimento antes de corregir; comparar con las mismas condiciones y conservar la evidencia desfavorable previa.
+- [x] Integrar los cambios sobre el historial real de GitHub, en `codex/separacion-cloudflare`, conservando las funciones remotas de ayuda contextual y administración. No reemplazar el repositorio por el snapshot ni actualizar main.
+- [x] Generar únicamente el artefacto estático con `scripts/build-pages.cjs`, origen API existente y origen público exacto de imágenes; revisar CSP, rutas, 404 y ausencia de archivos privados.
+- [x] Crear Pages Git con raíz del repositorio, comando `node scripts/build-pages.cjs` y salida `dist/pages`. Conservar planes gratuitos, sin Workers ni cambios DNS. Solicitar al propietario solo autenticación/verificaciones indispensables.
+- [x] Configurar CORS con los orígenes exactos Render y Pages, sin alterar credenciales. Verificar primero si el backend desplegado necesita cambios de código; evitar builds/migraciones innecesarios.
+- [x] Ejecutar suites Node, históricas y todas las specs de navegador en bases temporales, con directorios de resultados separados. Las escrituras comerciales y pruebas de ownership usan fixtures locales; las comprobaciones públicas no modifican datos existentes.
+- [x] Verificar la URL desplegada, recursos, API, restricciones, navegación móvil y disponibilidad del shell con API bloqueada en el navegador de prueba. Documentar métricas reales separadas de simulaciones, resultados, costes y reversión. Mantener Render y el dominio actual operativos.
 
 Riesgos que deben verificarse: recursos Supabase bloqueados por CSP/CORP, imports o fuentes que retrasen la pintura, pérdida de funciones al combinar copias divergentes, mezcla de specs con servidores distintos y escrituras involuntarias en PostgreSQL de producción.
 
-Fecha: 2026-10-21. Preparación local, sin publicación ni cambios de infraestructura.
+Estado al cierre: [Pages de prueba publicado y verificado](https://farmacia-reyna-del-cisne-pruebas.pages.dev/), frontend `28cbed8` y backend mínimo `75aee3e` Live. Configuración exacta, pruebas, coste adicional USD 0 y reversión: [DEPLOY_CLOUDFLARE.md](DEPLOY_CLOUDFLARE.md). Métricas públicas y límites: [RENDIMIENTO.md](RENDIMIENTO.md#comparación-de-las-urls-publicadas). Main, dominio principal y DNS permanecen intactos. Render Auto-Deploy está Off después de seleccionar el commit; antes de una promoción futura debe integrarse el parche de backend en la rama elegida y revisar ese control.
+
+Las secciones siguientes conservan el registro histórico de la preparación local del 2026-10-21, antes de la autorización y el despliegue. Sus cifras y acciones pendientes corresponden a esa fase; el estado vigente es el cierre anterior y la evidencia enlazada.
 
 ## Análisis y diseño
 
