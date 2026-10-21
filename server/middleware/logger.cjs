@@ -2,6 +2,16 @@ const {randomUUID} = require('node:crypto');
 const {performance}=require('node:perf_hooks');
 const diagnostics=require('../diagnostics.cjs');
 const timedRoutes=new Set(['/','/index.html','/api/salud','/api/productos','/api/promociones','/api/auth/me','/api/auth/login','/api/auth/register']);
+const adminWrites=new Map([
+  ['POST /api/productos','product.create'],['PUT /api/productos/:id','product.update'],['DELETE /api/productos/:id','product.delete'],
+  ['POST /api/promociones','promotion.create'],['PUT /api/promociones/:id','promotion.update'],['DELETE /api/promociones/:id','promotion.delete'],
+  ['POST /api/admin/imagenes','image.upload'],['POST /api/admin/configuracion/fiscal','fiscal.configuration.create'],
+  ['POST /api/admin/proveedores','supplier.create'],['PUT /api/admin/proveedores/:id','supplier.update'],
+  ['POST /api/admin/lotes','inventory.lot.create'],['POST /api/admin/inventario/ajustes','inventory.adjust'],
+  ['PUT /api/pedidos/:id/estado','order.status.update'],
+  ['PUT /api/admin/facturacion/configuracion','billing.configuration.update'],['POST /api/admin/facturacion/certificado','billing.certificate.upload'],
+  ['POST /api/admin/facturacion/facturas','billing.invoice.create'],['POST /api/admin/facturacion/facturas/:id/emitir','billing.invoice.emit'],
+]);
 module.exports = function logger(req,res,next) {
   req.id=randomUUID();res.setHeader('X-Request-Id',req.id);
   const start=performance.now();const tracing=diagnostics.enabled();
@@ -19,6 +29,12 @@ module.exports = function logger(req,res,next) {
   }
   res.on('finish',()=> {
     if(!tracing && process.env.NODE_ENV!=='test') console.info(JSON.stringify({level:'info',requestId:req.id,method:req.method,path:req.path,status:res.statusCode,ms:diagnostics.elapsed(start)}));
+    // Audit only fixed route templates and the database-authenticated administrator, never request contents.
+    const template=typeof req.route?.path==='string'?req.route.path:'';
+    // Express restores baseUrl while propagating errors; registered templates remain available.
+    const route=template.startsWith('/api/')?template:'/api'+template;
+    const action=adminWrites.get(req.method+' '+route);
+    if(action && req.user?.role==='admin')console.info(JSON.stringify({level:'info',event:'admin_write',at:new Date().toISOString(),requestId:req.id,actorId:req.user.id,action,route,status:res.statusCode}));
   });
   next();
 };
