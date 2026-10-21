@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-21T17:44:15.547Z",
+  "frontend": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+  "frontendCommitReportedByRoot": "0672e41",
+  "backend": "Temporary local SQLite fixtures; not Render accounts",
+  "scenarios": [
+    {
+      "role": "user",
+      "login": true,
+      "reloadRestore": true,
+      "ordersVisible": 1,
+      "trackingVisible": true,
+      "logoutTokenCleared": true,
+      "revokedStatus": 401
+    },
+    {
+      "role": "user",
+      "login": true,
+      "otherCustomerOrdersVisible": 0,
+      "adminAreaHidden": true,
+      "adminApiStatus": 403
+    },
+    {
+      "role": "admin",
+      "login": true,
+      "reloadRestore": true,
+      "panelMetrics": 8,
+      "logoutTokenCleared": true,
+      "revokedStatus": 401
+    }
+  ],
+  "documents": [
+    {
+      "status": 200,
+      "cspPresent": true,
+      "cspAllowsRender": true,
+      "cspNoInlineEval": true
+    },
+    {
+      "status": 200,
+      "cspPresent": true,
+      "cspAllowsRender": true,
+      "cspNoInlineEval": true
+    },
+    {
+      "status": 200,
+      "cspPresent": true,
+      "cspAllowsRender": true,
+      "cspNoInlineEval": true
+    },
+    {
+      "status": 200,
+      "cspPresent": true,
+      "cspAllowsRender": true,
+      "cspNoInlineEval": true
+    },
+    {
+      "status": 200,
+      "cspPresent": true,
+      "cspAllowsRender": true,
+      "cspNoInlineEval": true
+    },
+    {
+      "status": 200,
+      "cspPresent": true,
+      "cspAllowsRender": true,
+      "cspNoInlineEval": true
+    },
+    {
+      "status": 200,
+      "cspPresent": true,
+      "cspAllowsRender": true,
+      "cspNoInlineEval": true
+    },
+    {
+      "status": 200,
+      "cspPresent": true,
+      "cspAllowsRender": true,
+      "cspNoInlineEval": true
+    }
+  ],
+  "routing": {
+    "pagesContinued": 636,
+    "renderIntercepted": 21,
+    "renderOptionsIntercepted": 0,
+    "otherOriginsAborted": 0,
+    "renderContinued": 0
+  },
+  "pageErrorCount": 0,
+  "cspViolationCount": 0,
+  "guards": {
+    "renderDnsBlocked": true,
+    "renderProxyBypassed": true,
+    "serviceWorkersBlocked": true
+  },
+  "limits": [
+    "Real published HTML, config, scripts and CSP; API responses exclusively from local fixtures",
+    "No real accounts, orders, stock, SRI, payments or cookies forwarded to Render",
+    "No public API requests, including preflight; target-specific browser DNS/proxy guards remain enabled",
+    "No screenshots, response bodies, tokens, customer names or credentials in this report"
+  ],
+  "preflightSafetyProbe": {
+    "status": 401,
+    "renderDnsBlocked": true,
+    "renderOptionsIntercepted": 0
+  },
+  "ok": true,
+  "cleanup": {
+    "browserClosed": true,
+    "listenerClosed": true,
+    "fixtureDisconnected": true
+  }
+}

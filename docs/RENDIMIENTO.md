@@ -375,3 +375,117 @@ Confirmado: estáticos independientes de la API, CORS exacto, CORP de uploads p�
 Pendiente: medir un episodio real de suspensión con timestamps correlacionados de navegador/Render si vuelve a ocurrir; no se provocó una suspensión ni se midió su frecuencia. Las operaciones dinámicas siguen dependiendo de Render Free y pueden esperar su arranque. Antes de una promoción de dominio se debe integrar el parche mínimo en la rama de backend elegida y resolver Auto-Deploy, actualmente Off tras el despliegue por commit. Las cuentas válidas, permisos, ownership, escrituras y facturación se probaron con fixtures temporales, no con datos privados de producción; no se activó pasarela ni emisión SRI.
 
 Verificación integrada: **177 Node, 38 históricas, 54 navegador de un origen y 20 entre orígenes**, sin fallos ni omitidos; 18 GET estáticos, 10 comprobaciones API de solo lectura, dos HEAD de una imagen real y cinco escenarios públicos aprobados. La [evidencia de despliegue](pruebas/despliegue-cloudflare-2026-10-21.json) registra los servicios, commits, configuración, límites y reversión. Coste adicional contratado: **USD 0/mes**. No se tocaron DNS, dominio principal, secretos ni datos comerciales.
+
+## Optimización de la fachada para el objetivo LCP de 2,5 s
+
+El 21 de octubre de 2026 se investigó el coste de la fachada sin cambiar el diseño ni las funciones de la tienda. La imagen WebP anterior era **lossless**, conservaba 1672×941 y ocupaba **1.647.804 bytes**. El waterfall público de las 17:00 UTC ya mostraba que el navegador la solicitaba con prioridad `High`, entre 18 y 23 ms después de recibir el HTML; su descarga terminaba solo entre 46 y 56 ms antes del último candidato LCP. No aparecieron tareas largas de más de 50 ms. La evidencia señalaba el volumen de la imagen y el ancho de banda compartido con otros recursos; no justificaba añadir preload ni reescribir CSS, fuentes o JavaScript.
+
+### Nueva observación pública anterior al cambio
+
+Antes de sustituir el archivo se conservaron **otros tres pares Render/Pages**, seis navegaciones iniciadas a las **17:19 UTC**, con API activa. Se mantuvieron Chrome 155.0.8059.86, Node 24.15.0, viewport 1440×1000, contexto anónimo nuevo, caché desactivada, service workers bloqueados y el proxy normal del navegador. La red real recibió la limitación CDP adicional de 10 Mbps/5 Mbps y 40 ms, sin limitar CPU. Solo se permitieron GET/HEAD/OPTIONS hacia los orígenes exactos Render, Pages y Supabase; Maps y el resto de terceros quedaron bloqueados.
+
+| Mediana de tres muestras, antes del cambio | Render publicado | Pages publicado |
+| --- | ---: | ---: |
+| TTFB documento (`responseStart-requestStart`) | 153,6 ms | 77,9 ms |
+| HTML recibido (`responseEnd`) | 302,6 ms | 184,3 ms |
+| FCP | 932 ms | 760 ms |
+| Último candidato LCP | 5.608 ms | 4.180 ms |
+
+Las seis muestras tuvieron HTML 200, cuatro tarjetas, cero errores de página, navegación, solicitudes o HTTP y cero solicitudes pendientes. La fase proxy del documento fue **0 ms en las seis** y no hubo tareas largas de más de 50 ms. El [JSON de esta observación previa](pruebas/lcp-publico-antes-2026-10-21.json) conserva las muestras y el waterfall. Sus 4.180 ms de Pages no reemplazan los 5.828 ms históricos de las 17:00 UTC: son observaciones de momentos diferentes, con red y cachés de borde variables. No se mezclan muestras ni se calcula una mejora causal de hosting entre ellas.
+
+### Conversión y conservación visual
+
+Se recodificó únicamente `frontend/assets/images/farmacia-fachada-reina.webp` desde el PNG original con **Sharp 0.35.5, calidad 95 y esfuerzo 6**, sin redimensionar ni recortar. El archivo pasó a **391.110 bytes**, 1.256.694 bytes menos. Se eligió calidad 95 tras comparar también variantes 90 y 85; es la opción más conservadora de esas tres. El PNG original y la tienda histórica permanecen intactos.
+
+Se conservaron la ruta, el texto alternativo, `fetchpriority="high"`, las dimensiones naturales **1672×941** y las reglas CSS de encuadre, borde y rotación. No se añadieron preload, variantes responsive, dependencias ni cambios de HTML, CSS, fuentes o módulos JavaScript. La comparación de los **92 archivos públicos** del manifiesto congelado detectó una sola diferencia: el WebP de la fachada. Los hashes, parámetros y alcance de esa comparación están en [la evidencia de imagen](pruebas/lcp-imagen-2026-10-21.json). El RMSE RGB fue 4,4987 y el PSNR 35,069 dB frente al PNG; estas métricas no prueban equivalencia perceptual ni igualdad de píxeles.
+
+La [revisión visual local](pruebas/lcp-qa-visual-2026-10-21.json) comparó seis capturas con los CSS reales, una antes y otra después para cada ancho. Se esperó a las fuentes y a la decodificación de la foto; API y destinos externos estuvieron bloqueados, sin cargar entorno ni base de datos.
+
+| Ancho del viewport | Imagen según CSS, antes y después | Geometría y atributos |
+| --- | ---: | --- |
+| 1440 px | 601,5×360 px | Iguales |
+| 768 px | 328×310 px | Iguales |
+| 375 px | 311×265 px | Iguales |
+
+Se inspeccionaron las tres parejas: no se apreció degradación material de letreros, fachada, colores o encuadre; borde, rotación y distribución del pie coincidieron. Los seis HTML respondieron 200 y hubo cero errores JavaScript. Chrome y los dos listeners temporales quedaron cerrados. Las seis capturas permanecen en TEMP con rutas sustituidas por `%TEMP%` y SHA-256 en el JSON; no se incorporan imágenes voluminosas al repositorio. Esta revisión visual no mide rendimiento ni prueba el funcionamiento de la API.
+
+### Control local con API activa
+
+La baseline nueva es el frontend integrado del commit **`86804e7`**, congelado antes de esta conversión, ya preparado para Pages y con la fachada WebP lossless. Su manifiesto de 92 archivos públicos tiene SHA-256 `b1631e853276b6bebe76385df5bb27593fc38e8e23c39d12ce19f42b48dec50a`. No es la baseline remota `1e55805` ni la tienda anterior que solicitaba PNG.
+
+A las **17:28 UTC** se ejecutaron **tres pares secuenciales**, seis navegaciones sin traza, usando la misma API y SQLite temporal activa. Chrome 155, Node 24.15.0, viewport 1440×1000, caché desactivada, contextos nuevos, 10 Mbps/5 Mbps, 40 ms y CPU sin limitar. `--direct-loopback` aplicó `--no-proxy-server` solo al Chrome temporal del laboratorio; no cambió el proxy del sistema ni se utilizó para destinos públicos. Los terceros estuvieron bloqueados y la fase proxy del documento fue 0 ms en las seis muestras. No se ejecutaron escenarios de demora o falta de respuesta en este control.
+
+| Mediana de tres muestras locales | Baseline lossless (`coupled`) | Fachada calidad 95 (`pages`) |
+| --- | ---: | ---: |
+| TTFB documento | 3,0 ms | 2,8 ms |
+| HTML recibido | 73,0 ms | 68,6 ms |
+| FCP | 704 ms | 696 ms |
+| Último candidato LCP | 4.692 ms | **1.272 ms** |
+| Cuatro tarjetas disponibles | 1.638,2 ms | 1.549,3 ms |
+| Estado del menú disponible | 1.536,4 ms | 1.460,1 ms |
+| Solicitudes permitidas | 63 | 63 |
+
+Los LCP individuales de calidad 95 fueron **1.228, 1.272 y 1.364 ms**: las tres muestras cumplieron 2,5 s en este control. La baseline registró 5.044, 4.676 y 4.692 ms. El candidato siguió siendo la fachada, con 225.120 píxeles visibles. Hubo cuatro tarjetas en cada navegación, cero errores de página, navegación o solicitudes, cero solicitudes pendientes y ninguna tarea larga de más de 50 ms. El [JSON de las seis navegaciones locales](pruebas/lcp-control-local-2026-10-21.json) conserva manifiesto, recursos, fuentes, prioridades, waterfall y medianas recalculadas.
+
+Los nombres `coupled` y `pages` son etiquetas del harness: la baseline se entrega desde el listener de API y la candidata desde otro listener estático. Es un control local de la reducción de recursos, con una diferencia de topología de origen; **no mide los proveedores Render/Cloudflare ni aísla un efecto causal de hosting**. Tres pares con API activa no permiten inferir un p75 de usuarios, latencias de producción, caché CDN, TLS o arranques en frío. Alcanzar aquí 1.272 ms no garantiza el mismo LCP público.
+
+A las **17:29 UTC** se capturaron **dos navegaciones adicionales con traza**, una por variante: LCP de 5.016 ms para la baseline y 1.272 ms para calidad 95, sin fase proxy ni tareas largas de más de 50 ms. Son muestras separadas; la instrumentación puede añadir sobrecarga y no se mezclan con las seis del control. El [perfil saneado](pruebas/lcp-perfil-trazas-2026-10-21.json) conserva tiempos de red, eventos de fuentes, candidatos y los SHA-256 de ambas trazas. Los archivos de traza originales permanecen en TEMP y no se publican.
+
+### Resultado público posterior a la publicación
+
+Pages sirve la fachada calidad 95 desde el commit **`0672e414ca040afa43810e478e93502b834ff8da`**, despliegue **`8801c092-0a71-40f9-abeb-32b7cf2a97fd`**. Render conserva **`75aee3e`**, su frontend anterior con PNG y Auto-Deploy Off. El JSON posterior, fechado a las **17:52:33 UTC**, contiene otros tres pares secuenciales Render/Pages. Su metodología, destinos, Chrome, Node, viewport, limitación de red y políticas de caché/terceros coinciden exactamente con el control público de las 17:19 UTC. El documento y la fachada usaron **HTTP/2 en las doce navegaciones**; el resto de recursos combina HTTP/2 y HTTP/3. No se atribuye la diferencia a un cambio de protocolo.
+
+Medianas recalculadas desde las muestras individuales:
+
+| Métrica | Pages antes | Pages calidad 95 | Render antes, control | Render después, control |
+| --- | ---: | ---: | ---: | ---: |
+| TTFB documento (`responseStart-requestStart`) | 77,9 ms | 75,1 ms | 153,6 ms | 165,5 ms |
+| HTML recibido (`responseEnd`) | 184,3 ms | 191,8 ms | 302,6 ms | 398,2 ms |
+| FCP | 760 ms | 776 ms | 932 ms | 1.044 ms |
+| Último candidato LCP | 4.180 ms | **1.436 ms** | 5.608 ms | 5.204 ms |
+| Cuatro tarjetas disponibles | 1.599,0 ms | 1.619,7 ms | 1.941,6 ms | 1.805,0 ms |
+| Estado del menú disponible | 1.201,5 ms | 1.144,0 ms | 1.687,9 ms | 1.579,3 ms |
+| Bytes CDP observados | 6.428.506 | 5.170.553 | 10.389.767 | 10.389.931 |
+| Solicitudes permitidas | 63 | 63 | 64 | 64 |
+
+Los LCP de Pages fueron **1.436, 1.372 y 1.712 ms**: las tres muestras quedaron por debajo de 2,5 s. Antes fueron 3.568, 4.724 y 4.180 ms. La mediana observada disminuyó 2.744 ms (65,65 %) y los bytes CDP, 19,57 %. Render, cuyo código no cambió, registró 5.204, 4.864 y 5.516 ms: su mediana también varió un 7,20 %, por lo que no se trata el porcentaje de Pages como una estimación causal exacta. FCP y disponibilidad de las tarjetas de Pages no mejoraron. Los **5.828 ms históricos** corresponden a la observación anterior de las 17:00 UTC y permanecen separados de este antes/después.
+
+Las seis navegaciones posteriores tuvieron HTML 200, cuatro tarjetas, cero errores de página/navegación/solicitudes/HTTP, cero solicitudes pendientes y fase proxy de **0 ms**. No hubo tareas largas superiores a 50 ms. El candidato continuó siendo la fachada, con dimensiones naturales 1672×941, prioridad `High` y 225.120 píxeles visibles. Su transferencia CDP fue de 391.882–391.895 bytes, incluidos los bytes técnicos observados; el archivo de imagen ocupa 391.110 bytes. El JSON de navegación identifica rutas y versiones, pero no contiene hashes de cuerpos descargados: la identidad del archivo se documenta por separado en [la evidencia de imagen](pruebas/lcp-imagen-2026-10-21.json) y las comprobaciones del despliegue.
+
+El desglose nativo del candidato LCP distingue la carga reportada por el navegador de su presentación:
+
+| Muestra Pages | `loadTime` de la fachada | LCP (`renderTime`) | Demora posterior a la carga |
+| --- | ---: | ---: | ---: |
+| 1 | 1.386,3 ms | 1.436 ms | 49,7 ms |
+| 2 | 1.313,5 ms | 1.372 ms | 58,5 ms |
+| 3 | 1.648,3 ms | 1.712 ms | 63,7 ms |
+
+En el waterfall CDP, la solicitud de la fachada comenzó a los 197,07–207,23 ms y finalizó a los 1.311,78–1.646,77 ms. Los eventos CDP y `loadTime` nativo difieren aproximadamente 1,5–1,7 ms; no se mezclan como si fueran un desglose exacto de un solo reloj. La presentación ocurrió poco después de la carga y la descarga siguió ocupando la mayor parte del recorrido observado.
+
+En Pages se descargaron ocho CSS (42.819–42.873 bytes CDP), 34 scripts (96.562–96.598 bytes) y cuatro fuentes (136.376–136.447 bytes). El último de los seis CSS iniciales terminó entre 430,29 y 688,52 ms, antes del LCP; los dos CSS posteriores pertenecen al widget. La última fuente terminó entre 1.040,75 y 1.395,69 ms: en una muestra algunas finalizaron después de la presentación de la foto. No hay evidencia en estas muestras de que una tarea JavaScript larga o un retraso posterior a la carga de la imagen explique el LCP. CSS, fuentes y módulos conservan su coste, pero estos resultados no justifican modificarlos para cumplir el objetivo ya observado; cualquier optimización adicional exigiría aislar su contribución. La ausencia de tareas de más de 50 ms no significa que JavaScript consuma cero tiempo.
+
+El [JSON posterior saneado](pruebas/lcp-publico-despues-2026-10-21.json), SHA-256 **`877b950763ab57da3a0a0efdf86c32ec5cf9551296041363447d361b098663ad`**, conserva las seis muestras y el waterfall. Se inspeccionaron todos sus campos: sin rutas locales absolutas, valores de query, cuerpos, cookies ni cabeceras de autenticación. Incluye el SHA-256 del original conservado en TEMP y la comprobación de metodología/medianas.
+
+Maps y los demás terceros estuvieron bloqueados en ambos lados de la comparación; sus costes no forman parte de estas cifras. Son seis navegaciones públicas de laboratorio con API activa, CDN y red real variables: **no constituyen un p75 de usuarios ni garantizan 2,5 s en móvil, con terceros o durante un arranque en frío**. La observación de inactividad y cualquier recorrido con Maps permitido se documentan por separado, sin mezclarlos con estas medianas.
+
+### Observación de reposo y recuperación real
+
+Se retiró la portada visible del navegador propio: sus refrescos funcionales de catálogo/promociones cada 30 s impedían un intervalo sin tráfico propio. El primer intento anterior no era una prueba válida de reposo y no se utiliza. Desde **17:34:42,867 UTC** no se hicieron peticiones propias al backend ni se mantuvo esa portada visible. Un guard del harness exigió al menos 15 min 30 s antes de la siguiente navegación. Otros visitantes y el tráfico interno de Render no están controlados; no se suspendió ni reinició el servicio manualmente y no se añadieron keep-alive.
+
+En la primera navegación Pages posterior a ese intervalo, con el mismo perfil de red de laboratorio, el HTML respondió en 263 ms, FCP fue 900 ms, el menú estuvo disponible a los 1.045,7 ms y **LCP fue 1.668 ms**. Las primeras peticiones de productos/promociones y su retry fueron canceladas por los timeouts existentes de 10 s: cuatro `ERR_ABORTED`, sin cabeceras de esas peticiones. El refresco automático posterior recibió 200 y aparecieron cuatro tarjetas a los **31.378,3 ms**, sin interacción manual. No hubo errores JavaScript ni HTTP 4xx/5xx. Cuatro imágenes de las tarjetas seguían pendientes al cerrar la observación: esta muestra constata recuperación del contenido, no la descarga final de esas cuatro fotos. Es un episodio real separado de las seis navegaciones calientes; no se ocultan los timeouts ni se mezclan sus bytes incompletos con las medianas anteriores. [Evidencia de reposo](pruebas/lcp-reposo-publico-2026-10-21.json).
+
+Los registros privados de Render mostraron una nueva instancia `x2jzc` tras `5prkk`, con `Running 'npm start'` a las **12:49:10 PM mostradas en el panel**, `node server/index.cjs` a las 12:49:11 y escucha a las 12:49:15: cinco segundos entre inicio del comando y escucha dentro del reloj de esos logs. El requestId **`e32f73e3-2ee2-43bd-91bd-665b2630bb12`**, devuelto por la petición de recuperación de productos, coincide con un log 200 de esa instancia y **111 ms en Express**. Las horas mostradas por el panel no se restan de los UTC del navegador para calcular una demora de arranque: la correlación se hace por requestId e instancia. Eventos conserva el mismo despliegue `75aee3e`; no hubo una nueva publicación durante el ensayo.
+
+**Confirmado:** hubo un proceso nuevo, demora real de las API tras el intervalo sin tráfico propio, recuperación automática y portada independiente con LCP inferior a 2,5 s. La petición final de productos no tardó 31 s dentro de Express. **Hipótesis compatible:** suspensión/despertar del servicio Free y espera anterior a Express. El panel consultado no mostró un evento explícito de suspensión ni la causa del reinicio; no se puede excluir otro reinicio del proveedor o tráfico ajeno. No se atribuyen los 111 ms a SQL puro ni se inventa un tiempo de Prisma: `75aee3e` no tiene el diagnóstico opcional que separa conexión/consulta. Ese código sigue en la candidata, sin desplegarse ni modificar infraestructura.
+
+### Recursos externos y repetición funcional pública
+
+Una observación adicional con los orígenes públicos de Maps permitidos registró **LCP 1.532 ms**, cuatro tarjetas y ningún error de página/navegación/HTTP. Es una sola navegación separada; no forma una cuarta muestra del antes/después. El iframe tiene `loading="lazy"` y está por debajo de la portada. Su documento empezó a solicitarse a los 1.426,4 ms. El CDP del frame principal no aporta todos los eventos de los subframes de otro proceso, por lo que su waterfall no acredita descarga completa de Maps ni suma todos sus bytes. [Observación separada con Maps](pruebas/lcp-externos-publico-2026-10-21.json).
+
+Para completar ese inventario se usaron eventos Playwright de todo el contexto en otra navegación anónima, sin limitación artificial y esperando 12 s tras load: **17 solicitudes externas terminadas**, 518.021 bytes de cuerpos recibidos, un redirect 301 normal y respuestas finales 200, cero destinos bloqueados y cero errores JavaScript. Se distribuyeron en maps.googleapis.com (14), maps.gstatic.com (1) y www.google.com (2). No se guardaron queries, cuerpos, cookies o claves del proveedor. Esta medición complementa el inventario del iframe; no es otro benchmark LCP ni garantiza latencia de Google. [Recursos externos](pruebas/lcp-recursos-externos-2026-10-21.json).
+
+Se repitieron y aprobaron los **cinco escenarios públicos**: escritorio y móvil con catálogo/carrito local/login requerido, API desconectada en el contexto, API retenida 30 s y sesión sintética inválida/barrera admin. No hubo errores JS/CSP ni violaciones axe en los dos recorridos completos. Con API retenida, portada y menú estuvieron visibles a los **1.174 ms** y el catálogo se recuperó al liberarla; es simulación del navegador, no una suspensión adicional de Render. [Resultados](pruebas/lcp-navegador-publico-2026-10-21.json).
+
+La validación completa pasó **185 Node + 38 históricas + 54 navegador + 20 Pages/API = 297 pruebas**, sin fallos ni omitidos. Se añadieron ocho contratos de seguridad, sin repetir tests de conversión de imagen. Las comprobaciones públicas adicionales pasaron 102 controles estáticos, 22 sondas de autenticación/CORS y tres escenarios del cliente publicado contra fixtures locales. Alcance y riesgos en [SEGURIDAD_DESPLIEGUE.md](SEGURIDAD_DESPLIEGUE.md); versiones y reversión en [DEPLOY_CLOUDFLARE.md](DEPLOY_CLOUDFLARE.md).
+
+La candidata frontend cumple el objetivo observado de laboratorio y está preparada para aprobación de promoción. La producción completa sigue pendiente de autorización del backend/cambios de infraestructura y de definir la protección comercial de las reservas pendientes. [Render documenta](https://render.com/docs/free#spinning-down-on-idle) suspensión tras 15 min sin tráfico entrante y despertar de aproximadamente un minuto, además de límites y almacenamiento efímero. Pages protege la portada de esa espera; catálogo, sesión, pedidos y administración continúan dependiendo de la API. No se contratan servicios, se toca DNS ni se activa Auto-Deploy.

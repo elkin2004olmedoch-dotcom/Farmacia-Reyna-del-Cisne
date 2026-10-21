@@ -1,0 +1,489 @@
+{
+  "date": "2026-10-21T17:23:07.261Z",
+  "sourceBase": "86804e7 plus single compressed WebP and local audit-logging patch under test",
+  "scope": "All generated client artifacts; no .env/DB/customer data read",
+  "build": {
+    "files": 94,
+    "bytes": 12595686,
+    "maxFileBytes": 2650904
+  },
+  "safePublicConfig": "https://farmacia-reina-del-cisne.onrender.com",
+  "privatePatternMatches": [],
+  "files": [
+    {
+      "path": "_headers",
+      "bytes": 658,
+      "sha256": "075974f010b7cbe33e3196168f5b06a4faa0f32891aa14cf0b50c3c087b58116"
+    },
+    {
+      "path": "404.html",
+      "bytes": 518,
+      "sha256": "7808bdac623f5f35a040e067cc3a6e9c51175f5c9636c2ed02612106b77753ed"
+    },
+    {
+      "path": "admin.html",
+      "bytes": 36824,
+      "sha256": "901b4ef1401ffd821b2a29f06aaa312e51dc7f24c2e9623b7a61c31423c304d0"
+    },
+    {
+      "path": "assets/accesibilidad.css",
+      "bytes": 18429,
+      "sha256": "96077a8465695db5112d0f86c1bfa1b93e9605525037bdc3639e3e48884b4a64"
+    },
+    {
+      "path": "assets/fonts/fuente-1.ttf",
+      "bytes": 48280,
+      "sha256": "b0ae3e89a7d3ef2b1838bb4b1ceb0b17cc3435af061eee809d76aa623ff116e9"
+    },
+    {
+      "path": "assets/fonts/fuente-2.ttf",
+      "bytes": 48308,
+      "sha256": "376427b5322148d8de1e03f263bcca4935a2d60ba71d9f94f4947ab664c711ae"
+    },
+    {
+      "path": "assets/fonts/fuente-3.ttf",
+      "bytes": 48280,
+      "sha256": "b79a2ea7a38f33fd96a282fadb9ce97626bb0724a44d21075859f0e50239993a"
+    },
+    {
+      "path": "assets/fonts/fuente-4.ttf",
+      "bytes": 48200,
+      "sha256": "2a8e7f713ee79fbccdef3cef5c787aff47580299f7da60144961e7db2ec08211"
+    },
+    {
+      "path": "assets/fonts/fuente-5.ttf",
+      "bytes": 71632,
+      "sha256": "ff7cf63717c27756df857ca12045a83522569f7b561bedaff813a25274eb263f"
+    },
+    {
+      "path": "assets/fonts/fuente-6.ttf",
+      "bytes": 71588,
+      "sha256": "f0a9d39b9f14079c55070189562da36c794f824cbcf514b50a0ad0ef20c69379"
+    },
+    {
+      "path": "assets/images/farmacia-5.jpg",
+      "bytes": 74265,
+      "sha256": "d27fd9359d2ec6dfed82eeb8cce6b94d9d1b40864273d7b40902a74c91011ae1"
+    },
+    {
+      "path": "assets/images/farmacia-6.jpg",
+      "bytes": 72880,
+      "sha256": "985018a4b2f35bebdc4011666506c0317ae56b2816128b91e2f8592f78d5c096"
+    },
+    {
+      "path": "assets/images/farmacia-7.jpg",
+      "bytes": 72697,
+      "sha256": "53ddc1b77a25eb2337415fdb67ed623324f57af1eda536851e94d53810f1ff7d"
+    },
+    {
+      "path": "assets/images/farmacia-8.jpg",
+      "bytes": 32368,
+      "sha256": "21eb52bebd7f9e543d926dbb0be9da54e7edf5810ef07901b4a5d6adfabc8156"
+    },
+    {
+      "path": "assets/images/farmacia-9.jpg",
+      "bytes": 217975,
+      "sha256": "297628cedac9d9ea2138607aec76870a167992e470c45800d9fe3b48cb27c007"
+    },
+    {
+      "path": "assets/images/farmacia-fachada-reina.png",
+      "bytes": 2650904,
+      "sha256": "c3e431ff314c110aa28b73b105854e589bf223c3f54c7b2188e5f09633bd18c8"
+    },
+    {
+      "path": "assets/images/farmacia-fachada-reina.webp",
+      "bytes": 391110,
+      "sha256": "3ad5cde310565c5c7de247af74ad987f97a7197402e7ae65c02ac2fea162e8ae"
+    },
+    {
+      "path": "assets/images/logo-reina-del-cisne.png",
+      "bytes": 507362,
+      "sha256": "4932c3048bb1ac5a458b767c5c0087804753e75dba704688dae51e6956fd989d"
+    },
+    {
+      "path": "assets/images/producto-alcohol-antiseptico-d13f81e66a94.webp",
+      "bytes": 39056,
+      "sha256": "d13f81e66a94b02d67372782af123f982b080da8cd9289195317b7bb5c1f3f64"
+    },
+    {
+      "path": "assets/images/producto-alcohol-antiseptico.svg",
+      "bytes": 625,
+      "sha256": "eb9de3b1ed5760adf496dc210af8991a27677794f6da1ddc69aa72727073ec73"
+    },
+    {
+      "path": "assets/images/producto-algodon.svg",
+      "bytes": 589,
+      "sha256": "5919c6d740db49cb799461281533b8d854211b4b95d29a0459a44f3eb22423bf"
+    },
+    {
+      "path": "assets/images/producto-bebe-pigeon.png",
+      "bytes": 520392,
+      "sha256": "8a3915cc8d8e694c0bcbb4d51d2d6f5e7080e76d79c0c4541f938138dcf840f4"
+    },
+    {
+      "path": "assets/images/producto-botiquin.jpg",
+      "bytes": 32368,
+      "sha256": "21eb52bebd7f9e543d926dbb0be9da54e7edf5810ef07901b4a5d6adfabc8156"
+    },
+    {
+      "path": "assets/images/producto-curitas-adhesivas.svg",
+      "bytes": 622,
+      "sha256": "d7c912d03867153250b4f2ff8dddf0c04b4fc2bc2cd74facbccd20aab1bedd89"
+    },
+    {
+      "path": "assets/images/producto-frasco-tabletas.svg",
+      "bytes": 614,
+      "sha256": "2b5ebed566425e296952d61f81cc6cf933a8c8dbe7434169ff767a72769dfc0a"
+    },
+    {
+      "path": "assets/images/producto-gasas-esteriles.svg",
+      "bytes": 597,
+      "sha256": "4f6bb3a0fabf9ce8f134eb1acdcb71eb21582710be46bf31c85757ad7a67d238"
+    },
+    {
+      "path": "assets/images/producto-gel-antibacterial.svg",
+      "bytes": 623,
+      "sha256": "d2dddbd6c03df6ddacb5d66c80c7998e5cac93f2e8da370df882a94b01f90ef3"
+    },
+    {
+      "path": "assets/images/producto-generico-referencia.svg",
+      "bytes": 611,
+      "sha256": "9aef01d485df63e9fc8180022defeb536727496a6099b0d5f116cbe9788f1968"
+    },
+    {
+      "path": "assets/images/producto-mascarillas.svg",
+      "bytes": 621,
+      "sha256": "65f55e07e03f3a911d75915de16b2bdc1e5b5805d986b7360c5fde1658c5a172"
+    },
+    {
+      "path": "assets/images/producto-medicamento-liquido.svg",
+      "bytes": 625,
+      "sha256": "aa38dd1a6f0082f101e60ac6e7fa851d3c530fbf63c0068ba0eeb8bd882cbe35"
+    },
+    {
+      "path": "assets/images/producto-solar-eucerin.png",
+      "bytes": 400364,
+      "sha256": "6f74945b6502f1012f63c067fb93881565d4d300ca09eb7d5db8168237be061d"
+    },
+    {
+      "path": "assets/images/producto-solucion-salina.svg",
+      "bytes": 621,
+      "sha256": "eccb7e697bead46b031aa351140cd92e95ea8d4f25f640eb79817448f077eb30"
+    },
+    {
+      "path": "assets/images/producto-tabletas-blister.svg",
+      "bytes": 1762,
+      "sha256": "3d9bebfa9db791d9ebe4e44002479db5fa1752aba6effbea1499958699ca3457"
+    },
+    {
+      "path": "assets/images/producto-termometro-digital.svg",
+      "bytes": 589,
+      "sha256": "1df61c11ecd38d50e65bc5288ae0bc6de9582c2f8116a44fe8de2b7cfd6e5794"
+    },
+    {
+      "path": "assets/images/producto-toallitas-bebe.svg",
+      "bytes": 601,
+      "sha256": "e0417ea5fee0d0c7ad526150aa6572b68d1684f61c409699c106224aba97e8b6"
+    },
+    {
+      "path": "assets/images/producto-venda-elastica.svg",
+      "bytes": 512,
+      "sha256": "779c57a31a69137dfee712728502b29e66fcf76ccee3f9f58986c2fbbadb3e4c"
+    },
+    {
+      "path": "assets/images/producto-vitaminas.jpg",
+      "bytes": 53086,
+      "sha256": "e32dca71a2852269499137d6d71981872f37a7fc8780cbc5e0bb9d5b8f32ca41"
+    },
+    {
+      "path": "assets/mascotas/admin-companion.css",
+      "bytes": 3845,
+      "sha256": "325fd6b4a869bd46085aeaf4f1ad620c2b1904dc90fcffafe3d16ef535080a0a"
+    },
+    {
+      "path": "assets/mascotas/art/boti-base.png",
+      "bytes": 686402,
+      "sha256": "1c665eba86a0c3bb7aa82d4eb58b5e21534859e8026cb92d2bdc940cec700bd5"
+    },
+    {
+      "path": "assets/mascotas/art/farmi-base.png",
+      "bytes": 800903,
+      "sha256": "67a197aad68aed9ddb37982ddb42b600996a5ccd82ff1c0d7cb8aedd0bb4a045"
+    },
+    {
+      "path": "assets/mascotas/art/goti-base.png",
+      "bytes": 682107,
+      "sha256": "6e772f5344ee41dea0c8c949073d2a2e87336aa34f7cf5ad371852b21d1d8d55"
+    },
+    {
+      "path": "assets/mascotas/sprites/boti.png",
+      "bytes": 1319994,
+      "sha256": "ecc6ec344f646778ac1f3d6e2133c4ac214d606e14db81438dafca6aa23efbe2"
+    },
+    {
+      "path": "assets/mascotas/sprites/farmi.png",
+      "bytes": 1639099,
+      "sha256": "6d8617c82d718f1975c1d71bc3f01f05ed4ab7d6149c189bdbb5e39a58a8e37a"
+    },
+    {
+      "path": "assets/mascotas/sprites/goti.png",
+      "bytes": 1513527,
+      "sha256": "9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d"
+    },
+    {
+      "path": "assets/mascotas/sprites/manifest.json",
+      "bytes": 64510,
+      "sha256": "8b405171e7769a0d04425c88c73975ab1469960f6a86bade5b9a47135caf47a1"
+    },
+    {
+      "path": "assets/mascotas/widget-responsive.css",
+      "bytes": 1995,
+      "sha256": "b22522cdebed960d2086f7e0cfebb9efb36da7ad33d36e39330b91a4a87ceba5"
+    },
+    {
+      "path": "assets/mascotas/widget.css",
+      "bytes": 4797,
+      "sha256": "f609fce9bc47efdbed823ca5a80b8418ea1962903d4d1bd87c4fba98ca98cbf0"
+    },
+    {
+      "path": "assets/mvc.css",
+      "bytes": 28867,
+      "sha256": "a5804617780080446bf120ec59aa6db4d3a380212b11796f48ecfd1093306434"
+    },
+    {
+      "path": "assets/shop.css",
+      "bytes": 37986,
+      "sha256": "0735b2ee5f0ce9554d97b8a0a48fdda2ee87b8b6155b9ea48d964144179ad385"
+    },
+    {
+      "path": "assets/styles.css",
+      "bytes": 47416,
+      "sha256": "c8a0a4f08aaaa944e0ba3fa9f085c02940acaa23949628ed5e82c04c4025c656"
+    },
+    {
+      "path": "assets/vendor/bootstrap-grid.min.css",
+      "bytes": 51800,
+      "sha256": "84ddadb4c1bf2b7c10945acddd26d0d58178b48247084e2860ff9089b4f7bce6"
+    },
+    {
+      "path": "assets/vendor/fonts.css",
+      "bytes": 998,
+      "sha256": "a5409b870c25695e8a4c0c8f6a2e0e4a3e885d2719b06fc562c8fef26c3a60ff"
+    },
+    {
+      "path": "ayuda.html",
+      "bytes": 6229,
+      "sha256": "672ee77609a06b0018a68ff6a745d1971b333cef01173143a1c6af66ce062b7c"
+    },
+    {
+      "path": "catalogo.html",
+      "bytes": 5343,
+      "sha256": "4ec47dd3128e4e95ad0dfc012a88ddc84a256a42c3b2d4fdf9ed24e0401827cb"
+    },
+    {
+      "path": "checkout.html",
+      "bytes": 9046,
+      "sha256": "885df8f9f1a85abf4da06fa753c157823fce92876bc32061f10e0652e2b06d28"
+    },
+    {
+      "path": "comparar.html",
+      "bytes": 4556,
+      "sha256": "650463034db528ca156a2a9298318108856dfea39a9cd633b228ef08fd7f7a57"
+    },
+    {
+      "path": "config.js",
+      "bytes": 683,
+      "sha256": "9954bd475c682377342f7fb0c4bfd7b1913f6ac78d252f633d111b74e34f9769"
+    },
+    {
+      "path": "controllers/account.js",
+      "bytes": 3190,
+      "sha256": "37b3ccca5c65fad3ef00b24f90a2f3da96b3b6aea7db71689a7e7f9179c0778a"
+    },
+    {
+      "path": "controllers/admin-command.mjs",
+      "bytes": 4703,
+      "sha256": "b165136f1c54f471548e64aa171390186d012d6a7c29525fd6d9e17ee3c907d2"
+    },
+    {
+      "path": "controllers/admin-companion.js",
+      "bytes": 8305,
+      "sha256": "90821ac4f156ac8221d08471ea467719b7a37b934c37f153336c2e584f8ef492"
+    },
+    {
+      "path": "controllers/admin.js",
+      "bytes": 18008,
+      "sha256": "d857995125fefdeb86df71b3f30f912b2d49b26925395dff3be59511ba3ece51"
+    },
+    {
+      "path": "controllers/app.js",
+      "bytes": 1809,
+      "sha256": "18257d3d47f9ee15cf6afb268267beeb0dd0f107fd46225dd7bc8fc6ee0d851e"
+    },
+    {
+      "path": "controllers/billing.js",
+      "bytes": 12702,
+      "sha256": "ff4c1b43c7423124f436aec716c5fa94f7414e545d1e32825db294f0267187b2"
+    },
+    {
+      "path": "controllers/catalog.js",
+      "bytes": 7284,
+      "sha256": "27c4ea5753bc9b9c6cacd511879b27fd20e09bf1ae809e29846ffdbd2b8493d9"
+    },
+    {
+      "path": "controllers/checkout.js",
+      "bytes": 6525,
+      "sha256": "1a979f1f3353704712c61b9037030a401ba813a10c2a74d1cee7b11f96bb9670"
+    },
+    {
+      "path": "controllers/contact.js",
+      "bytes": 1015,
+      "sha256": "0528c5a5fc1ecef27075e29892834d823a1afbd36946b5d236e320ecadae5fa9"
+    },
+    {
+      "path": "controllers/dialog.js",
+      "bytes": 314,
+      "sha256": "a60ed8f11d10d21baf6fbaaf134b0d50c95b6d9ea5102a3595b7b3146939b160"
+    },
+    {
+      "path": "controllers/images.js",
+      "bytes": 2114,
+      "sha256": "b5421824a99f2f1a38dd89b618bf83df6580435cecab512104a8b214648ec0f7"
+    },
+    {
+      "path": "controllers/layout.js",
+      "bytes": 4043,
+      "sha256": "f6dd3b6529a7b0ba1bdbd9a79a4c8aba3b6c871f8678ee3d7841055c8194a5fa"
+    },
+    {
+      "path": "controllers/mascota-scope.mjs",
+      "bytes": 1807,
+      "sha256": "1a9d39911797901a98addaafb8783352ac2ccc54028633537f1b56e19c1fa1a9"
+    },
+    {
+      "path": "controllers/mascota.js",
+      "bytes": 22381,
+      "sha256": "605c2dba32d566df7fcce78dd2d37ebec0374eb0fe864c25522db9983244600d"
+    },
+    {
+      "path": "controllers/updates.js",
+      "bytes": 2513,
+      "sha256": "a97024327c839e27e3995ac34a5c3a150f18e4941dcbd0fc2c8efeab798a6d08"
+    },
+    {
+      "path": "cuenta.html",
+      "bytes": 8519,
+      "sha256": "7011287c2b1cc0303df3dd9b01244bc5115f1da033e2e8b42778d57dd631c473"
+    },
+    {
+      "path": "index.html",
+      "bytes": 17790,
+      "sha256": "faa239006e5bc50354bacfec839e849960952af72d99feb963cef235e791b204"
+    },
+    {
+      "path": "models/admin.js",
+      "bytes": 6946,
+      "sha256": "cc852ffddd08d5f72f4fe1d69395ef328465b8fdc14d411778401708d088dc19"
+    },
+    {
+      "path": "models/api.js",
+      "bytes": 2950,
+      "sha256": "c8d8b4a085e035a7927c94188df9bff2bdc8f799062a80b9dafb77eb86c2b5af"
+    },
+    {
+      "path": "models/auth.js",
+      "bytes": 936,
+      "sha256": "07047b8b9f115179c2e6c99749722327b40c194e2ebea2395bd45cfdc8c1f4ca"
+    },
+    {
+      "path": "models/billing.js",
+      "bytes": 1804,
+      "sha256": "9767b611df2d995686b2bc4d0ca94b6a1b4c9616e27220ec2e3a71e4b4777a90"
+    },
+    {
+      "path": "models/cart.js",
+      "bytes": 1956,
+      "sha256": "e68e14e649a375ca01d84f41bd60490094a260040ed9516a0ab104bd48c735d2"
+    },
+    {
+      "path": "models/catalog.js",
+      "bytes": 597,
+      "sha256": "84645f7d9237c8e6c7a9e530bc5188a4114f333399e7b0b5c27a906e23f289b5"
+    },
+    {
+      "path": "models/ecuador.js",
+      "bytes": 8665,
+      "sha256": "6891244c9dbccce5b2bb9e424666fa573e9082e6dba5520dfb12b6864bae4cb1"
+    },
+    {
+      "path": "models/events.js",
+      "bytes": 382,
+      "sha256": "a92ccb879f64dd86d2d3eaa8cf6ae9398171b9a6ae5076be60cf05f2e9bb1e83"
+    },
+    {
+      "path": "models/orders.js",
+      "bytes": 978,
+      "sha256": "ef008b399e5a244fcd1a58120d5044832162a30b6cdb9df49e04a06d4d0dcf4b"
+    },
+    {
+      "path": "models/pricing.js",
+      "bytes": 1091,
+      "sha256": "422026cf59fd3a3b0780954f37585b87bd07379b2cedb4892817b8106d2207aa"
+    },
+    {
+      "path": "models/promotion-publication.js",
+      "bytes": 2137,
+      "sha256": "96dbb3e448b549bbc371965ce94e0314ac7a5b3279acb9d9d9a397f8c16af282"
+    },
+    {
+      "path": "pedidos.html",
+      "bytes": 4684,
+      "sha256": "e0dee79df9fa50e13ee07f486f892144c93d119e48d4ad579c20c6eed99b9f77"
+    },
+    {
+      "path": "producto.html",
+      "bytes": 4533,
+      "sha256": "5072964455ea7cd99270986fdec14a678f6171731be57221a8d8d08489140475"
+    },
+    {
+      "path": "views/admin-dashboard.js",
+      "bytes": 11987,
+      "sha256": "cec7f1f7d31ff826d61080c1d92eaf6fb1fe8a304b92ac8955944863de463fdf"
+    },
+    {
+      "path": "views/admin.js",
+      "bytes": 14842,
+      "sha256": "1d56c8be956af779de78235f3bd80db58cb325c3099d05812c4c062dcb58a0dd"
+    },
+    {
+      "path": "views/billing.js",
+      "bytes": 9544,
+      "sha256": "a9e6b96cb553372b26d1e38fc5fd4de54751cf026bb2321fc99affc966436f36"
+    },
+    {
+      "path": "views/common.js",
+      "bytes": 2622,
+      "sha256": "59e3a5f104e1d38b8ae81274cb6cc9380e1e08acd5a1baa138ba5202b98e5983"
+    },
+    {
+      "path": "views/layout.js",
+      "bytes": 1867,
+      "sha256": "ac8b0dc86358a51addcbb7d2b76cef335f016ba35687dc0ac2c741f77de8b567"
+    },
+    {
+      "path": "views/orders.js",
+      "bytes": 10305,
+      "sha256": "d888bc5a0bcbaa005bff980e4ff95fc66c171a5256c70711e162c8c58410ea38"
+    },
+    {
+      "path": "views/products.js",
+      "bytes": 6579,
+      "sha256": "a8342588bf430b8787325fb40153e69442378b01f1ba48b9443ffce71f72c3bd"
+    }
+  ],
+  "limits": [
+    "Heuristic scanning does not prove universal absence of secrets; allowlist builder and private-route runtime checks complement it",
+    "Known public image and API origins are configuration intended for browsers",
+    "No private values were compared, printed or included in this report"
+  ]
+}

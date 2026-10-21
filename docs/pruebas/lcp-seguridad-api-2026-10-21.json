@@ -1,0 +1,682 @@
+{
+  "date": "2026-10-21T17:53:19.810Z",
+  "mode": "api",
+  "origins": {
+    "pages": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "api": "https://farmacia-reina-del-cisne.onrender.com"
+  },
+  "requests": 22,
+  "checks": [
+    {
+      "name": "preflight-login",
+      "method": "OPTIONS",
+      "path": "/api/auth/login",
+      "status": 204,
+      "expectedStatus": 204,
+      "headers": {
+        "access-control-allow-headers": "Content-Type,Authorization",
+        "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true,
+        "methodAllowed": true,
+        "headersAllowed": true
+      },
+      "ok": true
+    },
+    {
+      "name": "preflight-admin",
+      "method": "OPTIONS",
+      "path": "/api/productos/synthetic-security-check",
+      "status": 204,
+      "expectedStatus": 204,
+      "headers": {
+        "access-control-allow-headers": "Content-Type,Authorization",
+        "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true,
+        "methodAllowed": true,
+        "headersAllowed": true
+      },
+      "ok": true
+    },
+    {
+      "name": "session-anonymous",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "session-forged",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "cookie-without-bearer",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "own-orders-anonymous",
+      "method": "GET",
+      "path": "/api/pedidos/mis-pedidos",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "all-orders-anonymous",
+      "method": "GET",
+      "path": "/api/pedidos",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "admin-summary-anonymous",
+      "method": "GET",
+      "path": "/api/admin/resumen",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "private-ride-anonymous",
+      "method": "GET",
+      "path": "/api/facturacion/facturas/synthetic-security-check/ride",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "create-product-anonymous",
+      "method": "POST",
+      "path": "/api/productos",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "update-product-anonymous",
+      "method": "PUT",
+      "path": "/api/productos/synthetic-security-check",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "delete-product-anonymous",
+      "method": "DELETE",
+      "path": "/api/productos/synthetic-security-check",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "create-order-anonymous",
+      "method": "POST",
+      "path": "/api/pedidos",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "order-state-anonymous",
+      "method": "PUT",
+      "path": "/api/pedidos/synthetic-security-check/estado",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "inventory-adjustment-anonymous",
+      "method": "POST",
+      "path": "/api/admin/inventario/ajustes",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "billing-config-anonymous",
+      "method": "PUT",
+      "path": "/api/admin/facturacion/configuracion",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "billing-emission-anonymous",
+      "method": "POST",
+      "path": "/api/admin/facturacion/facturas/synthetic-security-check/emitir",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "logout-anonymous",
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "status": 401,
+      "expectedStatus": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "login-empty-once",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 422,
+      "expectedStatus": 422,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Origin, Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "cors-evil",
+      "method": "GET",
+      "path": "/api/productos",
+      "status": 403,
+      "expectedStatus": 403,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "cors-suffix",
+      "method": "GET",
+      "path": "/api/productos",
+      "status": 403,
+      "expectedStatus": 403,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    },
+    {
+      "name": "cors-null",
+      "method": "GET",
+      "path": "/api/productos",
+      "status": 403,
+      "expectedStatus": 403,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data: https://xjxnnqasikxlytjaxjdt.supabase.co;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self';upgrade-insecure-requests;connect-src 'self' https://farmacia-reina-del-cisne.onrender.com https://farmacia-reyna-del-cisne-pruebas.pages.dev;frame-src https://www.google.com",
+        "cross-origin-resource-policy": "same-origin",
+        "vary": "Accept-Encoding",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "SAMEORIGIN"
+      },
+      "setCookiePresent": false,
+      "bodyRead": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "privateCache": true,
+        "corpPrivate": true,
+        "noCredentialCors": true,
+        "cors": true
+      },
+      "ok": true
+    }
+  ],
+  "limits": [
+    "No real credentials or private data; API response bodies discarded to NUL",
+    "One request at a time; no retry; fixed origin/method/path allowlists",
+    "Synthetic unauthorized writes only; no valid purchase, payment, or inventory payload",
+    "Static secret-pattern scans are heuristic and never report matched values"
+  ],
+  "failed": 0,
+  "ok": true
+}
