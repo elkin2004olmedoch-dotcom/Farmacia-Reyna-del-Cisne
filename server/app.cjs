@@ -21,6 +21,7 @@ module.exports=function createApp(settings=require('./config.cjs')()) {
   app.use('/api',express.json({limit:'32kb',strict:true}));
   app.use('/api',require('./routes/index.cjs')(settings));
   app.use('/api',(req,res,next)=>next(new AppError(404,'NOT_FOUND','La ruta solicitada no existe.')));
+  app.use('/assets/uploads',helmet.crossOriginResourcePolicy({policy:'cross-origin'}));
   if(process.env.NODE_ENV==='test' && process.env.UPLOAD_DIR)app.use('/assets/uploads',express.static(require('./middleware/imagevalidation.cjs').uploadsDirectory(app.locals.frontendRoot),{dotfiles:'deny',maxAge:0}));
   if(cloudImages.isCloudStorage())app.get('/assets/uploads/:name',(req,res,next)=>{
     const url=cloudImages.getPublicImageUrl('assets/uploads/'+req.params.name);
