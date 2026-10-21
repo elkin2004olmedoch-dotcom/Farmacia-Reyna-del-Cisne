@@ -375,5 +375,32 @@
       "bytes": 2733,
       "sha256": "c9cca3218a177c3349a6de46e6ca6a4a250aea1fc592ca8292397a7efca07c26"
     }
-  ]
+  ],
+  "originalWorkspaceVerification": {
+    "sourceSnapshot": "bbf112a00d4a72903713c76c27651f9441a9265f",
+    "copiedFiles": 24,
+    "backedUpOverwrites": 5,
+    "newFiles": 19,
+    "equivalentEligibleFiles": 383,
+    "privateFilesUnchanged": 16,
+    "ownerOnlyFilesUnchanged": 7,
+    "conflicts": 0,
+    "backupZipCrcAndShaVerified": true,
+    "build": {
+      "files": 94,
+      "bytes": 12593861,
+      "differenceFromCanonicalArtifact": "Text line endings; source equivalence checked with Git normalization"
+    },
+    "nodeTests": {
+      "passed": 185,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "exitCode": 0,
+      "durationMs": 76172.5666,
+      "logSha256": "6d83e80c0e9d75793ad0d3d32c01b37c5c143bf032a3c69b99fcb1d533d3b3bc"
+    },
+    "privateGuardsPublished": false,
+    "runtimeChangesAfterTests": false
+  }
 }

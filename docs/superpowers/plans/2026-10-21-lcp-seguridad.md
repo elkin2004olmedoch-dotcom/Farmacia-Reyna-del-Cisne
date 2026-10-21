@@ -42,7 +42,7 @@
 
 - [x] Actualizar `docs/RENDIMIENTO.md`, `docs/DEPLOY_CLOUDFLARE.md` y `docs/SEGURIDAD_DESPLIEGUE.md`, con evidencias saneadas y límites entre pruebas locales y públicas.
 - [x] Registrar versión/rollback y requisitos pendientes de promoción sin tocar DNS ni activar operaciones comerciales.
-- [ ] Sincronizar cambios necesarios a la carpeta original con respaldo, hashes y preservación de `.env`, BD, uploads y archivos exclusivos. No tocar checkouts anidados ni entregables ajenos.
+- [x] Sincronizar cambios necesarios a la carpeta original con respaldo, hashes y preservación de `.env`, BD, uploads y archivos exclusivos. No tocar checkouts anidados ni entregables ajenos.
 
 ## Decisiones y límites
 
@@ -55,4 +55,4 @@
 
 Pages de prueba sirve `0672e41` / `8801c092`; Render conserva `75aee3e`, Auto-Deploy Off. La mediana pública Pages fue 1.436 ms (tres muestras, control previo 4.180 ms), frente a 5.204 ms del Render sin cambios. Pasaron 297 pruebas de las cuatro suites, 102 controles estáticos, 22 sondas API, cinco escenarios públicos y tres escenarios de sesión del cliente publicado con API temporal. El ensayo natural registró LCP 1.668 ms y recuperación de tarjetas a los 31.378,3 ms, con timeouts transitorios explícitos; reinicio observado, causa de suspensión compatible pero no confirmada por evento del proveedor. Los valores con Maps permanecen separados.
 
-La promoción del frontend y el parche de backend esperan autorización; no se tocó infraestructura, dominio, DNS, base, dependencias ni Auto-Deploy. Evidencia y riesgos en `docs/pruebas/lcp-seguridad-despliegue-2026-10-21.json` y `docs/SEGURIDAD_DESPLIEGUE.md`. La sincronización final se aplica después de cerrar la revisión documental y crear su commit, repitiendo guardas y respaldo.
+La promoción del frontend y el parche de backend esperan autorización; no se tocó infraestructura, dominio, DNS, base, dependencias ni Auto-Deploy. Evidencia y riesgos en `docs/pruebas/lcp-seguridad-despliegue-2026-10-21.json` y `docs/SEGURIDAD_DESPLIEGUE.md`. La sincronización de `bbf112a` aplicó 24 archivos (cinco sobrescrituras con respaldo y 19 altas), comprobó 383 archivos elegibles equivalentes y conservó 16 privados y siete exclusivos del propietario. El build de la carpeta original pasó con 94 archivos y `npm test` volvió a pasar 185/185, sin fallos ni omitidos. Los respaldos y las guardas privadas permanecen en TEMP; este cierre solo añade documentación y no exige repetir pruebas de código.
