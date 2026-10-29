@@ -4,6 +4,14 @@ Demostración del 28 de octubre de 2026. Se probaron formularios, botones y órd
 
 El recorrido visual pasó 2/2 en escritorio y móvil con el proveedor OpenStreetMap real, sin errores JavaScript ni fallos de limpieza. No se realizó una llamada, navegación física, cobro, envío de mensajes o emisión SRI. La suite general y publicación se registran por separado en [la evidencia del recorrido](pruebas/recorrido-roles-2026-10-28.json).
 
+## Así se ve publicado
+
+Versión `0d6df62` publicada en [la farmacia](https://farmacia-reyna-del-cisne-pruebas.pages.dev/). Los dos recorridos anónimos publicados verificaron carrito e imagen sin crear pedidos ni iniciar sesión. Pasaron 137 comprobaciones públicas y se conservó la tarifa existente.
+
+[Catálogo móvil](pruebas/recorrido-roles-2026-10-28/publicado/catalogo-movil.png) · [Catálogo escritorio](pruebas/recorrido-roles-2026-10-28/publicado/catalogo-escritorio.png) · [Carrito móvil](pruebas/recorrido-roles-2026-10-28/publicado/carrito-movil.png) · [Carrito escritorio](pruebas/recorrido-roles-2026-10-28/publicado/carrito-escritorio.png)
+
+![Carrito con imagen en la web publicada](pruebas/recorrido-roles-2026-10-28/publicado/carrito-escritorio.png)
+
 ## Correcciones
 
 - Acceso inferior al carrito en catálogo y ficha, con cantidad, teclado y espacio para la mascota. Se oculta para personal, carrito vacío y sesión pendiente.

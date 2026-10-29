@@ -11,7 +11,7 @@ La ampliación del 28 de octubre de 2026 conserva tres capas: presentación HTML
 - El envío y su IVA quedan guardados por pedido y se incorporan a la factura como servicio. Un cambio de tarifa exige revisar el nuevo importe antes de confirmar y no modifica pedidos anteriores.
 - Farmi ejecuta órdenes administrativas tipadas y abre los formularios cuando faltan datos. Conserva JWT, permisos, validaciones y versiones; no ejecuta SQL, código arbitrario, pagos o firmas privadas.
 
-La migración aditiva está aplicada en Supabase y conserva los datos anteriores. La versión `6235fc3` está publicada en [Cloudflare Pages](https://farmacia-reyna-del-cisne-pruebas.pages.dev/) y [Render](https://farmacia-reina-del-cisne.onrender.com/), con 137 comprobaciones públicas aprobadas. El estado de despliegue se registra en [la evidencia comercial](docs/pruebas/comercial-2026-10-28.json), separado del antecedente histórico descrito más abajo. Consulta [arquitectura y modelo de datos](docs/ARQUITECTURA-COMERCIAL.md), [operación y privacidad de entregas](docs/ENTREGAS-Y-PRIVACIDAD.md), [criterios de Ecuador](docs/ECUADOR-FARMACIA.md) y [contrato de la API](docs/superpowers/specs/2026-10-28-entregas-contract.md).
+La migración aditiva está aplicada en Supabase y conserva los datos anteriores. La versión `0d6df62` está publicada en [Cloudflare Pages](https://farmacia-reyna-del-cisne-pruebas.pages.dev/) y [Render](https://farmacia-reina-del-cisne.onrender.com/), con 137 comprobaciones públicas aprobadas. El estado de despliegue se registra en [la evidencia comercial](docs/pruebas/comercial-2026-10-28.json), separado del antecedente histórico descrito más abajo. Consulta [arquitectura y modelo de datos](docs/ARQUITECTURA-COMERCIAL.md), [operación y privacidad de entregas](docs/ENTREGAS-Y-PRIVACIDAD.md), [criterios de Ecuador](docs/ECUADOR-FARMACIA.md) y [contrato de la API](docs/superpowers/specs/2026-10-28-entregas-contract.md).
 
 ## Mascotas animadas para el bot
 
@@ -389,4 +389,4 @@ Consulta el [plan y límites de la separación](docs/SEPARACION_FRONTEND_BACKEND
 
 ## Recorrido verificado de roles
 
-La revisión posterior del 28 de octubre añade acceso inferior al carrito en catálogo/ficha y corrige el refresco de Entregas y la selección de provincia de la zona. El [recorrido completo con 24 capturas](docs/RECORRIDO-ROLES-2026-10-28.md) muestra cliente, administrador, Farmi, repartidor y mapa real con datos y GPS sintéticos. [Resultados y publicación exactos](docs/pruebas/recorrido-roles-2026-10-28.json).
+La revisión posterior del 28 de octubre añade acceso inferior al carrito en catálogo/ficha y corrige el refresco de Entregas y la selección de provincia de la zona. El [recorrido completo con 24 capturas de prueba y cuatro de la web publicada](docs/RECORRIDO-ROLES-2026-10-28.md) muestra cliente, administrador, Farmi, repartidor y mapa real con datos y GPS sintéticos. [Resultados y publicación exactos](docs/pruebas/recorrido-roles-2026-10-28.json).

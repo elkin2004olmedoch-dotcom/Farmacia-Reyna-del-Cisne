@@ -25,9 +25,11 @@
 
 ## Tareas
 
-- [ ] Revisar y reproducir recorridos y huecos de prueba; corregir la causa de cualquier fallo real.
-- [ ] Implementar barra inferior mínima reutilizando estructura y conteo existentes; RED/GREEN y revisión.
-- [ ] Recorrer visualmente compra → tarifa → administración/Farmi → asignación → GPS/mapa → llegada/llamada → entrega y privacidad, con evidencia de cada paso.
-- [ ] Ejecutar comprobaciones adecuadas de Node/navegador/Pages y registrar fallos, correcciones y omisiones exactas.
-- [ ] Revisar cambios, publicar en servicios existentes y comprobar artefactos/barreras públicos.
-- [ ] Entregar galería/documento con capturas del recorrido y límites reales de la prueba.
+- [x] Revisar y reproducir recorridos y huecos de prueba; corregir la causa de cualquier fallo real.
+- [x] Implementar barra inferior mínima reutilizando estructura y conteo existentes; RED/GREEN y revisión.
+- [x] Recorrer visualmente compra → tarifa → administración/Farmi → asignación → GPS/mapa → llegada/llamada → entrega y privacidad, con evidencia de cada paso.
+- [x] Ejecutar comprobaciones adecuadas de Node/navegador/Pages y registrar fallos, correcciones y omisiones exactas.
+- [x] Revisar cambios, publicar en servicios existentes y comprobar artefactos/barreras públicos.
+- [x] Entregar galería/documento con capturas del recorrido y límites reales de la prueba.
+
+Cierre: 382 pruebas principales, dos adicionales con mapa real, 137 sondas públicas y dos recorridos anónimos publicados aprobados. Instancia PostgreSQL temporal detenida; servicio Windows existente conservado Running. Publicación `0d6df62` verificada; reversión de aplicación a `6235fc3` / Pages `565901d4` sin cambio de schema.

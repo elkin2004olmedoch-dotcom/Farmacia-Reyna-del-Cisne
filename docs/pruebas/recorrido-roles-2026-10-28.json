@@ -1,6 +1,6 @@
 {
   "fechaLocal": "2026-10-28",
-  "generadoEnUTC": "2026-10-29T03:53:51.817Z",
+  "generadoEnUTC": "2026-10-29T04:02:26.891Z",
   "alcance": "Recorrido de cliente, administrador y repartidor; carrito inferior, tarifa, seguimiento y órdenes de Farmi. Todas las escrituras de prueba en SQLite/PostgreSQL temporales locales.",
   "cambios": [
     "Barra inferior de carrito con cantidad y enlace en catálogo y ficha, eventos existentes, oculta para personal/vacío/sesión pendiente, sin consultas nuevas.",
@@ -84,24 +84,39 @@
     "datosSinteticos": true,
     "mapaReal": true,
     "erroresJavascript": 0,
-    "fallosLimpieza": 0
+    "fallosLimpieza": 0,
+    "capturasPublicadas": 4,
+    "capturasTotales": 28
   },
   "datosProduccion": {
     "operacionesComercialesDePrueba": 0,
-    "migracionesEjecutadas": 0,
     "tarifaComercialModificada": false,
-    "credencialesEnFrontend": false
+    "credencialesEnFrontend": false,
+    "migracionesNuevasAplicadas": 0
   },
   "capturasHistoricas": {
     "restauradas": 28,
     "hashesConservados": true
   },
   "publicacion": {
-    "estado": "pendiente",
-    "commit": null,
+    "estado": "publicada y verificada",
+    "commit": "0d6df624c251370b58afe0c0889198e93ce2e6ac",
     "render": "https://farmacia-reina-del-cisne.onrender.com",
     "pages": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
-    "pullRequest": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/pull/11"
+    "pullRequest": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/pull/11",
+    "renderDeployment": "dep-dbhc7a942hec73c29qk0",
+    "renderStatus": "Live",
+    "renderDurationSeconds": 63,
+    "skipInitialSeed": true,
+    "renderConfiguredBranch": "main",
+    "renderAutoDeploy": "Off",
+    "pagesDeployment": "a97d9bc5-5c8c-41ae-a500-dac3fce00d98",
+    "pagesStatus": "Cloudflare Pages success",
+    "pagesImmutable": "https://a97d9bc5.farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "pagesBranch": "codex/separacion-cloudflare",
+    "mainModified": false,
+    "dnsModified": false,
+    "paidPlansChanged": false
   },
   "limites": [
     "GPS físico continuo, conducción de ruta y llamada real no verificados; se comprobaron permisos, posiciones sintéticas, destino URL y enlace telefónico.",
@@ -110,5 +125,34 @@
     "No cobros, SMS/correos/WhatsApp ni emisiones SRI reales.",
     "Agente .NET sin cambios: no se repitió su suite92/92 del turno anterior.",
     "RenderFree conserva suspensión y demoras de despertar."
-  ]
+  ],
+  "verificacionPublica": {
+    "at": "2026-10-29T04:00:52.283Z",
+    "comprobaciones": 137,
+    "aprobadas": 137,
+    "fallos": 0,
+    "transportRetries": 0,
+    "archivosPublicosPagesComparados": 101,
+    "htmlRenderComparados": 11,
+    "privatePaths404": true,
+    "corsExacto": true,
+    "rechazosPostAnonimos401": 3,
+    "alcance": "Anonymous public checks; no valid production account, order, invoice or stock mutation. POST {} must be rejected before business validation.",
+    "recorridosAnonimosPublicados": 2,
+    "cartImageLoaded": true,
+    "overflow": false,
+    "productionBusinessWrites": 0,
+    "tarifaPublicaConservada": true
+  },
+  "incidencias": [
+    "Una pasada inicial de navegador se interrumpió para corregir la pérdida de foco de los códigos hallada en revisión; la suite final completa aprobó82/82.",
+    "El primer intento público no completó: TypeError en sonda y ERR_CONNECTION_ABORTED en navegación. Tres GET independientes posteriores respondieron200; repetición final137/137 y2/2 pasó, sin reintentos de transporte en la sonda final. No se cambió la aplicación para ocultar ese fallo de conexión."
+  ],
+  "artefacto": {
+    "paginas": 11,
+    "archivos": 102,
+    "bytes": 12687301,
+    "sourceAndReleaseSame": true,
+    "knownPrivateValueMatches": 0
+  }
 }

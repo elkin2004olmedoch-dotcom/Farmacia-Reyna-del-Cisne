@@ -17,5 +17,31 @@
       ],
       "errors": 0
     }
-  }
+  },
+  "published": {
+    "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "images": [
+      {
+        "file": "publicado/carrito-escritorio.png",
+        "bytes": 47924,
+        "sha256": "5c6b0739103465e5f4e77c0d512204c40a42a1f656622aa20571b46dd010397b"
+      },
+      {
+        "file": "publicado/carrito-movil.png",
+        "bytes": 28502,
+        "sha256": "e1772617be3108fe04d93380d5e671ef9c83be1f7ba9762ff3c308ad59b47279"
+      },
+      {
+        "file": "publicado/catalogo-escritorio.png",
+        "bytes": 87919,
+        "sha256": "bb657e417912557eb07cb63c0ab0b61ddf05e2eb24331f9bb6500da79c7fa0f9"
+      },
+      {
+        "file": "publicado/catalogo-movil.png",
+        "bytes": 33528,
+        "sha256": "5e94b482a9f91ecca40118791a784fc1bd9b26ba7d14b4fa1288a8706ca56ddd"
+      }
+    ]
+  },
+  "totalImages": 28
 }
