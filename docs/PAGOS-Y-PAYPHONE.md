@@ -1,6 +1,6 @@
 # Pagos y preparación de PayPhone
 
-La farmacia incorpora una demostración visual y el código de integración con el formulario alojado de PayPhone. **El propietario confirmó que todavía no tiene cuenta comercial. No se han proporcionado credenciales, conectado una cuenta ni probado pagos contra PayPhone, tampoco en su ambiente de pruebas.** `PAYPHONE_ENABLED=false` conserva el servicio cerrado. Esta guía describe el código preparado; no acredita su publicación ni una habilitación comercial.
+La farmacia incorpora una demostración visual y el código de integración con el formulario alojado de PayPhone. **El propietario confirmó que todavía no tiene cuenta comercial. No se han proporcionado credenciales, conectado una cuenta ni probado pagos contra PayPhone, tampoco en su ambiente de pruebas.** `PAYPHONE_ENABLED=false` conserva el servicio cerrado. El código está publicado y la tabla aditiva aplicada; la [evidencia de pagos](PAGOS-2026-10-29.md) registra despliegues y comprobaciones. Esto no acredita una habilitación comercial.
 
 ## Tres experiencias distintas
 

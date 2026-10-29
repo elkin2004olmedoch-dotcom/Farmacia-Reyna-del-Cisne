@@ -1,6 +1,6 @@
 # Arquitectura comercial de la farmacia
 
-Estado del 28 de octubre de 2026: aplicación `0d6df62` publicada en Render y Cloudflare Pages; migración aditiva aplicada en Supabase. Las 137 comprobaciones públicas aprobaron. [Evidencia comercial](pruebas/comercial-2026-10-28.json).
+Estado del 29 de octubre de 2026: API `f373a59` Live en Render y frontend `f373a59` publicado en Cloudflare Pages; migración aditiva de pagos aplicada en Supabase. Aprobaron 149 comprobaciones públicas. Ambos servicios publican la misma revisión de la aplicación. PayPhone está preparado y desactivado, sin cuenta comercial. [Evidencia y capturas actuales](PAGOS-2026-10-29.md).
 
 La aplicación amplía el MVC existente con cobertura, tarifas, reparto y seguimiento privado. Conserva HTML, CSS, JavaScript, Express 5 y Prisma 6.19.3, sin añadir un framework. La tienda histórica de la raíz y sus recursos pertenecen al antecedente estático; la aplicación con cuentas, pedidos y persistencia vive en `frontend/` y `server/`. `scripts/build-frontend.cjs` genera las pantallas y los elementos compartidos: los cambios persistentes de estructura deben realizarse en sus plantillas.
 
@@ -46,7 +46,7 @@ Los dos esquemas declaran las mismas 19 entidades. La ampliación de reparto inc
 | `ZonaEntrega` — nueva | Cobertura administrable y tarifa vigente. Un importe nullable permite mantener una zona visible con costo todavía pendiente. |
 | `ZonaEntregaTarifa` — nueva | Cada versión de tarifa, clasificación fiscal, fundamento, actor y fecha; permite reconstruir cambios sin sobrescribir el historial. |
 | `Entrega` — nueva | Una entrega por pedido; asignación a un usuario repartidor, estados/fechas, versiones y última ubicación temporal. Evita crear historial permanente de recorridos. |
-| `Pago` — preparada | Una intención por pedido, ambiente, snapshot entero USD, estado y referencias únicas de PayPhone. No sustituye el pedido ni la factura SRI. |
+| `Pago` | Una intención por pedido, ambiente, snapshot entero USD, estado y referencias únicas de PayPhone. No sustituye el pedido ni la factura SRI. |
 
 Las claves foráneas y las restricciones de las migraciones protegen relaciones, estados, rangos y consistencia fiscal. `Entrega.pedidoId` es único; los índices repartidor/estado y estado/fecha sirven a las bandejas, `recibidaAt` a la purga y zona/versión al historial de tarifas. La migración `202610280007_delivery` añade tablas, campos y controles sin borrar registros. SQLite usa triggers para parte de la consistencia del pedido; PostgreSQL usa un `CHECK`. No se intercambian esos SQL entre motores.
 
@@ -111,7 +111,7 @@ La revisión posterior de recorridos aprobó la suite completa de navegador (82/
 
 ## Ampliación preparada de pagos: demostración y PayPhone
 
-La ampliación del código conserva las tres capas y añade la entidad número 19, `Pago`, sin sustituir las 18 descritas arriba. El estado de despliegue anterior sigue siendo evidencia histórica; esta sección no acredita publicación ni activación de cobros. El propietario confirmó que todavía no dispone de cuenta comercial PayPhone: no hay credenciales proporcionadas, conexión verificada ni transacciones reales o sandbox contra el proveedor.
+La ampliación del código conserva las tres capas y añade la entidad número 19, `Pago`, sin sustituir las 18 descritas arriba. El despliegue y su verificación están registrados en la evidencia actual enlazada al inicio; los párrafos del 28 de octubre conservan su carácter histórico. Publicar el código no activa cobros. El propietario confirmó que todavía no dispone de cuenta comercial PayPhone: no hay credenciales proporcionadas, conexión verificada ni transacciones reales o sandbox contra el proveedor.
 
 | Capa | Ampliación |
 |---|---|
