@@ -17,7 +17,7 @@
     },
     {
       "comando": "npx playwright test --config tests/reto2/pages.config.cjs",
-      "pasaron": 20,
+      "pasaron": 22,
       "fallaron": 0,
       "omitidas": 0
     },
@@ -37,15 +37,15 @@
       "nota": "Regresión RED/GREEN posterior para nombres sin espacios a 320/375 px, ambos perfiles."
     }
   ],
-  "totalLocal": 430,
+  "totalLocal": 432,
   "audit": {
     "vulnerabilidades": 0,
     "dependenciasNuevas": 0
   },
   "prisma": "6.19.3",
   "pages": {
-    "archivos": 106,
-    "bytes": 12705750,
+    "archivos": 107,
+    "bytes": 12716578,
     "maxFileBytes": 2650904
   },
   "supabase": {
@@ -91,12 +91,17 @@
   "incidencias": [
     "Fixture PostgreSQL de retiro mantenía zona de envío: corregido el fixture y repetida toda la suite Node con 258 aprobadas.",
     "Revisión corrigió sesión pendiente/caducada, actualización del intento, cambio de entorno, referencia de origen y nombre largo.",
-    "Escaneo inicial coincidió con la URL SQLite local no secreta de ejemplo; ninguna credencial real encontrada."
+    "Escaneo inicial coincidió con la URL SQLite local no secreta de ejemplo; ninguna credencial real encontrada.",
+    "La primera comprobación pública detectó que build-pages no incluía pagos.html en su lista: corregida la lista, añadida igualdad entre pantallas generadas/empaquetadas y regresión de pagos entre orígenes."
   ],
   "publicacion": {
-    "estado": "pendiente",
-    "codigo": null,
-    "render": null,
+    "estado": "backend publicado; corrección de empaquetado Pages verificada localmente y pendiente de publicación",
+    "backendCodigo": "b6c95c02fc3630e34903a08c5153592b89b90a55",
+    "render": {
+      "deploy": "dep-dbhkfvgu01pc73bigvb0",
+      "estado": "Live",
+      "duracionSegundos": 77
+    },
     "cloudflare": null
   }
 }

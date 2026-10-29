@@ -42,7 +42,7 @@ function buildPages({output=defaultOutput,apiOrigin=process.env.PUBLIC_API_ORIGI
     if(size>25*1024*1024 || ++files>20000)throw new Error('El artefacto supera los límites estáticos de Pages Free.');
     const target=path.join(output,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,content);bytes+=size;maxFileBytes=Math.max(maxFileBytes,size);
   };
-  const pages=['index.html','catalogo.html','producto.html','comparar.html','cuenta.html','checkout.html','pedidos.html','admin.html','ayuda.html','entregas.html','seguimiento.html'];
+  const pages=['index.html','catalogo.html','producto.html','comparar.html','cuenta.html','checkout.html','pedidos.html','admin.html','ayuda.html','entregas.html','seguimiento.html','pagos.html'];
   for(const file of pages)write(file,read(file));
   function copy(directory){
     for(const entry of fs.readdirSync(path.join(root,'frontend',directory),{withFileTypes:true})){

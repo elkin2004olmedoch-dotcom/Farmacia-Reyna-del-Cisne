@@ -8,7 +8,8 @@ test('artefacto solo publica estáticos cliente y configuración pública con CS
   const output=path.join(directory,'public');
   const result=buildPages({output,apiOrigin:'https://api.example.test',imageOrigin:'https://images.example.test'});
   assert.ok(result.files>80);
-  for(const file of ['index.html','admin.html','checkout.html','404.html','models/api.js','assets/images/farmacia-fachada-reina.webp'])assert.ok(fs.existsSync(path.join(output,file)),file);
+  for(const file of ['index.html','admin.html','checkout.html','pagos.html','404.html','models/api.js','assets/images/farmacia-fachada-reina.webp'])assert.ok(fs.existsSync(path.join(output,file)),file);
+  assert.deepEqual(fs.readdirSync(output).filter(file=>file.endsWith('.html') && file!=='404.html').sort(),fs.readdirSync(path.join('frontend')).filter(file=>file.endsWith('.html')).sort(),'Pages incluye todas las pantallas generadas de la aplicación');
   for(const file of ['.env','.env.example','server','data','docs','node_modules','assets/uploads','functions','_worker.js'])assert.ok(!fs.existsSync(path.join(output,file)),file);
   const config=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync(path.join(output,'config.js'))).toString('base64'));
   assert.equal(config.apiUrl('/productos?pageSize=4'),'https://api.example.test/api/productos?pageSize=4');

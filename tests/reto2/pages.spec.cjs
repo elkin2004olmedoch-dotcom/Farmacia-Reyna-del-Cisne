@@ -166,3 +166,36 @@ test('admin descarga el RIDE de un borrador autenticado entre orígenes sin emit
   const saved=invoices.find(item=>item.id===invoice.id);
   expect(saved.estado).toBe('BORRADOR');expect(saved.numeroAutorizacion).toBeNull();expect(saved.xmlDisponible).toBe(false);
 });
+
+test('Pages publica pagos y ejecuta los tres resultados de demostración con configuración y mascota entre orígenes',async({page})=>{
+  const apiRequests=[],writes=[];
+  page.on('request',request=>{
+    const url=new URL(request.url());if(!url.pathname.startsWith('/api/'))return;
+    apiRequests.push({origin:url.origin,path:url.pathname,method:request.method()});
+    if(!['GET','HEAD','OPTIONS'].includes(request.method()))writes.push(request.method()+' '+url.pathname);
+  });
+  const configured=page.waitForResponse(API+'/api/pagos/configuracion',{timeout:10000});
+  const document=await page.goto('/pagos.html');expect(document.status()).toBe(200);
+  await expect(page.locator('body')).toHaveAttribute('data-page','payments');
+  await expect(page.locator('#payment-total')).toContainText(/18[,.]50/);
+  const response=await configured;expect(response.status()).toBe(200);
+  expect(response.headers()['access-control-allow-origin']).toBe(STATIC);
+  expect((await response.json()).data.payphone.disponible).toBe(false);
+  await expect(page.locator('input[name="method"][value="card"]')).toBeDisabled();
+  for(const [outcome,heading]of [['aprobado',/aprobad/i],['rechazado',/rechazad/i],['cancelado',/cancelad/i]]){
+    await page.locator('#payment-demo-result').selectOption(outcome);
+    await page.locator('#payment-submit').focus();await page.keyboard.press('Enter');
+    await expect(page.locator('#payment-result')).toBeVisible();
+    await expect(page.locator('#payment-result-title')).toContainText(heading);
+    await expect(page.locator('#payment-result-title')).toBeFocused();
+    await page.locator('#payment-reset').focus();await page.keyboard.press('Enter');
+    await expect(page.locator('#payment-result')).toBeHidden();await expect(page.locator('#payment-submit')).toBeEnabled();
+  }
+  await page.waitForFunction(()=>globalThis.FarmaciaMascota?.getStatus().availableStates.length>0);
+  await page.locator('farmacia-mascota #launcher').click();
+  const atlas=page.waitForResponse(response=>new URL(response.url()).pathname.endsWith('/sprites/farmi.png') && response.status()===200,{timeout:10000});
+  await page.locator('farmacia-mascota #character').selectOption('farmi');await atlas;
+  await expect.poll(()=>page.evaluate(()=>FarmaciaMascota.getStatus().character)).toBe('farmi');
+  await expect.poll(()=>page.locator('farmacia-mascota #canvas').evaluate(canvas=>canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data.some((value,index)=>index%4===3 && value>0))).toBe(true);
+  expect(apiRequests.length).toBeGreaterThan(0);expect(apiRequests.every(request=>request.origin===API)).toBe(true);expect(writes).toEqual([]);
+});
