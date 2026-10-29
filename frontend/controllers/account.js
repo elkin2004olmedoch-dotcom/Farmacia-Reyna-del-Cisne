@@ -5,7 +5,7 @@ import {formErrors,message,busy} from '../views/common.js';
 const V=globalThis.Farmacia.validation;
 export function accountController() {
   const next=new URLSearchParams(location.search).get('next');
-  const destination=['checkout.html','pedidos.html','admin.html','entregas.html'].includes(next) || /^seguimiento\.html\?pedido=[a-zA-Z0-9_-]{1,100}$/.test(next)?next:null;
+  const destination=['checkout.html','pedidos.html','admin.html','entregas.html','pagos.html'].includes(next) || /^(seguimiento|pagos)\.html\?pedido=[a-zA-Z0-9_-]{1,100}$/.test(next)?next:null;
   if(auth.user){accountView(auth.user);return;}
   const note=sessionStorage.getItem('farmacia-mvc-login-message');if(note){message(note,false);sessionStorage.removeItem('farmacia-mvc-login-message');}
   const login=document.getElementById('login-panel');const register=document.getElementById('register-panel');

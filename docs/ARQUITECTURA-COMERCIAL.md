@@ -22,9 +22,9 @@ flowchart LR
 
 La arquitectura no obliga a hospedar ambas capas HTTP en el mismo proveedor. La configuración real de los servicios existentes y el origen de API se documentan en las guías de despliegue; esta candidata no cambia por sí sola esos servicios. El navegador llama a Express, no a tablas Supabase. Las nuevas tablas PostgreSQL habilitan RLS y revocan acceso a `PUBLIC`, `anon` y `authenticated`; eso complementa la autorización JWT del backend y debe verificarse en el destino al aplicar la migración.
 
-## Las 18 entidades
+## Las 19 entidades
 
-Los dos esquemas declaran las mismas 18 entidades. Las tres últimas incorporan el reparto sin duplicar clientes, productos ni inventario.
+Los dos esquemas declaran las mismas 19 entidades. La ampliación de reparto incorporó tres sin duplicar clientes, productos ni inventario; la preparación de pagos añade `Pago` y conserva las 18 anteriores.
 
 | Entidad | Finalidad |
 |---|---|
@@ -46,6 +46,7 @@ Los dos esquemas declaran las mismas 18 entidades. Las tres últimas incorporan 
 | `ZonaEntrega` — nueva | Cobertura administrable y tarifa vigente. Un importe nullable permite mantener una zona visible con costo todavía pendiente. |
 | `ZonaEntregaTarifa` — nueva | Cada versión de tarifa, clasificación fiscal, fundamento, actor y fecha; permite reconstruir cambios sin sobrescribir el historial. |
 | `Entrega` — nueva | Una entrega por pedido; asignación a un usuario repartidor, estados/fechas, versiones y última ubicación temporal. Evita crear historial permanente de recorridos. |
+| `Pago` — preparada | Una intención por pedido, ambiente, snapshot entero USD, estado y referencias únicas de PayPhone. No sustituye el pedido ni la factura SRI. |
 
 Las claves foráneas y las restricciones de las migraciones protegen relaciones, estados, rangos y consistencia fiscal. `Entrega.pedidoId` es único; los índices repartidor/estado y estado/fecha sirven a las bandejas, `recibidaAt` a la purga y zona/versión al historial de tarifas. La migración `202610280007_delivery` añade tablas, campos y controles sin borrar registros. SQLite usa triggers para parte de la consistencia del pedido; PostgreSQL usa un `CHECK`. No se intercambian esos SQL entre motores.
 
@@ -107,3 +108,23 @@ En el cierre de la ampliación inicial, la suite completa de navegador aprobó 7
 Supabase recibió únicamente la migración aditiva `202610280007_delivery`, después de respaldar base/Storage y comprobar sus hashes. Las 15 tablas anteriores conservan conteos y hashes de todas sus columnas previas: 18 productos, dos usuarios y un pedido. Las tres tablas nuevas tienen RLS y deniegan acceso directo anon/authenticated. La zona Puerto Quito mantiene tarifa pendiente, un registro de historial y cero entregas; no se inventaron repartidores ni pedidos reales. Render quedó Live en `dep-dbhbilm7bikc73e5vkdg` y Cloudflare confirmó éxito del despliegue `565901d4-b133-4468-bd5e-d0d410916ba3`; los archivos públicos coinciden con el artefacto local y las barreras anónimas aprobaron. La verificación pública no utilizó cuentas válidas ni creó pedidos reales. Las suites no emiten facturas reales, correos ni órdenes comerciales.
 
 La revisión posterior de recorridos aprobó la suite completa de navegador (82/82), Node (242/242), históricas (38/38) y Pages (20/20), sin omisiones. Dos ensayos adicionales cargaron OpenStreetMap real con GPS sintético; 28 capturas documentan la demostración y el carrito publicado. Corrige el refresco administrativo y la provincia canónica, e incorpora barra inferior y códigos de Farmi con foco conservado. El código `0d6df62` está Live en Render y publicado en Pages: aprobaron 137 comprobaciones públicas y dos recorridos anónimos. [Recorrido y límites](RECORRIDO-ROLES-2026-10-28.md), [evidencia exacta](pruebas/recorrido-roles-2026-10-28.json).
+
+## Ampliación preparada de pagos: demostración y PayPhone
+
+La ampliación del código conserva las tres capas y añade la entidad número 19, `Pago`, sin sustituir las 18 descritas arriba. El estado de despliegue anterior sigue siendo evidencia histórica; esta sección no acredita publicación ni activación de cobros. El propietario confirmó que todavía no dispone de cuenta comercial PayPhone: no hay credenciales proporcionadas, conexión verificada ni transacciones reales o sandbox contra el proveedor.
+
+| Capa | Ampliación |
+|---|---|
+| Presentación | `frontend/pagos.html`, generado por `scripts/build-frontend.cjs`, y los módulos `models/payments.js`, `views/payments.js`, `controllers/payments.js`. Muestra una demostración independiente o el resumen autenticado de un pedido; el formulario de tarjeta se abre en el dominio oficial de PayPhone mediante navegación completa. |
+| Aplicación | `routes/pagos.cjs` aplica JWT, rol y validación; `controllers/pagos.cjs` adapta HTTP; `models/pagos.cjs` autoriza propiedad, obtiene importes históricos y coordina la intención y confirmación; `models/payphone.cjs` valida configuración, URL y llamadas acotadas al proveedor. |
+| Persistencia | `Pago.pedidoId` único impone una intención por pedido. Ambos esquemas Prisma 6 y las migraciones aditivas `202610290008_payments` conservan snapshot monetario entero USD, ambiente y referencias únicas del proveedor. Los triggers protegen el snapshot y referencias ya registradas; PostgreSQL añade RLS y revocaciones sin políticas públicas. La importación incluye `Pago` después de `Pedido`. |
+
+Las nuevas rutas son `GET /api/pagos/configuracion` pública, `GET /api/pedidos/:id/pago` y `POST /api/pedidos/:id/pago/payphone` para propietario/admin, y `GET /api/pagos/payphone/respuesta` para el retorno público verificado. Repartidores quedan excluidos. La preparación solo admite cuerpo vacío o `{}`; importe, bases e IVA proceden de los snapshots del pedido y envío. El DTO entrega resumen de artículos/importes y estado de pago, sin PII del comprador ni secretos. Consulta [contrato, variables y operación](PAGOS-Y-PAYPHONE.md).
+
+Una transacción serializable reserva la intención y coordina la concurrencia con la cancelación del pedido; Prepare y Confirm se ejecutan fuera de la transacción con límite de 12 segundos y sin reintentar POST automáticamente. El retorno debe corresponder a una intención guardada y Confirm debe coincidir en transacción, referencia, centavos, USD y estado. Los callbacks repetidos o concurrentes no repiten la confirmación; una respuesta incierta o discrepante conserva `revision`. El backend redirige únicamente al origen público configurado y al ID de pedido almacenado.
+
+`PAYPHONE_ENABLED=false` mantiene el servicio cerrado. La demostración no escribe pedidos ni pagos. PayPhone sandbox requiere una aplicación WEB realmente marcada PRUEBAS y credenciales propias; la etiqueta `PAYPHONE_ENVIRONMENT=sandbox` no convierte un token de producción. Ambos ambientes usan el mismo host del proveedor. La intención conserva su ambiente; cambiarlo bloquea reutilización y oculta el enlace. En el despliegue separado, el dominio WEB registrado es el frontend Pages desde el que navega el cliente y la respuesta corresponde al backend Render; los orígenes reales deben verificarse antes de activar.
+
+`creando`, `pendiente`, `aprobado`, `cancelado` y `revision` describen el pago por separado del pedido. Aprobar no confirma, prepara ni entrega el pedido y no invoca SRI; sandbox no cuenta como dinero recibido. Una intención de producción que no esté cancelada bloquea cancelar el pedido y devolver inventario hasta conciliar. Esta versión no crea nuevos intentos automáticamente ni ofrece devoluciones o una acción administrativa de conciliación: una devolución externa tampoco actualiza por sí sola el estado local. El procedimiento de soporte y sus límites están documentados en [la guía de pagos](PAGOS-Y-PAYPHONE.md#revisión-de-incidencias-y-evidencia).
+
+El navegador no recoge PAN ni CVV, y token/StoreID permanecen en el servidor. La pantalla de pagos servida por Express envía solo el origen entre sitios mediante `strict-origin-when-cross-origin`, conservando CSP; el callback usa `no-referrer`. PayPhone exige Confirm dentro de cinco minutos posteriores al pago, por lo que un arranque en frío o una caída de Render Free es un riesgo operativo que debe resolverse antes de habilitar cobros. Las pruebas automatizadas usan bases temporales y respuestas simuladas; no sustituyen la validación real de una cuenta y aplicación PRUEBAS. [Protocolo oficial de PayPhone](https://docs.payphone.app/boton-de-pago).

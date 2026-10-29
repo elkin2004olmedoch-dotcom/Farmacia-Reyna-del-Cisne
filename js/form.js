@@ -62,7 +62,7 @@
       }
       status.textContent = '';
       const message = `Hola, soy ${values.name}.\nCorreo: ${values.email}\nTeléfono: ${values.phone}\nConsulta: ${values.message}`;
-      document.getElementById('contact-whatsapp').href = `https://wa.me/593979275988?text=${encodeURIComponent(message)}`;
+      document.getElementById('contact-whatsapp').href = `https://api.whatsapp.com/send?phone=593979275988&text=${encodeURIComponent(message)}`;
       success.hidden = false;
       document.getElementById('contact-whatsapp').focus();
     });

@@ -98,6 +98,7 @@ model Pedido {
   historial      PedidoEstado[]
   movimientos    MovimientoInventario[]
   factura        FacturaPedido?
+  pago           Pago?
   @@unique([userId, requestKey])
   @@index([userId, createdAt])
   @@index([zonaEntregaId])
@@ -338,4 +339,26 @@ model Entrega {
   @@index([repartidorId,estado])
   @@index([estado,createdAt])
   @@index([recibidaAt])
+}
+
+model Pago {
+  id String @id @default(uuid())
+  pedidoId String @unique
+  pedido Pedido @relation(fields:[pedidoId],references:[id],onDelete:Restrict)
+  proveedor String @default("payphone")
+  entorno String
+  estado String @default("creando")
+  moneda String @default("USD")
+  totalCentavos Int
+  sinIvaCentavos Int
+  baseIvaCentavos Int
+  ivaCentavos Int
+  paymentId String? @unique
+  providerTransactionId Int? @unique
+  urlPago String?
+  confirmacionIniciadaAt DateTime?
+  confirmadaAt DateTime?
+  revisionMotivo String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

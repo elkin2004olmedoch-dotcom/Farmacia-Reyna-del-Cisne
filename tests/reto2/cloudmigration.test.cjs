@@ -20,6 +20,7 @@ function fixture(uploaded=false){
     zonaEntrega:[{id:'puerto-quito',nombre:'Cobertura administrada',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:250,ivaCategoria:'general',fundamentoIva:null,activa:true,version:2,createdAt,updatedAt}],
     zonaEntregaTarifa:[{id:'puerto-quito-inicial',zonaEntregaId:'puerto-quito',version:1,tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,actorId:null,createdAt},{id:'tarifa-original',zonaEntregaId:'puerto-quito',version:2,tarifaCentavos:250,ivaCategoria:'general',fundamentoIva:null,actorId:'cliente-original',createdAt:updatedAt}],
     entrega:[{id:'entrega-original',pedidoId:'pedido-original',repartidorId:'repartidor-original',estado:'entregada',version:4,gpsVersion:3,asignadaAt:createdAt,salidaAt:createdAt,llegadaAt:updatedAt,finalizadaAt:updatedAt,latitud:null,longitud:null,precision:null,registradaAt:null,recibidaAt:null,createdAt,updatedAt}],
+    pago:[{id:'pago-original',pedidoId:'pedido-original',proveedor:'payphone',entorno:'sandbox',estado:'revision',moneda:'USD',totalCentavos:2719,sinIvaCentavos:2719,baseIvaCentavos:0,ivaCentavos:0,paymentId:null,providerTransactionId:null,urlPago:null,confirmacionIniciadaAt:null,confirmadaAt:null,revisionMotivo:'prueba_sintetica',createdAt,updatedAt}],
     pedidoDetalle:[{id:'detalle-original',pedidoId:'pedido-original',productoId:'producto-original',nombreProducto:'Alcohol anterior',cantidad:2,precioUnitario:new Prisma.Decimal('12.34567'),precioOriginal:new Prisma.Decimal('15.12345'),descuentoPorcentaje:18}],
     promocion:[{id:'promocion-original',titulo:'Promoción',descripcion:'Descripción',etiqueta:'Promo',productoId:'producto-original',activa:true,vistaPrevia:false,descuentoPorcentaje:18,imagen:uploaded?reference:null,alt:null,orden:4,inicio:createdAt,fin:updatedAt,createdAt}],
     pedidoEstado:[{id:'historial-original',pedidoId:'pedido-original',anterior:'pendiente',estado:'entregado',actorId:'cliente-original',createdAt}],
@@ -77,7 +78,7 @@ const emptyCounts=()=>Object.fromEntries(MODELS.map(model=>[model,0]));
 test('el importador cubre todos los modelos Prisma y no omite futuras entidades de farmacia',async()=>{
  const schema=await fs.readFile(path.resolve(__dirname,'../../server/prisma/schema.prisma'),'utf8');
  const names=[...schema.matchAll(/^model (\w+) \{/gm)].map(match=>match[1][0].toLowerCase()+match[1].slice(1));
- assert.deepEqual([...MODELS].sort(),names.sort());assert.equal(MODELS.length,18);
+ assert.deepEqual([...MODELS].sort(),names.sort());assert.equal(MODELS.length,19);
 });
 test('se sustituye sólo la semilla fiscal estándar en la misma transacción preservando historial del origen',async()=>{
  const snapshot=fixture(),defaultRow=technicalDefaults().configuracionFiscal[0],source=sourceClient(snapshot),target=targetClient({initial:{configuracionFiscal:[defaultRow]}});
@@ -152,7 +153,7 @@ test('la simulación consulta un snapshot único y muestra solo cantidades sin e
   assert.equal(target.transactions,1);assert.deepEqual(target.writes,[]);assert.deepEqual(result.destino,emptyCounts());assert.equal(inspected,0);assert.equal(cloudCalls,0);
   const printed=JSON.stringify(result);for(const privateValue of [privateHash,privateEmail,'cliente-original','Domicilio privado','huella-privada'])assert.ok(!printed.includes(privateValue));
 });
-test('la transferencia conserva IDs, hashes, roles, fechas, decimales, inventario y facturación de las dieciocho entidades',async()=>{
+test('la transferencia conserva IDs, hashes, roles, fechas, decimales, inventario, facturación y pagos de las diecinueve entidades',async()=>{
   const snapshot=fixture(),source=sourceClient(snapshot),target=targetClient();
   const result=await migrate({source,target,apply:true});
   assert.equal(result.modo,'aplicar');assert.deepEqual(target.writes,MODELS);assert.equal(target.transactions,2);

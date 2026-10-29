@@ -107,13 +107,36 @@ test('PostgreSQL aislado: migraciones, API, entrega, fiscalidad, permisos e impo
   assert.equal(closed.reparto.latitud,null);assert.equal(closed.reparto.longitud,null);assert.equal(delivery.destino,null);
   assert.deepEqual(sri.snapshot(closed,sriFixture.buyer,sriFixture.emitter),snapshot);
  });
+ await t.test('PayPhone sintético: reserva concurrente, Confirm, snapshot y conciliación de producción',async()=>{
+  const names=['PAYPHONE_ENABLED','PAYPHONE_TOKEN','PAYPHONE_STORE_ID','PAYPHONE_ENVIRONMENT','PAYMENT_PUBLIC_ORIGIN','PAYMENT_API_ORIGIN','CORS_ORIGIN'];
+  const previous=Object.fromEntries(names.map(name=>[name,process.env[name]])),originalFetch=global.fetch,calls=[],paymentId=randomUUID();
+  try {
+   Object.assign(process.env,{PAYPHONE_ENABLED:'true',PAYPHONE_TOKEN:'synthetic-token-not-real',PAYPHONE_STORE_ID:randomUUID(),PAYPHONE_ENVIRONMENT:'production',PAYMENT_PUBLIC_ORIGIN:'https://test.example.ec',PAYMENT_API_ORIGIN:'https://api.example.ec',CORS_ORIGIN:'http://localhost:3000,https://test.example.ec'});
+   global.fetch=async(url,options)=>{const body=JSON.parse(options.body);calls.push({url,body});return new Response(JSON.stringify(url.endsWith('/Prepare')?{paymentId,payWithCard:'https://pay.payphonetodoesposible.com/Anonymous/Index?paymentId='+paymentId}:{transactionId:body.id,clientTransactionId:body.clientTxId,amount:1150,currency:'USD',statusCode:3,transactionStatus:'Approved'}));};
+   // Pickup omits delivery-only keys; the API deliberately rejects them.
+   const {zonaEntregaId,...pickupBuyer}=buyer;
+   const input={carrito:[{productoId:product.id,cantidad:1}],comprador:{...pickupBuyer,delivery:'pickup'},claveSolicitud:randomUUID()};
+   const paymentOrder=(await api.post('/api/pedidos').set('Authorization',userAuth).send(input).expect(201)).body.data;
+   const route='/api/pedidos/'+paymentOrder.id+'/pago/payphone';
+   const parallel=await Promise.all([api.post(route).set('Authorization',userAuth).send({}),api.post(route).set('Authorization',userAuth).send({})]);
+   assert.deepEqual(parallel.map(response=>response.status).sort(),[200,201]);assert.equal(calls.length,1);
+   assert.deepEqual([calls[0].body.amount,calls[0].body.amountWithoutTax,calls[0].body.amountWithTax,calls[0].body.tax],[1150,0,1000,150]);
+   const pago=await db.pago.findUnique({where:{pedidoId:paymentOrder.id}}),callback='/api/pagos/payphone/respuesta?id=10001&clientTransactionId='+pago.id;
+   const returns=await Promise.all([api.get(callback),api.get(callback)]);assert.deepEqual(returns.map(response=>response.status),[303,303]);assert.equal(calls.length,2);
+   const approved=await db.pago.findUnique({where:{id:pago.id}});assert.equal(approved.estado,'aprobado');assert.equal(approved.entorno,'production');
+   await assert.rejects(()=>db.pago.update({where:{id:pago.id},data:{totalCentavos:1200,baseIvaCentavos:1050}}));
+   await assert.rejects(()=>db.pago.update({where:{id:pago.id},data:{providerTransactionId:10002}}));
+   const current=await db.pedido.findUnique({where:{id:paymentOrder.id}});assert.equal(current.estado,'pendiente');assert.equal(await db.facturaPedido.count({where:{pedidoId:paymentOrder.id}}),0);
+   const cancelled=await api.put('/api/pedidos/'+paymentOrder.id+'/estado').set('Authorization',adminAuth).send({estado:'cancelado',esperadoUpdatedAt:current.updatedAt.toISOString()}).expect(409);assert.equal(cancelled.body.error.code,'PAYMENT_REQUIRES_RECONCILIATION');
+  } finally {global.fetch=originalFetch;for(const name of names){if(previous[name]===undefined)delete process.env[name];else process.env[name]=previous[name];}}
+ });
  await t.test('CHECK, FK y RLS niegan acceso SQL a anon y authenticated',async()=>{
   await assert.rejects(()=>db.zonaEntrega.update({where:{id:'puerto-quito'},data:{tarifaCentavos:-1}}));
   await assert.rejects(()=>db.zonaEntrega.update({where:{id:'puerto-quito'},data:{ivaCategoria:'cero',fundamentoIva:null}}));
   await assert.rejects(()=>db.zonaEntregaTarifa.create({data:{zonaEntregaId:randomUUID(),version:1,ivaCategoria:'general'}}),e=>e.code==='P2003');
   await assert.rejects(()=>db.pedido.update({where:{id:order.id},data:{envioBaseImponible:null}}));
   await assert.rejects(()=>db.$executeRawUnsafe('UPDATE "Producto" SET "controlado"=2 WHERE "id"=$1',product.id));
-  const tables=['ZonaEntrega','ZonaEntregaTarifa','Entrega'];
+  const tables=['ZonaEntrega','ZonaEntregaTarifa','Entrega','Pago'];
   for(const table of tables){
    const rows=await db.$queryRawUnsafe('SELECT relrowsecurity FROM pg_class WHERE oid=$1::regclass','"'+table+'"');assert.equal(rows[0].relrowsecurity,true);
    for(const role of ['anon','authenticated']){
@@ -130,7 +153,7 @@ test('PostgreSQL aislado: migraciones, API, entrega, fiscalidad, permisos e impo
    }
   }
  });
- await t.test('importador real SQLite→PostgreSQL acepta baseline 007 y conserva historial y milisegundos',async()=>{
+ await t.test('importador real SQLite→PostgreSQL acepta baseline 008 y conserva historial, pagos y milisegundos',async()=>{
   const target=await database('import');migrate('postgresql',target.url);
   const sourceUrl='file:'+path.join(directory,'source.db').replaceAll('\\','/');migrate('sqlite',sourceUrl);
   const source=new (require('@prisma/client').PrismaClient)({datasources:{db:{url:sourceUrl}}});clients.push(source);

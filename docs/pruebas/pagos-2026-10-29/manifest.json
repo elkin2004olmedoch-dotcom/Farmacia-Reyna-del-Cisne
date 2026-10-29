@@ -1,0 +1,35 @@
+{
+  "entorno": "API localhost y SQLite temporal, sin pagos ni pedidos de producción",
+  "images": [
+    {
+      "file": "aprobacion-demostracion-escritorio.png",
+      "bytes": 83835,
+      "sha256": "8e536b80862d5192d768f47583fb69fc2b9a81f9ddea84f0a6f882e368cbe365"
+    },
+    {
+      "file": "aprobacion-demostracion-movil.png",
+      "bytes": 68734,
+      "sha256": "d4e36d255ad8bf4ccaab3110ffa16eb86de6bc58b9415ebe8472c6449de0755d"
+    },
+    {
+      "file": "demostracion-escritorio.png",
+      "bytes": 97974,
+      "sha256": "312e893ada74465e2de2f766fa14b28addd5d49998fe220237466f67ec47fbf8"
+    },
+    {
+      "file": "demostracion-movil.png",
+      "bytes": 80388,
+      "sha256": "8fb82f7d27bd22b5236fa7688297b59c0f84c7c023c375c09331ca92ba0c27e9"
+    },
+    {
+      "file": "pedido-escritorio.png",
+      "bytes": 89509,
+      "sha256": "8037fadb7589ff4a4fc379f0e16c1238b57103c5378ea48a6075eafe72c4950b"
+    },
+    {
+      "file": "pedido-movil.png",
+      "bytes": 73939,
+      "sha256": "1951ddf77766dcdd80e231a3e384ffe2331173ec3558990f27192e4230ac046d"
+    }
+  ]
+}

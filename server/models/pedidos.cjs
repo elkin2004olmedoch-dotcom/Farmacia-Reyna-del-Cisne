@@ -78,6 +78,8 @@ async function updateStatusTx(tx,id,{estado,esperadoUpdatedAt},actorId) {
   if(current.updatedAt.getTime()!==expected.getTime())throw new AppError(409,'ORDER_CHANGED','El pedido cambió. Actualiza sus datos antes de cambiar el estado.');
   if(!transitions[current.estado]?.includes(estado))throw new AppError(409,'INVALID_ORDER_TRANSITION','Ese cambio de estado no está permitido. Los pedidos entregados o cancelados son definitivos.');
   if(estado==='cancelado') {
+    const payment=await tx.pago.findUnique({where:{pedidoId:id},select:{estado:true,entorno:true}});
+    if(payment && payment.entorno==='production' && payment.estado!=='cancelado')throw new AppError(409,'PAYMENT_REQUIRES_RECONCILIATION','El pedido tiene un pago aprobado o en proceso. Coordina su conciliación o devolución antes de cancelar y devolver el inventario.');
     const invoice=await tx.facturaPedido.findUnique({where:{pedidoId:id},select:{estado:true,secuencial:true,xmlFirmado:true,procesandoHasta:true}});
     if(invoice && (invoice.secuencial!==null || invoice.xmlFirmado || invoice.estado==='AUTORIZADA' || invoice.procesandoHasta && invoice.procesandoHasta>new Date()))throw new AppError(409,'INVOICE_REQUIRES_RECONCILIATION','El pedido tiene una factura emitida o en proceso. Gestiona la anulación o nota de crédito correspondiente antes de devolver el inventario.');
   }

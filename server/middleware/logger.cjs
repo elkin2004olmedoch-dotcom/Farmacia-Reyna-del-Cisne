@@ -9,6 +9,7 @@ const adminWrites=new Map([
   ['POST /api/admin/proveedores','supplier.create'],['PUT /api/admin/proveedores/:id','supplier.update'],
   ['POST /api/admin/lotes','inventory.lot.create'],['POST /api/admin/inventario/ajustes','inventory.adjust'],
   ['PUT /api/pedidos/:id/estado','order.status.update'],
+  ['POST /api/pedidos/:id/pago/payphone','payment.start'],
   ['PUT /api/admin/facturacion/configuracion','billing.configuration.update'],['POST /api/admin/facturacion/certificado','billing.certificate.upload'],
   ['POST /api/admin/facturacion/facturas','billing.invoice.create'],['POST /api/admin/facturacion/facturas/:id/emitir','billing.invoice.emit'],
   ['POST /api/admin/zonas-entrega','delivery.zone.create'],['PUT /api/admin/zonas-entrega/:id','delivery.zone.update'],

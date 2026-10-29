@@ -13,6 +13,10 @@ La ampliación del 28 de octubre de 2026 conserva tres capas: presentación HTML
 
 La migración aditiva está aplicada en Supabase y conserva los datos anteriores. La versión `0d6df62` está publicada en [Cloudflare Pages](https://farmacia-reyna-del-cisne-pruebas.pages.dev/) y [Render](https://farmacia-reina-del-cisne.onrender.com/), con 137 comprobaciones públicas aprobadas. El estado de despliegue se registra en [la evidencia comercial](docs/pruebas/comercial-2026-10-28.json), separado del antecedente histórico descrito más abajo. Consulta [arquitectura y modelo de datos](docs/ARQUITECTURA-COMERCIAL.md), [operación y privacidad de entregas](docs/ENTREGAS-Y-PRIVACIDAD.md), [criterios de Ecuador](docs/ECUADOR-FARMACIA.md) y [contrato de la API](docs/superpowers/specs/2026-10-28-entregas-contract.md).
 
+## Pagos preparados para PayPhone
+
+La pestaña [Pagos](frontend/pagos.html) conserva la marca y las mascotas. Ofrece una demostración aprobada/rechazada/cancelada que no cobra ni modifica pedidos y un resumen privado por pedido. El adaptador de PayPhone valida importes históricos, entorno y retorno en el servidor; las credenciales comerciales todavía no existen y el proveedor permanece cerrado. Consulta [activación, contrato y límites](docs/PAGOS-Y-PAYPHONE.md). Apple Pay se muestra como no disponible hasta contar con una pasarela compatible habilitada para la farmacia.
+
 ## Mascotas animadas para el bot
 
 Farmi, Boti y Goti son compañeros pixel art con nueve gestos cada uno. El widget se carga en las páginas públicas y reacciona al carrito, permite cambiar de personaje y ofrece accesos a búsqueda, pedidos, horario y contacto.
@@ -24,7 +28,7 @@ Farmi, Boti y Goti son compañeros pixel art con nueve gestos cada uno. El widge
 
 Plataforma de farmacia con catálogo, carrito persistente, registro/login, pedidos en base de datos y administración de productos, promociones, proveedores, lotes, inventario, IVA y facturación electrónica SRI. Mantiene la fachada del negocio, identidad crema/vino, ubicación, WhatsApp y las 18 referencias anteriores. **Abre la [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) o [inicia sesión](https://farmacia-reina-del-cisne.onrender.com/cuenta.html).**
 
-**Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite local o PostgreSQL en Supabase, y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.
+**Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite local o PostgreSQL en Supabase, y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago se coordina con la farmacia mientras PayPhone permanece pendiente de cuenta y activación comercial; existe una demostración sin cobros. La entrega se gestiona con cobertura, tarifas y repartidores propios.
 
 **Antecedente del frontend de prueba, verificado el 21 de octubre de 2026:** [Cloudflare Pages](https://farmacia-reyna-del-cisne-pruebas.pages.dev/) servía el commit `0672e41` y consultaba la API Render existente. La fachada WebP pasó de 1.647.804 a 391.110 bytes (−76,26 %), sin cambiar HTML, CSS, JavaScript ni dimensiones. Pasaron 297 pruebas locales, 102 comprobaciones estáticas públicas y tres escenarios del cliente publicado con API local temporal. En esa fecha Render conservaba `75aee3e`, rama configurada `main` y Auto-Deploy Off; no se modificaron dominio principal, DNS ni datos comerciales. Configuración y reversión históricas en [DEPLOY_CLOUDFLARE.md](docs/DEPLOY_CLOUDFLARE.md), mediciones en [RENDIMIENTO.md](docs/RENDIMIENTO.md#comparación-de-las-urls-publicadas) y alcance de seguridad en [SEGURIDAD_DESPLIEGUE.md](docs/SEGURIDAD_DESPLIEGUE.md).
 
@@ -58,7 +62,7 @@ npm run setup
 npm start
 ~~~
 
-Abre **http://localhost:3000/**. Express sirve frontend y API en el mismo origen. Setup genera el cliente Prisma, aplica la migración, ejecuta seed y construye las once pantallas. Si .env no existe, genera JWT_SECRET y contraseña admin aleatorios; no sobrescribe un archivo existente.
+Abre **http://localhost:3000/**. Express sirve frontend y API en el mismo origen. Setup genera el cliente Prisma, aplica la migración, ejecuta seed y construye las doce pantallas. Si .env no existe, genera JWT_SECRET y contraseña admin aleatorios; no sobrescribe un archivo existente.
 
 Consulta ADMIN_EMAIL y ADMIN_PASSWORD en tu **archivo privado .env** e inicia sesión en /cuenta.html. Una cuenta admin entra automáticamente en /admin.html; una cuenta cliente conserva su cuenta, carrito e historial. No compartas ese archivo. Las cuentas normales se crean desde “Crear cuenta”; el registro nunca concede admin. Usa datos de prueba con formatos/verificadores ecuatorianos válidos durante la evaluación.
 
@@ -378,7 +382,7 @@ Genera **entrega/Reto2_Olmedo_Elkin.zip** con frontend/backend MVC, schema/migra
 
 ## Límites prácticos
 
-SQLite sirve para la instalación local; la aplicación pública utiliza PostgreSQL y Storage de Supabase. Rate limit en memoria de una instancia. Los respaldos automáticos SQLite requieren el servidor activo y espacio disponible; no cubren los servicios de nube. Render y Supabase gratuitos tienen límites y pausas por inactividad, sin garantía de disponibilidad continua. El nuevo agente todavía requiere cuentas, plantillas y configuración privada: para Gmail SMTP necesita alojamiento siempre activo con puertos SMTP disponibles; Render Free bloquea esos puertos. No se implementan pasarela bancaria, logística automática, MFA, recuperación de clave ni verificación de correo. El administrador actualiza los estados; el pago y la entrega se coordinan con la farmacia. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
+SQLite sirve para la instalación local; la aplicación pública utiliza PostgreSQL y Storage de Supabase. Rate limit en memoria de una instancia. Los respaldos automáticos SQLite requieren el servidor activo y espacio disponible; no cubren los servicios de nube. Render y Supabase gratuitos tienen límites y pausas por inactividad, sin garantía de disponibilidad continua. El nuevo agente todavía requiere cuentas, plantillas y configuración privada: para Gmail SMTP necesita alojamiento siempre activo con puertos SMTP disponibles; Render Free bloquea esos puertos. PayPhone está preparado y desactivado hasta validar una cuenta comercial; no se han probado pagos bancarios reales. No se implementan MFA, recuperación de clave ni verificación de correo. El administrador actualiza los estados; el pago y la entrega se coordinan con la farmacia. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
 
 
 ## Frontend estático independiente de Render

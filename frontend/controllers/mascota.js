@@ -17,7 +17,7 @@ export function activateMascotaAction(href,doc=document){
 function stored(key){try{return localStorage.getItem(key);}catch(_){return null;}}
 function remember(key,value){try{localStorage.setItem(key,value);}catch(_){}}
 function cartCount(){try{const mvc=JSON.parse(localStorage.getItem('farmacia-mvc-carrito')||'{}');const local=JSON.parse(localStorage.getItem('farmacia-reina-cart')||'{}');return [...Object.values(mvc),...Object.values(local?.items||{})].reduce((sum,value)=>sum+(Number.isInteger(value)&&value>0?value:0),0);}catch(_){return 0;}}
-function pageContext(){const path=location.pathname.split('/').pop()||'index.html',page=document.body.dataset.page,section=location.hash.slice(1),map={'index.html':page==='home'?'home':'home','catalogo.html':'catalog','producto.html':'product','comparar.html':'compare','checkout.html':'checkout','cuenta.html':'account','pedidos.html':'orders','ayuda.html':'help'};if(path==='index.html'&&['servicios','promos','ubicacion','contacto','featured-title'].includes(section))return section==='promos'?'promotions':section==='ubicacion'||section==='contacto'?'contact':'home';return map[path]||({'home':'home','catalog':'catalog','product':'product','compare':'compare','checkout':'checkout','account':'account','orders':'orders','help':'help'}[page]||'home');}
+function pageContext(){const path=location.pathname.split('/').pop()||'index.html',page=document.body.dataset.page,section=location.hash.slice(1),map={'index.html':page==='home'?'home':'home','catalogo.html':'catalog','producto.html':'product','comparar.html':'compare','checkout.html':'checkout','cuenta.html':'account','pedidos.html':'orders','ayuda.html':'help','pagos.html':'payments'};if(path==='index.html'&&['servicios','promos','ubicacion','contacto','featured-title'].includes(section))return section==='promos'?'promotions':section==='ubicacion'||section==='contacto'?'contact':'home';return map[path]||({'home':'home','catalog':'catalog','product':'product','compare':'compare','checkout':'checkout','account':'account','orders':'orders','help':'help','payments':'payments'}[page]||'home');}
 
 /** A small, local store-navigation helper. Messages never leave this module. */
 export async function mascotaController(){
@@ -47,6 +47,7 @@ export async function mascotaController(){
     checkout:[['¿Cómo cambio cantidades?','cantidades'],['¿Cómo completo mi pedido?','pedido'],['Hablar con la farmacia','whatsapp']],
     account:[['¿Cómo creo mi cuenta?','registro'],['¿Para qué necesito una cuenta?','cuenta'],['Comprar sin cuenta','invitado']],
     orders:[['¿Cómo reviso el estado?','estado pedido'],['¿Necesitas ayuda con una entrega?','whatsapp'],['Volver al catálogo','productos']],
+    payments:[['¿Cómo funciona la prueba?','prueba pago'],['Pagar mi pedido','pago'],['Hablar con la farmacia','whatsapp']],
     help:[['¿Cuál es el horario?','horario'],['Contactar por WhatsApp','whatsapp'],['Buscar un producto','productos']],
     contact:[['¿Cuál es el horario?','horario'],['Abrir ubicación','ubicacion'],['Contactar por WhatsApp','whatsapp']],
   };
@@ -118,7 +119,7 @@ export async function mascotaController(){
     const link=event.target.closest('.message-links a');
     if(link&&activateMascotaAction(link.getAttribute('href')))event.preventDefault();
   });
-  const whatsapp={label:'Hablar con la farmacia ↗',href:'https://wa.me/593979275988',external:true};
+  const whatsapp={label:'Hablar con la farmacia ↗',href:'https://api.whatsapp.com/send?phone=593979275988',external:true};
   function answer(text){
     const normalized=text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');
     const context=pageContext();
@@ -139,6 +140,7 @@ export async function mascotaController(){
     if(/horario|abren|cierran|hora/.test(normalized))return{state:'review',text:'La farmacia atiende de lunes a sábado, de 08:00 a 19:00. Puedes confirmar la atención por WhatsApp antes de visitarnos.',actions:[{label:'Ver ubicación',href:'index.html#ubicacion'},whatsapp]};
     if(/whatsapp|telefono|contact|ubicacion|direccion/.test(normalized))return{state:'waving',text:'Puedes escribir a la farmacia al +593 97 927 5988. Allí te ayudarán a confirmar disponibilidad, pago y entrega.',actions:[whatsapp,{label:'Ver ubicación',href:'index.html#ubicacion'}]};
     if(/mis pedidos|estado.{0,15}pedido|seguir.{0,15}pedido/.test(normalized))return{state:'review',text:'En Mis pedidos puedes revisar tus compras y seguir su estado. Inicia sesión con la cuenta con la que confirmaste el pedido.',actions:[{label:'Ver mis pedidos',href:'pedidos.html'},{label:'Ir a mi cuenta',href:'cuenta.html'}]};
+    if(/pagos?|pagar|tarjeta|payphone|apple pay|prueba pago/.test(normalized))return{state:'review',text:'En Pagos puedes probar una demostración sin cobros. Para un pedido registrado, abre su opción de pago desde Mis pedidos. PayPhone estará disponible cuando la farmacia active su cuenta; Apple Pay requiere habilitación de una pasarela compatible. Nunca compartas los datos de tu tarjeta por chat.',actions:[{label:'Explorar pagos de prueba',href:'pagos.html'},{label:'Pagar mi pedido',href:'pedidos.html'},whatsapp]};
     if(/carrito|pedido|pagar|pago|entrega|comprar/.test(normalized))return{state:'review',text:'Añade los productos al carrito, revisa las cantidades e inicia sesión para confirmar tu pedido. El pago y la entrega se coordinan directamente con la farmacia.',actions:[{label:'Revisar mi carrito',href:'checkout.html'},{label:'Ver mis pedidos',href:'pedidos.html'},whatsapp]};
     const query=text.replace(/^(hola[, ]*)?(quiero |necesito |puedes |por favor )*(buscar |busca |encontrar |un producto[: ]*|producto[: ]*)/i,'').trim().slice(0,100)||text.slice(0,100);
     return{state:'waiting',text:`Puedes buscar «${query}» en el catálogo. Allí verás las presentaciones y los precios publicados. Confirma con la farmacia cualquier duda de disponibilidad o receta.`,actions:[{label:`Buscar ${query}`,href:`catalogo.html?q=${encodeURIComponent(query)}`},whatsapp]};
