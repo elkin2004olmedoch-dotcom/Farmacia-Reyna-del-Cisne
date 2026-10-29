@@ -26,11 +26,25 @@ export async function homeController() {
 }
 export async function catalogController() {
   let products=await catalog.all();const target=document.getElementById('catalog-grid');const query=document.getElementById('catalog-search');const category=document.getElementById('catalog-category');const sort=document.getElementById('catalog-sort');
-  const route=new URLSearchParams(location.search);query.value=(route.get('q') || '').slice(0,100);if(['bienestar','cuidado','bebe'].includes(route.get('category')))category.value=route.get('category');
+  function readRoute(){
+    const route=new URLSearchParams(location.search);
+    query.value=(route.get('q') || '').slice(0,100);
+    category.value=['bienestar','cuidado','bebe'].includes(route.get('category'))?route.get('category'):'todos';
+    sort.value=['low','high'].includes(route.get('sort'))?route.get('sort'):'recommended';
+  }
+  function writeRoute(){
+    const route=new URLSearchParams(location.search);
+    for(const [key,value,fallback] of [['q',query.value.trim(),''],['category',category.value,'todos'],['sort',sort.value,'recommended']]){
+      if(value===fallback)route.delete(key);else route.set(key,value);
+    }
+    const search=route.toString();history.replaceState(null,'',location.pathname+(search?'?'+search:'')+location.hash);
+  }
+  readRoute();
   const normalize=value=>value.normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase();
-  function render(){let visible=products.filter(p=>(category.value==='todos' || p.categoria===category.value) && normalize(p.nombre+' '+p.descripcion).includes(normalize(query.value.trim())));if(sort.value!=='recommended')visible.sort((a,b)=>(Number(a.precio)-Number(b.precio))*(sort.value==='low'?1:-1));catalogView(visible,target);document.getElementById('catalog-count').textContent=`${visible.length} productos encontrados`;for(const input of target.querySelectorAll('[data-compare]'))input.checked=selected().includes(input.dataset.compare);}
+  function render(){writeRoute();const headerQuery=document.getElementById('global-search');if(headerQuery)headerQuery.value=query.value;let visible=products.filter(p=>(category.value==='todos' || p.categoria===category.value) && normalize(p.nombre+' '+p.descripcion).includes(normalize(query.value.trim())));if(sort.value!=='recommended')visible.sort((a,b)=>(Number(a.precio)-Number(b.precio))*(sort.value==='low'?1:-1));catalogView(visible,target);document.getElementById('catalog-count').textContent=`${visible.length} productos encontrados`;for(const input of target.querySelectorAll('[data-compare]'))input.checked=selected().includes(input.dataset.compare);}
   for(const input of [query,category,sort])input.addEventListener(input===query?'input':'change',render);
   document.getElementById('catalog-clear').addEventListener('click',()=>{query.value='';category.value='todos';sort.value='recommended';render();message('Filtros restablecidos.');});render();actions(target);
+  window.addEventListener('popstate',()=>{readRoute();preserveFocus(target,render);});
   watchUpdates(async()=>{const loaded=await catalog.all();if(JSON.stringify(loaded)!==JSON.stringify(products)){products=loaded;preserveFocus(target,render);}});
 }
 export async function productController() {

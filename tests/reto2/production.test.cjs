@@ -153,6 +153,7 @@ test('precios, cliente y seed usan PostgreSQL aunque el cliente SQLite predeterm
     // against the real isolated database in fiscal-inventory.test.cjs.
     if(requested==='./fiscal.cjs')return {inclusiveTax:()=>({})};
     if(requested==='./inventario.cjs')return {sellableStock:()=>0};
+    if(requested==='../../frontend/models/pharmacy-policy.js')return require('../../frontend/models/pharmacy-policy.js');
     return stub;
   }};
   vm.runInNewContext(fs.readFileSync(path.join(directory, 'prices.cjs'), 'utf8'), prices);

@@ -11,6 +11,9 @@ const adminWrites=new Map([
   ['PUT /api/pedidos/:id/estado','order.status.update'],
   ['PUT /api/admin/facturacion/configuracion','billing.configuration.update'],['POST /api/admin/facturacion/certificado','billing.certificate.upload'],
   ['POST /api/admin/facturacion/facturas','billing.invoice.create'],['POST /api/admin/facturacion/facturas/:id/emitir','billing.invoice.emit'],
+  ['POST /api/admin/zonas-entrega','delivery.zone.create'],['PUT /api/admin/zonas-entrega/:id','delivery.zone.update'],
+  ['POST /api/admin/repartidores','delivery.courier.create'],['PUT /api/admin/repartidores/:id','delivery.courier.update'],
+  ['POST /api/entregas/asignar','delivery.assign'],['PUT /api/entregas/:id/estado','delivery.state.update'],
 ]);
 module.exports = function logger(req,res,next) {
   req.id=randomUUID();res.setHeader('X-Request-Id',req.id);

@@ -3,6 +3,17 @@ import {classifyMascotaQuestion} from './mascota-scope.mjs';
 const PEOPLE={farmi:'Farmi',boti:'Boti',goti:'Goti'};
 const STORED_CHARACTER='farmacia-companion';
 const STORED_MOTION='farmacia-motion';
+const CONTROL_ACTIONS=new Map([['#show-register','#register-nombre'],['#checkout-next','#delivery-form input:not([type=hidden])']]);
+/** Fixed navigation controls only: never submit a purchase or change cart contents. */
+export function activateMascotaAction(href,doc=document){
+  if(!CONTROL_ACTIONS.has(href))return false;
+  const target=doc.getElementById(href.slice(1));
+  if(!target||target.disabled||target.closest('[hidden], [inert], [aria-disabled="true"]'))return true;
+  target.click();
+  const focus=doc.querySelector(CONTROL_ACTIONS.get(href));
+  if(focus&&!focus.disabled&&!focus.closest('[hidden], [inert]'))focus.focus();
+  return true;
+}
 function stored(key){try{return localStorage.getItem(key);}catch(_){return null;}}
 function remember(key,value){try{localStorage.setItem(key,value);}catch(_){}}
 function cartCount(){try{const mvc=JSON.parse(localStorage.getItem('farmacia-mvc-carrito')||'{}');const local=JSON.parse(localStorage.getItem('farmacia-reina-cart')||'{}');return [...Object.values(mvc),...Object.values(local?.items||{})].reduce((sum,value)=>sum+(Number.isInteger(value)&&value>0?value:0),0);}catch(_){return 0;}}
@@ -102,6 +113,11 @@ export async function mascotaController(){
     if(actions.length){const links=document.createElement('div');links.className='message-links';for(const action of actions){const link=document.createElement('a');link.textContent=action.label;link.href=action.href;if(action.external){link.target='_blank';link.rel='noopener noreferrer';}links.append(link);}message.append(links);}
     find('#messages').append(message);find('#messages').scrollTop=find('#messages').scrollHeight;return message;
   }
+  // Native links keep Enter support. Delegate only the two explicitly allowed actions.
+  find('#messages').addEventListener('click',event=>{
+    const link=event.target.closest('.message-links a');
+    if(link&&activateMascotaAction(link.getAttribute('href')))event.preventDefault();
+  });
   const whatsapp={label:'Hablar con la farmacia ↗',href:'https://wa.me/593979275988',external:true};
   function answer(text){
     const normalized=text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');

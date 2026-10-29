@@ -9,13 +9,18 @@ const app=require('./app.cjs')(config);
 diagnostics.phase('app_ready');
 const tls=process.env.TLS_CERT_PATH && process.env.TLS_KEY_PATH;
 const server=tls?https.createServer({cert:fs.readFileSync(process.env.TLS_CERT_PATH),key:fs.readFileSync(process.env.TLS_KEY_PATH)},app):http.createServer(app);
-let backups;
+let backups,locationTimer,locationStartupTimer;
 async function start(){
   if (/^postgres(?:ql)?:\/\//i.test(process.env.DATABASE_URL || '')) {
     // The SQLite file backup cannot protect a remote PostgreSQL database.
     console.info('PostgreSQL remoto: configura respaldos externos de la base y del almacenamiento de imágenes.');
   } else{diagnostics.phase('backups_start');backups=await require('./models/backups.cjs').startAutomaticBackups();diagnostics.phase('backups_ready');}
-  server.listen(config.port,config.host,()=>{diagnostics.phase('listening');console.info(`Farmacia MVC: ${tls?'https':'http'}://localhost:${config.port}`);});
+  server.listen(config.port,config.host,()=>{
+    diagnostics.phase('listening');console.info(`Farmacia MVC: ${tls?'https':'http'}://localhost:${config.port}`);
+    // Cleanup must not delay HTTP startup. Read endpoints independently hide stale locations.
+    const purge=()=>require('./models/entregas.cjs').purgeExpiredLocations().catch(()=>console.error('No se pudo completar la limpieza temporal de ubicaciones.'));
+    locationStartupTimer=setTimeout(purge,1000);locationStartupTimer.unref();locationTimer=setInterval(purge,60000);locationTimer.unref();
+  });
 }
-start().catch(async error=>{diagnostics.phase('startup_failed');console.error('No se pudo iniciar el servidor.');await backups?.stop();await require('./models/db.cjs').$disconnect();process.exitCode=1;});
-for(const signal of ['SIGINT','SIGTERM']) process.on(signal,()=>{diagnostics.emit('shutdown',{signal});server.close(async()=>{await backups?.stop();await require('./models/db.cjs').$disconnect();process.exit(0);});});
+start().catch(async error=>{diagnostics.phase('startup_failed');console.error('No se pudo iniciar el servidor.');clearTimeout(locationStartupTimer);clearInterval(locationTimer);await backups?.stop();await require('./models/db.cjs').$disconnect();process.exitCode=1;});
+for(const signal of ['SIGINT','SIGTERM']) process.on(signal,()=>{diagnostics.emit('shutdown',{signal});clearTimeout(locationStartupTimer);clearInterval(locationTimer);server.close(async()=>{await backups?.stop();await require('./models/db.cjs').$disconnect();process.exit(0);});});

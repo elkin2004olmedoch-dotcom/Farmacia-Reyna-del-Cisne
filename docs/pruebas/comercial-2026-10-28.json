@@ -1,0 +1,155 @@
+{
+  "fechaLocal": "2026-10-28",
+  "generadoEnUTC": "2026-10-29T03:08:57.281Z",
+  "alcance": "Arquitectura comercial, entregas Puerto Quito, checkout y restricciones; servicios existentes autorizados. Sin operaciones comerciales de prueba en producción.",
+  "stack": "HTML/CSS/JavaScript, Express5, Prisma6.19.3; SQLite y PostgreSQL",
+  "pruebas": {
+    "node": {
+      "comando": "npm test",
+      "aprobadas": 242,
+      "fallos": 0,
+      "omitidas": 0,
+      "entorno": "SQLite temporal y PHARMACY_TEST_DATABASE_URL PostgreSQL18 local aislado; SRI_XSD_PYTHON Python3.12/lxml"
+    },
+    "historicas": {
+      "comando": "npm run test:reto1",
+      "aprobadas": 38,
+      "fallos": 0,
+      "omitidas": 0
+    },
+    "pages": {
+      "comando": "npx playwright test --config tests/reto2/pages.config.cjs",
+      "aprobadas": 20,
+      "fallos": 0,
+      "omitidas": 0
+    },
+    "dotnet": {
+      "comando": ".publish/dotnet/dotnet.exe test services/inventory-agent/tests/InventoryAgent.Tests.csproj -c Release --no-restore",
+      "aprobadas": 92,
+      "fallos": 0,
+      "omitidas": 0,
+      "entorno": "INVENTORY_AGENT_TEST_CONNECTION solo PostgreSQL temporal local; ningún SMTP/Telegram/WhatsApp real"
+    },
+    "navegador": {
+      "comando": "npx playwright test --config tests/reto2/playwright.config.cjs",
+      "primeraEjecucion": {
+        "aprobadas": 70,
+        "fallos": 4,
+        "causa": "Dos fixtures antiguos Quito/tarifa implícita repetidos en escritorio y móvil; corregidos para Puerto Quito/tarifa explícita."
+      },
+      "ultimaEjecucionCompleta": {
+        "aprobadas": 73,
+        "fallos": 1,
+        "omitidas": 0
+      },
+      "causaUltimoFallo": "Helper de prueba avanzaba de página2 sin regresar a página1 para localizar un pedido nuevo. Trace confirma petición page=2 y ausencia de retorno. Sin error API.",
+      "repeticionFocal": {
+        "comando": "Playwright frontend.spec.cjs --grep \"administración y cliente comparten\"; configuración temporal con 41 pedidos sintéticos para forzar varias páginas",
+        "aprobadas": 2,
+        "fallos": 0,
+        "omitidas": 0,
+        "redReproducido": true,
+        "correccion": "Reutilizar findAdminRow en ambas direcciones y colocar bandeja en última página antes de cancelar.",
+        "casosDeNavegadorCubiertosEntreSuiteYFocal": 74,
+        "suiteCompletaRepetidaTrasCambioSoloDeFixture": false
+      },
+      "sinCambiosAplicacionTrasUltimaSuite": true
+    }
+  },
+  "auditoria": {
+    "vulnerabilidades": 0,
+    "dependenciasDirectasNuevas": 0
+  },
+  "schemas": {
+    "sqlite": "válido",
+    "postgresql": "válido",
+    "prisma": "6.19.3"
+  },
+  "artefactoPublico": {
+    "paginas": 11,
+    "archivos": 102,
+    "bytes": 12684261,
+    "maxArchivoBytes": 2650904,
+    "fuenteYClonComparados": true,
+    "diferencias": 0,
+    "revisionSecretos": {
+      "archivosStaged": 86,
+      "archivosPublicos": 102,
+      "coincidenciasPrivadas": 0,
+      "patronesSinteticosRevisados": 2,
+      "limite": "Heuristic plus known private values; not universal proof. Local SQLite paths excluded as non-credentials."
+    }
+  },
+  "supabase": {
+    "proyecto": "xjxnnqasikxlytjaxjdt",
+    "migracion": "202610280007_delivery",
+    "aplicada": true,
+    "tablasNegocio": 18,
+    "tablasAnterioresComparadas": 15,
+    "datosAnterioresConservados": true,
+    "conteos": {
+      "productos": 18,
+      "usuarios": 2,
+      "pedidos": 1
+    },
+    "zonaInicial": {
+      "id": "puerto-quito",
+      "nombre": "Todo Puerto Quito",
+      "provincia": "Pichincha",
+      "canton": "Puerto Quito",
+      "tarifaCentavos": null,
+      "version": 1,
+      "activa": true
+    },
+    "historialTarifas": 1,
+    "entregas": 0,
+    "respaldo": {
+      "completo": true,
+      "formato": "pg_dump custom + objeto Storage",
+      "tableDataEntries": 16,
+      "objetosStorage": 1,
+      "hashesVerificados": true,
+      "indicePgRestoreVerificado": true,
+      "restaurado": false
+    },
+    "nuevasTablasSeguridad": [
+      {
+        "table": "Entrega",
+        "rls": true,
+        "anon_select": false,
+        "authenticated_select": false
+      },
+      {
+        "table": "ZonaEntrega",
+        "rls": true,
+        "anon_select": false,
+        "authenticated_select": false
+      },
+      {
+        "table": "ZonaEntregaTarifa",
+        "rls": true,
+        "anon_select": false,
+        "authenticated_select": false
+      }
+    ]
+  },
+  "publicacion": {
+    "estado": "candidata verificada; pendiente de publicación",
+    "render": "https://farmacia-reina-del-cisne.onrender.com",
+    "pages": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "commit": null
+  },
+  "limites": [
+    "La tarifa final, clasificación fiscal del envío y cuentas reales de repartidores debe configurarlas administración.",
+    "Geolocalización voluntaria en primer plano; no ETA garantizada ni rastreo continuo con móvil bloqueado.",
+    "Google Maps URLs para navegación; OpenStreetMap iframe voluntario con atribución. Sin Cloud billing nuevo.",
+    "Normativa y flags sanitarios documentados; la clasificación/dispensación y habilitación real requieren revisión profesional del negocio.",
+    "No se probaron pagos, emisiones SRI ni comunicaciones reales; servicio .NET conserva activación/configuración propias.",
+    "Render Free conserva suspensión y demora de arranque; no se cambiaron planes ni DNS."
+  ],
+  "capturasHistoricas": {
+    "restauradas": 28,
+    "hashesConservados": true,
+    "nuevasCapturasConservadasFueraRepositorio": true
+  }
+}

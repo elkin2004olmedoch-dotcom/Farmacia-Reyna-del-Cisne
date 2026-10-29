@@ -14,9 +14,12 @@ function fixture(uploaded=false){
   const createdAt=new Date('2024-01-02T03:04:05.123Z');
   const updatedAt=new Date('2024-02-03T04:05:06.789Z');
   return {
-    usuario:[{id:'cliente-original',nombre:'Cliente privado',email:privateEmail,telefono:'0979275988',passwordHash:privateHash,role:'user',tokenVersion:7,activo:false,createdAt}],
+    usuario:[{id:'cliente-original',nombre:'Cliente privado',email:privateEmail,telefono:'0979275988',passwordHash:privateHash,role:'user',tokenVersion:7,activo:false,createdAt},{id:'repartidor-original',nombre:'Repartidor privado',email:'repartidor@example.ec',telefono:'0979275988',passwordHash:privateHash,role:'repartidor',tokenVersion:1,activo:true,createdAt}],
     producto:[{id:'producto-original',nombre:'Alcohol',precio:new Prisma.Decimal('12.34567'),stock:9,categoria:'Salud',descripcion:'Descripción',imagen:uploaded?reference:'assets/images/producto-alcohol-antiseptico.svg',alt:'Alcohol',activo:true,createdAt,updatedAt}],
-    pedido:[{id:'pedido-original',userId:'cliente-original',total:new Prisma.Decimal('24.69134'),estado:'entregado',entrega:'delivery',nombre:'Nombre privado',email:privateEmail,telefono:'0979275988',documento:'••••••0400',provincia:'Pichincha',ciudad:'Quito',direccion:'Domicilio privado',codigoPostal:'170101',requestKey:'solicitud-original',fingerprint:'huella-privada',createdAt,updatedAt}],
+    pedido:[{id:'pedido-original',userId:'cliente-original',total:new Prisma.Decimal('27.19134'),subtotalProductos:new Prisma.Decimal('24.69134'),costoEnvioCentavos:250,envioIvaPorcentaje:15,envioBaseImponible:new Prisma.Decimal('2.17'),envioIvaMonto:new Prisma.Decimal('0.33'),zonaEntregaId:'puerto-quito',latitudEntrega:null,longitudEntrega:null,ubicacionEntregaAceptadaAt:null,estado:'entregado',entrega:'delivery',nombre:'Nombre privado',email:privateEmail,telefono:'0979275988',documento:'••••••0400',provincia:'Pichincha',ciudad:'Puerto Quito',direccion:'Domicilio privado',codigoPostal:'170101',requestKey:'solicitud-original',fingerprint:'huella-privada',createdAt,updatedAt}],
+    zonaEntrega:[{id:'puerto-quito',nombre:'Cobertura administrada',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:250,ivaCategoria:'general',fundamentoIva:null,activa:true,version:2,createdAt,updatedAt}],
+    zonaEntregaTarifa:[{id:'puerto-quito-inicial',zonaEntregaId:'puerto-quito',version:1,tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,actorId:null,createdAt},{id:'tarifa-original',zonaEntregaId:'puerto-quito',version:2,tarifaCentavos:250,ivaCategoria:'general',fundamentoIva:null,actorId:'cliente-original',createdAt:updatedAt}],
+    entrega:[{id:'entrega-original',pedidoId:'pedido-original',repartidorId:'repartidor-original',estado:'entregada',version:4,gpsVersion:3,asignadaAt:createdAt,salidaAt:createdAt,llegadaAt:updatedAt,finalizadaAt:updatedAt,latitud:null,longitud:null,precision:null,registradaAt:null,recibidaAt:null,createdAt,updatedAt}],
     pedidoDetalle:[{id:'detalle-original',pedidoId:'pedido-original',productoId:'producto-original',nombreProducto:'Alcohol anterior',cantidad:2,precioUnitario:new Prisma.Decimal('12.34567'),precioOriginal:new Prisma.Decimal('15.12345'),descuentoPorcentaje:18}],
     promocion:[{id:'promocion-original',titulo:'Promoción',descripcion:'Descripción',etiqueta:'Promo',productoId:'producto-original',activa:true,vistaPrevia:false,descuentoPorcentaje:18,imagen:uploaded?reference:null,alt:null,orden:4,inicio:createdAt,fin:updatedAt,createdAt}],
     pedidoEstado:[{id:'historial-original',pedidoId:'pedido-original',anterior:'pendiente',estado:'entregado',actorId:'cliente-original',createdAt}],
@@ -30,6 +33,14 @@ function fixture(uploaded=false){
     secuenciaFactura:[{id:'contador-original',emisorRuc:'0102030400001',ambiente:'1',establecimiento:'001',puntoEmision:'001',ultimo:7}],
     facturaPedido:[{id:'factura-original',pedidoId:'pedido-original',estado:'AUTORIZADA',ambiente:'1',emisorRuc:'0102030400001',establecimiento:'001',puntoEmision:'001',secuencial:7,claveAcceso:'1'.repeat(49),fechaEmision:createdAt,snapshot:JSON.stringify({pedidoId:'pedido-original',comprador:{identificacionComprador:'0102030400'}}),xmlBorrador:'<factura/>',xmlFirmado:'<factura-firmada/>',xmlAutorizado:'<factura-firmada/>',numeroAutorizacion:'1'.repeat(49),fechaAutorizacion:createdAt,mensajes:'[]',ultimoError:null,procesandoHasta:null,intentos:1,createdAt,updatedAt}]
   };
+}
+function technicalDefaults(){
+ const createdAt=new Date('2026-10-28T10:00:00.123Z');
+ return {
+  configuracionFiscal:[{...INITIAL_FISCAL,inicioVigencia:new Date(INITIAL_FISCAL.inicioVigencia),createdAt,updatedAt:createdAt}],
+  zonaEntrega:[{id:'puerto-quito',nombre:'Todo Puerto Quito',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,activa:true,version:1,createdAt,updatedAt:createdAt}],
+  zonaEntregaTarifa:[{id:'puerto-quito-inicial',zonaEntregaId:'puerto-quito',version:1,tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,actorId:null,createdAt}]
+ };
 }
 function sourceClient(snapshot){
   let transactions=0;const reads=[];
@@ -47,8 +58,11 @@ function targetClient({initial={},failOn,beforeTransaction}={}){
         count:async()=>working[model].length,
         findMany:async()=>[...working[model]],
         deleteMany:async({where})=>{const before=working[model].length;working[model]=working[model].filter(row=>row.id!==where.id);return {count:before-working[model].length};},
-        createMany:async({data})=>{
+        createMany:async({data,skipDuplicates})=>{
+          assert.equal(skipDuplicates,undefined);
           writes.push(model);if(model===failOn)throw new Error('PG falló con '+privateEmail+' '+privateHash);
+          if(data.some(row=>working[model].some(existing=>existing.id===row.id)))throw new Error('ID duplicado');
+          if(model==='zonaEntregaTarifa' && data.some(row=>!working.zonaEntrega.some(zone=>zone.id===row.zonaEntregaId)))throw new Error('Zona ausente');
           working[model].push(...data);return {count:data.length};
         }
       }]));
@@ -63,21 +77,67 @@ const emptyCounts=()=>Object.fromEntries(MODELS.map(model=>[model,0]));
 test('el importador cubre todos los modelos Prisma y no omite futuras entidades de farmacia',async()=>{
  const schema=await fs.readFile(path.resolve(__dirname,'../../server/prisma/schema.prisma'),'utf8');
  const names=[...schema.matchAll(/^model (\w+) \{/gm)].map(match=>match[1][0].toLowerCase()+match[1].slice(1));
- assert.deepEqual([...MODELS].sort(),names.sort());assert.equal(MODELS.length,15);
+ assert.deepEqual([...MODELS].sort(),names.sort());assert.equal(MODELS.length,18);
 });
 test('se sustituye sólo la semilla fiscal estándar en la misma transacción preservando historial del origen',async()=>{
- const snapshot=fixture(),defaultRow={...snapshot.configuracionFiscal[0]},source=sourceClient(snapshot),target=targetClient({initial:{configuracionFiscal:[defaultRow]}});
+ const snapshot=fixture(),defaultRow=technicalDefaults().configuracionFiscal[0],source=sourceClient(snapshot),target=targetClient({initial:{configuracionFiscal:[defaultRow]}});
  snapshot.configuracionFiscal.push({...defaultRow,id:'tarifa-programada',tarifaGeneral:14,inicioVigencia:new Date('2027-01-01T05:00:00Z'),referenciaNormativa:'Norma sintética adicional para verificar traslado',actorId:'cliente-original'});
  const result=await migrate({source,target,apply:true});assert.equal(result.destino.configuracionFiscal,2);assert.deepEqual(target.state.configuracionFiscal,snapshot.configuracionFiscal);
  const printed=JSON.stringify(result);assert.ok(!printed.includes('material-cifrado'));assert.ok(!printed.includes('0102030400'));
 });
+test('el destino recién migrado admite sus tres defaults técnicos y conserva toda la historia y snapshots de entrega del origen',async()=>{
+ const snapshot=fixture(),before=JSON.stringify(snapshot),target=targetClient({initial:technicalDefaults()});
+ const result=await migrate({source:sourceClient(snapshot),target,apply:true});
+ assert.equal(result.destino.zonaEntrega,1);assert.equal(result.destino.zonaEntregaTarifa,2);assert.equal(result.destino.entrega,1);
+ for(const model of ['zonaEntrega','zonaEntregaTarifa','entrega','pedido'])assert.deepEqual(target.state[model],snapshot[model]);
+ assert.equal(target.state.zonaEntregaTarifa[1].actorId,'cliente-original');assert.equal(target.state.zonaEntregaTarifa[1].createdAt.toISOString(),'2024-02-03T04:05:06.789Z');
+ assert.equal(JSON.stringify(snapshot),before);
+});
+test('zonas o tarifas técnicas editadas, incompletas o adicionales bloquean el destino sin alterar sus datos',async()=>{
+ const edits=[
+  s=>{s.zonaEntrega[0].nombre='Cobertura propia';},s=>{s.zonaEntrega[0].provincia='Otra provincia';},s=>{s.zonaEntrega[0].canton='Otro cantón';},
+  s=>{s.zonaEntrega[0].tarifaCentavos=0;},s=>{s.zonaEntrega[0].activa=false;},s=>{s.zonaEntrega[0].version=2;},
+  s=>{s.zonaEntrega[0].fundamentoIva='Fundamento propio';},s=>{s.zonaEntrega[0].ivaCategoria='cero';},s=>{s.zonaEntrega[0].updatedAt=new Date('2027-01-01T00:00:00Z');},
+  s=>{s.zonaEntrega.push({...s.zonaEntrega[0],id:'zona-propia'});},s=>{s.zonaEntregaTarifa[0].id='historia-propia';},
+  s=>{s.zonaEntregaTarifa[0].actorId='actor-propio';},s=>{s.zonaEntregaTarifa[0].tarifaCentavos=100;},s=>{s.zonaEntregaTarifa[0].version=2;},
+  s=>{s.zonaEntregaTarifa[0].zonaEntregaId='zona-propia';},s=>{s.zonaEntregaTarifa[0].ivaCategoria='cero';},s=>{s.zonaEntregaTarifa[0].fundamentoIva='Fundamento propio';},
+  s=>{s.zonaEntregaTarifa[0].createdAt=new Date('2027-01-01T00:00:00Z');},s=>{s.zonaEntregaTarifa.push({...s.zonaEntregaTarifa[0],id:'historia-propia',version:2});},
+  s=>{s.zonaEntrega=[];},s=>{s.zonaEntregaTarifa=[];}
+ ];
+ for(const edit of edits){
+  const initial=technicalDefaults();edit(initial);const target=targetClient({initial});
+  await assert.rejects(migrate({source:sourceClient(fixture()),target,apply:true}),error=>error.code==='TARGET_NOT_EMPTY');
+  assert.deepEqual(target.state.zonaEntrega,initial.zonaEntrega);assert.deepEqual(target.state.zonaEntregaTarifa,initial.zonaEntregaTarifa);assert.deepEqual(target.writes,[]);
+ }
+});
+test('se conservan defaults técnicos sin datos correspondientes en origen y el resumen muestra sus cantidades reales',async()=>{
+ const initial=technicalDefaults(),snapshot=fixture();snapshot.configuracionFiscal=[];snapshot.zonaEntrega=[];snapshot.zonaEntregaTarifa=[];snapshot.pedido[0].zonaEntregaId=null;
+ const target=targetClient({initial}),result=await migrate({source:sourceClient(snapshot),target,apply:true});
+ for(const model of ['configuracionFiscal','zonaEntrega','zonaEntregaTarifa']){assert.deepEqual(target.state[model],initial[model]);assert.equal(result.destino[model],1);}
+});
+test('un fallo posterior revierte el reemplazo de todos los defaults técnicos y conserva el snapshot local',async()=>{
+ const initial=technicalDefaults(),snapshot=fixture(),before=JSON.stringify(snapshot),target=targetClient({initial,failOn:'entrega'});
+ await assert.rejects(migrate({source:sourceClient(snapshot),target,apply:true}),error=>error.code==='DATABASE_TRANSFER');
+ for(const model of MODELS)assert.deepEqual(target.state[model],initial[model] || []);
+ assert.equal(JSON.stringify(snapshot),before);
+});
+test('las referencias de zona, historial y reparto se verifican antes de consultar el destino; repartidor nulo es válido',async()=>{
+ const edits=[s=>{s.pedido[0].zonaEntregaId='ausente';},s=>{s.zonaEntregaTarifa[0].zonaEntregaId='ausente';},s=>{s.zonaEntregaTarifa[1].actorId='ausente';},s=>{s.entrega[0].pedidoId='ausente';},s=>{s.entrega[0].repartidorId='ausente';}];
+ for(const edit of edits){const snapshot=fixture(),target=targetClient();edit(snapshot);await assert.rejects(migrate({source:sourceClient(snapshot),target,apply:true}),error=>error.code==='SOURCE_RELATIONS');assert.equal(target.transactions,0);}
+ const snapshot=fixture(),target=targetClient();snapshot.entrega[0].repartidorId=null;await migrate({source:sourceClient(snapshot),target,apply:true});assert.deepEqual(target.state.entrega,snapshot.entrega);
+});
+test('se rechaza una edición concurrente del default de reparto antes de reemplazarlo',async()=>{
+ const target=targetClient({initial:technicalDefaults(),beforeTransaction:(number,state)=>{if(number===2){state.zonaEntrega[0]={...state.zonaEntrega[0],version:2,tarifaCentavos:100};}}});
+ await assert.rejects(migrate({source:sourceClient(fixture()),target,apply:true}),error=>error.code==='TARGET_NOT_EMPTY');
+ assert.deepEqual(target.writes,[]);assert.equal(target.state.zonaEntrega[0].tarifaCentavos,100);
+});
 test('una semilla fiscal modificada o una segunda fila en destino bloquean importación sin sobrescribir',async()=>{
- for(const rows of [[{...fixture().configuracionFiscal[0],tarifaGeneral:14}],[{...fixture().configuracionFiscal[0],actorId:'usuario-del-destino'}],[fixture().configuracionFiscal[0],{...fixture().configuracionFiscal[0],id:'dato-negocio'}]]) {
+ for(const rows of [[{...technicalDefaults().configuracionFiscal[0],tarifaGeneral:14}],[{...technicalDefaults().configuracionFiscal[0],actorId:'usuario-del-destino'}],[{...technicalDefaults().configuracionFiscal[0],updatedAt:new Date('2027-01-01T00:00:00Z')}],[technicalDefaults().configuracionFiscal[0],{...technicalDefaults().configuracionFiscal[0],id:'dato-negocio'}]]) {
   const target=targetClient({initial:{configuracionFiscal:rows}});await assert.rejects(migrate({source:sourceClient(fixture()),target,apply:true}),error=>error.code==='TARGET_NOT_EMPTY');assert.deepEqual(target.state.configuracionFiscal,rows);assert.deepEqual(target.writes,[]);
  }
 });
 test('fallo tardío conserva la semilla fiscal permitida y no deja negocio importado parcialmente',async()=>{
- const initial=fixture().configuracionFiscal[0],target=targetClient({initial:{configuracionFiscal:[initial]},failOn:'facturaPedido'});
+ const initial=technicalDefaults().configuracionFiscal[0],target=targetClient({initial:{configuracionFiscal:[initial]},failOn:'facturaPedido'});
  await assert.rejects(migrate({source:sourceClient(fixture()),target,apply:true}),error=>error.code==='DATABASE_TRANSFER');
  assert.deepEqual(target.state.configuracionFiscal,[initial]);for(const model of MODELS.filter(model=>model!=='configuracionFiscal'))assert.deepEqual(target.state[model],[]);
 });
@@ -92,7 +152,7 @@ test('la simulación consulta un snapshot único y muestra solo cantidades sin e
   assert.equal(target.transactions,1);assert.deepEqual(target.writes,[]);assert.deepEqual(result.destino,emptyCounts());assert.equal(inspected,0);assert.equal(cloudCalls,0);
   const printed=JSON.stringify(result);for(const privateValue of [privateHash,privateEmail,'cliente-original','Domicilio privado','huella-privada'])assert.ok(!printed.includes(privateValue));
 });
-test('la transferencia conserva IDs, hashes, roles, fechas, decimales, inventario y facturación de las quince entidades',async()=>{
+test('la transferencia conserva IDs, hashes, roles, fechas, decimales, inventario y facturación de las dieciocho entidades',async()=>{
   const snapshot=fixture(),source=sourceClient(snapshot),target=targetClient();
   const result=await migrate({source,target,apply:true});
   assert.equal(result.modo,'aplicar');assert.deepEqual(target.writes,MODELS);assert.equal(target.transactions,2);

@@ -51,6 +51,9 @@ test('el asistente local del panel actualiza productos y publica promociones par
     await publicPage.goto('/producto.html?id='+product.id);
     await expect(publicPage.locator('.promotion-ribbon')).toContainText('20%');
     await publicPage.close();publicPage=null;
+    await companion.locator('#input').fill('Crea zona: nombre="Zona asistente pendiente"');await companion.locator('#form [type=submit]').click();
+    await expect(page).toHaveURL(/entregas\.html#delivery-zone-editor$/);await expect(page.locator('#delivery-zone-editor')).toHaveAttribute('open','');await expect(page.locator('#delivery-zone-name')).toHaveValue('Zona asistente pendiente');
+    const zones=await page.request.get('/api/admin/zonas-entrega',{headers});expect((await zones.json()).data.some(zone=>zone.nombre==='Zona asistente pendiente')).toBe(false);
     await page.goto('/index.html');
     await expect(page.locator('farmacia-admin-companion')).toHaveCount(0);
     await expect(page.locator('farmacia-mascota')).toHaveCount(0);

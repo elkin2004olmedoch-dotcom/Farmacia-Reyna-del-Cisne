@@ -4,7 +4,7 @@ export class ApiError extends Error {
   constructor(message,status=0,details=[]) {super(message);Object.assign(this,{status,details});}
 }
 // The timeout covers reading the response too. Only public, idempotent catalog GETs retry.
-export async function apiFetch(path,{method='GET',headers={},body,signal,timeoutMs=method==='GET'?10000:60000}={},consume){
+export async function apiFetch(path,{method='GET',headers={},body,signal,keepalive=false,timeoutMs=method==='GET'?10000:60000}={},consume){
   const retry=method==='GET' && /^\/(?:productos(?:\/[^/?#]+)?|promociones)(?:\?|$)/.test(path);
   for(let attempt=0;attempt<=(retry?1:0);attempt++){
     if(signal?.aborted)throw signal.reason || new DOMException('Solicitud cancelada.','AbortError');
@@ -13,7 +13,7 @@ export async function apiFetch(path,{method='GET',headers={},body,signal,timeout
     signal?.addEventListener('abort',abort,{once:true});
     const timer=setTimeout(()=>{timedOut=true;controller.abort();},timeoutMs);
     try{
-      const response=await fetch(apiUrl(path),{method,headers,body,signal:controller.signal,cache:'no-store',credentials:'omit'});
+      const response=await fetch(apiUrl(path),{method,headers,body,signal:controller.signal,cache:'no-store',credentials:'omit',...(keepalive?{keepalive:true}:{})});
       if(!(retry && attempt===0 && [502,503,504].includes(response.status)))return await consume(response);
       await response.body?.cancel();
     }catch(error){
@@ -25,12 +25,12 @@ export async function apiFetch(path,{method='GET',headers={},body,signal,timeout
     await new Promise(resolve=>setTimeout(resolve,500));
   }
 }
-export async function request(path,{method='GET',body,signal}={}) {
+export async function request(path,{method='GET',body,signal,keepalive=false}={}) {
   const headers={Accept:'application/json'};
   const token=sessionStorage.getItem('farmacia-mvc-token');
   if(token)headers.Authorization=`Bearer ${token}`;
   if(body!==undefined)headers['Content-Type']='application/json';
-  return apiFetch(path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),signal},async response=>{
+  return apiFetch(path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),signal,keepalive},async response=>{
   if(response.status===204){if(!path.startsWith('/auth/'))dataChanged();return null;}
   let payload;
   try {payload=await response.json();}catch(error){if(error.name==='AbortError')throw error;throw new ApiError('El servidor devolvió una respuesta inesperada.',response.status);}

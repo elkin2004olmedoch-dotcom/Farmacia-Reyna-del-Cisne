@@ -42,7 +42,7 @@ function buildPages({output=defaultOutput,apiOrigin=process.env.PUBLIC_API_ORIGI
     if(size>25*1024*1024 || ++files>20000)throw new Error('El artefacto supera los límites estáticos de Pages Free.');
     const target=path.join(output,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,content);bytes+=size;maxFileBytes=Math.max(maxFileBytes,size);
   };
-  const pages=['index.html','catalogo.html','producto.html','comparar.html','cuenta.html','checkout.html','pedidos.html','admin.html','ayuda.html'];
+  const pages=['index.html','catalogo.html','producto.html','comparar.html','cuenta.html','checkout.html','pedidos.html','admin.html','ayuda.html','entregas.html','seguimiento.html'];
   for(const file of pages)write(file,read(file));
   function copy(directory){
     for(const entry of fs.readdirSync(path.join(root,'frontend',directory),{withFileTypes:true})){
@@ -60,8 +60,8 @@ function buildPages({output=defaultOutput,apiOrigin=process.env.PUBLIC_API_ORIGI
   if(!source.includes("export const apiOrigin='';"))throw new Error('La plantilla de configuración pública no es válida.');
   write('config.js',source.replace("export const apiOrigin='';",`export const apiOrigin=${JSON.stringify(apiOrigin)};`));
   const images=["'self'",'data:',apiOrigin,...(imageOrigin?[imageOrigin]:[])].join(' ');
-  const csp=`default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src ${images}; connect-src 'self' ${apiOrigin}; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
-  write('_headers',`/*\n  Content-Security-Policy: ${csp}\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: DENY\n  Cross-Origin-Opener-Policy: same-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n`);
+  const csp=`default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src ${images}; connect-src 'self' ${apiOrigin}; frame-src https://www.google.com https://www.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
+  write('_headers',`/*\n  Content-Security-Policy: ${csp}\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: DENY\n  Cross-Origin-Opener-Policy: same-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=(self)\n`);
   write('404.html','<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Página no encontrada | Farmacia Reina del Cisne</title><link rel="stylesheet" href="/assets/styles.css"><link rel="stylesheet" href="/assets/shop.css"></head><body><main class="section-wrap shop-main"><h1>No encontramos esta página.</h1><p>Revisa la dirección o vuelve al inicio de la farmacia.</p><a class="button button-primary" href="/">Volver al inicio</a></main></body></html>\n');
   return {output,files,bytes,maxFileBytes,apiOrigin,imageOrigin};
 }

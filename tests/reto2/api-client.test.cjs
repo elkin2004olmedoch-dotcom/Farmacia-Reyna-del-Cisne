@@ -57,3 +57,9 @@ test('una descarga privada permite un plazo mayor sin repetirla',async t=>{
   await tick();t.mock.timers.tick(10000);await tick();assert.equal(finished,false);
   t.mock.timers.tick(50000);await tick();assert.match((await result).message,/tardando|tiempo/i);assert.equal(calls,1);
 });
+test('retirar ubicación permite completar el DELETE al cerrar sin cookies ni repetición',async()=>{
+  const {request}=await client();let calls=0,options;
+  global.fetch=async(url,value)=>{calls++;options=value;return new Response(null,{status:204});};
+  await request('/entregas/entrega-sintetica/ubicacion',{method:'DELETE',keepalive:true});
+  assert.equal(calls,1);assert.equal(options.keepalive,true);assert.equal(options.method,'DELETE');assert.equal(options.credentials,'omit');
+});

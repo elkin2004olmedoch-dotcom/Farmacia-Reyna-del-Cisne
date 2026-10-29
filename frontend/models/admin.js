@@ -16,6 +16,10 @@ export const administration={
   saveLot:values=>request('/admin/lotes',{method:'POST',body:values}),
   saveMovement:values=>request('/admin/inventario/ajustes',{method:'POST',body:values}),
   changeOrderState:(id,estado,esperadoUpdatedAt)=>request('/pedidos/'+encodeURIComponent(id)+'/estado',{method:'PUT',body:{estado,esperadoUpdatedAt}}),
+  async order(id){
+    let page=1;
+    while(true){const data=await request(`/pedidos?page=${page++}&pageSize=100`);const found=data.items.find(order=>order.id===id);if(found)return found;if(!data.items.length || (page-1)*data.pageSize>=data.total)throw new Error('No se encontró el pedido. Usa su identificador completo.');}
+  },
   async uploadImage(file,signal){const bytes=new Uint8Array(await file.arrayBuffer());const chunks=[];for(let offset=0;offset<bytes.length;offset+=8192)chunks.push(String.fromCharCode(...bytes.subarray(offset,offset+8192)));return request('/admin/imagenes',{method:'POST',body:{archivo:btoa(chunks.join('')),nombreOriginal:file.name},signal});},
 };
 

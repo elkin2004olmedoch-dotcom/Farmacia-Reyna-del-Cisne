@@ -4,7 +4,9 @@ const {AppError}=require('../middleware/errors.cjs');
 const {discountWhere,effectivePrice}=require('./prices.cjs');
 const fiscal=require('./fiscal.cjs');
 const {trackedStock,serializable}=require('./inventario.cjs');
+const {allowsPromotion}=require('../../frontend/models/pharmacy-policy.js');
 function validatePvp(product) {
+  if(!allowsPromotion(product) && Number(product.descuentoPorcentaje)>0)throw new AppError(422,'PHARMACY_PROMOTION_RESTRICTED','Los productos bajo receta, control especial o biológicos no admiten publicidad ni descuentos promocionales.');
   if(product.tipoProducto==='medicamento' && (!product.pvpMaximo || !product.registroSanitario || !product.laboratorio || !product.presentacion))throw new AppError(422,'MEDICATION_METADATA','El medicamento requiere PVP impreso, registro sanitario, laboratorio y presentación.');
   if(product.pvpMaximo!=null && new Prisma.Decimal(product.precio).gt(product.pvpMaximo))throw new AppError(422,'PRICE_EXCEEDS_PVP','El precio no puede superar el PVP máximo impreso.');
 }

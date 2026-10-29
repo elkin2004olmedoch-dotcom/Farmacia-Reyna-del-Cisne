@@ -8,8 +8,8 @@ test('MVC separa datos, renderizado, eventos, rutas, controladores y middleware'
   for(const file of fs.readdirSync(path.join(root,'frontend/views')).filter(file=>file.endsWith('.js'))){const code=fs.readFileSync(path.join(root,'frontend/views',file),'utf8');assert.ok(!/\bfetch\(/.test(code),'La vista no consume la API.');assert.ok(!/addEventListener\(/.test(code),'Los eventos se controlan fuera de la vista.');}
   for(const file of fs.readdirSync(path.join(root,'server/controllers'))){const code=fs.readFileSync(path.join(root,'server/controllers',file),'utf8');assert.ok(!/\.(findMany|findUnique|\$transaction)\(/.test(code),'Los controladores no consultan Prisma directamente.');}
 });
-test('las nueve páginas y los imports MVC apuntan a recursos locales existentes',()=>{
-  const pages=fs.readdirSync(path.join(root,'frontend')).filter(file=>file.endsWith('.html'));assert.equal(pages.length,9);
+test('las once páginas y los imports MVC apuntan a recursos locales existentes',()=>{
+  const pages=fs.readdirSync(path.join(root,'frontend')).filter(file=>file.endsWith('.html'));assert.equal(pages.length,11);assert.ok(pages.includes('entregas.html') && pages.includes('seguimiento.html'));
   for(const file of pages){const html=fs.readFileSync(path.join(root,'frontend',file),'utf8');assert.match(html,/<html lang="es">/);assert.match(html,/<main /);for(const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)){const url=match[1];if(/^(https?:|tel:|mailto:)/.test(url))continue;const local=url.split(/[?#]/)[0];assert.ok(fs.existsSync(path.join(root,'frontend',local)),`${file}: ${local}`);}}
   for(const folder of ['models','views','controllers'])for(const file of fs.readdirSync(path.join(root,'frontend',folder)).filter(file=>file.endsWith('.js'))){const code=fs.readFileSync(path.join(root,'frontend',folder,file),'utf8');for(const match of code.matchAll(/(?:from\s+|import\s+)['"]([^'"]+)['"]/g))assert.ok(fs.existsSync(path.resolve(root,'frontend',folder,match[1])));}
 });
