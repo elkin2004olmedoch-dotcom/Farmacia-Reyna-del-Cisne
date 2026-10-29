@@ -5,13 +5,13 @@ test('checkout muestra tarifa pendiente, actualiza la cotización y exige revisa
   const login=await request.post('/api/auth/login',{data:{email:'admin-browser@example.ec',password:'AdminBrowser2026!'}});expect(login.status()).toBe(200);const headers={Authorization:'Bearer '+(await login.json()).data.token};
   const suffix=randomUUID().slice(0,8),email='cotizacion-'+suffix+'@example.ec';
   const registered=await request.post('/api/auth/register',{data:{nombre:'Cliente Cotización',email,telefono:'0979275988',cedula:'0102030400',password:'ClienteCotizacion2026!'}});expect(registered.status()).toBe(201);const customer=(await registered.json()).data;
-  const zoneInput={nombre:'Cotización '+suffix,provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,activa:true};
+  const zoneInput={nombre:'Cotización '+suffix,provincia:'pichincha',canton:'Puerto Quito',tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,activa:true};
   const createdZone=await request.post('/api/admin/zonas-entrega',{headers,data:zoneInput});expect(createdZone.status()).toBe(201);let zone=(await createdZone.json()).data;
   const createdProduct=await request.post('/api/productos',{headers,data:{nombre:'Artículo cotización '+suffix,precio:5,stock:10,categoria:'cuidado',descripcion:'Artículo sintético para comprobar cotización de entrega',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase de prueba',tipoProducto:'cuidado',requiereReceta:false}});expect(createdProduct.status()).toBe(201);const product=(await createdProduct.json()).data;
   try{
     await page.goto('/cuenta.html');await page.evaluate(token=>sessionStorage.setItem('farmacia-mvc-token',token),customer.token);await page.goto('/producto.html?id='+product.id);
     await page.locator('#detail-add-button').click();await page.goto('/checkout.html');await expect(page.locator('.checkout-item-image')).toHaveCount(1);
-    await page.locator('#checkout-next').click();await page.locator('[name=delivery][value=delivery]').check();await page.locator('#checkout-zone').selectOption(zone.id);
+    await page.locator('#checkout-next').click();await page.locator('[name=delivery][value=delivery]').check();await page.locator('#checkout-zone').selectOption(zone.id);await expect(page.locator('#checkout-province')).toHaveValue('Pichincha');
     await page.locator('#checkout-document').fill('0102030400');await page.locator('#checkout-address').fill('Calle de prueba frente al parque de Puerto Quito');await page.locator('#checkout-terms').check();
     await expect(page.locator('#delivery-form [type=submit]')).toBeDisabled();await expect(page.locator('#checkout-grand-total')).toHaveText('Por confirmar');
     let updated=await request.put('/api/admin/zonas-entrega/'+zone.id,{headers,data:{...zoneInput,tarifaCentavos:250,esperadoVersion:zone.version}});expect(updated.status()).toBe(200);zone=(await updated.json()).data;

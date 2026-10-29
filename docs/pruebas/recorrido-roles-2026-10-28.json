@@ -1,0 +1,114 @@
+{
+  "fechaLocal": "2026-10-28",
+  "generadoEnUTC": "2026-10-29T03:53:51.817Z",
+  "alcance": "Recorrido de cliente, administrador y repartidor; carrito inferior, tarifa, seguimiento y órdenes de Farmi. Todas las escrituras de prueba en SQLite/PostgreSQL temporales locales.",
+  "cambios": [
+    "Barra inferior de carrito con cantidad y enlace en catálogo y ficha, eventos existentes, oculta para personal/vacío/sesión pendiente, sin consultas nuevas.",
+    "Actualizar Entregas incorpora pedidos, zonas y repartidores, preservando página, selección y formularios.",
+    "Provincia y cantón comparados con normalización consistente y provincia canónica al seleccionar zona.",
+    "Códigos completos de zona/repartidor/pedido/entrega visibles para Farmi; desplegables y foco conservados durante refresco.",
+    "Demostración UI con registro/login, órdenes de precio/promoción/tarifa/preparación/asignación, conflicto409, GPS voluntario, mapa real, llegada/teléfono y cierre privado."
+  ],
+  "pruebas": {
+    "node": {
+      "comando": "npm test",
+      "aprobadas": 242,
+      "fallos": 0,
+      "omitidas": 0,
+      "entorno": "PHARMACY_TEST_DATABASE_URL en PostgreSQL18 temporal local; SQLite temporal; SRI_XSD_PYTHON Python3.12/lxml"
+    },
+    "historicas": {
+      "comando": "npm run test:reto1",
+      "aprobadas": 38,
+      "fallos": 0,
+      "omitidas": 0
+    },
+    "pages": {
+      "comando": "npx playwright test --config tests/reto2/pages.config.cjs",
+      "aprobadas": 20,
+      "fallos": 0,
+      "omitidas": 0
+    },
+    "browser": {
+      "comando": "npx playwright test --config tests/reto2/playwright.config.cjs",
+      "aprobadas": 82,
+      "fallos": 0,
+      "omitidas": 0,
+      "flaky": 0,
+      "duracionMs": 442568.303
+    },
+    "mapaReal": {
+      "comando": "PHARMACY_DEMO_LIVE_MAP=true; Playwright role-journey.spec.cjs en servidor temporal3340",
+      "aprobadas": 2,
+      "fallos": 0,
+      "omitidas": 0,
+      "proveedor": "OpenStreetMap real, MapLibre canvas y teselas HTTP200",
+      "tiles": {
+        "escritorio": 18,
+        "movil": 6
+      },
+      "gps": "simulado y consentido mediante botón",
+      "sinLlamadaReal": true,
+      "sinNavegacionFisica": true
+    },
+    "regresiones": {
+      "actualizarMetadatos": {
+        "redReproducido": true,
+        "green": true
+      },
+      "provinciaMinuscula": {
+        "red": 2,
+        "green": 2
+      },
+      "desplegableFarmi": {
+        "red": 1,
+        "green": 2
+      }
+    },
+    "focalPosteriorRecursos": {
+      "comando": "node --test --test-concurrency=1 tests/reto2/resources.test.cjs tests/reto2/delivery-client.test.cjs",
+      "aprobadas": 5,
+      "fallos": 0
+    }
+  },
+  "totalPruebasPrincipales": 382,
+  "auditoria": {
+    "vulnerabilidades": 0,
+    "dependenciasNuevas": 0,
+    "coincidenciasDeSecretos": 0,
+    "limite": "Comparación de rutas y valores privados conocidos, no certificación universal."
+  },
+  "demostracion": {
+    "documento": "../RECORRIDO-ROLES-2026-10-28.md",
+    "capturas": 24,
+    "datosSinteticos": true,
+    "mapaReal": true,
+    "erroresJavascript": 0,
+    "fallosLimpieza": 0
+  },
+  "datosProduccion": {
+    "operacionesComercialesDePrueba": 0,
+    "migracionesEjecutadas": 0,
+    "tarifaComercialModificada": false,
+    "credencialesEnFrontend": false
+  },
+  "capturasHistoricas": {
+    "restauradas": 28,
+    "hashesConservados": true
+  },
+  "publicacion": {
+    "estado": "pendiente",
+    "commit": null,
+    "render": "https://farmacia-reina-del-cisne.onrender.com",
+    "pages": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "pullRequest": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/pull/11"
+  },
+  "limites": [
+    "GPS físico continuo, conducción de ruta y llamada real no verificados; se comprobaron permisos, posiciones sintéticas, destino URL y enlace telefónico.",
+    "En regresiones generales el mapa se sustituye por un fixture rotulado; en ensayo adicional y capturas de galería se cargó proveedor real.",
+    "Tarifa comercial debe acordarse y configurarse en administración; importes de demostración250/300centavos no se aplican a producción.",
+    "No cobros, SMS/correos/WhatsApp ni emisiones SRI reales.",
+    "Agente .NET sin cambios: no se repitió su suite92/92 del turno anterior.",
+    "RenderFree conserva suspensión y demoras de despertar."
+  ]
+}

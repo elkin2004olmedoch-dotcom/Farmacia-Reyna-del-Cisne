@@ -1,13 +1,14 @@
 import {deliveries,deliveryQuote} from '../models/deliveries.js';
 import {money} from '../views/common.js';
+const normalized=value=>String(value || '').normalize('NFD').replace(/\p{M}/gu,'').trim().replace(/\s+/g,' ').toLocaleLowerCase('es');
 
 export function deliveryCheckout(form,onChange){
   const byId=id=>document.getElementById(id),select=byId('checkout-zone');
   let zones=[],position=null,failed=false,loading=false,locationRequest=0;
   const zone=()=>zones.find(item=>item.id===select.value);
   const mode=()=>form.elements.delivery.value;
-  function match(){const selected=zone();return selected && form.elements.province.value===selected.provincia && form.elements.city.value.trim().toLocaleLowerCase('es')===selected.canton.toLocaleLowerCase('es');}
-  function syncAddress(){const selected=zone();if(selected){form.elements.province.value=selected.provincia;form.elements.city.value=selected.canton;}onChange();}
+  function match(){const selected=zone();return selected && normalized(form.elements.province.value)===normalized(selected.provincia) && normalized(form.elements.city.value)===normalized(selected.canton);}
+  function syncAddress(){const selected=zone();if(selected){const province=[...form.elements.province.options].find(option=>normalized(option.value)===normalized(selected.provincia));form.elements.province.value=province?.value || '';form.elements.city.value=selected.canton.trim().replace(/\s+/g,' ');}onChange();}
   async function reload(){
     if(loading)return;loading=true;const previous=select.value;
     try{

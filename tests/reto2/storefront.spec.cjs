@@ -59,3 +59,44 @@ test('carrito conserva miniatura, enlace, disponibilidad y foco al ajustar canti
   await item.getByRole('heading').getByRole('link').focus();await page.keyboard.press('Enter');await expect(page).toHaveURL(new RegExp('producto.html\\?id='+product.id));
   const cardImage=page.locator('#zoom-product img');await expect(cardImage).toHaveAttribute('width','600');await expect(cardImage).toHaveAttribute('height','600');
 });
+
+test('barra inferior del carrito sigue las unidades entre catálogo, ficha y otras pestañas',async({page,context})=>{
+  const [product]=await availableProducts(page);expect(product).toBeTruthy();
+  await page.goto('/catalogo.html');
+  const dock=page.getByRole('region',{name:'Resumen del carrito',includeHidden:true});
+  await expect(dock).toBeHidden();
+  const add=page.locator(`[data-add="${product.id}"]`);await add.focus();await page.keyboard.press('Enter');
+  await expect(dock).toBeVisible();await expect(dock).toContainText('1 unidad');await expect(add).toBeFocused();
+  await page.goto('/producto.html?id='+encodeURIComponent(product.id));
+  await expect(dock).toBeVisible();await expect(dock).toContainText('1 unidad');
+  const other=await context.newPage();await other.goto('/catalogo.html');
+  await other.evaluate(async id=>{const {cart}=await import('/models/cart.js');cart.update(id,2);},product.id);
+  await expect(dock).toContainText('2 unidades');
+  await other.evaluate(async()=>{const {cart}=await import('/models/cart.js');cart.clear();});
+  await expect(dock).toBeHidden();
+  await page.locator('#detail-add-button').click();await expect(dock).toBeVisible();
+  await dock.getByRole('link',{name:'Ver carrito'}).focus();await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/checkout.html$/);await expect(page.locator('#checkout-items')).toContainText(product.nombre);
+  await expect(dock).toHaveCount(0);await other.close();
+});
+
+test('barra inferior del carrito respeta sesión y deja accesible el pie a 320 px',async({page})=>{
+  const [product]=await availableProducts(page);expect(product).toBeTruthy();
+  await page.goto('/catalogo.html');
+  await page.evaluate(async id=>{const {cart}=await import('/models/cart.js');cart.add({id,stock:5});},product.id);
+  const dock=page.getByRole('region',{name:'Resumen del carrito',includeHidden:true});
+  await expect(dock).toBeVisible();
+  await page.setViewportSize({width:320,height:740});
+  const link=dock.getByRole('link',{name:'Ver carrito'});await expect(link).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();
+  const helper=page.locator('farmacia-mascota #launcher');await expect(helper).toBeVisible();
+  const launcher=await helper.boundingBox(),bar=await dock.boundingBox();expect(launcher.y+launcher.height).toBeLessThanOrEqual(bar.y);
+  const footer=page.locator('.site-footer');await footer.locator('a').last().focus();await page.keyboard.press('End');
+  await expect.poll(async()=>{const footerLink=await footer.locator('a').last().boundingBox();return footerLink.y+footerLink.height;}).toBeLessThanOrEqual(bar.y);
+  for(const role of ['admin','repartidor']){
+    await page.evaluate(async role=>{const {auth}=await import('/models/auth.js');auth.save({token:'ui-session',usuario:{role,nombre:'Prueba',email:'prueba@example.ec'}});},role);
+    await expect(dock).toBeHidden();
+  }
+  await page.evaluate(async()=>{const {auth}=await import('/models/auth.js');auth.clear();});await expect(dock).toBeVisible();
+  await page.evaluate(()=>document.body.dataset.sessionPending='');await expect(dock).toBeHidden();
+});

@@ -11,6 +11,12 @@ export function sessionView(user,count) {
   for(const element of document.querySelectorAll('[data-admin-email]'))element.textContent=user?.email || '';
   for(const counter of document.querySelectorAll('[data-shop-count]'))counter.textContent=count;
   for(const link of document.querySelectorAll('.shop-cart'))link.setAttribute('aria-label',`Carrito, ${count} unidades`);
+  const dock=document.getElementById('cart-dock');
+  if(dock){
+    dock.hidden=!count || admin || courier || document.body.hasAttribute('data-session-pending');
+    document.getElementById('cart-dock-summary').textContent=`${count} ${count===1?'unidad':'unidades'}`;
+    document.body.toggleAttribute('data-cart-dock',!dock.hidden);
+  }
 }
 export function accountView(user) {
   const panel=document.getElementById('account-area');

@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-29T03:45:29.385Z",
+  "syntheticGps": true,
+  "realOpenStreetMap": true,
+  "profiles": {
+    "escritorio": {
+      "images": 12,
+      "tilesLoaded": [
+        18
+      ],
+      "errors": 0
+    },
+    "movil": {
+      "images": 12,
+      "tilesLoaded": [
+        6
+      ],
+      "errors": 0
+    }
+  }
+}

@@ -181,8 +181,15 @@ h1,h2,h3 { color:var(--ink); font-family:var(--sans); letter-spacing:-.045em; }
 .catalog-detail-link { margin-top:5px; font-size:12px; }
 .catalog-compare { display:flex; gap:8px; align-items:center; padding:8px 0; color:var(--muted); font-size:12px; }
 .catalog-compare input { accent-color:var(--brand-red); width:16px; height:16px; }
-.cart-dock { background:var(--ink); border-radius:12px; }
-#cart-dock-summary { color:#e0e7ee; }
+.cart-dock { bottom:calc(20px + env(safe-area-inset-bottom,0px)); background:var(--ink); border-radius:12px; }
+.cart-dock > div > span { color:var(--footer-muted); }
+#cart-dock-summary { color:var(--surface); font-variant-numeric:tabular-nums; }
+.cart-dock .button:hover { background:var(--brand-dark); }
+.cart-dock :focus-visible { outline:3px solid var(--surface); outline-offset:3px; }
+body[data-cart-dock] { --cart-dock-offset:calc(112px + env(safe-area-inset-bottom,0px)); }
+body[data-cart-dock] .site-shell { padding-bottom:var(--cart-dock-offset); }
+farmacia-mascota { margin-bottom:var(--cart-dock-offset,0px); }
+@media(max-width:600px) { .cart-dock { bottom:calc(12px + env(safe-area-inset-bottom,0px)); } }
 .promos .eyebrow.light { color:var(--brand-red); }
 .product-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; }
 .product-main-image { position:relative; display:block; border:0; border-radius:15px; background:var(--soft); width:100%; aspect-ratio:1; }

@@ -109,7 +109,7 @@ export async function deliveriesController(){
     }
     if(admin && button.hasAttribute('data-courier-toggle')){const person=couriers.find(entry=>entry.id===button.dataset.courierToggle);if(person)await action(button,async()=>{await deliveries.setCourierActive(person.id,!person.activo);await metadata();},'Disponibilidad del repartidor actualizada.');}
   });
-  byId('deliveries-refresh').addEventListener('click',event=>{void action(event.currentTarget,async()=>{await retryRetirement();},'Bandeja actualizada.');});
+  byId('deliveries-refresh').addEventListener('click',event=>{void action(event.currentTarget,async()=>{await retryRetirement();if(admin)await Promise.all([metadata(),refreshOrders()]);},'Bandeja actualizada.');});
   for(const [id,offset]of [['deliveries-prev',-1],['deliveries-next',1]])byId(id).addEventListener('click',event=>{void action(event.currentTarget,async()=>{await stopGps({notice:false,drawList:false});page=Math.max(1,page+offset);snapshot='';},'Página de entregas actualizada.');});
   byId('delivery-filter').addEventListener('change',()=>{if(working)return;page=1;snapshot='';requestId++;void refreshList().catch(error=>{if(error.status!==401)message(error.message,true);});});
   if(admin){
