@@ -92,6 +92,10 @@ test('la página mantiene teclado, contraste, mascota animada y ancho móvil sin
     const data=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
     return data.some((value,index)=>index%4===3 && value>0);
   })).toBe(true);
+  await page.locator('farmacia-mascota #input').fill('¿Cómo puedo pagar?');
+  await page.locator('farmacia-mascota #input').press('Enter');
+  await expect(page.locator('farmacia-mascota #messages .message.bot').last()).toContainText('En Pagos puedes probar una demostración sin cobros.');
+  await expect(page.locator('farmacia-mascota #messages .message.bot').last().getByRole('link',{name:'Explorar pagos de prueba'})).toHaveAttribute('href','pagos.html');
   await page.locator('farmacia-mascota #close').click();await expect(launcher).toBeFocused();
   for(const width of [320,375,768,1440]){
     await page.setViewportSize({width,height:1000});
