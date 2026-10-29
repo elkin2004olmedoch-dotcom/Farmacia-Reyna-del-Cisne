@@ -32,9 +32,9 @@
 
 **Produces:** zonas, tarifas, cuentas de repartidor, asignación, estados y GPS; snapshots de envío en pedidos/facturas. Endpoints documentados por el implementador antes de integrar la UI. Nuevas tablas con RLS y checks. Flags `Producto.controlado/biologico/cadenaFrio` en ambos schemas.
 
-- [ ] Escribir y ejecutar fallos para roles, cobertura, tarifa pendiente, tarifa histórica, fiscalidad, propiedad, estados/carreras, entrega/cancelación atómicas y ubicación.
-- [ ] Implementar migraciones aditivas, servicios/DTOs y rutas; extraer helper transaccional de estado del pedido sin duplicar sus restricciones.
-- [ ] Validar schemas, generar clientes y migrar únicamente bases temporales; ejecutar pruebas focalizadas y revisión.
+- [x] Escribir y ejecutar fallos para roles, cobertura, tarifa pendiente, tarifa histórica, fiscalidad, propiedad, estados/carreras, entrega/cancelación atómicas y ubicación.
+- [x] Implementar migraciones aditivas, servicios/DTOs y rutas; extraer helper transaccional de estado del pedido sin duplicar sus restricciones.
+- [x] Validar schemas, generar clientes y migrar únicamente bases temporales; ejecutar pruebas focalizadas y revisión.
 
 ## Task 2: Tienda y carrito
 
@@ -42,9 +42,9 @@
 
 **Produces:** cabecera/buscador/categorías/cobertura, estructura comercial original, miniaturas y navegación preservada. Generador reserva integración de dos páginas nuevas a root después de entregar su edición.
 
-- [ ] Cubrir miniatura/alt, filtros conservados, búsqueda/categorías y navegación por teclado con pruebas de comportamiento.
-- [ ] Aplicar cambios acotados reutilizando tarjetas y estilos actuales; sin inventar campañas o métricas.
-- [ ] Comprobar sintaxis, pruebas focalizadas y revisión; no regenerar HTML mientras otros editan plantillas.
+- [x] Cubrir miniatura/alt, filtros conservados, búsqueda/categorías y navegación por teclado con pruebas de comportamiento.
+- [x] Aplicar cambios acotados reutilizando tarjetas y estilos actuales; sin inventar campañas o métricas.
+- [x] Comprobar sintaxis, pruebas focalizadas y revisión; no regenerar HTML mientras otros editan plantillas.
 
 ## Task 3: Asistente y mascotas
 
@@ -52,9 +52,9 @@
 
 **Consumes:** modelos administrativos existentes y contrato de entregas; integra eventos de navegación ya usados por admin.
 
-- [ ] Escribir fallos de comandos tipados, ambigüedad, fechas Ecuador, navegación sin catálogo y acciones reales de mascotas.
-- [ ] Implementar órdenes completas con endpoints existentes y permisos actuales; preparar acciones de entrega/zona mediante contrato nuevo. Datos faltantes abren formularios o generan preguntas concretas.
-- [ ] Verificar parser/integración, sin métodos arbitrarios ni secretos en mensajes; revisión independiente.
+- [x] Escribir fallos de comandos tipados, ambigüedad, fechas Ecuador, navegación sin catálogo y acciones reales de mascotas.
+- [x] Implementar órdenes completas con endpoints existentes y permisos actuales; preparar acciones de entrega/zona mediante contrato nuevo. Datos faltantes abren formularios o generan preguntas concretas.
+- [x] Verificar parser/integración, sin métodos arbitrarios ni secretos en mensajes; revisión independiente.
 
 ## Task 4: Ventanas, checkout y restricciones
 
@@ -62,16 +62,16 @@
 
 **Consumes:** contrato Task 1 y marcado Task 2. Root es responsable de archivos compartidos tras finalizar ediciones delegadas.
 
-- [ ] Añadir pruebas de cliente/repartidor/admin, tarifario, destino opcional, mapa por decisión del usuario, llamada al llegar, teclado y privacidad.
-- [ ] Implementar `entregas.html` y `seguimiento.html`, roles, formularios de zonas/repartidores/asignación y refresco seguro; mostrar envío/subtotal/total reales.
-- [ ] Bloquear compra automática y campañas según flags sanitarios, manteniendo PVP/IVA/receta existentes. Cubrirlo con regresiones antes del cambio.
-- [ ] Integrar helper de ubicación y proveedor de mapas; permisos propios de geolocalización, CSP exacta y avisos de privacidad.
+- [x] Añadir pruebas de cliente/repartidor/admin, tarifario, destino opcional, mapa por decisión del usuario, llamada al llegar, teclado y privacidad.
+- [x] Implementar `entregas.html` y `seguimiento.html`, roles, formularios de zonas/repartidores/asignación y refresco seguro; mostrar envío/subtotal/total reales.
+- [x] Bloquear compra automática y campañas según flags sanitarios, manteniendo PVP/IVA/receta existentes. Cubrirlo con regresiones antes del cambio.
+- [x] Integrar helper de ubicación y proveedor de mapas; permisos propios de geolocalización, CSP exacta y avisos de privacidad.
 
 ## Task 5: Verificación, Supabase y publicación
 
-- [ ] Revisar cada dominio y resolver hallazgos; ejecutar Node, tienda histórica, navegador y Pages/API completos, además del agente .NET con el SDK local si está disponible.
-- [ ] Regenerar HTML y artefacto público; validar imports, privacidad del artefacto y ausencia de secretos; conservar capturas históricas.
-- [ ] Verificar conexión Supabase y estado de migraciones por lectura. Respaldar base/Storage de forma privada antes de cualquier migración aditiva real; conservar checksums/resultados saneados.
-- [ ] Aplicar migraciones revisadas sin seed ni datos de prueba sobre producción; verificar restricciones/RLS y conservación de registros.
-- [ ] Preparar fuente en copia separada del historial remoto, verificar diferencias y publicar solo versiones probadas en servicios autorizados, con rollback. No alterar planes de pago o DNS sin necesidad/alcance explícito.
-- [ ] Actualizar arquitectura, manual de operación/cobertura, integraciones/normativa y evidencia exacta. Separar pruebas temporales, lecturas públicas y comprobaciones reales.
+- [x] Revisar cada dominio y resolver hallazgos; ejecutar Node, tienda histórica, navegador y Pages/API completos, además del agente .NET con el SDK local si está disponible.
+- [x] Regenerar HTML y artefacto público; validar imports, privacidad del artefacto y ausencia de secretos; conservar capturas históricas.
+- [x] Verificar conexión Supabase y estado de migraciones por lectura. Respaldar base/Storage de forma privada antes de cualquier migración aditiva real; conservar checksums/resultados saneados.
+- [x] Aplicar migraciones revisadas sin seed ni datos de prueba sobre producción; verificar restricciones/RLS y conservación de registros.
+- [x] Preparar fuente en copia separada del historial remoto, verificar diferencias y publicar solo versiones probadas en servicios autorizados, con rollback. No alterar planes de pago o DNS sin necesidad/alcance explícito.
+- [x] Actualizar arquitectura, manual de operación/cobertura, integraciones/normativa y evidencia exacta. Separar pruebas temporales, lecturas públicas y comprobaciones reales.

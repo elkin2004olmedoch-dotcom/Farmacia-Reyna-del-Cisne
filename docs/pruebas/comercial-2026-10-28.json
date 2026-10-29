@@ -1,6 +1,6 @@
 {
   "fechaLocal": "2026-10-28",
-  "generadoEnUTC": "2026-10-29T03:08:57.281Z",
+  "generadoEnUTC": "2026-10-29T03:16:09.794Z",
   "alcance": "Arquitectura comercial, entregas Puerto Quito, checkout y restricciones; servicios existentes autorizados. Sin operaciones comerciales de prueba en producción.",
   "stack": "HTML/CSS/JavaScript, Express5, Prisma6.19.3; SQLite y PostgreSQL",
   "pruebas": {
@@ -131,13 +131,35 @@
         "anon_select": false,
         "authenticated_select": false
       }
-    ]
+    ],
+    "verificacionPosteriorDespliegue": {
+      "datosAnterioresConservados": true,
+      "productos": 18,
+      "usuarios": 2,
+      "pedidos": 1,
+      "entregas": 0
+    }
   },
   "publicacion": {
-    "estado": "candidata verificada; pendiente de publicación",
+    "estado": "publicada y verificada",
     "render": "https://farmacia-reina-del-cisne.onrender.com",
     "pages": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
-    "commit": null
+    "commit": "6235fc31ab915d31744a387d9947cb48d9df00c5",
+    "renderDeployment": "dep-dbhbilm7bikc73e5vkdg",
+    "renderStatus": "Live",
+    "renderBuildDurationSeconds": 46,
+    "renderConfiguredBranch": "main",
+    "renderAutoDeploy": "Off",
+    "skipInitialSeed": true,
+    "pagesDeployment": "565901d4-b133-4468-bd5e-d0d410916ba3",
+    "pagesStatus": "Cloudflare Pages check success",
+    "pagesImmutable": "https://565901d4.farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "pagesBranch": "codex/separacion-cloudflare",
+    "pullRequest": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/pull/11",
+    "pullRequestState": "draft",
+    "mainModified": false,
+    "dnsModified": false,
+    "paidPlanChanges": false
   },
   "limites": [
     "La tarifa final, clasificación fiscal del envío y cuentas reales de repartidores debe configurarlas administración.",
@@ -151,5 +173,27 @@
     "restauradas": 28,
     "hashesConservados": true,
     "nuevasCapturasConservadasFueraRepositorio": true
+  },
+  "verificacionPublica": {
+    "at": "2026-10-29T03:15:07.156Z",
+    "comprobaciones": 137,
+    "aprobadas": 137,
+    "fallos": 0,
+    "archivosPagesComparados": 101,
+    "headersReservados404": true,
+    "htmlRenderComparados": 11,
+    "apiNuevaConfirmada": true,
+    "corsOrigenesExactos": true,
+    "barrerasSinSesion": true,
+    "escriturasAnonimasRechazadas": 3,
+    "operacionesComercialesReales": 0,
+    "cuentasValidasProduccionUtilizadas": 0,
+    "limite": "Anonymous public checks; no valid production account, order, invoice or stock mutation. POST {} must be rejected before business validation.",
+    "carritoMovil": {
+      "productoConImagenCargada": true,
+      "sinDesbordamiento": true,
+      "soloCarritoLocal": true,
+      "pedidoCreado": false
+    }
   }
 }

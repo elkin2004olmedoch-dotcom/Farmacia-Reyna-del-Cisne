@@ -33,9 +33,9 @@ Ruling: la cobertura inicial es Puerto Quito completo; la tarifa queda pendiente
 - [x] Tienda y carrito.
 - [x] Asistente y mascotas.
 - [x] Ventanas, checkout y restricciones.
-- [ ] Revisión, suites completas, respaldo/migración y publicación verificadas.
+- [x] Revisión, suites completas, respaldo/migración y publicación verificadas (navegador con repetición focal documentada).
 
-No se ha aplicado una migración real ni se ha publicado código nuevo en esta etapa.
+Registro inicial: todavía no se había aplicado la migración ni publicado la ampliación; el cierre de esta bitácora registra el resultado posterior.
 
 ## Integración implementada
 
@@ -54,3 +54,7 @@ No se ha aplicado una migración real ni se ha publicado código nuevo en esta e
 Node242/242, históricas38/38, Pages20/20 y .NET92/92; cero omisiones. Navegador última suite73/74 más repetición focal2/2 con paginación forzada, sin cambios posteriores de aplicación; cobertura de sus74casos, sin afirmar una tercera suite completa. Auditoría0 y ambos schemas Prisma6válidos. Capturas históricas28restauradas por hash; capturas nuevas fuera del repositorio.
 
 Respaldo Supabase/Storage completo, hashes e índice pg_restore comprobados, sin restauración de datos reales para pruebas. Migración007 aplicada sin seed:15tablas previas conservadas,18productos/2usuarios/1pedido, nuevas tablas RLS y sin privilegios anon/authenticated. Zona Puerto Quito pendiente/1historial/0entregas. Instancia PG18temporal54621 detenida; servicio Windows PostgreSQL existente sigue Running. Publicación de aplicación pendiente.
+
+## Publicación verificada
+
+Commit6235fc31ab915d31744a387d9947cb48d9df00c5: Render Live dep-dbhbilm7bikc73e5vkdg (46s), AutoDeployOff/main/SKIP_INITIAL_SEED=true conservados. Pages branchcodex/separacion-cloudflare avanzó sin forcepush; checkCloudflare success, deployment565901d4-b133-4468-bd5e-d0d410916ba3. Pasaron137/137sondas públicas:101archivos Pages,11HTML Render,API/CORS/barreras/privados. No cuentas válidas ni operaciones comerciales reales. Relectura SQL posterior conserva18productos/2usuarios/1pedido y0entregas. PRborrador11adjunta para revisión; main/DNS/planes intactos.
