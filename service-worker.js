@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'farmacia-reina-shell-cloud-2d6191ff05d1';
+const CACHE_NAME = 'farmacia-reina-shell-cloud-2d6191ff05d1-sin-boton-whatsapp';
 const APP_FILES = [
   'js/mascota.js', 'frontend/controllers/mascota.js',
   'frontend/assets/mascotas/widget.css', 'frontend/assets/mascotas/widget-responsive.css',
