@@ -1,0 +1,826 @@
+{
+  "date": "2026-10-30T02:02:45.063Z",
+  "codeRevision": "f2ab405f13571cea56cb99c2cbb46765c7c66c45",
+  "testedRevision": "aa4ecb751dce4533a0a9571d93d1444264d25b81",
+  "sameGitTreeVerified": true,
+  "render": {
+    "origin": "https://farmacia-reina-del-cisne.onrender.com",
+    "deployment": "dep-dbhvhvec6qcc73f3k4hg",
+    "observedStatus": "Live",
+    "sourceBranch": "main",
+    "autoDeploy": "Off"
+  },
+  "pages": {
+    "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "branch": "codex/separacion-cloudflare",
+    "publicAssetParityVerified": true
+  },
+  "checks": {
+    "at": "2026-10-30T01:59:12.018Z",
+    "origins": {
+      "render": "https://farmacia-reina-del-cisne.onrender.com",
+      "pages": "https://farmacia-reyna-del-cisne-pruebas.pages.dev"
+    },
+    "transportRetries": [],
+    "total": 151,
+    "passed": 151,
+    "failed": [],
+    "checks": [
+      {
+        "name": "Render /index.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /catalogo.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /producto.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /comparar.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /cuenta.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /checkout.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /pedidos.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /admin.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /ayuda.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /entregas.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /seguimiento.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render /pagos.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "API salud",
+        "ok": true,
+        "status": 200,
+        "observedMs": 112
+      },
+      {
+        "name": "Cobertura inicial pendiente",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Catálogo real conservado",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Sin sesión /api/entregas",
+        "ok": true,
+        "status": 401
+      },
+      {
+        "name": "Sin sesión /api/admin/zonas-entrega",
+        "ok": true,
+        "status": 401
+      },
+      {
+        "name": "Sin sesión /api/admin/repartidores",
+        "ok": true,
+        "status": 401
+      },
+      {
+        "name": "Sin sesión /api/pedidos/00000000-0000-4000-8000-000000000000/seguimiento",
+        "ok": true,
+        "status": 401
+      },
+      {
+        "name": "Escritura anónima rechazada /api/entregas/asignar",
+        "ok": true,
+        "status": 401
+      },
+      {
+        "name": "Escritura anónima rechazada /api/admin/repartidores",
+        "ok": true,
+        "status": 401
+      },
+      {
+        "name": "Escritura anónima rechazada /api/pedidos",
+        "ok": true,
+        "status": 401
+      },
+      {
+        "name": "CORS Pages autorizado",
+        "ok": true
+      },
+      {
+        "name": "CORS externo sin permiso",
+        "ok": true
+      },
+      {
+        "name": "CSP exacta e imágenes Storage autorizadas",
+        "ok": true
+      },
+      {
+        "name": "Identidad propia sin flotante de WhatsApp",
+        "ok": true
+      },
+      {
+        "name": "Pages /assets/accesibilidad.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /404.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/fonts/fuente-1.ttf",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/fonts/fuente-3.ttf",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/fonts/fuente-4.ttf",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/fonts/fuente-5.ttf",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/fonts/fuente-6.ttf",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/deliveries.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/farmacia-6.jpg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/farmacia-7.jpg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/farmacia-8.jpg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/farmacia-5.jpg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /admin.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/farmacia-fachada-reina.webp",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/logo-reina-del-cisne.png",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-alcohol-antiseptico-d13f81e66a94.webp",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/farmacia-fachada-reina.png",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/farmacia-9.jpg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-bebe-pigeon.png",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-botiquin.jpg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-alcohol-antiseptico.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-curitas-adhesivas.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-frasco-tabletas.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-gasas-esteriles.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/fonts/fuente-2.ttf",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-gel-antibacterial.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-medicamento-liquido.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-solar-eucerin.png",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-algodon.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-generico-referencia.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-tabletas-blister.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-toallitas-bebe.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-solucion-salina.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-vitaminas.jpg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-mascarillas.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mascotas/admin-companion.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-termometro-digital.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mascotas/art/goti-base.png",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mascotas/art/farmi-base.png",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mascotas/art/boti-base.png",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mascotas/sprites/goti.png",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/images/producto-venda-elastica.svg",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mascotas/sprites/manifest.json",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mascotas/widget-responsive.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mascotas/widget.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mvc.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/shop.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/styles.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/vendor/bootstrap-grid.min.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/vendor/fonts.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mascotas/sprites/boti.png",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /ayuda.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/mascotas/sprites/farmi.png",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /catalogo.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /comparar.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /config.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/account.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/admin-command.mjs",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/admin-companion.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/app.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/billing.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/catalog.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/checkout.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/contact.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/deliveries.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/delivery-checkout.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/dialog.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/images.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/layout.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/mascota-scope.mjs",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /assets/payments.css",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/payments.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/updates.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/admin.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /controllers/mascota.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /index.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/admin.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/api.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/auth.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/billing.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /cuenta.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/cart.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/catalog.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/deliveries.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/ecuador.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/events.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/payments.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/orders.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/pharmacy-policy.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/pricing.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /models/promotion-publication.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /checkout.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /pedidos.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /producto.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /views/admin-dashboard.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /views/admin.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /views/billing.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /views/common.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /views/deliveries.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /views/layout.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /views/orders.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /views/payments.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /views/products.js",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /_headers no expuesto",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Pages /seguimiento.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /pagos.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Pages /entregas.html",
+        "ok": true,
+        "status": 200
+      },
+      {
+        "name": "Render privado .env",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Render privado server/config.cjs",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Render privado server/prisma/schema.prisma",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Render privado package.json",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Render privado .git/config",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Pages privado .env",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Pages privado server/config.cjs",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Pages privado server/prisma/schema.prisma",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Pages privado package.json",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Pages privado .git/config",
+        "ok": true,
+        "status": 404
+      },
+      {
+        "name": "Mapa y geolocalización https://farmacia-reina-del-cisne.onrender.com",
+        "ok": true
+      },
+      {
+        "name": "Mapa y geolocalización https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "ok": true
+      },
+      {
+        "name": "PayPhone cerrado sin cuenta y demostración disponible",
+        "ok": true
+      },
+      {
+        "name": "Pagos sin sesión GET",
+        "ok": true,
+        "status": 401
+      },
+      {
+        "name": "Pagos sin sesión POST",
+        "ok": true,
+        "status": 401
+      },
+      {
+        "name": "Retorno inválido rechazado",
+        "ok": true,
+        "status": 422
+      },
+      {
+        "name": "Pagos origen y sin acortadores https://farmacia-reina-del-cisne.onrender.com",
+        "ok": true
+      },
+      {
+        "name": "Pagos origen y sin acortadores https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "ok": true
+      }
+    ],
+    "scope": "Anonymous public checks; no valid production account, order, invoice or stock mutation. POST {} must be rejected before business validation."
+  },
+  "browser": {
+    "startedAt": "2026-10-30T01:59:06.539Z",
+    "scope": "Publicación real; contextos anónimos nuevos. Carrito solo local, sin cuentas, pedidos, llamadas ni pagos reales. Se bloquean escrituras de red.",
+    "profiles": [
+      {
+        "name": "escritorio",
+        "width": 1440,
+        "errors": [],
+        "writeAttempts": [],
+        "pass": true,
+        "checks": [
+          "portada propia",
+          "mascota dibujada",
+          "sin flotante WhatsApp",
+          "sin desbordamiento",
+          "carrito inferior",
+          "imagen de producto en carrito",
+          "acceso previo a confirmar",
+          "foco de teclado",
+          "cero escrituras comerciales"
+        ]
+      },
+      {
+        "name": "movil",
+        "width": 375,
+        "errors": [],
+        "writeAttempts": [],
+        "pass": true,
+        "checks": [
+          "portada propia",
+          "mascota dibujada",
+          "sin flotante WhatsApp",
+          "sin desbordamiento",
+          "carrito inferior",
+          "imagen de producto en carrito",
+          "acceso previo a confirmar",
+          "foco de teclado",
+          "cero escrituras comerciales"
+        ]
+      }
+    ],
+    "completedAt": "2026-10-30T01:59:14.448Z",
+    "pass": true
+  },
+  "publicPaymentEvidence": "publicado-pagos-evidencia.json",
+  "businessWrites": 0,
+  "scope": "Anonymous read-only public verification. Rejected unauthorized POST requests are included in access barriers; no valid customer account, order, charge, invoice, notification or call was created."
+}

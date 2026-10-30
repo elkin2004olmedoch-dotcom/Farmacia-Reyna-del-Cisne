@@ -1,0 +1,35 @@
+{
+  "environment": "Localhost / SQLite temporal; nombres, pedidos, tarifas de ensayo y GPS sintéticos. Sin pagos, llamadas ni mensajes reales.",
+  "profile": "1440x1000",
+  "visuallyInspected": true,
+  "captures": [
+    {
+      "file": "administrador-farmi.png",
+      "role": "Administrador / Farmi",
+      "caption": "Farmi modifica un precio y publica una promoción mediante la API local temporal.",
+      "bytes": 112255,
+      "sha256": "0276eb4a3f3c4710b0c410da9a91d8cdf93439d7c9362ef4ce65f3e02186eeca"
+    },
+    {
+      "file": "administrador-entregas.png",
+      "role": "Administrador / Entregas",
+      "caption": "Zonas, tarifas pendientes y repartidor sintético creados en la base aislada.",
+      "bytes": 116855,
+      "sha256": "d01ec8fb9e3b97360ff142cac331f5adfd0d5b511f941061c9fbbe8712f136bd"
+    },
+    {
+      "file": "repartidor-destino.png",
+      "role": "Repartidor",
+      "caption": "Llegada a destino con GPS sintético; enlaces de navegación y llamada visibles, sin abrirlos.",
+      "bytes": 66526,
+      "sha256": "e2ce2b14df9a533a510795ceea94c766ab7853edca13f2cfc6fa3a4cb6e8de1c"
+    },
+    {
+      "file": "cliente-seguimiento.png",
+      "role": "Cliente / Seguimiento",
+      "caption": "Seguimiento privado con ubicación sintética y mapa sustituido por un fixture rotulado.",
+      "bytes": 31976,
+      "sha256": "e2774822bd0bc912be618e7f26ec265e8b5270c4dc238e5bc126964210827ba9"
+    }
+  ]
+}

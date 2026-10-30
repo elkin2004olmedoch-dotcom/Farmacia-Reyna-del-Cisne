@@ -1,0 +1,47 @@
+{
+  "codeRevision": "f2ab405f13571cea56cb99c2cbb46765c7c66c45",
+  "captures": [
+    {
+      "file": "administrador-entregas.png",
+      "bytes": 116855,
+      "sha256": "d01ec8fb9e3b97360ff142cac331f5adfd0d5b511f941061c9fbbe8712f136bd"
+    },
+    {
+      "file": "administrador-farmi.png",
+      "bytes": 112255,
+      "sha256": "0276eb4a3f3c4710b0c410da9a91d8cdf93439d7c9362ef4ce65f3e02186eeca"
+    },
+    {
+      "file": "cliente-seguimiento.png",
+      "bytes": 31976,
+      "sha256": "e2774822bd0bc912be618e7f26ec265e8b5270c4dc238e5bc126964210827ba9"
+    },
+    {
+      "file": "publicado-pagos-escritorio.png",
+      "bytes": 95461,
+      "sha256": "70c5d347338b4d2e360c013d036bddc7a71f8a6f96f3dcb3259ec58db9c069c0"
+    },
+    {
+      "file": "publicado-pagos-movil.png",
+      "bytes": 79371,
+      "sha256": "2d6dbdf5871db4d0d006f4221c261c06caebee87442fc9c38d3c9879a7712669"
+    },
+    {
+      "file": "publicado-portada-escritorio.png",
+      "bytes": 441372,
+      "sha256": "abb8f191f627579b768d0dd88c0d3f764fa9c4039dd0f3733fc1bba523e17182"
+    },
+    {
+      "file": "publicado-portada-movil.png",
+      "bytes": 143731,
+      "sha256": "04e943072a54f8f8630a3a6791efb07f54c8a4b64970ba9799686ce8b74fa034"
+    },
+    {
+      "file": "repartidor-destino.png",
+      "bytes": 66526,
+      "sha256": "e2ce2b14df9a533a510795ceea94c766ab7853edca13f2cfc6fa3a4cb6e8de1c"
+    }
+  ],
+  "publicScreenshots": 4,
+  "localRoleScreenshots": 4
+}

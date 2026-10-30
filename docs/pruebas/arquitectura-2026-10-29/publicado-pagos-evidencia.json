@@ -1,0 +1,977 @@
+{
+  "startedAt": "2026-10-30T01:59:43.718Z",
+  "requestedURL": "https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos.html",
+  "scope": "Navegador público, sesiones nuevas y únicamente solicitudes HTTP GET/HEAD/OPTIONS. Sin credenciales, registros, pedidos ni cobros.",
+  "availability": [
+    {
+      "at": "2026-10-30T01:59:43.867Z",
+      "attempt": 1,
+      "status": 200,
+      "url": "https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos",
+      "currentPaymentHTML": true,
+      "etag": "W/\"15c13eda647a8a74a016a4ebd5cf6dcc\""
+    }
+  ],
+  "profiles": [
+    {
+      "name": "escritorio",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "initialStorage": {
+        "cookies": [],
+        "origins": []
+      },
+      "apiRequests": [
+        {
+          "method": "GET",
+          "url": "https://farmacia-reina-del-cisne.onrender.com/api/pagos/configuracion"
+        }
+      ],
+      "httpErrors": [],
+      "requestFailures": [],
+      "jsErrors": [],
+      "consoleErrors": [],
+      "businessWriteAttempts": [],
+      "businessWritesSent": 0,
+      "outcomes": [
+        {
+          "selected": "aprobado",
+          "title": "Prueba aprobada",
+          "keyboard": true,
+          "focused": true
+        },
+        {
+          "selected": "rechazado",
+          "title": "Prueba rechazada",
+          "keyboard": true,
+          "focused": true
+        },
+        {
+          "selected": "cancelado",
+          "title": "Prueba cancelada",
+          "keyboard": true,
+          "focused": true
+        }
+      ],
+      "pass": true,
+      "document": {
+        "status": 200,
+        "url": "https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos"
+      },
+      "configuration": {
+        "status": 200,
+        "url": "https://farmacia-reina-del-cisne.onrender.com/api/pagos/configuracion",
+        "cors": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "data": {
+          "payphone": {
+            "disponible": false,
+            "entorno": null
+          },
+          "demostracion": true,
+          "moneda": "USD"
+        }
+      },
+      "mascot": {
+        "selected": "farmi",
+        "atlasStatus": 200,
+        "atlasURL": "https://farmacia-reyna-del-cisne-pruebas.pages.dev/assets/mascotas/sprites/farmi.png?v=6d8617c82d718f1975c1d71bc3f01f05ed4ab7d6149c189bdbb5e39a58a8e37a",
+        "availableStates": [
+          "idle",
+          "running-right",
+          "running-left",
+          "waving",
+          "jumping",
+          "failed",
+          "waiting",
+          "running",
+          "review"
+        ],
+        "firstCanvas": {
+          "opaquePixels": 10266,
+          "pixelHash": 2473016093,
+          "width": 192,
+          "height": 208
+        },
+        "animatedCanvas": {
+          "opaquePixels": 10544,
+          "pixelHash": 1676166219,
+          "width": 192,
+          "height": 208
+        },
+        "freePhrase": {
+          "question": "¿Cómo puedo pagar?",
+          "reply": "En Pagos puedes probar una demostración sin cobros. Para un pedido registrado, abre su opción de pago desde Mis pedidos. PayPhone estará disponible cuando la farmacia active su cuenta; Apple Pay requiere habilitación de una pasarela compatible. Nunca compartas los datos de tu tarjeta por chat.Explorar pagos de pruebaPagar mi pedidoHablar con la farmacia ↗"
+        },
+        "localGuidance": "En Pagos puedes probar una demostración sin cobros. Para un pedido registrado, abre su opción de pago desde Mis pedidos. PayPhone estará disponible cuando la farmacia active su cuenta; Apple Pay requiere habilitación de una pasarela compatible. Nunca compartas los datos de tu tarjeta por chat.Explorar pagos de pruebaPagar mi pedidoHablar con la farmacia ↗",
+        "links": [
+          {
+            "text": "Explorar catálogo",
+            "href": "catalogo.html",
+            "target": "",
+            "rel": ""
+          },
+          {
+            "text": "Explorar pagos de prueba",
+            "href": "pagos.html",
+            "target": "",
+            "rel": ""
+          },
+          {
+            "text": "Pagar mi pedido",
+            "href": "pedidos.html",
+            "target": "",
+            "rel": ""
+          },
+          {
+            "text": "Hablar con la farmacia ↗",
+            "href": "https://api.whatsapp.com/send?phone=593979275988",
+            "target": "_blank",
+            "rel": "noopener noreferrer"
+          },
+          {
+            "text": "Explorar pagos de prueba",
+            "href": "pagos.html",
+            "target": "",
+            "rel": ""
+          },
+          {
+            "text": "Pagar mi pedido",
+            "href": "pedidos.html",
+            "target": "",
+            "rel": ""
+          },
+          {
+            "text": "Hablar con la farmacia ↗",
+            "href": "https://api.whatsapp.com/send?phone=593979275988",
+            "target": "_blank",
+            "rel": "noopener noreferrer"
+          }
+        ]
+      },
+      "links": [
+        {
+          "text": "Saltar al contenido",
+          "href": "#contenido",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "",
+          "href": "index.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Mis pedidos",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Ingresar",
+          "href": "cuenta.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Admin",
+          "href": "admin.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Carrito 0",
+          "href": "checkout.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Inicio",
+          "href": "index.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Productos",
+          "href": "catalogo.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Promociones",
+          "href": "index.html#promos",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Comparar",
+          "href": "comparar.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Mis pedidos",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Mi cuenta",
+          "href": "cuenta.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Administrador",
+          "href": "admin.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Pagos",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Ayuda",
+          "href": "ayuda.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Visítanos",
+          "href": "index.html#ubicacion",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Inicio",
+          "href": "index.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Catálogo",
+          "href": "catalogo.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Promociones",
+          "href": "index.html#promos",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Pagos",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Ayuda",
+          "href": "ayuda.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Bienestar",
+          "href": "catalogo.html?category=bienestar",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Cuidado personal",
+          "href": "catalogo.html?category=cuidado",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Mamá y bebé",
+          "href": "catalogo.html?category=bebe",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "⌖ Puerto Quito",
+          "href": "index.html#cobertura",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Carrito",
+          "href": "checkout.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Pedido y entrega",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Seguir explorando →",
+          "href": "catalogo.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Explorar la demostración sin modificar este pedido →",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "",
+          "href": "index.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Mis pedidos",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Formas de pago",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Comparar productos",
+          "href": "comparar.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Cobertura de entrega",
+          "href": "index.html#cobertura",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Ayuda para comprar",
+          "href": "ayuda.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Privacidad y condiciones",
+          "href": "ayuda.html#privacidad",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Ver ubicación →",
+          "href": "index.html#ubicacion",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "+593 97 927 5988 ↗",
+          "href": "https://api.whatsapp.com/send?phone=593979275988",
+          "target": "_blank",
+          "rel": "noopener noreferrer"
+        },
+        {
+          "text": "Explorar catálogo",
+          "href": "catalogo.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Explorar pagos de prueba",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Pagar mi pedido",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Hablar con la farmacia ↗",
+          "href": "https://api.whatsapp.com/send?phone=593979275988",
+          "target": "_blank",
+          "rel": "noopener noreferrer"
+        },
+        {
+          "text": "Explorar pagos de prueba",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Pagar mi pedido",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Hablar con la farmacia ↗",
+          "href": "https://api.whatsapp.com/send?phone=593979275988",
+          "target": "_blank",
+          "rel": "noopener noreferrer"
+        }
+      ],
+      "layout": {
+        "viewport": 1440,
+        "scrollWidth": 1440,
+        "left": 671.546875,
+        "right": 1250,
+        "centerReachable": true,
+        "mascotOverlap": 0,
+        "rows": [
+          {
+            "left": 221,
+            "right": 586.546875,
+            "limitLeft": 190,
+            "limitRight": 617.546875
+          },
+          {
+            "left": 540.546875,
+            "right": 586.546875,
+            "limitLeft": 190,
+            "limitRight": 617.546875
+          },
+          {
+            "left": 221,
+            "right": 586.546875,
+            "limitLeft": 190,
+            "limitRight": 617.546875
+          },
+          {
+            "left": 547.546875,
+            "right": 586.546875,
+            "limitLeft": 190,
+            "limitRight": 617.546875
+          }
+        ]
+      },
+      "screenshot": "publicado-pagos-escritorio.png",
+      "anonymousAPI": {
+        "method": "GET",
+        "url": "https://farmacia-reina-del-cisne.onrender.com/api/pedidos/cd1614df-1c22-4a95-b3db-ac68fa71de8c/pago",
+        "status": 401,
+        "expected": true
+      },
+      "anonymousUI": {
+        "redirect": "https://farmacia-reyna-del-cisne-pruebas.pages.dev/cuenta?next=pagos.html%3Fpedido%3Dcd1614df-1c22-4a95-b3db-ac68fa71de8c",
+        "loginVisible": true,
+        "token": null
+      },
+      "checksExcludingConversationPass": true,
+      "contextualConversation": {
+        "question": "¿Cómo puedo pagar?",
+        "reply": "En Pagos puedes probar una demostración sin cobros. Para un pedido registrado, abre su opción de pago desde Mis pedidos. PayPhone estará disponible cuando la farmacia active su cuenta; Apple Pay requiere habilitación de una pasarela compatible. Nunca compartas los datos de tu tarjeta por chat.Explorar pagos de pruebaPagar mi pedidoHablar con la farmacia ↗",
+        "pass": true
+      }
+    },
+    {
+      "name": "movil",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "initialStorage": {
+        "cookies": [],
+        "origins": []
+      },
+      "apiRequests": [
+        {
+          "method": "GET",
+          "url": "https://farmacia-reina-del-cisne.onrender.com/api/pagos/configuracion"
+        }
+      ],
+      "httpErrors": [],
+      "requestFailures": [],
+      "jsErrors": [],
+      "consoleErrors": [],
+      "businessWriteAttempts": [],
+      "businessWritesSent": 0,
+      "outcomes": [
+        {
+          "selected": "aprobado",
+          "title": "Prueba aprobada",
+          "keyboard": true,
+          "focused": true
+        },
+        {
+          "selected": "rechazado",
+          "title": "Prueba rechazada",
+          "keyboard": true,
+          "focused": true
+        },
+        {
+          "selected": "cancelado",
+          "title": "Prueba cancelada",
+          "keyboard": true,
+          "focused": true
+        }
+      ],
+      "pass": true,
+      "document": {
+        "status": 200,
+        "url": "https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos"
+      },
+      "configuration": {
+        "status": 200,
+        "url": "https://farmacia-reina-del-cisne.onrender.com/api/pagos/configuracion",
+        "cors": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "data": {
+          "payphone": {
+            "disponible": false,
+            "entorno": null
+          },
+          "demostracion": true,
+          "moneda": "USD"
+        }
+      },
+      "mascot": {
+        "selected": "farmi",
+        "atlasStatus": 200,
+        "atlasURL": "https://farmacia-reyna-del-cisne-pruebas.pages.dev/assets/mascotas/sprites/farmi.png?v=6d8617c82d718f1975c1d71bc3f01f05ed4ab7d6149c189bdbb5e39a58a8e37a",
+        "availableStates": [
+          "idle",
+          "running-right",
+          "running-left",
+          "waving",
+          "jumping",
+          "failed",
+          "waiting",
+          "running",
+          "review"
+        ],
+        "firstCanvas": {
+          "opaquePixels": 10266,
+          "pixelHash": 2473016093,
+          "width": 192,
+          "height": 208
+        },
+        "animatedCanvas": {
+          "opaquePixels": 10544,
+          "pixelHash": 1676166219,
+          "width": 192,
+          "height": 208
+        },
+        "freePhrase": {
+          "question": "¿Cómo puedo pagar?",
+          "reply": "En Pagos puedes probar una demostración sin cobros. Para un pedido registrado, abre su opción de pago desde Mis pedidos. PayPhone estará disponible cuando la farmacia active su cuenta; Apple Pay requiere habilitación de una pasarela compatible. Nunca compartas los datos de tu tarjeta por chat.Explorar pagos de pruebaPagar mi pedidoHablar con la farmacia ↗"
+        },
+        "localGuidance": "En Pagos puedes probar una demostración sin cobros. Para un pedido registrado, abre su opción de pago desde Mis pedidos. PayPhone estará disponible cuando la farmacia active su cuenta; Apple Pay requiere habilitación de una pasarela compatible. Nunca compartas los datos de tu tarjeta por chat.Explorar pagos de pruebaPagar mi pedidoHablar con la farmacia ↗",
+        "links": [
+          {
+            "text": "Explorar catálogo",
+            "href": "catalogo.html",
+            "target": "",
+            "rel": ""
+          },
+          {
+            "text": "Explorar pagos de prueba",
+            "href": "pagos.html",
+            "target": "",
+            "rel": ""
+          },
+          {
+            "text": "Pagar mi pedido",
+            "href": "pedidos.html",
+            "target": "",
+            "rel": ""
+          },
+          {
+            "text": "Hablar con la farmacia ↗",
+            "href": "https://api.whatsapp.com/send?phone=593979275988",
+            "target": "_blank",
+            "rel": "noopener noreferrer"
+          },
+          {
+            "text": "Explorar pagos de prueba",
+            "href": "pagos.html",
+            "target": "",
+            "rel": ""
+          },
+          {
+            "text": "Pagar mi pedido",
+            "href": "pedidos.html",
+            "target": "",
+            "rel": ""
+          },
+          {
+            "text": "Hablar con la farmacia ↗",
+            "href": "https://api.whatsapp.com/send?phone=593979275988",
+            "target": "_blank",
+            "rel": "noopener noreferrer"
+          }
+        ]
+      },
+      "links": [
+        {
+          "text": "Saltar al contenido",
+          "href": "#contenido",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "",
+          "href": "index.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Mis pedidos",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Ingresar",
+          "href": "cuenta.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Admin",
+          "href": "admin.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Carrito 0",
+          "href": "checkout.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Inicio",
+          "href": "index.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Productos",
+          "href": "catalogo.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Promociones",
+          "href": "index.html#promos",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Comparar",
+          "href": "comparar.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Mis pedidos",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Mi cuenta",
+          "href": "cuenta.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Administrador",
+          "href": "admin.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Pagos",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Ayuda",
+          "href": "ayuda.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Visítanos",
+          "href": "index.html#ubicacion",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Inicio",
+          "href": "index.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Catálogo",
+          "href": "catalogo.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Promociones",
+          "href": "index.html#promos",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Pagos",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Ayuda",
+          "href": "ayuda.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Bienestar",
+          "href": "catalogo.html?category=bienestar",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Cuidado personal",
+          "href": "catalogo.html?category=cuidado",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Mamá y bebé",
+          "href": "catalogo.html?category=bebe",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "⌖ Puerto Quito",
+          "href": "index.html#cobertura",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Carrito",
+          "href": "checkout.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Pedido y entrega",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Seguir explorando →",
+          "href": "catalogo.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Explorar la demostración sin modificar este pedido →",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "",
+          "href": "index.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Mis pedidos",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Formas de pago",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Comparar productos",
+          "href": "comparar.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Cobertura de entrega",
+          "href": "index.html#cobertura",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Ayuda para comprar",
+          "href": "ayuda.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Privacidad y condiciones",
+          "href": "ayuda.html#privacidad",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Ver ubicación →",
+          "href": "index.html#ubicacion",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "+593 97 927 5988 ↗",
+          "href": "https://api.whatsapp.com/send?phone=593979275988",
+          "target": "_blank",
+          "rel": "noopener noreferrer"
+        },
+        {
+          "text": "Explorar catálogo",
+          "href": "catalogo.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Explorar pagos de prueba",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Pagar mi pedido",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Hablar con la farmacia ↗",
+          "href": "https://api.whatsapp.com/send?phone=593979275988",
+          "target": "_blank",
+          "rel": "noopener noreferrer"
+        },
+        {
+          "text": "Explorar pagos de prueba",
+          "href": "pagos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Pagar mi pedido",
+          "href": "pedidos.html",
+          "target": "",
+          "rel": ""
+        },
+        {
+          "text": "Hablar con la farmacia ↗",
+          "href": "https://api.whatsapp.com/send?phone=593979275988",
+          "target": "_blank",
+          "rel": "noopener noreferrer"
+        }
+      ],
+      "layout": {
+        "viewport": 375,
+        "scrollWidth": 375,
+        "left": 16,
+        "right": 359,
+        "centerReachable": true,
+        "mascotOverlap": 0,
+        "rows": [
+          {
+            "left": 40,
+            "right": 335,
+            "limitLeft": 16,
+            "limitRight": 359
+          },
+          {
+            "left": 289,
+            "right": 335,
+            "limitLeft": 16,
+            "limitRight": 359
+          },
+          {
+            "left": 40,
+            "right": 335,
+            "limitLeft": 16,
+            "limitRight": 359
+          },
+          {
+            "left": 296,
+            "right": 335,
+            "limitLeft": 16,
+            "limitRight": 359
+          }
+        ]
+      },
+      "layout320": {
+        "viewport": 320,
+        "scrollWidth": 320,
+        "left": 16,
+        "right": 304,
+        "centerReachable": true,
+        "mascotOverlap": 0,
+        "rows": [
+          {
+            "left": 40,
+            "right": 280,
+            "limitLeft": 16,
+            "limitRight": 304
+          },
+          {
+            "left": 234,
+            "right": 280,
+            "limitLeft": 16,
+            "limitRight": 304
+          },
+          {
+            "left": 40,
+            "right": 280,
+            "limitLeft": 16,
+            "limitRight": 304
+          },
+          {
+            "left": 241,
+            "right": 280,
+            "limitLeft": 16,
+            "limitRight": 304
+          }
+        ]
+      },
+      "screenshot": "publicado-pagos-movil.png",
+      "anonymousAPI": {
+        "method": "GET",
+        "url": "https://farmacia-reina-del-cisne.onrender.com/api/pedidos/cd1614df-1c22-4a95-b3db-ac68fa71de8c/pago",
+        "status": 401,
+        "expected": true
+      },
+      "anonymousUI": {
+        "redirect": "https://farmacia-reyna-del-cisne-pruebas.pages.dev/cuenta?next=pagos.html%3Fpedido%3Dcd1614df-1c22-4a95-b3db-ac68fa71de8c",
+        "loginVisible": true,
+        "token": null
+      },
+      "checksExcludingConversationPass": true,
+      "contextualConversation": {
+        "question": "¿Cómo puedo pagar?",
+        "reply": "En Pagos puedes probar una demostración sin cobros. Para un pedido registrado, abre su opción de pago desde Mis pedidos. PayPhone estará disponible cuando la farmacia active su cuenta; Apple Pay requiere habilitación de una pasarela compatible. Nunca compartas los datos de tu tarjeta por chat.Explorar pagos de pruebaPagar mi pedidoHablar con la farmacia ↗",
+        "pass": true
+      }
+    }
+  ],
+  "pass": true,
+  "completedAt": "2026-10-30T01:59:56.944Z"
+}

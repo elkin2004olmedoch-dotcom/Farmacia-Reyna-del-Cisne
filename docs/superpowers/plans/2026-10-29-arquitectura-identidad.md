@@ -32,9 +32,9 @@
 - [x] **Carga por pantalla** — `frontend/controllers/app.js`, `tests/reto2/performance.spec.cjs`: observar una regresión de descarga de módulos ajenos en la portada; usar importación dinámica mediante mapa cerrado; comprobar catálogo, sesiones y roles. Comparar peticiones y bytes con el mismo perfil. La comprobación entre orígenes exigió una barrera nativa de controles hasta completar la preparación.
 - [x] **Lecturas y operación** — modelos de productos/promociones/pedidos/proveedores, `server/app.cjs`, `server/index.cjs` y pruebas focales: reproducir lotes innecesarios, empates y cuota de health; corregir consultas y ciclo de vida con pruebas. No modificar reserva de existencias.
 - [x] **Identidad editorial** — `scripts/templates/home.cjs`, `scripts/build-frontend.cjs`, `frontend/assets/shop.css` y HTML generado: portada propia con fotografía real; tipografía, espaciado y tarjetas consistentes. Reutilizar pruebas de accesibilidad y recorridos; tomar capturas de escritorio y móvil.
-- [ ] **Integración continua:** conservar estas comprobaciones en `.github/workflows/verify-mvc.yml`, con PostgreSQL y cuentas sintéticas, sin secretos comerciales ni publicación automática. Actualizar la dependencia existente MailKit para corregir los avisos confirmados.
-- [ ] **Integración:** ejecutar Node/históricas, PostgreSQL temporal, navegador completo y Pages. Revisar diff, dependencias y límites. Corregir fallos antes de publicar.
-- [ ] **Entrega:** actualizar arquitectura y resultados reales, sincronizar la rama de desarrollo existente, publicar en los destinos verificados y comprobar recursos y barreras públicas sin datos válidos.
+- [x] **Integración continua:** conservar estas comprobaciones en `.github/workflows/verify-mvc.yml`, con PostgreSQL y cuentas sintéticas, sin secretos comerciales ni publicación automática. Actualizar la dependencia existente MailKit para corregir los avisos confirmados. Ambos workflows aprobaron en GitHub.
+- [x] **Integración:** ejecutar Node/históricas, PostgreSQL temporal, navegador completo y Pages. Revisar diff, dependencias y límites. Corregir fallos antes de publicar. Resultado: 550/550, sin omisiones.
+- [x] **Entrega:** actualizar arquitectura y resultados reales, sincronizar la rama de desarrollo existente, publicar en los destinos verificados y comprobar recursos y barreras públicas sin datos válidos. PR #11 integrado, código `f2ab405` publicado y 151 comprobaciones públicas aprobadas; cuatro perfiles públicos de navegador sin escrituras comerciales.
 
 ## Registro de decisiones
 
