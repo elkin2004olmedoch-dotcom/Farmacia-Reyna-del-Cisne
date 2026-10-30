@@ -1,8 +1,10 @@
 # Publicar la farmacia completa: Render y Supabase
 
-Estado al 11 de octubre de 2026: **la [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) está activa en Render Free y utiliza PostgreSQL/Storage reales de Supabase**. El administrador, 18 productos, dos promociones y una foto fueron trasladados conservando registros y hash de la imagen. Se comprobaron la API pública, los recorridos de ambos roles y la persistencia después de reiniciar Render. Los datos sintéticos fueron retirados; los originales se conservaron. `data/deployment.json` apunta al origen real y Pages abre esa aplicación.
+Comprobación histórica del 11 de octubre de 2026: **la [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) quedó activa en Render Free con PostgreSQL/Storage reales de Supabase**. El administrador, 18 productos, dos promociones y una foto fueron trasladados conservando registros y hash de la imagen. Se comprobaron la API pública, los recorridos de ambos roles y la persistencia después de reiniciar Render. Los datos sintéticos fueron retirados; los originales se conservaron. `data/deployment.json` conserva el origen de Render.
 
-Clientes y administrador utilizan [el mismo enlace público](https://farmacia-reina-del-cisne.onrender.com/). Abre [Ingresar](https://farmacia-reina-del-cisne.onrender.com/cuenta.html): la cuenta administrativa conservada llega al dashboard; los clientes usan “Crear cuenta” y consultan sus propios pedidos. Edita productos, fotos y promociones desde el panel en línea para compartirlos con todos. GitHub Pages sirve como entrada hacia Render, porque no ejecuta Express ni comparte la SQLite del equipo. Las cuentas de demostración del antiguo navegador son distintas de las cuentas MVC.
+Último estado documentado, del 21 de octubre de 2026: [Cloudflare Pages de prueba](https://farmacia-reyna-del-cisne-pruebas.pages.dev/) sirve el frontend MVC `0672e41` y consulta la API existente de Render, que conserva `75aee3e` y Auto-Deploy Off. GitHub Pages publica la tienda estática histórica independiente, sin redirección automática a Render. Esta actualización documental no verifica el estado remoto actual; consulta [la configuración y reversión de Pages y Render](DEPLOY_CLOUDFLARE.md).
+
+Clientes y administrador pueden utilizar [el mismo enlace de Render](https://farmacia-reina-del-cisne.onrender.com/). Abre [Ingresar](https://farmacia-reina-del-cisne.onrender.com/cuenta.html): la cuenta administrativa conservada llega al dashboard; los clientes usan “Crear cuenta” y consultan sus propios pedidos. Edita productos, fotos y promociones desde el panel en línea para compartirlos con todos. GitHub Pages no ejecuta Express ni comparte cuentas, pedidos o carrito con la aplicación MVC. Las cuentas de demostración del antiguo navegador son distintas de las cuentas MVC.
 
 ## 1. Crear el proyecto gratuito de Supabase
 
@@ -15,7 +17,7 @@ Las migraciones PostgreSQL habilitan RLS en todas las tablas de la farmacia y en
 
 ## 2. Crear el servicio gratuito de Render
 
-1. Entra a [Render](https://dashboard.render.com/). Puedes crear un **Web Service** usando la URL pública de este repositorio, rama `main`, región Virginia, build `npm ci --include=dev && npm run setup:production`, inicio `npm start` y health check `/api/salud`; importa las variables mediante el formulario privado. También está disponible el **Blueprint** `render.yaml`. Comprueba que el servicio indique **Free ($0/mes)**. No crees base de datos ni disco de pago en Render. En la cuenta utilizada, desplegar Free abrió el formulario **Add Card** con una autorización temporal de USD 1; ese paso lo completa el titular. [Verificación de tarjeta](https://render.com/pricing).
+1. Entra a [Render](https://dashboard.render.com/). Puedes crear un **Web Service** usando la URL pública de este repositorio, rama `main`, región Virginia, build `npm ci --include=dev && npm run setup:production`, inicio `npm start` y health check `/api/salud`; importa las variables mediante el formulario privado. También está disponible el **Blueprint histórico** `render.yaml`, con las diferencias indicadas a continuación. Comprueba que el servicio indique **Free ($0/mes)**. No crees base de datos ni disco de pago en Render. En la cuenta utilizada, desplegar Free abrió el formulario **Add Card** con una autorización temporal de USD 1; ese paso lo completa el titular. [Verificación de tarjeta](https://render.com/pricing).
 2. Configura los valores privados solicitados:
 
 | Variable | Valor |
@@ -27,6 +29,8 @@ Las migraciones PostgreSQL habilitan RLS en todas las tablas de la farmacia y en
 | `ADMIN_PASSWORD` | Contraseña privada: mínimo 10 caracteres, letra y número, máximo 72 bytes |
 
 `JWT_SECRET` se genera en Render con Blueprint, o se prepara aleatoriamente y se importa de forma privada para un Web Service manual. El blueprint fija `NODE_ENV=production`, `HOST=0.0.0.0`, `IMAGE_STORAGE=supabase`, bucket `farmaciaproductos` y `SKIP_INITIAL_SEED=true`. El `PORT` y `RENDER_EXTERNAL_URL` los asigna Render. CORS usa el origen HTTPS del servicio por defecto; si necesitas otros clientes, configura `CORS_ORIGIN` con orígenes HTTPS exactos separados por comas. Si ya usas una clave heredada, deja `SUPABASE_SECRET_KEY` vacía y agrega `SUPABASE_SERVICE_ROLE_KEY` como secreto privado en el servicio.
+
+`render.yaml` no reproduce el panel documentado el 21 de octubre: configura `autoDeployTrigger: commit` y CORS solo para Render, mientras el servicio conserva Auto-Deploy Off y los orígenes exactos de Render y Pages de prueba. No reapliques el Blueprint al servicio existente como una actualización rutinaria; revisa [las diferencias y el procedimiento controlado](DEPLOY_CLOUDFLARE.md#render-existente).
 
 3. Ejecuta el despliegue. La compilación genera el cliente Prisma PostgreSQL independiente y aplica las migraciones. El seed se omite inicialmente para poder trasladar tu base local a una base vacía. Si vas a importar datos, conserva el enlace sin compartir hasta terminar el traslado: registrar usuarios antes haría que el destino ya no estuviera vacío y la importación se rechazaría para proteger esos registros.
 
@@ -55,18 +59,21 @@ El traslado conserva IDs, hashes de contraseña, fechas, catálogo, promociones,
 
 Las cuentas de `localStorage` de la antigua demostración estática no se importan: no corresponden a usuarios MVC. Para usar los datos compartidos, abre el enlace público tanto como administrador como cliente. Editar una SQLite local independiente no modifica la base en internet.
 
-## 4. Comprobar y conectar el enlace de GitHub
+## 4. Comprobaciones y configuración histórica opcional de GitHub
 
-1. Comprueba `/api/salud`, inicia sesión con una cuenta importada, entra al panel administrador y verifica los datos.
-2. Cambia una imagen/promoción desde ese panel y abre la tienda pública en otro navegador. Registra un usuario y un pedido, verifica el stock y las transiciones de estado.
-3. Reinicia o redespliega Render y comprueba que usuarios, fotos y pedidos se conserven en Supabase.
-4. Cuando estas comprobaciones pasen, configura la URL real:
+La instalación del 11 de octubre incluyó estas comprobaciones, conservadas como antecedente:
+
+1. Se comprobó `/api/salud`, la sesión con una cuenta importada y los datos del panel administrador.
+2. Se comprobaron imágenes/promociones, registro, pedidos, stock y transiciones de estado.
+3. Se comprobó la persistencia de usuarios, fotos y pedidos después del reinicio de Render.
+
+El siguiente comando pertenece a la configuración histórica opcional del enlace hacia Render; **no debe ejecutarse para la publicación actual**:
 
 ```sh
 node scripts/configure-public-site.cjs https://TU-SERVICIO.onrender.com
 ```
 
-En esta instalación el origen configurado es `https://farmacia-reina-del-cisne.onrender.com`. Publica los cambios de `data/deployment.json` y `service-worker.js` en GitHub. Las ocho páginas de Pages abren la misma ruta de la aplicación completa, conservando identificador de producto, consulta y sección. La API, el navegador y el reinicio del servicio ya se comprobaron antes de activar esta configuración.
+El script modifica `data/deployment.json` y la versión de caché de `service-worker.js`; no activa por sí solo una redirección. Los HTML históricos actuales no cargan `js/live-site.js` y conservan la tienda estática. La publicación MVC de prueba en Cloudflare Pages utiliza `scripts/build-pages.cjs` y su configuración pública de API e imágenes, según [la guía vigente documentada](DEPLOY_CLOUDFLARE.md); no requiere ejecutar `configure-public-site.cjs` ni sustituir la tienda de GitHub Pages.
 
 ## Límites y respaldos
 

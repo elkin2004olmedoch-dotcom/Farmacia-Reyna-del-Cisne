@@ -48,7 +48,12 @@ function snapshot(order,buyer,config) {
     if(base+tax!==total||Math.abs(Math.round(base*d.ivaPorcentaje/100)-tax)>1)throw new AppError(409,'INVALID_TAX_SNAPSHOT','Los importes fiscales del pedido no cuadran. Requiere conciliación contable.');
     return {codigo:d.productoId.slice(0,25),descripcion:d.nombreProducto,cantidad:d.cantidad,precioUnitarioSinIva:(originalBase/100/d.cantidad).toFixed(6),descuento:originalBase-base,base,iva:tax,total,tarifa:d.ivaPorcentaje};
   });
-  if(lines.reduce((sum,l)=>sum+l.base,0)!==cents(order.baseImponible)||lines.reduce((sum,l)=>sum+l.iva,0)!==cents(order.ivaMonto)||lines.reduce((sum,l)=>sum+l.total,0)!==cents(order.total))throw new AppError(409,'INVALID_TAX_SNAPSHOT','Los totales del pedido no cuadran con sus productos.');
+  if(order.envioIvaPorcentaje!=null || order.costoEnvioCentavos>0) {
+    const rate=order.envioIvaPorcentaje,base=cents(order.envioBaseImponible),tax=cents(order.envioIvaMonto),total=order.costoEnvioCentavos;
+    if(!Object.hasOwn(taxCodes,rate)||order.envioBaseImponible==null||order.envioIvaMonto==null||!Number.isSafeInteger(total)||base+tax!==total||Math.abs(Math.round(base*rate/100)-tax)>1)throw new AppError(409,'INVALID_TAX_SNAPSHOT','Los importes fiscales del envío no cuadran.');
+    lines.push({codigo:'SERV-ENVIO',descripcion:'Servicio de entrega a domicilio',cantidad:1,precioUnitarioSinIva:(base/100).toFixed(6),descuento:0,base,iva:tax,total,tarifa:rate});
+  }
+  if(lines.reduce((sum,l)=>sum+l.base,0)!==cents(order.baseImponible)||lines.reduce((sum,l)=>sum+l.iva,0)!==cents(order.ivaMonto)||lines.reduce((sum,l)=>sum+l.total,0)!==cents(order.total))throw new AppError(409,'INVALID_TAX_SNAPSHOT','Los totales del pedido no cuadran con sus productos y envío.');
   return {pedidoId:order.id,comprador:buyer,emisor:config,lineas:lines,total:cents(order.total),base:cents(order.baseImponible),iva:cents(order.ivaMonto),descuento:lines.reduce((sum,l)=>sum+l.descuento,0)};
 }
 function ecuadorDate(date=new Date()) {const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'America/Guayaquil',day:'2-digit',month:'2-digit',year:'numeric'}).formatToParts(date).map(p=>[p.type,p.value]));return {clave:parts.day+parts.month+parts.year,xml:`${parts.day}/${parts.month}/${parts.year}`};}

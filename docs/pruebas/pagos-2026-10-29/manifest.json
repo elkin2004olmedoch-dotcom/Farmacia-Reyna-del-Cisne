@@ -1,0 +1,53 @@
+{
+  "images": [
+    {
+      "file": "aprobacion-demostracion-escritorio.png",
+      "origen": "API localhost y SQLite temporal con datos sintéticos",
+      "bytes": 83835,
+      "sha256": "8e536b80862d5192d768f47583fb69fc2b9a81f9ddea84f0a6f882e368cbe365"
+    },
+    {
+      "file": "aprobacion-demostracion-movil.png",
+      "origen": "API localhost y SQLite temporal con datos sintéticos",
+      "bytes": 68734,
+      "sha256": "d4e36d255ad8bf4ccaab3110ffa16eb86de6bc58b9415ebe8472c6449de0755d"
+    },
+    {
+      "file": "demostracion-escritorio.png",
+      "origen": "API localhost y SQLite temporal con datos sintéticos",
+      "bytes": 97974,
+      "sha256": "312e893ada74465e2de2f766fa14b28addd5d49998fe220237466f67ec47fbf8"
+    },
+    {
+      "file": "demostracion-movil.png",
+      "origen": "API localhost y SQLite temporal con datos sintéticos",
+      "bytes": 80388,
+      "sha256": "8fb82f7d27bd22b5236fa7688297b59c0f84c7c023c375c09331ca92ba0c27e9"
+    },
+    {
+      "file": "pedido-escritorio.png",
+      "origen": "API localhost y SQLite temporal con datos sintéticos",
+      "bytes": 89509,
+      "sha256": "8037fadb7589ff4a4fc379f0e16c1238b57103c5378ea48a6075eafe72c4950b"
+    },
+    {
+      "file": "pedido-movil.png",
+      "origen": "API localhost y SQLite temporal con datos sintéticos",
+      "bytes": 73939,
+      "sha256": "1951ddf77766dcdd80e231a3e384ffe2331173ec3558990f27192e4230ac046d"
+    },
+    {
+      "file": "publicado-escritorio.png",
+      "origen": "Pages público anónimo, demostración sin escrituras",
+      "bytes": 98315,
+      "sha256": "12b7e08e66b4be393040f3de9920b690d3dc6c970d83d050018dd3db516109fe"
+    },
+    {
+      "file": "publicado-movil.png",
+      "origen": "Pages público anónimo, demostración sin escrituras",
+      "bytes": 80707,
+      "sha256": "484a6875d063cd2c6486b3bfd82e93871a0fe20e6b452f958bb6161ff5724fa1"
+    }
+  ],
+  "publicEvidenceSha256": "a62a5175655e31dae4647a221fcb70a3e6113e9a15bb3a8a249a66da9260f639"
+}

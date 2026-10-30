@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const {EventEmitter} = require('node:events');
 const {productionEnvironment, runSetup} = require('../../scripts/setup-production.cjs');
 
 // These values are synthetic. No test connects to PostgreSQL or reads .env.
@@ -153,13 +154,14 @@ test('precios, cliente y seed usan PostgreSQL aunque el cliente SQLite predeterm
     // against the real isolated database in fiscal-inventory.test.cjs.
     if(requested==='./fiscal.cjs')return {inclusiveTax:()=>({})};
     if(requested==='./inventario.cjs')return {sellableStock:()=>0};
+    if(requested==='../../frontend/models/pharmacy-policy.js')return require('../../frontend/models/pharmacy-policy.js');
     return stub;
   }};
   vm.runInNewContext(fs.readFileSync(path.join(directory, 'prices.cjs'), 'utf8'), prices);
   const discounted = prices.module.exports.effectivePrice({id: 'p', precio: '4.50', activo: true}, [{id: 'promo', activa: true, vistaPrevia: false, descuentoPorcentaje: 20, orden: 0}]);
   assert.equal(discounted.precio.toFixed(2), '3.60');
   assert.equal(discounted.precioOriginal.toFixed(2), '4.50');
-  const db = {module: {exports: {}}, require: requested => requested === './prisma-client.cjs' ? selected : stub};
+  const db = {module: {exports: {}}, require: requested => requested === '../diagnostics.cjs' ? require('../../server/diagnostics.cjs') : requested === './prisma-client.cjs' ? selected : stub};
   vm.runInNewContext(fs.readFileSync(path.join(directory, 'db.cjs'), 'utf8'), db);
   assert.equal(db.module.exports.provider, 'postgresql');
   let isolation;
@@ -194,23 +196,51 @@ test('precios, cliente y seed usan PostgreSQL aunque el cliente SQLite predeterm
 test('arranque remoto omite respaldos SQLite y el arranque local los conserva', async () => {
   const source = fs.readFileSync(path.resolve(__dirname, '../../server/index.cjs'), 'utf8');
   for (const [url, expectedBackups] of [['file:./local.db', 1], ['postgresql://test.invalid/database', 0]]) {
-    let backups = 0, listens = 0;
+    let backupImports = 0, backups = 0, stopped = 0, disconnected = 0, listens = 0, deliveryImports = 0, purges = 0;
+    const signals = new Map(), exits = [], errors = [], timers = [];
+    const server = new EventEmitter();
+    server.listen = function() {listens++; queueMicrotask(() => this.emit('listening')); return this;};
+    server.close = function(callback) {queueMicrotask(() => {callback?.(); this.emit('close');}); return this;};
+    server.closeAllConnections = () => {};
+    const schedule = (callback, delay) => {const timer = {callback, delay, detached: false, cleared: false, unref() {this.detached = true;}}; timers.push(timer); return timer;};
     const context = {
-      process: {env: {DATABASE_URL: url}, on() {}},
-      console: {info() {}, error() {}},
+      process: {env: {DATABASE_URL: url}, on: (signal, callback) => signals.set(signal, callback), exit: code => exits.push(code)},
+      console: {info() {}, error: message => errors.push(message)},
+      setTimeout: schedule, setInterval: schedule,
+      clearTimeout: timer => {if(timer)timer.cleared = true;}, clearInterval: timer => {if(timer)timer.cleared = true;},
       require: requested => {
+        if (requested === './diagnostics.cjs') return require('../../server/diagnostics.cjs');
         if (requested === 'node:fs') return {};
-        if (requested === 'node:http' || requested === 'node:https') return {createServer: () => ({listen() {listens++;}, close() {}})};
+        if (requested === 'node:http' || requested === 'node:https') return {createServer: () => server};
+        if (requested === './lifecycle.cjs') return require('../../server/lifecycle.cjs');
         if (requested === './config.cjs') return () => ({port: 3000, host: '0.0.0.0'});
         if (requested === './app.cjs') return () => ({});
-        if (requested === './models/backups.cjs') return {startAutomaticBackups: async () => {backups++; return {stop: async () => {}};}};
-        if (requested === './models/db.cjs') return {$disconnect: async () => {}};
-        throw new Error('Unexpected test dependency');
+        if (requested === './models/backups.cjs') {backupImports++; return {startAutomaticBackups: async () => {backups++; return {stop: async () => {stopped++;}};}};}
+        if (requested === './models/db.cjs') return {$disconnect: async () => {disconnected++;}};
+        if (requested === './models/entregas.cjs') {deliveryImports++; return {purgeExpiredLocations: async () => {purges++;}};}
+        throw new Error('Unexpected test dependency: ' + requested);
       }
     };
     vm.runInNewContext(source, context);
     await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(errors, []);
+    assert.deepEqual(exits, []);
+    assert.equal(backupImports, expectedBackups);
     assert.equal(backups, expectedBackups);
     assert.equal(listens, 1);
+    assert.equal(deliveryImports, 0, 'la limpieza no debe consultar la base durante el arranque HTTP');
+    assert.equal(purges, 0);
+    assert.deepEqual(timers.map(timer => timer.delay), [1000, 60000]);
+    assert.ok(timers.every(timer => timer.detached));
+    timers[0].callback();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(purges, 1);
+    signals.get('SIGTERM')();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(stopped, expectedBackups);
+    assert.equal(disconnected, 1);
+    assert.ok(timers.every(timer => timer.cleared));
+    assert.deepEqual(exits, [0]);
+    assert.deepEqual(errors, []);
   }
 });

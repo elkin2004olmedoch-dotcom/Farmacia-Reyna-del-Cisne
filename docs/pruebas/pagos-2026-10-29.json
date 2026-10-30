@@ -1,0 +1,144 @@
+{
+  "fecha": "2026-10-29",
+  "entorno": "Pruebas locales con datos sintéticos; PayPhone sustituido por respuestas controladas.",
+  "suites": [
+    {
+      "comando": "npm test",
+      "pasaron": 258,
+      "fallaron": 0,
+      "omitidas": 0,
+      "postgresTemporalReal": true
+    },
+    {
+      "comando": "npm run test:reto1",
+      "pasaron": 38,
+      "fallaron": 0,
+      "omitidas": 0
+    },
+    {
+      "comando": "npx playwright test --config tests/reto2/pages.config.cjs",
+      "pasaron": 22,
+      "fallaron": 0,
+      "omitidas": 0
+    },
+    {
+      "comando": "npm run test:browser",
+      "pasaron": 112,
+      "fallaron": 0,
+      "omitidas": 0,
+      "flaky": 0,
+      "nota": "Suite recogida antes de añadir payment-summary.spec.cjs; incluye 30 casos de pagos."
+    },
+    {
+      "comando": "npx playwright test --config <config temporal que reutiliza el servidor> (payment-summary.spec.cjs)",
+      "pasaron": 2,
+      "fallaron": 0,
+      "omitidas": 0,
+      "nota": "Regresión RED/GREEN posterior para nombres sin espacios a 320/375 px, ambos perfiles."
+    }
+  ],
+  "totalLocal": 432,
+  "audit": {
+    "vulnerabilidades": 0,
+    "dependenciasNuevas": 0
+  },
+  "prisma": "6.19.3",
+  "pages": {
+    "archivos": 107,
+    "bytes": 12716584,
+    "maxFileBytes": 2650904
+  },
+  "supabase": {
+    "migration": "202610290008_payments",
+    "aplicada": true,
+    "tablasPrevias": 18,
+    "datosPreviosConservados": true,
+    "conteos": {
+      "Producto": 18,
+      "Usuario": 3,
+      "Pedido": 2,
+      "PedidoDetalle": 6,
+      "Promocion": 2,
+      "PedidoEstado": 5,
+      "Semilla": 1,
+      "ConfiguracionFiscal": 1,
+      "Proveedor": 0,
+      "Lote": 0,
+      "MovimientoInventario": 2,
+      "PedidoDetalleLote": 0,
+      "ConfiguracionEmisor": 0,
+      "SecuenciaFactura": 0,
+      "FacturaPedido": 0,
+      "ZonaEntrega": 1,
+      "ZonaEntregaTarifa": 1,
+      "Entrega": 0
+    },
+    "pago": {
+      "count": 0,
+      "rls": true,
+      "anon_access": false,
+      "authenticated_access": false
+    },
+    "respaldoPrivadoVerificado": true
+  },
+  "limites": [
+    "Sin cuenta ni credenciales PayPhone; ningún cobro ni sandbox real verificado.",
+    "Demostración no recoge tarjetas ni escribe pedidos, pagos o inventario.",
+    "Apple Pay no disponible hasta habilitación de una pasarela compatible.",
+    "Una intención por pedido, sin reinicio, reembolso o conciliación administrativa automática.",
+    "Pagos y dispensación/entrega/SRI tienen estados independientes."
+  ],
+  "incidencias": [
+    "Fixture PostgreSQL de retiro mantenía zona de envío: corregido el fixture y repetida toda la suite Node con 258 aprobadas.",
+    "Revisión corrigió sesión pendiente/caducada, actualización del intento, cambio de entorno, referencia de origen y nombre largo.",
+    "Escaneo inicial coincidió con la URL SQLite local no secreta de ejemplo; ninguna credencial real encontrada.",
+    "La primera comprobación pública detectó que build-pages no incluía pagos.html en su lista: corregida la lista, añadida igualdad entre pantallas generadas/empaquetadas y regresión de pagos entre orígenes.",
+    "Un sondeo adicional comenzó durante el despliegue Pages y observó 404 transitorio; la repetición posterior al estado success aprobó 149/149.",
+    "La revisión pública detectó que el vocabulario reconocía pagos pero no pagar: corregido con RED/GREEN y repetición final de conversación pública."
+  ],
+  "publicacion": {
+    "estado": "publicado y verificado",
+    "backendCodigo": "f373a591d1dd51a7ca760d68defebca22bbe34fd",
+    "frontendCodigo": "f373a591d1dd51a7ca760d68defebca22bbe34fd",
+    "render": {
+      "deploy": "dep-dbhkno8473hc73a8lke0",
+      "estado": "Live",
+      "duracionSegundos": 59.6
+    },
+    "cloudflare": {
+      "deploy": "14b46c3c-18b1-4b41-9339-e886828c666e",
+      "estado": "success"
+    },
+    "url": "https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos",
+    "comprobacionesPublicas": {
+      "pasaron": 149,
+      "fallaron": 0,
+      "reintentosTransporte": 0
+    },
+    "recorridosPublicos": {
+      "perfiles": 2,
+      "pasaron": 2,
+      "escriturasComerciales": 0,
+      "erroresInesperados": 0,
+      "conversacionPagar": true
+    },
+    "mainFusionado": false
+  },
+  "verificacionesFocales": [
+    {
+      "comando": "node --test tests/reto2/pages-build.test.cjs tests/reto2/resources.test.cjs",
+      "pasaron": 8,
+      "nota": "Posterior al arreglo de empaquetado; no se agrega al total porque repite casos de la suite Node."
+    },
+    {
+      "comando": "npm run test:reto1",
+      "pasaron": 38,
+      "nota": "Repetida después de añadir pagar al vocabulario; no duplica el total."
+    },
+    {
+      "comando": "npx playwright test --config tests/reto2/playwright.config.cjs tests/reto2/payments.spec.cjs --grep \"la página mantiene teclado\"",
+      "pasaron": 2,
+      "nota": "Repetición posterior de ambos perfiles con la frase exacta; no duplica el total."
+    }
+  ]
+}

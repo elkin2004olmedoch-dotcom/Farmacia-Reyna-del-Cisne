@@ -1,0 +1,497 @@
+{
+  "date": "2026-10-21T17:22:58.759Z",
+  "scope": "Local visual QA only; no timing benchmark, API, database, environment file or public-server traffic.",
+  "output": "%TEMP%\\farmacia-lcp-visual-sjBgD0",
+  "roots": {
+    "baseline": "%TEMP%\\farmacia-lcp-86804e7-7nJaWe\\frontend",
+    "candidate": "%WORKSPACE%\\frontend"
+  },
+  "method": {
+    "browser": "Chrome headless",
+    "viewports": [
+      {
+        "width": 1440,
+        "height": 1000
+      },
+      {
+        "width": 768,
+        "height": 1000
+      },
+      {
+        "width": 375,
+        "height": 900
+      }
+    ],
+    "deviceScaleFactor": 1,
+    "serviceWorkers": "blocked",
+    "network": "Only the two exact temporary 127.0.0.1 static origins; API paths, non-read methods and every other origin aborted.",
+    "screenshot": "business-photo locator, animations disabled; fonts.ready and image.decode awaited"
+  },
+  "images": {
+    "baseline": {
+      "bytes": 1647804,
+      "sha256": "ed21c9a79c08aceadedae9984c453a6b784e43f74ee1be4680525cd8d20ad4d8",
+      "pngSha256": "c3e431ff314c110aa28b73b105854e589bf223c3f54c7b2188e5f09633bd18c8"
+    },
+    "candidate": {
+      "bytes": 391110,
+      "sha256": "3ad5cde310565c5c7de247af74ad987f97a7197402e7ae65c02ac2fea162e8ae",
+      "pngSha256": "c3e431ff314c110aa28b73b105854e589bf223c3f54c7b2188e5f09633bd18c8"
+    }
+  },
+  "samples": [
+    {
+      "variant": "baseline",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "mainStatus": 200,
+      "figure": {
+        "x": 738.498046875,
+        "y": 138.64691162109375,
+        "width": 625.50390625,
+        "height": 474.7061767578125
+      },
+      "image": {
+        "x": 748.1723022460938,
+        "y": 146.78530883789062,
+        "width": 607.6912231445312,
+        "height": 370.4427795410156
+      },
+      "imageCss": {
+        "width": "601.5px",
+        "height": "360px",
+        "objectFit": "cover",
+        "objectPosition": "50% 50%",
+        "display": "block"
+      },
+      "figureCss": {
+        "width": "617.5px",
+        "height": "464px",
+        "border": "8px solid rgb(255, 250, 241)",
+        "borderRadius": "22px",
+        "transform": "matrix(0.999848, 0.0174524, -0.0174524, 0.999848, 0, 0)"
+      },
+      "naturalWidth": 1672,
+      "naturalHeight": 941,
+      "src": "assets/images/farmacia-fachada-reina.webp",
+      "fetchpriority": "high",
+      "alt": "Fachada de Farmacia Reina del Cisne con su letrero y entrada",
+      "fontStatus": "loaded",
+      "scrollX": 0,
+      "scrollY": 0,
+      "documentWidth": 1440,
+      "viewportWidth": 1440,
+      "screenshot": "%TEMP%\\farmacia-lcp-visual-sjBgD0\\1440-baseline.png",
+      "screenshotSha256": "56ef85444b71431ce8fe67f5793fb7a52258a626f353aa34ef614f335c4c6234",
+      "blocked": [
+        {
+          "origin": "https://www.google.com",
+          "path": "/maps",
+          "method": "GET",
+          "reason": "Non-local-origin"
+        },
+        {
+          "origin": "http://127.0.0.1:65254",
+          "path": "/api/productos",
+          "method": "GET",
+          "reason": "API"
+        },
+        {
+          "origin": "http://127.0.0.1:65254",
+          "path": "/api/promociones",
+          "method": "GET",
+          "reason": "API"
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "variant": "candidate",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "mainStatus": 200,
+      "figure": {
+        "x": 738.498046875,
+        "y": 138.64691162109375,
+        "width": 625.50390625,
+        "height": 474.7061767578125
+      },
+      "image": {
+        "x": 748.1723022460938,
+        "y": 146.78530883789062,
+        "width": 607.6912231445312,
+        "height": 370.4427795410156
+      },
+      "imageCss": {
+        "width": "601.5px",
+        "height": "360px",
+        "objectFit": "cover",
+        "objectPosition": "50% 50%",
+        "display": "block"
+      },
+      "figureCss": {
+        "width": "617.5px",
+        "height": "464px",
+        "border": "8px solid rgb(255, 250, 241)",
+        "borderRadius": "22px",
+        "transform": "matrix(0.999848, 0.0174524, -0.0174524, 0.999848, 0, 0)"
+      },
+      "naturalWidth": 1672,
+      "naturalHeight": 941,
+      "src": "assets/images/farmacia-fachada-reina.webp",
+      "fetchpriority": "high",
+      "alt": "Fachada de Farmacia Reina del Cisne con su letrero y entrada",
+      "fontStatus": "loaded",
+      "scrollX": 0,
+      "scrollY": 0,
+      "documentWidth": 1440,
+      "viewportWidth": 1440,
+      "screenshot": "%TEMP%\\farmacia-lcp-visual-sjBgD0\\1440-candidate.png",
+      "screenshotSha256": "86f1f605d0eff0b8e5436f3dffd9f241fe2da83b6836da6444aacd27ca05c23a",
+      "blocked": [
+        {
+          "origin": "https://www.google.com",
+          "path": "/maps",
+          "method": "GET",
+          "reason": "Non-local-origin"
+        },
+        {
+          "origin": "http://127.0.0.1:65255",
+          "path": "/api/productos",
+          "method": "GET",
+          "reason": "API"
+        },
+        {
+          "origin": "http://127.0.0.1:65255",
+          "path": "/api/promociones",
+          "method": "GET",
+          "reason": "API"
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "variant": "baseline",
+      "viewport": {
+        "width": 768,
+        "height": 1000
+      },
+      "mainStatus": 200,
+      "figure": {
+        "x": 395.1255798339844,
+        "y": 185.0322265625,
+        "width": 351.7488098144531,
+        "height": 452.935546875
+      },
+      "image": {
+        "x": 405.375732421875,
+        "y": 193.17062377929688,
+        "width": 333.36029052734375,
+        "height": 315.67718505859375
+      },
+      "imageCss": {
+        "width": "328px",
+        "height": "310px",
+        "objectFit": "cover",
+        "objectPosition": "50% 50%",
+        "display": "block"
+      },
+      "figureCss": {
+        "width": "344px",
+        "height": "447px",
+        "border": "8px solid rgb(255, 250, 241)",
+        "borderRadius": "22px",
+        "transform": "matrix(0.999848, 0.0174524, -0.0174524, 0.999848, 0, 0)"
+      },
+      "naturalWidth": 1672,
+      "naturalHeight": 941,
+      "src": "assets/images/farmacia-fachada-reina.webp",
+      "fetchpriority": "high",
+      "alt": "Fachada de Farmacia Reina del Cisne con su letrero y entrada",
+      "fontStatus": "loaded",
+      "scrollX": 0,
+      "scrollY": 0,
+      "documentWidth": 768,
+      "viewportWidth": 768,
+      "screenshot": "%TEMP%\\farmacia-lcp-visual-sjBgD0\\768-baseline.png",
+      "screenshotSha256": "59452a9a67db34b57871328be15fb03f96a39ebd37708c1f13032159eac76317",
+      "blocked": [
+        {
+          "origin": "http://127.0.0.1:65254",
+          "path": "/api/productos",
+          "method": "GET",
+          "reason": "API"
+        },
+        {
+          "origin": "http://127.0.0.1:65254",
+          "path": "/api/promociones",
+          "method": "GET",
+          "reason": "API"
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "variant": "candidate",
+      "viewport": {
+        "width": 768,
+        "height": 1000
+      },
+      "mainStatus": 200,
+      "figure": {
+        "x": 395.1255798339844,
+        "y": 185.0322265625,
+        "width": 351.7488098144531,
+        "height": 452.935546875
+      },
+      "image": {
+        "x": 405.375732421875,
+        "y": 193.17062377929688,
+        "width": 333.36029052734375,
+        "height": 315.67718505859375
+      },
+      "imageCss": {
+        "width": "328px",
+        "height": "310px",
+        "objectFit": "cover",
+        "objectPosition": "50% 50%",
+        "display": "block"
+      },
+      "figureCss": {
+        "width": "344px",
+        "height": "447px",
+        "border": "8px solid rgb(255, 250, 241)",
+        "borderRadius": "22px",
+        "transform": "matrix(0.999848, 0.0174524, -0.0174524, 0.999848, 0, 0)"
+      },
+      "naturalWidth": 1672,
+      "naturalHeight": 941,
+      "src": "assets/images/farmacia-fachada-reina.webp",
+      "fetchpriority": "high",
+      "alt": "Fachada de Farmacia Reina del Cisne con su letrero y entrada",
+      "fontStatus": "loaded",
+      "scrollX": 0,
+      "scrollY": 0,
+      "documentWidth": 768,
+      "viewportWidth": 768,
+      "screenshot": "%TEMP%\\farmacia-lcp-visual-sjBgD0\\768-candidate.png",
+      "screenshotSha256": "f5ebe6ad243b717dfcfa1137a3fab9d92f4dc679447cd695f9faa0b797f53f7b",
+      "blocked": [
+        {
+          "origin": "http://127.0.0.1:65255",
+          "path": "/api/productos",
+          "method": "GET",
+          "reason": "API"
+        },
+        {
+          "origin": "http://127.0.0.1:65255",
+          "path": "/api/promociones",
+          "method": "GET",
+          "reason": "API"
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "variant": "baseline",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "mainStatus": 200,
+      "figure": {
+        "x": 24,
+        "y": 384.125,
+        "width": 327,
+        "height": 384
+      },
+      "image": {
+        "x": 32,
+        "y": 392.125,
+        "width": 311,
+        "height": 265
+      },
+      "imageCss": {
+        "width": "311px",
+        "height": "265px",
+        "objectFit": "cover",
+        "objectPosition": "50% 50%",
+        "display": "block"
+      },
+      "figureCss": {
+        "width": "327px",
+        "height": "384px",
+        "border": "8px solid rgb(255, 250, 241)",
+        "borderRadius": "22px",
+        "transform": "none"
+      },
+      "naturalWidth": 1672,
+      "naturalHeight": 941,
+      "src": "assets/images/farmacia-fachada-reina.webp",
+      "fetchpriority": "high",
+      "alt": "Fachada de Farmacia Reina del Cisne con su letrero y entrada",
+      "fontStatus": "loaded",
+      "scrollX": 0,
+      "scrollY": 185,
+      "documentWidth": 375,
+      "viewportWidth": 375,
+      "screenshot": "%TEMP%\\farmacia-lcp-visual-sjBgD0\\375-baseline.png",
+      "screenshotSha256": "407201b7cb0ef97ba47e049c00fd0fd282bc127519de1a7cd3b386d9d207a23a",
+      "blocked": [
+        {
+          "origin": "http://127.0.0.1:65254",
+          "path": "/api/productos",
+          "method": "GET",
+          "reason": "API"
+        },
+        {
+          "origin": "http://127.0.0.1:65254",
+          "path": "/api/promociones",
+          "method": "GET",
+          "reason": "API"
+        }
+      ],
+      "pageErrors": []
+    },
+    {
+      "variant": "candidate",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "mainStatus": 200,
+      "figure": {
+        "x": 24,
+        "y": 384.125,
+        "width": 327,
+        "height": 384
+      },
+      "image": {
+        "x": 32,
+        "y": 392.125,
+        "width": 311,
+        "height": 265
+      },
+      "imageCss": {
+        "width": "311px",
+        "height": "265px",
+        "objectFit": "cover",
+        "objectPosition": "50% 50%",
+        "display": "block"
+      },
+      "figureCss": {
+        "width": "327px",
+        "height": "384px",
+        "border": "8px solid rgb(255, 250, 241)",
+        "borderRadius": "22px",
+        "transform": "none"
+      },
+      "naturalWidth": 1672,
+      "naturalHeight": 941,
+      "src": "assets/images/farmacia-fachada-reina.webp",
+      "fetchpriority": "high",
+      "alt": "Fachada de Farmacia Reina del Cisne con su letrero y entrada",
+      "fontStatus": "loaded",
+      "scrollX": 0,
+      "scrollY": 185,
+      "documentWidth": 375,
+      "viewportWidth": 375,
+      "screenshot": "%TEMP%\\farmacia-lcp-visual-sjBgD0\\375-candidate.png",
+      "screenshotSha256": "caa4b537ae7eabc26ab97dc1c7bdf2e0b4e218741e9795e026a088e68ffa715e",
+      "blocked": [
+        {
+          "origin": "http://127.0.0.1:65255",
+          "path": "/api/productos",
+          "method": "GET",
+          "reason": "API"
+        },
+        {
+          "origin": "http://127.0.0.1:65255",
+          "path": "/api/promociones",
+          "method": "GET",
+          "reason": "API"
+        }
+      ],
+      "pageErrors": []
+    }
+  ],
+  "comparisons": [
+    {
+      "width": 1440,
+      "geometryAndAttributesEqual": true,
+      "differences": [],
+      "expectedImageCssHeight": "360px",
+      "actualImageCssHeight": "360px",
+      "mainStatuses": [
+        200,
+        200
+      ],
+      "pageErrorCount": 0
+    },
+    {
+      "width": 768,
+      "geometryAndAttributesEqual": true,
+      "differences": [],
+      "expectedImageCssHeight": "310px",
+      "actualImageCssHeight": "310px",
+      "mainStatuses": [
+        200,
+        200
+      ],
+      "pageErrorCount": 0
+    },
+    {
+      "width": 375,
+      "geometryAndAttributesEqual": true,
+      "differences": [],
+      "expectedImageCssHeight": "265px",
+      "actualImageCssHeight": "265px",
+      "mainStatuses": [
+        200,
+        200
+      ],
+      "pageErrorCount": 0
+    }
+  ],
+  "cleanup": {
+    "browserClosed": true,
+    "serversClosed": true
+  },
+  "failure": null,
+  "origins": {
+    "baseline": "http://127.0.0.1:65254",
+    "candidate": "http://127.0.0.1:65255"
+  },
+  "chrome": "155.0.8059.86",
+  "candidateHashAfter": "3ad5cde310565c5c7de247af74ad987f97a7197402e7ae65c02ac2fea162e8ae",
+  "visualInspection": {
+    "performed": true,
+    "method": "Inspected all six PNG screenshots at original pixel size, comparing baseline/candidate at 1440, 768 and 375 CSS pixels.",
+    "findings": [
+      {
+        "viewportWidth": 1440,
+        "result": "No material visible change in the facade, signage legibility, entrance, colors or framing; identical border, rotation, caption and link layout."
+      },
+      {
+        "viewportWidth": 768,
+        "result": "No material visible change in the central crop, signage or gate detail; identical 310px image height, rotation, caption wrapping and link layout."
+      },
+      {
+        "viewportWidth": 375,
+        "result": "No material visible change in the mobile crop or signage; identical 265px image height, unrotated border, caption wrapping and link layout."
+      }
+    ],
+    "limitation": "A human-style visual inspection is not proof of pixel equality or perceptual equivalence. The lossy image intentionally has different decoded pixels. This QA does not establish LCP performance or API functionality."
+  },
+  "artifactPolicy": "All six PNG captures remain in TEMP at the placeholder paths below. No screenshot images are copied into the repository.",
+  "evidencePreservation": {
+    "sourceFile": "visual-qa.json",
+    "sourceSha256": "c6feae82fbfc1287af587106eb2175010f2444ee5c95003d5a15bddcf5ed2bb6",
+    "sanitization": "Replaced absolute local TEMP/workspace roots with placeholders. Original resource pathnames, timings, hashes and safe metadata retained; no bodies, query values or credentials.",
+    "rawTracesAndScreenshots": "Remain in TEMP; only metadata and SHA-256 references are included when present."
+  }
+}

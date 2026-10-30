@@ -1,0 +1,212 @@
+{
+  "fechaLocal": "2026-10-28",
+  "zonaHoraria": "Etc/GMT+5",
+  "generadoEnUTC": "2026-10-29T02:02:52.121Z",
+  "alcance": "Revisión y correcciones en la carpeta local. Lecturas públicas anónimas; ninguna publicación, migración de producción ni operación comercial.",
+  "cambios": [
+    {
+      "archivo": "frontend/controllers/checkout.js",
+      "detalle": "Mis pedidos registra los observadores antes de la carga inicial, conserva la página confirmada si falla una navegación y pausa refrescos/dobles avances durante su carga. Mantiene controles de sesión, factura en curso, foco e historial. El fallo inicial muestra error recuperable; un 401 conserva la lista vacía y la sesión cerrada."
+    },
+    {
+      "archivo": "tests/reto2/order-recovery.spec.cjs",
+      "detalle": "Cuatro regresiones en escritorio y móvil: recuperación tras 503 inicial, reintento de página sin saltos, refresco durante navegación y 401 inicial."
+    },
+    {
+      "archivo": "tests/reto2/frontend.spec.cjs",
+      "detalle": "La prueba administrativa localiza Vitaminas diarias con su ayudante paginado. La primera página puede contener únicamente productos desactivados de pruebas anteriores."
+    },
+    {
+      "archivo": "package-lock.json",
+      "detalle": "Solo tres dependencias transitivas actualizadas con npm update body-parser qs ip-address --ignore-scripts --no-fund --no-audit. package.json y Prisma 6.19.3 sin cambios."
+    },
+    {
+      "archivo": "README.md; docs/DESPLIEGUE-GRATUITO.md",
+      "detalle": "Distingue GitHub Pages estático, frontend MVC de Cloudflare y API Render. Aclara diferencias del Blueprint histórico frente al panel documentado (Auto-Deploy/CORS) y el carácter histórico del configurador de redirección."
+    }
+  ],
+  "dependencias": [
+    {
+      "paquete": "body-parser",
+      "antes": "2.3.0",
+      "despues": "2.4.0",
+      "aviso": "https://github.com/advisories/GHSA-27r3-jxmh-p828"
+    },
+    {
+      "paquete": "ip-address",
+      "antes": "10.7.3",
+      "despues": "10.7.5",
+      "aviso": "https://github.com/advisories/GHSA-rxp7-6hxx-x8q5"
+    },
+    {
+      "paquete": "qs",
+      "antes": "6.16.0",
+      "despues": "6.17.1",
+      "aviso": "https://github.com/advisories/GHSA-6pq8-jhm2-2vcw"
+    }
+  ],
+  "reproduccionAntesDeCorregir": {
+    "navegadorCompleto": {
+      "aprobadas": 53,
+      "fallidas": 1,
+      "causa": "Prueba móvil presuponía un producto editable en la primera página; el trace confirmó 20 productos desactivados y HTTP 200.",
+      "logLocal": "C:\\Users\\Elkin\\AppData\\Local\\Temp\\farmacia-revision-browser-20261028.log"
+    },
+    "pedidos": {
+      "fallidas": 3,
+      "motivos": [
+        "Sin tarjetas tras recuperar foco después del 503 inicial.",
+        "El reintento saltaba de página 1 a 3.",
+        "Refresco/foco duplicaban consultas de la página pendiente."
+      ],
+      "logLocal": "C:\\Users\\Elkin\\AppData\\Local\\Temp\\farmacia-revision-pedidos-red-20261028.log"
+    },
+    "revisionIntermedia401": {
+      "fallidas": 1,
+      "causa": "El fallback del parche repoblaba la lista después del cierre de sesión; se condicionó a auth.user.",
+      "logLocal": "C:\\Users\\Elkin\\AppData\\Local\\Temp\\farmacia-revision-pedidos-401-red-20261028.log"
+    },
+    "auditoria": {
+      "alto": 1,
+      "moderado": 2,
+      "total": 3
+    }
+  },
+  "verificacionFinal": {
+    "npmTest": {
+      "comando": "npm test",
+      "entorno": "IMAGE_STORAGE=local y SRI_XSD_PYTHON=Python 3.12 con lxml",
+      "aprobadas": 185,
+      "fallidas": 0,
+      "omitidas": 0,
+      "logLocal": "C:\\Users\\Elkin\\AppData\\Local\\Temp\\farmacia-revision-node-completa-20261028.log"
+    },
+    "historicas": {
+      "comando": "npm run test:reto1",
+      "aprobadas": 38,
+      "fallidas": 0,
+      "omitidas": 0,
+      "logLocal": "C:\\Users\\Elkin\\AppData\\Local\\Temp\\farmacia-revision-reto1-final-20261028.log"
+    },
+    "navegador": {
+      "comando": "node node_modules/@playwright/test/cli.js test --config tests/reto2/playwright.config.cjs --output <TEMP>/farmacia-revision-browser-final-20261028-artifacts",
+      "aprobadas": 62,
+      "fallidas": 0,
+      "omitidas": 0,
+      "inestables": 0,
+      "logLocal": "C:\\Users\\Elkin\\AppData\\Local\\Temp\\farmacia-revision-browser-final-20261028.log"
+    },
+    "pages": {
+      "comando": "node node_modules/@playwright/test/cli.js test --config tests/reto2/pages.config.cjs --reporter=line --output <TEMP>/farmacia-revision-pages-final-20261028-artifacts",
+      "aprobadas": 20,
+      "fallidas": 0,
+      "omitidas": 0,
+      "logLocal": "C:\\Users\\Elkin\\AppData\\Local\\Temp\\farmacia-revision-pages-final-20261028.log"
+    },
+    "totalAprobadas": 305,
+    "npmAudit": {
+      "comando": "npm audit --json",
+      "vulnerabilidades": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "logLocal": "C:\\Users\\Elkin\\AppData\\Local\\Temp\\farmacia-revision-audit-final-20261028.json"
+    },
+    "buildPages": {
+      "metodo": "buildPages con configuración pública predeterminada y salida temporal permitida; no se reemplazó dist/pages.",
+      "output": "C:\\Users\\Elkin\\AppData\\Local\\Temp\\farmacia-pages-revision-final-SzXuTP\\public",
+      "files": 94,
+      "bytes": 12594093,
+      "maxFileBytes": 2650904,
+      "apiOrigin": "https://farmacia-reina-del-cisne.onrender.com",
+      "imageOrigin": ""
+    },
+    "sintaxis": {
+      "comando": "node --check",
+      "archivos": [
+        "frontend/controllers/checkout.js",
+        "tests/reto2/order-recovery.spec.cjs",
+        "tests/reto2/frontend.spec.cjs"
+      ],
+      "errores": 0
+    },
+    "revisionIndependiente": "Sin hallazgos accionables en lock/documentación y parche final de pedidos/pruebas. Revisión estática.",
+    "capturas": "28 capturas históricas restauradas y verificadas por SHA-256; nuevas capturas y traces conservados en TEMP. Cero capturas adicionales en la carpeta histórica."
+  },
+  "lecturasPublicas": [
+    {
+      "url": "https://farmacia-reyna-del-cisne-pruebas.pages.dev/",
+      "status": 200,
+      "durationToHeadersMs": 640,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://farmacia-reina-del-cisne.onrender.com/api/salud",
+      "status": 200,
+      "durationToHeadersMs": 33620,
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "url": "https://elkin2004olmedoch-dotcom.github.io/Farmacia-Reyna-del-Cisne/",
+      "status": 200,
+      "durationToHeadersMs": 529,
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "url": "https://farmacia-reina-del-cisne.onrender.com/api/salud",
+      "status": 200,
+      "durationToHeadersMs": 538,
+      "observation": "segunda consulta de salud; proceso no reiniciado por la prueba"
+    }
+  ],
+  "interpretacionPublica": "Las tres URLs respondieron 200. Salud de Render tardó 33620 ms hasta cabeceras en la primera consulta y 538 ms en la segunda. Son observaciones de esta conexión, no un benchmark, p75 ni demostración de la causa del retraso. No se reinició ni reconfiguró el servicio.",
+  "limites": [
+    "Pruebas con SQLite/uploads/cuentas temporales y proveedores simulados. No se probaron PostgreSQL privado, pagos, SRI real, correo o WhatsApp.",
+    "dotnet --version informó ausencia de SDK; no se ejecutaron las pruebas del agente C#.",
+    "No se inspeccionó el panel actual de infraestructura; commits y Auto-Deploy remotos citados en la documentación conservan su fecha histórica.",
+    "La raíz carece de metadatos Git. Comparación por respaldos/hashes; no se modificaron los checkouts anidados ni entregables.",
+    "Avisos ESM y FORCE_COLOR previos sin fallos; npm audit no certifica ausencia de vulnerabilidades de aplicación.",
+    "Cambios locales pendientes de publicación. Permanecen las decisiones comerciales de reservas y las activaciones reales documentadas."
+  ],
+  "hashesDeFuentes": [
+    {
+      "archivo": "package.json",
+      "sha256Antes": "fefb908c45288f3cc0a0952fab8502cef7df526c9ac05aee6436c3e2736b3d28",
+      "sha256Despues": "fefb908c45288f3cc0a0952fab8502cef7df526c9ac05aee6436c3e2736b3d28"
+    },
+    {
+      "archivo": "package-lock.json",
+      "sha256Antes": "f7d76d9d85b8ad2ae73afa42a374c280221595a1171c6a5f324fee4dc53897ff",
+      "sha256Despues": "503f28197dac2025b054d8a080d10ab56c2cb31f295ec119d69b5d8a756dd98f"
+    },
+    {
+      "archivo": "README.md",
+      "sha256Antes": "5454eb7fde085e314bfb6724324dfbd5e20a6f78994c0aa85243db2a7d757846",
+      "sha256Despues": "797a706c46ee7fcb877ed8f9a36c484f942732f50274e3d222bb4a55a3fd5aa2"
+    },
+    {
+      "archivo": "docs/DESPLIEGUE-GRATUITO.md",
+      "sha256Antes": "a82ca4f5fd8995c184e21655e5c01bdbb703b2b63824117ac8d10a5e5f7b6e96",
+      "sha256Despues": "5bea14f0b487f6239bf5d69ed69aea59f218e8fcc78c0b12a93b245ae88c2e2a"
+    },
+    {
+      "archivo": "frontend/controllers/checkout.js",
+      "sha256Antes": "14704764808d456172b2ffa8a1b7ccfbcbafef6bba93292efc28b210a005f1d6",
+      "sha256Despues": "763d09e7dd3cc72b3062af583243c6d21269d0e713d2f55b21b5cc124b9a2bb4"
+    },
+    {
+      "archivo": "tests/reto2/frontend.spec.cjs",
+      "sha256Antes": "55a2ba41fdee90ca9e2b385bd235cf78bd57f9cbabf77f6c8a06df029de713a8",
+      "sha256Despues": "7cf09dd1a2dc11d71204ad9cd9d84336cadcc2d19b94b2e5c5d63e97b809ccab"
+    },
+    {
+      "archivo": "tests/reto2/order-recovery.spec.cjs",
+      "nuevo": true,
+      "sha256Despues": "cf21bf0bdb91066a1da836fc47cf8f365f197cb779f242878749058f1f138571"
+    }
+  ]
+}

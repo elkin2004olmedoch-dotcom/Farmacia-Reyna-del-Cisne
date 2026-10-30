@@ -1,0 +1,406 @@
+{
+  "date": "2026-10-21T17:58:10.072564+00:00",
+  "scope": "LCP optimization and security of existing Cloudflare Pages test deployment; no production promotion",
+  "versions": {
+    "base": "86804e790fdff0429f91063e7f865baa0eedba54",
+    "pagesCode": "0672e414ca040afa43810e478e93502b834ff8da",
+    "backendCandidateNotDeployed": "51d40d9293cfd54f3eaf372e1a191a5c55319e95",
+    "renderDeployed": "75aee3e67ca0e807e8047f5e53e9e9769275cac2",
+    "mainUnchanged": "1e5580596e89d0bac591a773210e99b220fd0dd0"
+  },
+  "deployment": {
+    "pagesUrl": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "pagesImmutableUrl": "https://8801c092.farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "pagesDeploymentId": "8801c092-0a71-40f9-abeb-32b7cf2a97fd",
+    "linuxFiles": 94,
+    "linuxBytes": 12591298,
+    "uploadedNewFiles": 1,
+    "alreadyUploadedFiles": 92,
+    "buildSecondsDisplayed": 29,
+    "functions": false,
+    "renderUrl": "https://farmacia-reina-del-cisne.onrender.com",
+    "renderServiceId": "srv-db5sg2ss728c738t3n6g",
+    "renderDeploymentId": "dep-dbceq0uktt5c73f6satg",
+    "renderPlan": "Free",
+    "renderRegion": "Virginia",
+    "renderAutoDeploy": "Off",
+    "renderConfiguredBranch": "main",
+    "additionalServicesPurchased": 0,
+    "dnsChanged": false,
+    "mainDomainChanged": false,
+    "databaseSchemaChanged": false,
+    "dependenciesChanged": false
+  },
+  "comparison": {
+    "before": {
+      "render": {
+        "samples": 3,
+        "median": {
+          "documentTtfbMs": 153.6,
+          "navigationResponseStartMs": 256,
+          "htmlReadyMs": 302.6,
+          "fcpMs": 932,
+          "productsReadyMs": 1941.6,
+          "menuReadyMs": 1687.9,
+          "encodedBytesObserved": 10389767,
+          "requestCount": 64
+        },
+        "lcpMedianMs": 5608,
+        "proxyPhaseMs": [
+          0,
+          0,
+          0
+        ],
+        "cards": [
+          4,
+          4,
+          4
+        ]
+      },
+      "pages": {
+        "samples": 3,
+        "median": {
+          "documentTtfbMs": 77.9,
+          "navigationResponseStartMs": 173.7,
+          "htmlReadyMs": 184.3,
+          "fcpMs": 760,
+          "productsReadyMs": 1599,
+          "menuReadyMs": 1201.5,
+          "encodedBytesObserved": 6428506,
+          "requestCount": 63
+        },
+        "lcpMedianMs": 4180,
+        "proxyPhaseMs": [
+          0,
+          0,
+          0
+        ],
+        "cards": [
+          4,
+          4,
+          4
+        ]
+      }
+    },
+    "after": {
+      "render": {
+        "samples": 3,
+        "median": {
+          "documentTtfbMs": 165.5,
+          "navigationResponseStartMs": 355,
+          "htmlReadyMs": 398.2,
+          "fcpMs": 1044,
+          "productsReadyMs": 1805,
+          "menuReadyMs": 1579.3,
+          "encodedBytesObserved": 10389931,
+          "requestCount": 64
+        },
+        "lcpMedianMs": 5204,
+        "proxyPhaseMs": [
+          0,
+          0,
+          0
+        ],
+        "cards": [
+          4,
+          4,
+          4
+        ]
+      },
+      "pages": {
+        "samples": 3,
+        "median": {
+          "documentTtfbMs": 75.1,
+          "navigationResponseStartMs": 176.3,
+          "htmlReadyMs": 191.8,
+          "fcpMs": 776,
+          "productsReadyMs": 1619.7,
+          "menuReadyMs": 1144,
+          "encodedBytesObserved": 5170553,
+          "requestCount": 63
+        },
+        "lcpMedianMs": 1436,
+        "proxyPhaseMs": [
+          0,
+          0,
+          0
+        ],
+        "cards": [
+          4,
+          4,
+          4
+        ]
+      }
+    },
+    "sampleCountBefore": 6,
+    "sampleCountAfter": 6,
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "network": "Real network plus 10Mbps down/5Mbps up and 40ms CDP delay; no CPU throttle",
+    "cache": "Fresh anonymous contexts with browser cache disabled; CDN state uncontrolled",
+    "thirdParties": "Blocked identically in the three-pair comparison; separately inventoried",
+    "lcpElement": ".business-photo > img",
+    "fieldP75Claim": false
+  },
+  "naturalIdle": {
+    "ownRequestsStoppedAt": "2026-10-21T17:34:42.867Z",
+    "guardMinimumIdleMs": 930000,
+    "lcpMs": 1668,
+    "menuReadyMs": 1045.699999999255,
+    "cardsReadyMs": 31378.299999998882,
+    "apiAborts": 4,
+    "pendingCardImagesAtEnd": 4,
+    "automaticRecovery": true,
+    "processRestartObserved": true,
+    "providerSpinDownCauseExplicitlyConfirmed": false,
+    "otherTrafficControlled": false,
+    "forcedSuspendOrRestart": false
+  },
+  "renderLogCorrelation": {
+    "source": "Authenticated Render application logs and Events, manually inspected; selected operational fields only",
+    "observedOldInstance": "5prkk",
+    "observedNewInstance": "x2jzc",
+    "providerDisplayedTimes": {
+      "runningNpmStart": "12:49:10 PM",
+      "nodeStart": "12:49:11 PM",
+      "httpListen": "12:49:15 PM",
+      "matchingProducts200": "12:49:26 PM"
+    },
+    "sameLogClockCommandToListenSeconds": 5,
+    "matchingRequestId": "e32f73e3-2ee2-43bd-91bd-665b2630bb12",
+    "matchingExpressMs": 111,
+    "matchingStatus": 200,
+    "limitations": [
+      "Displayed provider times are not subtracted from browser UTC to infer a cross-clock startup duration.",
+      "No explicit spin-down event/cause was visible; restart plus delayed API is compatible with Free wake-up.",
+      "Express duration includes connection/query work; deployed source does not separate Prisma or SQL."
+    ]
+  },
+  "tests": {
+    "node": {
+      "passed": 185,
+      "failed": 0,
+      "skipped": 0,
+      "logSha256": "6e9501cdb44f88b6481c9fb78b173fbf288ad656ae4d37f4a7a18da28c78f5cc"
+    },
+    "historical": {
+      "passed": 38,
+      "failed": 0,
+      "skipped": 0,
+      "logSha256": "98df1270c568e8c9d8fabec1a88f2c90ea46fa1037f4d6fbd1ebf1b082542dd6"
+    },
+    "browserSameOrigin": {
+      "passed": 54,
+      "failed": 0,
+      "skipped": 0,
+      "logSha256": "d3f41e4d4021d9e6fb07e4d867bbe2e1e06d737b34ef118f632f30e7c6b7bce1"
+    },
+    "browserPagesApi": {
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "logSha256": "a2d427c89e43ee72490514d7d17bfb09dfc84f83ad9628d5ab0db43c77dcbfae"
+    },
+    "suiteTotal": 297,
+    "newSecurityContracts": 8,
+    "publicStaticChecks": 102,
+    "publicStaticHttpRequests": 112,
+    "publicApiChecks": 22,
+    "publicBrowserScenarios": 5,
+    "publishedClientLocalApiScenarios": 3,
+    "productionValidAccountWritesTested": false,
+    "realPaymentsOrSriEmission": false
+  },
+  "dependencyAudit": {
+    "command": "npm audit --omit=dev --json",
+    "exitCode": 0,
+    "productionAdvisories": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "limits": "Point-in-time production advisory database; not a universal or development-dependency certification"
+  },
+  "deployedCriticalSourceComparison": [
+    {
+      "path": "server/middleware/auth.cjs",
+      "matchesDeployedSource75aee3e": true,
+      "sha256Normalized": "624d6db05d84c5e68417ec84935e85364176bd2fabcaaa9b6a83ce280f8c4797"
+    },
+    {
+      "path": "server/controllers/auth.cjs",
+      "matchesDeployedSource75aee3e": true,
+      "sha256Normalized": "f10394fc4b74ed78ba5a9364c22690e9c23dc1ecee6b8c0e2c288b44cdc46e40"
+    },
+    {
+      "path": "server/controllers/pedidos.cjs",
+      "matchesDeployedSource75aee3e": true,
+      "sha256Normalized": "ffa548800a2bc4ab7b2a4df5b632491cf79381d75211eac8bc1545a2fbeeed43"
+    },
+    {
+      "path": "server/models/pedidos.cjs",
+      "matchesDeployedSource75aee3e": true,
+      "sha256Normalized": "e4864edbe1142cff3fe07b8b623bc3f93c42f053903457298a822e2752f729d1"
+    },
+    {
+      "path": "server/models/usuarios.cjs",
+      "matchesDeployedSource75aee3e": true,
+      "sha256Normalized": "38984b00d6e79949138b13720dc68d258922b0c6605768f483e01ab0ffb89ecc"
+    },
+    {
+      "path": "server/models/inventario.cjs",
+      "matchesDeployedSource75aee3e": true,
+      "sha256Normalized": "9162fa9659c6fca64c762d8b666f6e3a6084ae6a5d7f04654932cce8bd4267d2"
+    },
+    {
+      "path": "server/models/sri.cjs",
+      "matchesDeployedSource75aee3e": true,
+      "sha256Normalized": "2c72ce144e03d360651398326ff35b009c738a4b04dd7bc08ccfd8def5be2263"
+    },
+    {
+      "path": "server/routes/index.cjs",
+      "matchesDeployedSource75aee3e": true,
+      "sha256Normalized": "416bdd69d0d06bf59aa0758b41feb61324d24a48c20737feb40c3c573b67e722"
+    },
+    {
+      "path": "server/routes/sri.cjs",
+      "matchesDeployedSource75aee3e": true,
+      "sha256Normalized": "7c357958919d7fb6f41794d41f50d7e132884ce2727651744d5574f2ec9b8211"
+    },
+    {
+      "path": "server/middleware/validation.cjs",
+      "matchesDeployedSource75aee3e": true,
+      "sha256Normalized": "ddd1a71a4ac2637a19edcf2e16076c2bad8c313cb77251124e2d6c9300607660"
+    }
+  ],
+  "remainingRisks": [
+    "Administrative write attribution is fixed only in backend candidate, not deployed Render.",
+    "JWT remains in sessionStorage; XSS would expose it. No exploitable XSS chain was confirmed.",
+    "In-memory rate limits reset at process restart and are not shared when scaling.",
+    "Pending orders reserve stock without expiry/per-account pending limit; business decision required.",
+    "Render Free idle wake-up and resource/usage limits remain; dynamic functions depend on the API.",
+    "Historical render.yaml differs from dashboard Auto-Deploy/CORS; do not reapply a Blueprint without reviewing and authorization."
+  ],
+  "readiness": {
+    "frontendReadyForAuthorizedPromotion": true,
+    "productionPublished": false,
+    "commercialContinuousAvailabilityCertified": false,
+    "backendPublicationRequiresApproval": true,
+    "businessReservationPolicyPending": true
+  },
+  "rollback": {
+    "pagesCode": "28cbed850d242d0a0f268613c5057a70577af186",
+    "pagesDeploymentId": "8c4a0c9e-710e-40f4-b50e-f1b5f850745e",
+    "renderAction": "None; retain75aee3e and Auto-Deploy Off",
+    "databaseRestoreNeeded": false
+  },
+  "evidence": [
+    {
+      "file": "lcp-artefacto-seguridad-2026-10-21.json",
+      "bytes": 15901,
+      "sha256": "b0b9a199566da91edc8745e83d5cec7af66ebe51dfa25009f63616250ab6dd1b"
+    },
+    {
+      "file": "lcp-control-local-2026-10-21.json",
+      "bytes": 566633,
+      "sha256": "f4b33fa57a56478adc0acc054634ead1a1e9c451fb75a74f6aeac19c8fcede3f"
+    },
+    {
+      "file": "lcp-externos-publico-2026-10-21.json",
+      "bytes": 97097,
+      "sha256": "44c9b21ee710cf140cf7601a88a913177177d6764b0b4ef87085d8a3d0de64fe"
+    },
+    {
+      "file": "lcp-imagen-2026-10-21.json",
+      "bytes": 1902,
+      "sha256": "7aac4077326f82f09c0d8a3c593580eaa43d158efa6301204816703926ae7c29"
+    },
+    {
+      "file": "lcp-navegador-publico-2026-10-21.json",
+      "bytes": 5173,
+      "sha256": "110b63dc4163f7707cab6499b3a75261a5e0cfcf79c91d57c1dcbb42b1b9bffe"
+    },
+    {
+      "file": "lcp-perfil-trazas-2026-10-21.json",
+      "bytes": 202601,
+      "sha256": "8dfd406f2c9400663d0cddc4af99c608e951ad084fde03333ec3307240f8eb85"
+    },
+    {
+      "file": "lcp-portada-publicada-2026-10-21.png",
+      "bytes": 422987,
+      "sha256": "fdc6e9768da98f19cb5b945a643e0b66d5ac38c6478329f50bce73f4c1594c87"
+    },
+    {
+      "file": "lcp-publico-antes-2026-10-21.json",
+      "bytes": 574068,
+      "sha256": "40213030f2ff861c6e5d97655385d61b603dcc9eb28ec46b04ea4af7725dca84"
+    },
+    {
+      "file": "lcp-publico-despues-2026-10-21.json",
+      "bytes": 573402,
+      "sha256": "877b950763ab57da3a0a0efdf86c32ec5cf9551296041363447d361b098663ad"
+    },
+    {
+      "file": "lcp-qa-visual-2026-10-21.json",
+      "bytes": 14806,
+      "sha256": "3f1ecd2591970df78929487c354c5e83ffea8f9e89d3221a2c17a25a5d0f5b71"
+    },
+    {
+      "file": "lcp-recursos-externos-2026-10-21.json",
+      "bytes": 4997,
+      "sha256": "070c66c8f9ef2935d2adbc4326862ddeaa7ac0ec4aa7ca098ca8e4c8aa661b03"
+    },
+    {
+      "file": "lcp-reposo-publico-2026-10-21.json",
+      "bytes": 94937,
+      "sha256": "7d11934efe3696d79aff26f363bf39f22d3eff451790eb62950ef19581d36621"
+    },
+    {
+      "file": "lcp-seguridad-api-2026-10-21.json",
+      "bytes": 30290,
+      "sha256": "2c942733422a69b80f062dcf108a6d73e7fa678372edeaefa54f3693ba232073"
+    },
+    {
+      "file": "lcp-seguridad-estaticos-2026-10-21.json",
+      "bytes": 129169,
+      "sha256": "b171c08228cf63036b556ee2ce459224472651daffb9d86621af4d67d61af2e0"
+    },
+    {
+      "file": "lcp-sesiones-fixture-publicado-2026-10-21.json",
+      "bytes": 2733,
+      "sha256": "c9cca3218a177c3349a6de46e6ca6a4a250aea1fc592ca8292397a7efca07c26"
+    }
+  ],
+  "originalWorkspaceVerification": {
+    "sourceSnapshot": "bbf112a00d4a72903713c76c27651f9441a9265f",
+    "copiedFiles": 24,
+    "backedUpOverwrites": 5,
+    "newFiles": 19,
+    "equivalentEligibleFiles": 383,
+    "privateFilesUnchanged": 16,
+    "ownerOnlyFilesUnchanged": 7,
+    "conflicts": 0,
+    "backupZipCrcAndShaVerified": true,
+    "build": {
+      "files": 94,
+      "bytes": 12593861,
+      "differenceFromCanonicalArtifact": "Text line endings; source equivalence checked with Git normalization"
+    },
+    "nodeTests": {
+      "passed": 185,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "exitCode": 0,
+      "durationMs": 76172.5666,
+      "logSha256": "6d83e80c0e9d75793ad0d3d32c01b37c5c143bf032a3c69b99fcb1d533d3b3bc"
+    },
+    "privateGuardsPublished": false,
+    "runtimeChangesAfterTests": false
+  }
+}

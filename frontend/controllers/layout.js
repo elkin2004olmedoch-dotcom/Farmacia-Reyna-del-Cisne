@@ -28,8 +28,10 @@ export function layoutController() {
   });
   overlay?.addEventListener('click',()=>closeMenu(true));menu.addEventListener('click',event=>{if(event.target.closest('a'))closeMenu();});
   if(overlay)matchMedia('(min-width:901px)').addEventListener('change',event=>{if(event.matches)closeMenu();});
-  for(const link of document.querySelectorAll('.shop-nav a'))if(link.getAttribute('href')===(location.pathname.split('/').pop() || 'index.html'))link.setAttribute('aria-current','page');
+  const currentPage=(location.pathname.replace(/\/+$/,'').split('/').pop() || 'index').replace(/\.html$/,'');
+  for(const link of document.querySelectorAll('.shop-nav a'))if(link.getAttribute('href').replace(/\.html$/,'')===currentPage)link.setAttribute('aria-current','page');
   document.addEventListener('click',async event=>{const logout=event.target.closest('#logout');if(!logout)return;busy(logout,true);try{await auth.logout();location.replace('cuenta.html');}catch(error){message(error.message,true);location.replace('cuenta.html');}});
+  return update;
 }
 export function requireUser(next='checkout.html',admin=false) {
   if(!auth.user){message('Inicia sesión para continuar. Te llevaremos al acceso.',true,true);sessionStorage.setItem('farmacia-mvc-login-message',admin?'Inicia sesión con tu cuenta de administrador para gestionar la farmacia.':'Inicia sesión para continuar con tu pedido.');location.assign('cuenta.html?next='+encodeURIComponent(next));return false;}

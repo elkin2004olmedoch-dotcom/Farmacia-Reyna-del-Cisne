@@ -1,0 +1,98 @@
+name: Verificar farmacia MVC
+
+on:
+  push:
+    branches: [main]
+    paths: ['frontend/**', 'server/**', 'scripts/**', 'tests/**', 'data/**', 'assets/**', '*.html', '*.js', '*.css', 'package*.json', '.github/workflows/verify-mvc.yml']
+  pull_request:
+    paths: ['frontend/**', 'server/**', 'scripts/**', 'tests/**', 'data/**', 'assets/**', '*.html', '*.js', '*.css', 'package*.json', '.github/workflows/verify-mvc.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: mvc-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
+env:
+  NODE_ENV: test
+  IMAGE_STORAGE: local
+  DATABASE_URL: file:./ci.db
+
+jobs:
+  node:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: farmacia_test
+          POSTGRES_DB: farmacia_test
+          # The opt-in suite requires no password; this service is loopback-only and disposable.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['127.0.0.1:5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U farmacia_test -d farmacia_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PHARMACY_TEST_DATABASE_URL: 'postgresql://farmacia_test@127.0.0.1:5432/farmacia_test?schema=public&connection_limit=3'
+      SRI_XSD_PYTHON: /usr/bin/python3
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v7.1.0
+        with: {node-version: '22', cache: npm}
+      - run: npm ci --include=dev
+      - name: Preparar validación XSD y clientes Prisma 6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-lxml openssl
+          npm run db:generate
+          DATABASE_URL="$PHARMACY_TEST_DATABASE_URL" npm run db:generate:postgres
+          npx --no-install prisma validate --schema server/prisma/schema.prisma
+          DATABASE_URL="$PHARMACY_TEST_DATABASE_URL" npx --no-install prisma validate --schema server/prisma/postgresql/schema.prisma
+          export PHARMACY_TEST_POSTGRES_META="$RUNNER_TEMP/farmacia-postgres-ci.json"
+          echo "PHARMACY_TEST_POSTGRES_META=$PHARMACY_TEST_POSTGRES_META" >> "$GITHUB_ENV"
+          node -e 'require("node:fs").writeFileSync(process.env.PHARMACY_TEST_POSTGRES_META,JSON.stringify({url:process.env.PHARMACY_TEST_DATABASE_URL,port:5432}))'
+      - name: Node con SQLite y PostgreSQL, sin omisiones
+        run: |
+          node --test --test-concurrency=1 --test-reporter=tap tests/reto2/*.test.cjs | tee ci-node.tap
+          node -e 'if(!/^# skipped 0$/m.test(require("node:fs").readFileSync("ci-node.tap","utf8")))process.exit(1)'
+      - run: npm run test:reto1
+      - run: npm audit --json > ci-audit.json
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
+        with:
+          name: mvc-node-failure
+          path: |
+            ci-node.tap
+            ci-audit.json
+          retention-days: 7
+
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v7.1.0
+        with: {node-version: '22', cache: npm}
+      - run: npm ci --include=dev
+      - run: npm run db:generate
+      - run: npx --no-install playwright install --with-deps chrome
+      - name: Navegador MVC, escritorio y móvil
+        run: npm run test:browser
+      - name: Pages con orígenes separados
+        run: npx --no-install playwright test --config tests/reto2/pages.config.cjs
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
+        with:
+          name: mvc-browser-failure
+          path: |
+            test-results/*-browser-results.json
+            tests/reto2/test-results/reto2-artifacts/
+            tests/reto2/test-results/pages-artifacts/
+          retention-days: 7

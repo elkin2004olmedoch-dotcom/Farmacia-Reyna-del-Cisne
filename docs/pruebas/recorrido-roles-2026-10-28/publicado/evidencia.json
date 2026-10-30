@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-29T04:01:01.060Z",
+  "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+  "scope": "Carrito local anónimo; sin pedido ni autenticación real",
+  "results": [
+    {
+      "profile": "escritorio",
+      "cartImageLoaded": true,
+      "overflow": false,
+      "writes": [],
+      "errors": [],
+      "screenshots": [
+        "catalogo-escritorio.png",
+        "carrito-escritorio.png"
+      ]
+    },
+    {
+      "profile": "movil",
+      "cartImageLoaded": true,
+      "overflow": false,
+      "writes": [],
+      "errors": [],
+      "screenshots": [
+        "catalogo-movil.png",
+        "carrito-movil.png"
+      ]
+    }
+  ]
+}

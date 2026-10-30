@@ -2,8 +2,13 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
-const MODELS=Object.freeze(['usuario','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','semilla']);
+const MODELS=Object.freeze(['usuario','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','semilla']);
 const INITIAL_FISCAL=Object.freeze({id:'iva-general-inicial',tarifaGeneral:15,inicioVigencia:'2024-04-01T05:00:00.000Z',referenciaNormativa:'Ley de Régimen Tributario Interno, art. 65; Decreto Ejecutivo 198; Circular SRI NAC-DGECCGC25-00000006 (vigencia 2026).',actorId:null});
+const INITIAL_DEFAULTS=Object.freeze({
+  configuracionFiscal:INITIAL_FISCAL,
+  zonaEntrega:{id:'puerto-quito',nombre:'Todo Puerto Quito',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,activa:true,version:1},
+  zonaEntregaTarifa:{id:'puerto-quito-inicial',zonaEntregaId:'puerto-quito',version:1,tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,actorId:null}
+});
 const UPLOAD_PATTERN=/^assets\/uploads\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.webp$/;
 const STATIC_IMAGE_PATTERN=/^assets\/images\/[a-z0-9-]+\.(?:jpg|png|webp|svg)$/;
 const MAX_BYTES=2*1024*1024;
@@ -50,7 +55,10 @@ function assertSnapshotRelations(snapshot){
     ids[model]=new Set(snapshot[model].map(row=>row.id));
     if(ids[model].size!==snapshot[model].length || snapshot[model].some(row=>typeof row.id!=='string' || !row.id))fail('SOURCE_DATA','La base local contiene identificadores inválidos.');
   }
-  const valid=snapshot.pedido.every(row=>ids.usuario.has(row.userId))
+  const valid=snapshot.pedido.every(row=>ids.usuario.has(row.userId) && (row.zonaEntregaId==null || ids.zonaEntrega.has(row.zonaEntregaId)))
+    && snapshot.zonaEntregaTarifa.every(row=>ids.zonaEntrega.has(row.zonaEntregaId) && (row.actorId==null || ids.usuario.has(row.actorId)))
+    && snapshot.entrega.every(row=>ids.pedido.has(row.pedidoId) && (row.repartidorId==null || ids.usuario.has(row.repartidorId)))
+    && snapshot.pago.every(row=>ids.pedido.has(row.pedidoId))
     && snapshot.pedidoDetalle.every(row=>ids.pedido.has(row.pedidoId) && ids.producto.has(row.productoId))
     && snapshot.promocion.every(row=>ids.producto.has(row.productoId))
     && snapshot.pedidoEstado.every(row=>ids.pedido.has(row.pedidoId) && ids.usuario.has(row.actorId))
@@ -107,12 +115,22 @@ async function targetCounts(tx){
   for(const model of MODELS)counts[model]=await tx[model].count();
   return counts;
 }
-function isInitialFiscal(row){
-  try{return row && Object.keys(INITIAL_FISCAL).every(key=>key==='inicioVigencia'?new Date(row[key]).toISOString()===INITIAL_FISCAL[key]:row[key]===INITIAL_FISCAL[key]);}catch{return false;}
+function sameTimestamp(first,second){
+  return first!=null && second!=null && Number.isFinite(new Date(first).getTime()) && new Date(first).getTime()===new Date(second).getTime();
 }
 async function assertEmpty(tx,counts){
-  if(MODELS.some(model=>model!=='configuracionFiscal' && counts[model]!==0) || counts.configuracionFiscal>1)fail('TARGET_NOT_EMPTY','La base PostgreSQL debe estar vacía, incluida Semilla. Sólo se admite la fila fiscal estándar recién creada por migración; ningún dato de negocio se sobrescribe.');
-  if(counts.configuracionFiscal===1){const rows=await tx.configuracionFiscal.findMany();if(rows.length!==1 || !isInitialFiscal(rows[0]))fail('TARGET_NOT_EMPTY','La configuración fiscal del destino contiene datos propios. No se borrarán ni sobrescribirán.');}
+  const reject=()=>fail('TARGET_NOT_EMPTY','La base PostgreSQL debe estar vacía, incluida Semilla. Sólo se admiten los defaults técnicos intactos de IVA y Puerto Quito creados por migración; ningún dato propio se sobrescribe.');
+  if(MODELS.some(model=>counts[model]!==0 && (!INITIAL_DEFAULTS[model] || counts[model]!==1)) || counts.zonaEntrega!==counts.zonaEntregaTarifa)reject();
+  const defaults={};
+  for(const [model,expected] of Object.entries(INITIAL_DEFAULTS)){
+    if(!counts[model])continue;
+    const rows=await tx[model].findMany(),row=rows[0];
+    if(rows.length!==1 || !Object.keys(expected).every(key=>key==='inicioVigencia'?sameTimestamp(row[key],expected[key]):row[key]===expected[key]))reject();
+    if(model!=='zonaEntregaTarifa' && !sameTimestamp(row.createdAt,row.updatedAt))reject();
+    defaults[model]=row;
+  }
+  // Both delivery defaults are inserted by migration 007 in one PG transaction.
+  if(defaults.zonaEntrega && !sameTimestamp(defaults.zonaEntrega.createdAt,defaults.zonaEntregaTarifa.createdAt))reject();
 }
 async function migrate({source,target,apply=false,frontendRoot,storage,inspectImages=inspectUploadFiles}){
   const snapshot=await readSnapshot(source);
@@ -129,21 +147,27 @@ async function migrate({source,target,apply=false,frontendRoot,storage,inspectIm
     for(const image of images)if(await storage.cloudImageExists(image.reference))fail('IMAGE_COLLISION','Ya existe una imagen con el mismo identificador en el destino. No se sobrescribirá.');
   }catch(error){if(error instanceof MigrationError)throw error;fail('CLOUD_IMAGES','No se pudo comprobar el almacenamiento de imágenes. No se ha guardado ningún registro.');}
   try{for(const image of images)await storage.uploadCloudImage(image.reference,image.buffer);}catch{fail('IMAGE_TRANSFER','La transferencia de imágenes falló. No se ha guardado ningún registro; pueden quedar imágenes sin referencia en el destino.');}
+  let importedCounts;
   try{
-    await target.$transaction(async tx=>{
+    importedCounts=await target.$transaction(async tx=>{
       // Recheck inside the write transaction to reject concurrent seeds/imports.
       const counts=await targetCounts(tx);await assertEmpty(tx,counts);
       if(counts.configuracionFiscal===1 && snapshot.configuracionFiscal.length)await tx.configuracionFiscal.deleteMany({where:{id:INITIAL_FISCAL.id}});
+      if(counts.zonaEntrega===1 && snapshot.zonaEntrega.length){
+        await tx.zonaEntregaTarifa.deleteMany({where:{id:INITIAL_DEFAULTS.zonaEntregaTarifa.id}});
+        await tx.zonaEntrega.deleteMany({where:{id:INITIAL_DEFAULTS.zonaEntrega.id}});
+      }
       for(const model of MODELS){
         const rows=snapshot[model];
         for(let offset=0;offset<rows.length;offset+=500)await tx[model].createMany({data:rows.slice(offset,offset+500)});
       }
+      return targetCounts(tx);
     },TRANSACTION_OPTIONS);
   }catch(error){
     if(error instanceof MigrationError && !images.length)throw error;
     fail('DATABASE_TRANSFER','La transferencia de registros se revirtió completamente. Pueden quedar imágenes sin referencia; no se publicaron datos de usuarios ni pedidos.');
   }
-  return {...summary,destino:{...origin,configuracionFiscal:origin.configuracionFiscal || destination.configuracionFiscal}};
+  return {...summary,destino:importedCounts};
 }
 function safeError(error){return error instanceof MigrationError?error.message:'No se pudo completar la transferencia. Revisa las conexiones y las migraciones sin compartir contraseñas ni datos privados.';}
 async function runCli({argv=process.argv.slice(2),env=process.env,root=ROOT,log=console.log,createClients,storage}={}){

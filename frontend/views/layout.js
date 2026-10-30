@@ -1,7 +1,9 @@
 import {escape} from './common.js';
 export function sessionView(user,count) {
-  const admin=user?.role==='admin';document.body.dataset.sessionRole=admin?'admin':user?'user':'guest';
-  for(const link of document.querySelectorAll('[data-account-link]')){link.textContent=admin?'Panel':user?`Hola, ${user.nombre.split(' ')[0]}`:'Ingresar';link.href=admin?'admin.html':'cuenta.html';}
+  const admin=user?.role==='admin',courier=user?.role==='repartidor';document.body.dataset.sessionRole=admin?'admin':courier?'repartidor':user?'user':'guest';
+  for(const link of document.querySelectorAll('[data-account-link]')){link.textContent=admin?'Panel':courier?'Mis entregas':user?`Hola, ${user.nombre.split(' ')[0]}`:'Ingresar';link.href=admin?'admin.html':courier?'entregas.html':'cuenta.html';}
+  for(const link of document.querySelectorAll('[data-deliveries-link]'))link.hidden=!admin && !courier;
+  for(const link of document.querySelectorAll('a[href="pedidos.html"]'))if(courier){link.href='entregas.html';link.textContent='Mis entregas';}
   for(const link of document.querySelectorAll('[data-admin-link]'))link.hidden=user?.role!=='admin';
   for(const element of document.querySelectorAll('[data-admin-session]'))element.hidden=!admin;
   for(const element of document.querySelectorAll('[data-admin-guest]'))element.hidden=admin;
@@ -9,6 +11,12 @@ export function sessionView(user,count) {
   for(const element of document.querySelectorAll('[data-admin-email]'))element.textContent=user?.email || '';
   for(const counter of document.querySelectorAll('[data-shop-count]'))counter.textContent=count;
   for(const link of document.querySelectorAll('.shop-cart'))link.setAttribute('aria-label',`Carrito, ${count} unidades`);
+  const dock=document.getElementById('cart-dock');
+  if(dock){
+    dock.hidden=!count || admin || courier || document.body.hasAttribute('data-session-pending');
+    document.getElementById('cart-dock-summary').textContent=`${count} ${count===1?'unidad':'unidades'}`;
+    document.body.toggleAttribute('data-cart-dock',!dock.hidden);
+  }
 }
 export function accountView(user) {
   const panel=document.getElementById('account-area');

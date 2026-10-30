@@ -4,6 +4,8 @@ let current=null;
 export const auth={
   get user(){return current;},
   get isAdmin(){return current?.role==='admin';},
+  get isCourier(){return current?.role==='repartidor';},
+  get isStaff(){return ['admin','repartidor'].includes(current?.role);},
   async restore(){
     if(!sessionStorage.getItem('farmacia-mvc-token'))return null;
     current=await request('/auth/me');return current;

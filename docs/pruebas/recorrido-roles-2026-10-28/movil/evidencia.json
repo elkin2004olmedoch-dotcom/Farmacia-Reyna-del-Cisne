@@ -1,0 +1,90 @@
+{
+  "entorno": "API localhost y SQLite temporal del browser-server; ningún dato de producción",
+  "gps": "Destino y GPS sintéticos; sólo compartidos tras clic explícito. La llamada y Google Maps no se abren.",
+  "mapa": "Proveedor OpenStreetMap real",
+  "tilesLoaded": [
+    6
+  ],
+  "providerHttpFailures": [],
+  "cleanup": [
+    {
+      "name": "promocion",
+      "ok": true
+    },
+    {
+      "name": "producto",
+      "ok": true
+    },
+    {
+      "name": "zona",
+      "ok": true
+    },
+    {
+      "name": "repartidor",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "images": [
+    {
+      "file": "01-cliente-registrado.png",
+      "bytes": 51218,
+      "sha256": "537e1949b11fa2fe17ecdd446697200f596281dea177f9851d32a04d8ea5457a"
+    },
+    {
+      "file": "02-farmi-precio-y-promocion.png",
+      "bytes": 66350,
+      "sha256": "6110fb34b0c9c090ef952e005cc370e318d4fa07aa16f3b483aa54f24ed6984a"
+    },
+    {
+      "file": "03-admin-zona-pendiente-y-repartidor.png",
+      "bytes": 86964,
+      "sha256": "1f58bb40fbff4b65998058ec9285861f6ed8612a7b1a423187c555112778df1c"
+    },
+    {
+      "file": "04-catalogo-descuento-y-barra-inferior.png",
+      "bytes": 91445,
+      "sha256": "7d4a403a48b571d616e4510b94bb94d6467f900c99d599b74fa56566e69532e2"
+    },
+    {
+      "file": "05-carrito-con-imagen.png",
+      "bytes": 65018,
+      "sha256": "b1536fed97f89701fe8f11bba888d8a62457427729fc8c52c4cb6a55ae3e1f33"
+    },
+    {
+      "file": "06-checkout-tarifa-pendiente.png",
+      "bytes": 96151,
+      "sha256": "ce87eb258814da17205d2576dc4df890d5bafa441e7cd9ca60f34b413a4bd4f8"
+    },
+    {
+      "file": "07-tarifa-actualizada-y-total.png",
+      "bytes": 96069,
+      "sha256": "0de902db7fc56a26696586c8385d9e628e11d66250eec5732725926935ed6b6d"
+    },
+    {
+      "file": "08-pedido-real-confirmado.png",
+      "bytes": 112182,
+      "sha256": "d1a52ec93e9dd9829fcee408e0fd5636d254be5aa19f53ef8fac9739ae4ce9a4"
+    },
+    {
+      "file": "09-pedido-y-repartidor-asignados-por-farmi.png",
+      "bytes": 99742,
+      "sha256": "f57fbd841f9c8bd4857fa4667b3aade816a6bb5cf08eb5384dce138c25ddf548"
+    },
+    {
+      "file": "10-repartidor-llegada-google-maps-y-llamada.png",
+      "bytes": 58825,
+      "sha256": "656f6f42fd185a660a28cd361cc4e49bbee3498e0ba04f24abd56c2342f5da25"
+    },
+    {
+      "file": "11-cliente-seguimiento-privado-mapa-voluntario.png",
+      "bytes": 58793,
+      "sha256": "19a45466418efc61f9d766f9570cda28e365a4673ded5cb06a363d8cbced5b29"
+    },
+    {
+      "file": "12-cliente-entrega-cerrada-sin-ubicacion.png",
+      "bytes": 57964,
+      "sha256": "e89fdcf16bdf99405239880f93cd01eabd77e7b7952afeba17b07ba7dc0ff05c"
+    }
+  ]
+}

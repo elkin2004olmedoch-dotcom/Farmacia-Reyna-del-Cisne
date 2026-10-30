@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-21T16:43:24.787Z",
+  "scope": "Local integration on real GitHub history; no production data, deployment or benchmark performed by this verification run.",
+  "baseCommit": "1e5580596e89d0bac591a773210e99b220fd0dd0",
+  "sourceSnapshot": "07706e6",
+  "fixture": "Temporary SQLite databases and local browser servers. Express and static Pages origins isolated; third parties blocked in Pages tests. No real SRI issuance.",
+  "preservation": {
+    "remoteFeatureFilesChecked": 97,
+    "unchanged": "Remote-only files, historical storefront and service worker, Render deployment configuration, admin assistant/model/controller, category analytics/model/view, cart event bridge and their existing tests.",
+    "surgicalChanges": "Mascot atlas eager loading removed; session-pending selector added without removing remote CSS; MVC generator keeps remote cart SVG and adds only WebP/loading state.",
+    "trackedBrowserCapturesRestored": 28
+  },
+  "regressions": [
+    {
+      "behavior": "Pages artifact retains remote .mjs dependencies and auxiliary CSS",
+      "red": "Temporarily restoring the .js-only allowlist fails for controllers/admin-command.mjs",
+      "green": "Allowlist restored; all 5 pages-build tests pass"
+    },
+    {
+      "behavior": "Benchmark baseline retains imported .mjs files and excludes uploads/private files",
+      "red": "Original snapshot allowlist fails for omitted helper.mjs",
+      "green": "Allowlist broadened to .mjs; 1/1 regression passes"
+    }
+  ],
+  "suites": [
+    {
+      "command": "npm test",
+      "passed": 177,
+      "durationMs": 80590.8825,
+      "logSha256": "0bc8c2c4ba728f91a7b6909b4239cfcb5752b40096d2e3b4e84013619a89bf52",
+      "exitCode": 0,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "npm run test:reto1",
+      "passed": 38,
+      "durationMs": 701.8202,
+      "logSha256": "6a23ad3bf6c0272f212e6942dfbbef9c3bf09749f6728f16b026c2784406755a",
+      "exitCode": 0,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "npm run test:browser",
+      "passed": 54,
+      "durationReported": "5.4m",
+      "logSha256": "709b6504677641f718ae0a993e6cb1b406f0ce18bcd82fe848ee54c3b05e728c",
+      "exitCode": 0,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "npx playwright test --config tests/reto2/pages.config.cjs",
+      "passed": 20,
+      "durationReported": "1.4m",
+      "logSha256": "bc7380613bd1bda9034815c8871319d6736bb0d366f16c356d0914576f95222c",
+      "exitCode": 0,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "limits": [
+    "No benchmark was run as part of this verification; performance comparisons are separate evidence.",
+    "Cloudflare and Render public deployment checks are separate from these local fixtures.",
+    "No dependency, database schema or migration changes."
+  ],
+  "checks": {
+    "nodeSyntax": "New CJS files checked",
+    "gitDiffWhitespace": "Passed",
+    "deletedTrackedFiles": 0,
+    "noCommitOrPush": true
+  }
+}

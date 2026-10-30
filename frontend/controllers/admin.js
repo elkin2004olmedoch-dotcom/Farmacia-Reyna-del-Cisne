@@ -11,6 +11,7 @@ import {watchUpdates,preserveFocus} from './updates.js';
 import {imageController} from './images.js';
 import {billingController} from './billing.js';
 import {adminCompanionController} from './admin-companion.js';
+import {ZONE_FORM_DRAFT} from '../models/deliveries.js';
 
 const editableSections=['productos','promociones','proveedores','lotes','movimientos'];
 const sectionForms={productos:'product-form',promociones:'promotion-form',proveedores:'supplier-form',lotes:'lot-form',movimientos:'movement-form'};
@@ -103,7 +104,7 @@ export async function adminController() {
     if(image?.pending){status.textContent='Espera a que termine de cargar la imagen.';return;}
     const issues=adminFormIssues(form);if(!errors(form,issues)){status.textContent='Revisa los campos indicados antes de guardar.';return;}
     const fields=Object.fromEntries(new FormData(form));let values;
-    if(section==='productos')values={...fields,...Object.fromEntries(['codigoInterno','codigoBarras','laboratorio','principioActivo','concentracion','presentacion','registroSanitario','fundamentoIva'].map(key=>[key,fields[key]?.trim() || null])),precio:Number(fields.precio),pvpMaximo:fields.pvpMaximo?Number(fields.pvpMaximo):null,stock:Number(fields.stock),stockMinimo:Number(fields.stockMinimo),descuentoPorcentaje:Number(fields.descuentoPorcentaje),requiereReceta:form.elements.requiereReceta.checked,...(editing?{esperadoUpdatedAt:editingVersion}:{})};
+    if(section==='productos')values={...fields,...Object.fromEntries(['codigoInterno','codigoBarras','laboratorio','principioActivo','concentracion','presentacion','registroSanitario','fundamentoIva'].map(key=>[key,fields[key]?.trim() || null])),precio:Number(fields.precio),pvpMaximo:fields.pvpMaximo?Number(fields.pvpMaximo):null,stock:Number(fields.stock),stockMinimo:Number(fields.stockMinimo),descuentoPorcentaje:Number(fields.descuentoPorcentaje),requiereReceta:form.elements.requiereReceta.checked,...Object.fromEntries(['controlado','biologico','cadenaFrio'].map(key=>[key,form.elements[key].checked])),...(editing?{esperadoUpdatedAt:editingVersion}:{})};
     else if(section==='promociones')values={...fields,imagen:fields.imagen || null,alt:fields.imagen?fields.alt:null,descuentoPorcentaje:Number(fields.descuentoPorcentaje),activa:form.elements.activa.checked,vistaPrevia:form.elements.vistaPrevia.checked,orden:Number(fields.orden),inicio:ecuadorDateTime(fields.inicio),fin:ecuadorDateTime(fields.fin)};
     else if(section==='proveedores')values={...fields,activo:form.elements.activo.checked};
     else if(section==='lotes')values={...fields,cantidad:Number(fields.cantidad),costoUnitario:Number(fields.costoUnitario),proveedorId:fields.proveedorId || null};
@@ -137,8 +138,33 @@ export async function adminController() {
   stateDialog.addEventListener('cancel',event=>{if(stateForm.querySelector('[type=submit][aria-busy=true]'))event.preventDefault();});
   for(const button of document.querySelectorAll('[data-state-close]'))button.addEventListener('click',()=>stateDialog.close());
   for(const button of document.querySelectorAll('[data-editor-close]'))button.addEventListener('click',()=>dialog.close());
-  await render();
-  adminCompanionController({refresh:()=>render({silent:true})});
+  // The section has its recovery handlers; a data error must not lock navigation.
+  try{await render();}catch(error){message(error.message,true,true);}
+  async function navigate(section){
+    if(!auth.isAdmin)throw new Error('Inicia sesión nuevamente como administrador.');
+    if(document.querySelector('dialog[open]'))throw new Error('Termina o cierra el formulario abierto antes de cambiar de sección.');
+    if(section==='entregas'){location.assign('entregas.html');return;}
+    if(![...editableSections,'dashboard','pedidos','usuarios','detalles','fiscal','facturacion'].includes(section))throw new Error('Esa sección no está disponible.');
+    name=section;page=1;history.replaceState(null,'',section==='dashboard'?'admin.html':'admin.html?tabla='+section);await render();
+    document.getElementById('contenido').focus();
+  }
+  async function openEditor(section,values={},record){
+    if(section==='entregas'){
+      if(!auth.isAdmin)throw new Error('Inicia sesión nuevamente como administrador.');
+      const allowed=['nombre','provincia','canton','tarifaCentavos','ivaCategoria','fundamentoIva','activa'];
+      const draft=Object.fromEntries(Object.entries(values).filter(([key])=>allowed.includes(key)));
+      sessionStorage.setItem(ZONE_FORM_DRAFT,JSON.stringify({values:draft,createdAt:Date.now()}));location.assign('entregas.html#delivery-zone-editor');return;
+    }
+    if(!editableSections.includes(section))throw new Error('Usa los controles específicos de esa sección.');
+    await navigate(section);await open(record);
+    const form=forms[section];
+    for(const [key,value] of Object.entries(values)){const field=form.elements.namedItem(key);if(!field || value==null)continue;if(field.type==='checkbox')field.checked=Boolean(value);else field.value=String(value);}
+    if(section==='productos')pharmaceuticalRequired();
+    if(section==='promociones')promotionEditorState(form);
+    if(section==='movimientos')await loadMovementLots();
+    form.querySelector('input:not([type=hidden]),select,textarea')?.focus();
+  }
+  adminCompanionController({refresh:()=>render({silent:true}),navigate,openEditor});
   const refresh=watchUpdates(()=>render({silent:true}),{canRefresh:()=>auth.isAdmin && !document.querySelector('dialog[open]') && !document.querySelector('#admin-area [aria-busy=true]')});
   dialog.addEventListener('close',()=>{lotRequest++;openingId++;productImage.reset();promoImage.reset();if(!auth.isAdmin || !dialog.isConnected)return;(previousFocus?.isConnected?previousFocus:document.getElementById('admin-create'))?.focus();void refresh();});
   stateDialog.addEventListener('close',()=>{if(!auth.isAdmin || !stateDialog.isConnected)return;if(stateFocus?.isConnected)stateFocus.focus();void refresh();});

@@ -1,0 +1,364 @@
+{
+  "scope": "Authorized sequential read-only Render verification. OPTIONS are preflight only; no writes, registration, login, order/customer data, payment, manual database access, redirect following, browser, or benchmark. Public payloads sanitized to counts/upload image routes only; no prices or PII retained.",
+  "url": "https://farmacia-reina-del-cisne.onrender.com",
+  "pagesOrigin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+  "expectedDeployedCommit": "75aee3e67ca0e807e8047f5e53e9e9769275cac2",
+  "startedAt": "2026-10-21T16:52:53.195924+00:00",
+  "finishedAt": "2026-10-21T16:52:56.410827+00:00",
+  "requestCount": 10,
+  "tlsVerification": "Python default CA chain and hostname verification enabled",
+  "timingDefinition": "Client verification wall/time-to-response-headers includes new connection DNS/TCP/TLS and network. These 10 serial requests are not a performance benchmark or cold-start comparison.",
+  "records": [
+    {
+      "requestNumber": 1,
+      "method": "OPTIONS",
+      "path": "/api/auth/login",
+      "at": "2026-10-21T16:52:53.195924+00:00",
+      "expectedStatus": 204,
+      "requestContext": {
+        "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "syntheticInvalidBearer": false,
+        "requestedMethod": "POST",
+        "requestedHeaders": "content-type"
+      },
+      "clientTimeToHeadersMs": 383.51,
+      "status": 204,
+      "headers": {
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "access-control-allow-headers": "Content-Type,Authorization",
+        "vary": "Origin",
+        "cache-control": "no-store",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "dae35cb7-f9b6-40f8-94ef-f15f24a05a14",
+        "server": "cloudflare",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer"
+      },
+      "checks": {
+        "expectedStatus": true,
+        "allowsExactPagesOrigin": true,
+        "allowsPost": true,
+        "allowsRequestedHeaders": true,
+        "credentialsNotEnabled": true
+      },
+      "clientWallMs": 383.75
+    },
+    {
+      "requestNumber": 2,
+      "method": "OPTIONS",
+      "path": "/api/pedidos",
+      "at": "2026-10-21T16:52:53.607036+00:00",
+      "expectedStatus": 204,
+      "requestContext": {
+        "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "syntheticInvalidBearer": false,
+        "requestedMethod": "POST",
+        "requestedHeaders": "content-type,authorization"
+      },
+      "clientTimeToHeadersMs": 267.51,
+      "status": 204,
+      "headers": {
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
+        "access-control-allow-headers": "Content-Type,Authorization",
+        "vary": "Origin",
+        "cache-control": "no-store",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "d4f93f6b-3f72-4baa-a73d-b49b437f5090",
+        "server": "cloudflare",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer"
+      },
+      "checks": {
+        "expectedStatus": true,
+        "allowsExactPagesOrigin": true,
+        "allowsPost": true,
+        "allowsRequestedHeaders": true,
+        "credentialsNotEnabled": true
+      },
+      "clientWallMs": 267.67
+    },
+    {
+      "requestNumber": 3,
+      "method": "GET",
+      "path": "/api/productos?pageSize=4",
+      "at": "2026-10-21T16:52:53.897601+00:00",
+      "expectedStatus": 200,
+      "requestContext": {
+        "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "syntheticInvalidBearer": false,
+        "requestedMethod": null,
+        "requestedHeaders": null
+      },
+      "clientTimeToHeadersMs": 479.48,
+      "status": 200,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "vary": "Origin, Accept-Encoding",
+        "cache-control": "no-store",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "8b5e39f7-63e8-4378-8f32-f479eeb0f28e",
+        "server": "cloudflare",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer"
+      },
+      "checks": {
+        "expectedStatus": true,
+        "cacheNoStore": true,
+        "allowsExactPagesOrigin": true
+      },
+      "responseBytesRead": 3262,
+      "publicSummary": {
+        "returnedItems": 4,
+        "totalPublicProducts": 18,
+        "uploadImageRoutes": []
+      },
+      "clientWallMs": 480.26
+    },
+    {
+      "requestNumber": 4,
+      "method": "GET",
+      "path": "/api/promociones",
+      "at": "2026-10-21T16:52:54.401861+00:00",
+      "expectedStatus": 200,
+      "requestContext": {
+        "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "syntheticInvalidBearer": false,
+        "requestedMethod": null,
+        "requestedHeaders": null
+      },
+      "clientTimeToHeadersMs": 258.03,
+      "status": 200,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "vary": "Origin, Accept-Encoding",
+        "cache-control": "no-store",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "2703b842-403c-489c-921b-dc2292dc9423",
+        "server": "cloudflare",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer"
+      },
+      "checks": {
+        "expectedStatus": true,
+        "cacheNoStore": true,
+        "allowsExactPagesOrigin": true
+      },
+      "responseBytesRead": 21,
+      "publicSummary": {
+        "returnedCampaigns": 0,
+        "uploadImageRoutes": []
+      },
+      "clientWallMs": 258.3
+    },
+    {
+      "requestNumber": 5,
+      "method": "GET",
+      "path": "/api/auth/me",
+      "at": "2026-10-21T16:52:54.684834+00:00",
+      "expectedStatus": 401,
+      "requestContext": {
+        "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "syntheticInvalidBearer": true,
+        "requestedMethod": null,
+        "requestedHeaders": null
+      },
+      "clientTimeToHeadersMs": 264.14,
+      "status": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "vary": "Origin, Accept-Encoding",
+        "cache-control": "no-store",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "fbf42e52-9542-4f8d-bb57-302d9c09f837",
+        "server": "cloudflare",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer"
+      },
+      "checks": {
+        "expectedStatus": true,
+        "cacheNoStore": true,
+        "allowsExactPagesOrigin": true
+      },
+      "responseBytesRead": 171,
+      "errorCode": "INVALID_TOKEN",
+      "clientWallMs": 264.54
+    },
+    {
+      "requestNumber": 6,
+      "method": "GET",
+      "path": "/api/admin/resumen",
+      "at": "2026-10-21T16:52:54.976424+00:00",
+      "expectedStatus": 401,
+      "requestContext": {
+        "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "syntheticInvalidBearer": false,
+        "requestedMethod": null,
+        "requestedHeaders": null
+      },
+      "clientTimeToHeadersMs": 255.73,
+      "status": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "vary": "Origin, Accept-Encoding",
+        "cache-control": "no-store",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "ac0aee9d-0792-47f0-ad5f-71c3482c0fda",
+        "server": "cloudflare",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer"
+      },
+      "checks": {
+        "expectedStatus": true,
+        "cacheNoStore": true,
+        "allowsExactPagesOrigin": true
+      },
+      "responseBytesRead": 139,
+      "errorCode": "AUTH_REQUIRED",
+      "clientWallMs": 255.98
+    },
+    {
+      "requestNumber": 7,
+      "method": "GET",
+      "path": "/api/pedidos/mis-pedidos",
+      "at": "2026-10-21T16:52:55.254951+00:00",
+      "expectedStatus": 401,
+      "requestContext": {
+        "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "syntheticInvalidBearer": false,
+        "requestedMethod": null,
+        "requestedHeaders": null
+      },
+      "clientTimeToHeadersMs": 280.51,
+      "status": 401,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "access-control-allow-origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+        "vary": "Origin, Accept-Encoding",
+        "cache-control": "no-store",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "f3d5b35c-8ad0-4c53-ad5b-86b4729142ca",
+        "server": "cloudflare",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer"
+      },
+      "checks": {
+        "expectedStatus": true,
+        "cacheNoStore": true,
+        "allowsExactPagesOrigin": true
+      },
+      "responseBytesRead": 139,
+      "errorCode": "AUTH_REQUIRED",
+      "clientWallMs": 280.79
+    },
+    {
+      "requestNumber": 8,
+      "method": "GET",
+      "path": "/api/productos?pageSize=4",
+      "at": "2026-10-21T16:52:55.558688+00:00",
+      "expectedStatus": 403,
+      "requestContext": {
+        "origin": "https://untrusted.invalid",
+        "syntheticInvalidBearer": false,
+        "requestedMethod": null,
+        "requestedHeaders": null
+      },
+      "clientTimeToHeadersMs": 250.81,
+      "status": 403,
+      "headers": {
+        "content-type": "application/json; charset=utf-8",
+        "vary": "Accept-Encoding",
+        "cache-control": "no-store",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "7c215cbd-70ed-403c-9a7d-c8a73726b400",
+        "server": "cloudflare",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer"
+      },
+      "checks": {
+        "expectedStatus": true,
+        "cacheNoStore": true,
+        "untrustedGetsNoAllowOrigin": true
+      },
+      "responseBytesRead": 131,
+      "errorCode": "CORS_FORBIDDEN",
+      "clientWallMs": 251.24
+    },
+    {
+      "requestNumber": 9,
+      "method": "HEAD",
+      "path": "/assets/uploads/00000000-0000-4000-8000-000000000000.webp",
+      "at": "2026-10-21T16:52:55.834493+00:00",
+      "expectedStatus": 302,
+      "requestContext": {
+        "origin": null,
+        "syntheticInvalidBearer": false,
+        "requestedMethod": null,
+        "requestedHeaders": null
+      },
+      "clientTimeToHeadersMs": 264.75,
+      "status": 302,
+      "headers": {
+        "vary": "Accept",
+        "cache-control": "public, max-age=86400",
+        "cross-origin-resource-policy": "cross-origin",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "f4de1683-d942-4810-ad12-77d91f01666f",
+        "location": "https://xjxnnqasikxlytjaxjdt.supabase.co/storage/v1/object/public/farmaciaproductos/00000000-0000-4000-8000-000000000000.webp",
+        "server": "cloudflare",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer"
+      },
+      "checks": {
+        "expectedStatus": true,
+        "corpCrossOrigin": true,
+        "locationIsExpectedPublicSupabaseImage": true,
+        "redirectNotFollowed": true
+      },
+      "clientWallMs": 265.39
+    },
+    {
+      "requestNumber": 10,
+      "method": "HEAD",
+      "path": "/",
+      "at": "2026-10-21T16:52:56.126891+00:00",
+      "expectedStatus": 200,
+      "requestContext": {
+        "origin": null,
+        "syntheticInvalidBearer": false,
+        "requestedMethod": null,
+        "requestedHeaders": null
+      },
+      "clientTimeToHeadersMs": 254.59,
+      "status": 200,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "vary": "Accept-Encoding",
+        "cache-control": "public, max-age=0",
+        "cross-origin-resource-policy": "same-origin",
+        "x-content-type-options": "nosniff",
+        "x-request-id": "7b887551-e938-47af-966a-b65b4d4cabde",
+        "server": "cloudflare",
+        "x-frame-options": "SAMEORIGIN",
+        "referrer-policy": "no-referrer"
+      },
+      "checks": {
+        "expectedStatus": true
+      },
+      "clientWallMs": 254.79
+    }
+  ]
+}

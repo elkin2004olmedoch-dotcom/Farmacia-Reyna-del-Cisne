@@ -1,4 +1,5 @@
 import {escape,money} from './common.js';
+import {publicImageUrl} from '../config.js';
 import {promotionPublication} from '../models/promotion-publication.js';
 const columns={
   productos:[['nombre','Producto'],['precio','Precio con IVA'],['stock','Stock'],['descuentoPorcentaje','Descuento directo %'],['pvpMaximo','PVP máximo impreso'],['ivaCategoria','IVA'],['stockMinimo','Stock mínimo'],['requiereReceta','Receta'],['categoria','Categoría'],['activo','Activo']],
@@ -61,7 +62,7 @@ export function fiscalView(data){
 export function imagePreviewView(prefix,path){
   const image=document.getElementById(prefix+'-image-preview');
   const valid=/^assets\/(?:images\/[a-z0-9-]+\.(?:jpg|png|webp|svg)|uploads\/[a-f0-9-]+\.webp)$/.test(path || '');
-  image.hidden=!valid;if(valid)image.src=path;else image.removeAttribute('src');
+  image.hidden=!valid;if(valid)image.src=publicImageUrl(path);else image.removeAttribute('src');
 }
 const stateLabels={pendiente:'Pendiente',confirmado:'Confirmado',preparado:'Preparado',entregado:'Entregado',cancelado:'Cancelado'};
 export function orderStateView(order){

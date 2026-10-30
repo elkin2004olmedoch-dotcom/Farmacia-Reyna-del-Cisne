@@ -1,0 +1,23 @@
+const {Router}=require('express');
+const {authenticate,roles}=require('../middleware/auth.cjs');
+const V=require('../middleware/validation.cjs');
+const D=require('../middleware/delivery-validation.cjs');
+const C=require('../controllers/entregas.cjs');
+module.exports=config=>{
+ const router=Router(),auth=authenticate(config),admin=roles('admin'),operator=roles('admin','repartidor');
+ const noStore=(req,res,next)=>{res.set('Cache-Control','no-store');next();};
+ router.get('/zonas-entrega',noStore,C.zones);
+ router.get('/admin/zonas-entrega',noStore,auth,admin,C.adminZones);
+ router.post('/admin/zonas-entrega',noStore,auth,admin,...D.zone,C.createZone);
+ router.put('/admin/zonas-entrega/:id',noStore,auth,admin,V.id,...D.zoneUpdate,C.updateZone);
+ router.get('/admin/repartidores',noStore,auth,admin,C.drivers);
+ router.post('/admin/repartidores',noStore,auth,admin,...D.driver,C.createDriver);
+ router.put('/admin/repartidores/:id',noStore,auth,admin,V.id,...D.driverActive,C.driverActive);
+ router.get('/entregas',noStore,auth,operator,...D.list,C.list);
+ router.post('/entregas/asignar',noStore,auth,admin,...D.assign,C.assign);
+ router.put('/entregas/:id/estado',noStore,auth,operator,V.id,...D.state,C.state);
+ router.put('/entregas/:id/ubicacion',noStore,auth,roles('repartidor'),V.id,...D.location,C.location);
+ router.delete('/entregas/:id/ubicacion',noStore,auth,roles('repartidor'),V.id,V.validated,C.clearLocation);
+ router.get('/pedidos/:id/seguimiento',noStore,auth,roles('user','admin'),V.id,V.validated,C.tracking);
+ return router;
+};

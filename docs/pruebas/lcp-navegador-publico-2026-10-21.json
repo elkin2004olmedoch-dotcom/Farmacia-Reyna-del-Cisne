@@ -1,0 +1,216 @@
+{
+  "site": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+  "api": "https://farmacia-reina-del-cisne.onrender.com",
+  "date": "2026-10-21T17:54:44.784Z",
+  "scope": "Public deployed UI; no real accounts, orders, payments, stock changes or private data",
+  "results": [
+    {
+      "name": "escritorio-publico",
+      "width": 1440,
+      "startedAt": "2026-10-21T17:53:46.299Z",
+      "mode": "real readonly API",
+      "passed": true,
+      "shellVisibleMs": 1118,
+      "homeCards": 4,
+      "hero": {
+        "loaded": true,
+        "width": 1672,
+        "path": "/assets/images/farmacia-fachada-reina.webp"
+      },
+      "horizontalOverflow": false,
+      "axeViolations": [],
+      "catalogCards": 18,
+      "cartAcknowledged": true,
+      "cartItems": 1,
+      "checkoutRequiresLogin": true,
+      "apiRequests": [
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        },
+        {
+          "method": "GET",
+          "path": "/api/promociones"
+        },
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        },
+        {
+          "method": "GET",
+          "path": "/assets/uploads/62113271-4b00-4b07-bb3e-92419a0c405b.webp"
+        },
+        {
+          "method": "GET",
+          "path": "/api/productos/vitaminas"
+        },
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        }
+      ],
+      "heldRequests": 0,
+      "elapsedMs": 9652,
+      "mutationsBlocked": [],
+      "pageErrors": [],
+      "cspViolations": []
+    },
+    {
+      "name": "movil-publico",
+      "width": 375,
+      "startedAt": "2026-10-21T17:53:56.265Z",
+      "mode": "real readonly API",
+      "passed": true,
+      "shellVisibleMs": 1196,
+      "homeCards": 4,
+      "hero": {
+        "loaded": true,
+        "width": 1672,
+        "path": "/assets/images/farmacia-fachada-reina.webp"
+      },
+      "horizontalOverflow": false,
+      "axeViolations": [],
+      "catalogCards": 18,
+      "cartAcknowledged": true,
+      "cartItems": 1,
+      "checkoutRequiresLogin": true,
+      "apiRequests": [
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        },
+        {
+          "method": "GET",
+          "path": "/api/promociones"
+        },
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        },
+        {
+          "method": "GET",
+          "path": "/api/productos/vitaminas"
+        },
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        }
+      ],
+      "heldRequests": 0,
+      "elapsedMs": 10303,
+      "mutationsBlocked": [],
+      "pageErrors": [],
+      "cspViolations": []
+    },
+    {
+      "name": "api-sin-conexion",
+      "width": 375,
+      "startedAt": "2026-10-21T17:54:06.848Z",
+      "mode": "API requests aborted in this context",
+      "passed": true,
+      "shellVisibleMs": 1130,
+      "cards": 0,
+      "errorVisible": true,
+      "apiRequests": [
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        },
+        {
+          "method": "GET",
+          "path": "/api/promociones"
+        },
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        },
+        {
+          "method": "GET",
+          "path": "/api/promociones"
+        }
+      ],
+      "heldRequests": 0,
+      "elapsedMs": 1614,
+      "mutationsBlocked": [],
+      "pageErrors": [],
+      "cspViolations": []
+    },
+    {
+      "name": "api-retenida-30s",
+      "width": 1440,
+      "startedAt": "2026-10-21T17:54:09.099Z",
+      "mode": "API requests held for 30 real seconds in this context",
+      "passed": true,
+      "shellVisibleMs": 1174,
+      "cards": 4,
+      "apiRequests": [
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        },
+        {
+          "method": "GET",
+          "path": "/api/promociones"
+        },
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        },
+        {
+          "method": "GET",
+          "path": "/api/promociones"
+        },
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        },
+        {
+          "method": "GET",
+          "path": "/api/promociones"
+        }
+      ],
+      "heldRequests": 6,
+      "elapsedMs": 31652,
+      "mutationsBlocked": [],
+      "pageErrors": [],
+      "cspViolations": []
+    },
+    {
+      "name": "sesion-invalida",
+      "width": 1440,
+      "startedAt": "2026-10-21T17:54:41.467Z",
+      "mode": "real readonly API",
+      "passed": true,
+      "shellVisibleMs": 895,
+      "invalidTokenCleared": true,
+      "adminHidden": true,
+      "apiRequests": [
+        {
+          "method": "GET",
+          "path": "/api/productos"
+        },
+        {
+          "method": "GET",
+          "path": "/api/promociones"
+        },
+        {
+          "method": "GET",
+          "path": "/api/auth/me"
+        },
+        {
+          "method": "GET",
+          "path": "/api/auth/me"
+        },
+        {
+          "method": "GET",
+          "path": "/api/auth/me"
+        }
+      ],
+      "heldRequests": 0,
+      "elapsedMs": 3200,
+      "mutationsBlocked": [],
+      "pageErrors": [],
+      "cspViolations": []
+    }
+  ]
+}

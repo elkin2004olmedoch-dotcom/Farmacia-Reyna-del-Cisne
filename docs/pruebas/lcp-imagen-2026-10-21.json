@@ -1,0 +1,51 @@
+{
+  "sourceCommit": "86804e7",
+  "baselineFiles": 92,
+  "baselineManifestSha256": "b1631e853276b6bebe76385df5bb27593fc38e8e23c39d12ce19f42b48dec50a",
+  "before": {
+    "bytes": 1647804,
+    "sha256": "ed21c9a79c08aceadedae9984c453a6b784e43f74ee1be4680525cd8d20ad4d8"
+  },
+  "after": {
+    "bytes": 391110,
+    "sha256": "3ad5cde310565c5c7de247af74ad987f97a7197402e7ae65c02ac2fea162e8ae"
+  },
+  "conversion": {
+    "source": "frontend/assets/images/farmacia-fachada-reina.png",
+    "format": "webp",
+    "quality": 95,
+    "effort": 6,
+    "width": 1672,
+    "height": 941,
+    "resize": false
+  },
+  "comparison": {
+    "rmseRGB": 4.4987,
+    "psnrDb": 35.069,
+    "scope": "Pixel error against original PNG, not proof of perceptual equivalence"
+  },
+  "publicManifestComparison": {
+    "scope": "The 92 public files listed in the frozen local-control baseline manifest; excluded/non-public files are outside this comparison.",
+    "filesCompared": 92,
+    "changed": [
+      {
+        "path": "assets/images/farmacia-fachada-reina.webp",
+        "baselineSha256": "ed21c9a79c08aceadedae9984c453a6b784e43f74ee1be4680525cd8d20ad4d8",
+        "candidateSha256": "3ad5cde310565c5c7de247af74ad987f97a7197402e7ae65c02ac2fea162e8ae"
+      }
+    ],
+    "missing": [],
+    "onlyFacadeWebpChanged": true
+  },
+  "reduction": {
+    "bytes": 1256694,
+    "percent": 76.2648
+  },
+  "visualQaEvidence": "lcp-qa-visual-2026-10-21.json",
+  "evidencePreservation": {
+    "sourceFile": "lcp-image-evidence.json",
+    "sourceSha256": "856d01857339bde54007b6ab5a486de0a561acf69453c93b0ecb956b375c49ca",
+    "sanitization": "Replaced absolute local TEMP/workspace roots with placeholders. Original resource pathnames, timings, hashes and safe metadata retained; no bodies, query values or credentials.",
+    "rawTracesAndScreenshots": "Remain in TEMP; only metadata and SHA-256 references are included when present."
+  }
+}

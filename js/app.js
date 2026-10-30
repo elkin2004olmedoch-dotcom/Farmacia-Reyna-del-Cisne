@@ -76,7 +76,7 @@
       `Teléfono: ${details.phone}`, `Dirección: ${details.address}`,
       ...lines, `Total estimado: ${app.view.money(totals.totalCents)}. Por favor, confirmen disponibilidad y precio final.`
     ].join('\n');
-    global.open(`https://wa.me/593979275988?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+    global.open(`https://api.whatsapp.com/send?phone=593979275988&text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   });
   const normalize = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   let announcementTimer;

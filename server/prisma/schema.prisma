@@ -31,6 +31,9 @@ model Producto {
   presentacion String?
   registroSanitario String?
   requiereReceta Boolean @default(false)
+  controlado Boolean @default(false)
+  biologico Boolean @default(false)
+  cadenaFrio Boolean @default(false)
   stockMinimo Int @default(5)
   pvpMaximo Decimal?
   lotes Lote[]
@@ -52,6 +55,8 @@ model Usuario {
   createdAt    DateTime @default(now())
   pedidos      Pedido[]
   cambiosPedidos PedidoEstado[]
+  entregas Entrega[]
+  cambiosTarifa ZonaEntregaTarifa[]
   configuracionesFiscales ConfiguracionFiscal[]
   movimientos MovimientoInventario[]
 }
@@ -61,6 +66,17 @@ model Pedido {
   userId         String
   usuario        Usuario  @relation(fields: [userId], references: [id], onDelete: Restrict)
   total          Decimal
+  subtotalProductos Decimal?
+  costoEnvioCentavos Int @default(0)
+  envioIvaPorcentaje Int?
+  envioBaseImponible Decimal?
+  envioIvaMonto Decimal?
+  zonaEntregaId String?
+  zonaEntrega ZonaEntrega? @relation(fields:[zonaEntregaId],references:[id],onDelete:Restrict)
+  latitudEntrega Float?
+  longitudEntrega Float?
+  ubicacionEntregaAceptadaAt DateTime?
+  reparto Entrega?
   baseImponible  Decimal?
   ivaMonto       Decimal?
   estado         String   @default("pendiente")
@@ -81,8 +97,10 @@ model Pedido {
   historial      PedidoEstado[]
   movimientos    MovimientoInventario[]
   factura        FacturaPedido?
+  pago           Pago?
   @@unique([userId, requestKey])
   @@index([userId, createdAt])
+  @@index([zonaEntregaId])
 }
 
 model PedidoDetalle {
@@ -265,4 +283,81 @@ model FacturaPedido {
   updatedAt DateTime @updatedAt
   @@unique([emisorRuc,ambiente,establecimiento,puntoEmision,secuencial])
   @@index([createdAt])
+}
+model ZonaEntrega {
+  id String @id @default(uuid())
+  nombre String
+  provincia String
+  canton String
+  tarifaCentavos Int?
+  ivaCategoria String @default("general")
+  fundamentoIva String?
+  activa Boolean @default(true)
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  pedidos Pedido[]
+  tarifas ZonaEntregaTarifa[]
+  @@index([activa, nombre])
+}
+
+model ZonaEntregaTarifa {
+  id String @id @default(uuid())
+  zonaEntregaId String
+  zona ZonaEntrega @relation(fields:[zonaEntregaId],references:[id],onDelete:Restrict)
+  version Int
+  tarifaCentavos Int?
+  ivaCategoria String
+  fundamentoIva String?
+  actorId String?
+  actor Usuario? @relation(fields:[actorId],references:[id],onDelete:SetNull)
+  createdAt DateTime @default(now())
+  @@unique([zonaEntregaId,version])
+}
+
+model Entrega {
+  id String @id @default(uuid())
+  pedidoId String @unique
+  pedido Pedido @relation(fields:[pedidoId],references:[id],onDelete:Restrict)
+  repartidorId String?
+  repartidor Usuario? @relation(fields:[repartidorId],references:[id],onDelete:Restrict)
+  estado String @default("asignada")
+  version Int @default(1)
+  gpsVersion Int @default(0)
+  asignadaAt DateTime @default(now())
+  salidaAt DateTime?
+  llegadaAt DateTime?
+  finalizadaAt DateTime?
+  latitud Float?
+  longitud Float?
+  precision Float?
+  registradaAt DateTime?
+  recibidaAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([repartidorId,estado])
+  @@index([estado,createdAt])
+  @@index([recibidaAt])
+}
+
+model Pago {
+  id String @id @default(uuid())
+  pedidoId String @unique
+  pedido Pedido @relation(fields:[pedidoId],references:[id],onDelete:Restrict)
+  proveedor String @default("payphone")
+  entorno String
+  estado String @default("creando")
+  moneda String @default("USD")
+  totalCentavos Int
+  sinIvaCentavos Int
+  baseIvaCentavos Int
+  ivaCentavos Int
+  paymentId String? @unique
+  providerTransactionId Int? @unique
+  urlPago String?
+  confirmacionIniciadaAt DateTime?
+  confirmadaAt DateTime?
+  revisionMotivo String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

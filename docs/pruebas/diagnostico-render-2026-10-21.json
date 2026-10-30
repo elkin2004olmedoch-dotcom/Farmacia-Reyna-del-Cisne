@@ -1,0 +1,5931 @@
+{
+  "date": "2026-10-21",
+  "publicHttp": {
+    "startedAt": "2026-10-21T15:19:15.362Z",
+    "origin": "https://farmacia-reina-del-cisne.onrender.com",
+    "environment": {
+      "platform": "win32",
+      "node": "v24.15.0",
+      "architecture": "x64",
+      "timezone": "Etc/GMT+5",
+      "httpClient": "curl.exe 8.21.0 (Schannel)",
+      "tlsVerification": "default enabled"
+    },
+    "methodology": {
+      "sequential": true,
+      "method": "GET",
+      "rootMaxSamples": 2,
+      "firstRootTimeoutMs": 60000,
+      "otherTimeoutMs": 30000,
+      "connectTimeoutMs": 20000,
+      "retries": 0,
+      "redirectsFollowed": false,
+      "compression": "curl --compressed (supported gzip/deflate)",
+      "bodiesSaved": false,
+      "cookiesSaved": false,
+      "newCurlProcessPerSample": true,
+      "proxyPolicy": "curl default environment behavior; no proxy credentials recorded",
+      "times": "curl cumulative seconds converted to milliseconds, from transfer start"
+    },
+    "samples": [
+      {
+        "route": "/",
+        "label": "first-root",
+        "startedAt": "2026-10-21T15:19:15.387Z",
+        "status": 200,
+        "exitCode": 0,
+        "httpVersion": "1.1",
+        "proxyUsed": 0,
+        "proxyConnectStatus": null,
+        "timingMs": {
+          "dns": 160.98,
+          "connect": 208.61,
+          "tls": 673.11,
+          "pretransfer": 673.24,
+          "firstByte": 33113.93,
+          "total": 33114.32
+        },
+        "bodyBytes": 5274,
+        "headers": {
+          "date": "Wed, 21 Oct 2026 15:18:23 GMT",
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "public, max-age=0",
+          "etag": "W/\"44d2-1a145b1a340\"",
+          "last-modified": "Fri, 16 Oct 2026 17:10:32 GMT",
+          "server": "cloudflare",
+          "vary": "Accept-Encoding",
+          "x-render-origin-server": "Render",
+          "x-request-id": "fd9f1819-47b9-496e-b34f-435351f4fc81",
+          "cf-cache-status": "DYNAMIC",
+          "content-encoding": "gzip"
+        },
+        "error": null
+      },
+      {
+        "route": "/",
+        "label": "consecutive-root",
+        "startedAt": "2026-10-21T15:19:48.561Z",
+        "status": 200,
+        "exitCode": 0,
+        "httpVersion": "1.1",
+        "proxyUsed": 0,
+        "proxyConnectStatus": null,
+        "timingMs": {
+          "dns": 61.8,
+          "connect": 79.51,
+          "tls": 269,
+          "pretransfer": 269.13,
+          "firstByte": 452.2,
+          "total": 452.5
+        },
+        "bodyBytes": 5274,
+        "headers": {
+          "date": "Wed, 21 Oct 2026 15:18:23 GMT",
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "public, max-age=0",
+          "cf-cache-status": "DYNAMIC",
+          "etag": "W/\"44d2-1a145b1a340\"",
+          "last-modified": "Fri, 16 Oct 2026 17:10:32 GMT",
+          "server": "cloudflare",
+          "vary": "Accept-Encoding",
+          "x-render-origin-server": "Render",
+          "x-request-id": "2ca7b344-6983-4fd8-b91b-67c7d839a980",
+          "content-encoding": "gzip"
+        },
+        "error": null
+      },
+      {
+        "route": "/api/salud",
+        "label": "health-after-root",
+        "startedAt": "2026-10-21T15:19:49.068Z",
+        "status": 200,
+        "exitCode": 0,
+        "httpVersion": "1.1",
+        "proxyUsed": 0,
+        "proxyConnectStatus": null,
+        "timingMs": {
+          "dns": 28.67,
+          "connect": 42.63,
+          "tls": 144.69,
+          "pretransfer": 144.81,
+          "firstByte": 346.99,
+          "total": 347.15
+        },
+        "bodyBytes": 42,
+        "headers": {
+          "date": "Wed, 21 Oct 2026 15:18:23 GMT",
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "no-store",
+          "etag": "W/\"2a-i7TY/IRoMn9E0w6u9DwLrGCmOyA\"",
+          "server": "cloudflare",
+          "vary": "Accept-Encoding",
+          "x-render-origin-server": "Render",
+          "x-request-id": "b69cabcc-a0c1-4500-bc0f-7d7f74e5da9e",
+          "cf-cache-status": "DYNAMIC"
+        },
+        "error": null
+      },
+      {
+        "route": "/api/productos?pageSize=4",
+        "label": "catalog-after-health",
+        "startedAt": "2026-10-21T15:19:49.471Z",
+        "status": 200,
+        "exitCode": 0,
+        "httpVersion": "1.1",
+        "proxyUsed": 0,
+        "proxyConnectStatus": null,
+        "timingMs": {
+          "dns": 7.29,
+          "connect": 18.41,
+          "tls": 145.74,
+          "pretransfer": 145.86,
+          "firstByte": 451.78,
+          "total": 452.09
+        },
+        "bodyBytes": 906,
+        "headers": {
+          "date": "Wed, 21 Oct 2026 15:18:24 GMT",
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "no-store",
+          "etag": "W/\"cbe-UNUZ9mNPNxoLrbJmi2gsZ+e6/40\"",
+          "server": "cloudflare",
+          "vary": "Accept-Encoding",
+          "x-render-origin-server": "Render",
+          "x-request-id": "a2262f68-ad01-4333-9482-2001ebed29bc",
+          "cf-cache-status": "DYNAMIC",
+          "content-encoding": "gzip"
+        },
+        "error": null
+      }
+    ],
+    "finishedAt": "2026-10-21T15:19:49.979Z",
+    "configurationEvidence": {
+      "publicConfig": "data/deployment.json",
+      "configuredOrigin": "https://farmacia-reina-del-cisne.onrender.com",
+      "renderBlueprint": "render.yaml: plan free; npm start; /api/salud health check",
+      "frontend": "server/app.cjs serves frontend/ as static content",
+      "backend": "same-origin Express /api",
+      "vercelConfigFound": false,
+      "deployedRevisionVerified": false
+    },
+    "logAccess": {
+      "privateRenderLogsAccessed": false,
+      "privateVercelLogsAccessed": false,
+      "renderVercelCliInPath": false,
+      "backendLogsFoundInServer": false,
+      "existingLocalLogs": "Six .playwright-mcp console logs dated 2026-10-07 and 2026-10-15; metadata only",
+      "logger": "server/middleware/logger.cjs writes per-request JSON to stdout and sets X-Request-Id"
+    },
+    "interpretation": {
+      "observed": "First HTML request had a long pre-first-byte delay; consecutive HTML and two API requests completed in under 0.5 seconds in this sample.",
+      "firstRootWaitAfterPretransferMs": 32440.69,
+      "rootCause": "Not established; no private hosting lifecycle or request logs.",
+      "coldStart": "Compatible with transient service activation; not demonstrated.",
+      "healthTiming": "Includes network, TLS, Express and SELECT 1; not isolated database query latency.",
+      "clockNote": "Client wall-clock timestamps and HTTP Date differ; preserve both and correlate private logs using X-Request-Id."
+    },
+    "limitations": [
+      "One first/consecutive pair and one sample per API; not percentiles or proof of sustained availability.",
+      "No authentication, production mutations, deployment, infrastructure changes or database inspection.",
+      "Bodies discarded to NUL and sensitive/cookie headers excluded.",
+      "No redirects received; no redirect destinations followed.",
+      "No remote source-code revision verified."
+    ]
+  },
+  "localBefore": {
+    "label": "investigation-before",
+    "date": "2026-10-21T15:24:00.481Z",
+    "node": "v24.15.0",
+    "chrome": "installed channel chrome",
+    "database": "temporary SQLite seeded by fixture",
+    "network": "10 Mbps download / 5 Mbps upload / 40 ms latency for constrained profile; cache disabled; desktop 1440x1000",
+    "connectMs": 13.59,
+    "select1Ms": [
+      3.31,
+      0.48,
+      0.31,
+      0.34,
+      0.35
+    ],
+    "api": [
+      {
+        "route": "/api/productos?pageSize=100",
+        "sample": 0,
+        "status": 200,
+        "ttfbMs": 49.22,
+        "totalMs": 51.23,
+        "bytes": 15177
+      },
+      {
+        "route": "/api/productos?pageSize=100",
+        "sample": 1,
+        "status": 200,
+        "ttfbMs": 10.81,
+        "totalMs": 11.07,
+        "bytes": 15177
+      },
+      {
+        "route": "/api/productos?pageSize=100",
+        "sample": 2,
+        "status": 200,
+        "ttfbMs": 7.38,
+        "totalMs": 7.87,
+        "bytes": 15177
+      },
+      {
+        "route": "/api/productos?pageSize=4",
+        "sample": 0,
+        "status": 200,
+        "ttfbMs": 6.19,
+        "totalMs": 6.36,
+        "bytes": 3262
+      },
+      {
+        "route": "/api/productos?pageSize=4",
+        "sample": 1,
+        "status": 200,
+        "ttfbMs": 5.4,
+        "totalMs": 5.64,
+        "bytes": 3262
+      },
+      {
+        "route": "/api/productos?pageSize=4",
+        "sample": 2,
+        "status": 200,
+        "ttfbMs": 5.26,
+        "totalMs": 5.44,
+        "bytes": 3262
+      },
+      {
+        "route": "/api/promociones",
+        "sample": 0,
+        "status": 200,
+        "ttfbMs": 8.59,
+        "totalMs": 8.82,
+        "bytes": 2347
+      },
+      {
+        "route": "/api/promociones",
+        "sample": 1,
+        "status": 200,
+        "ttfbMs": 6.88,
+        "totalMs": 7.08,
+        "bytes": 2347
+      },
+      {
+        "route": "/api/promociones",
+        "sample": 2,
+        "status": 200,
+        "ttfbMs": 5.23,
+        "totalMs": 5.43,
+        "bytes": 2347
+      }
+    ],
+    "samples": [
+      {
+        "profile": "local",
+        "sample": 0,
+        "ttfbMs": 5,
+        "htmlMs": 848.8999999999069,
+        "fcpMs": 1212,
+        "lcp": {
+          "startTime": 1232,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:65361/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 2799.8000000002794,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 6.100000000093132,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 7.399999999906868,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 7.7999999998137355,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 8.200000000186265,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 13.100000000093132,
+            "transferBytes": 26627,
+            "decodedBytes": 26327,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 35.89999999990687,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 26.100000000093132,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 27.299999999813735,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 53,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 36.09999999962747,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 37.5,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 23.300000000279397,
+            "transferBytes": 1681,
+            "decodedBytes": 1381,
+            "initiator": "script"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 1919.2999999998137,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 16.299999999813735,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 11.5,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 12,
+            "transferBytes": 4235,
+            "decodedBytes": 3935,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 15.599999999627471,
+            "transferBytes": 7618,
+            "decodedBytes": 7318,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 16.40000000037253,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 17,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 17.100000000093132,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 17.899999999906868,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 24.399999999906868,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 11.799999999813735,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 13.100000000093132,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 13.700000000186265,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 14.100000000093132,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 6.5,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 6.699999999720603,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 6.800000000279397,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 7.100000000093132,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 7.600000000093132,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 7.899999999906868,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 12.299999999813735,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 12.5,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 12.5,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 13.599999999627471,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 13.699999999720603,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 14.299999999813735,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 19.700000000186265,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 19.899999999906868,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 20,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 20.699999999720603,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 20.699999999720603,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 5.7000000001862645,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 6.5,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 7.100000000093132,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 4.600000000093132,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 7.7000000001862645,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 1.7999999998137355,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 3.400000000372529,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 5.600000000093132,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 6.199999999720603,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 7.2999999998137355,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 3.7999999998137355,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 8.200000000186265,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 8.700000000186265,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 5,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 11.400000000372529,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      },
+      {
+        "profile": "local",
+        "sample": 1,
+        "ttfbMs": 1.7000000001862645,
+        "htmlMs": 3.8999999999068677,
+        "fcpMs": 400,
+        "lcp": {
+          "startTime": 400,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:65361/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 2071.7999999998137,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 4.5,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 7.7000000001862645,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 8,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 8.300000000279397,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 8.700000000186265,
+            "transferBytes": 26627,
+            "decodedBytes": 26327,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 19.199999999720603,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 23.600000000093132,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 15.799999999813735,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 18.200000000186265,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 18.300000000279397,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 20.700000000186265,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 15.299999999813735,
+            "transferBytes": 1681,
+            "decodedBytes": 1381,
+            "initiator": "script"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 2036.6000000000931,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 2.8999999999068677,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 3.6000000000931323,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 4.199999999720603,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 3.099999999627471,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 5.2999999998137355,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 5.399999999906868,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 6.400000000372529,
+            "transferBytes": 4235,
+            "decodedBytes": 3935,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 6.899999999906868,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 7.300000000279397,
+            "transferBytes": 7618,
+            "decodedBytes": 7318,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 14.5,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 16.799999999813735,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 20.5,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 21,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 11.799999999813735,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 11.799999999813735,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 12.599999999627471,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 13.200000000186265,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 15.399999999906868,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 16.5,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 16.699999999720603,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 18.200000000186265,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 13.100000000093132,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 14.799999999813735,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 19.700000000186265,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 19.59999999962747,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 17.700000000186265,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 18,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 17.800000000279397,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 18.299999999813735,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 19,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 7.100000000093132,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 3.2000000001862645,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 3.2000000001862645,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 5.399999999906868,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 8,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 2.3000000002793968,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 3.8000000002793968,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 7.399999999906868,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 5.800000000279397,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 4.800000000279397,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 9.399999999906868,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 10.100000000093132,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 7.199999999720603,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 11.599999999627471,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 6.2000000001862645,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      },
+      {
+        "profile": "local",
+        "sample": 2,
+        "ttfbMs": 1.6999999997206032,
+        "htmlMs": 850.2000000001863,
+        "fcpMs": 1164,
+        "lcp": {
+          "startTime": 1164,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:65361/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 2654,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 4.699999999720603,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 8.299999999813735,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 7.699999999720603,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 8.799999999813735,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 9.200000000186265,
+            "transferBytes": 26627,
+            "decodedBytes": 26327,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 19.899999999906868,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 14.899999999906868,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 26.399999999906868,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 18.799999999813735,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 19,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 23.299999999813735,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 16.5,
+            "transferBytes": 1681,
+            "decodedBytes": 1381,
+            "initiator": "script"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 1771.3000000002794,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 8.900000000372529,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 4.199999999720603,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 4.7000000001862645,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 5.5,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 6,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 5,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 6.399999999906868,
+            "transferBytes": 4235,
+            "decodedBytes": 3935,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 6.400000000372529,
+            "transferBytes": 7618,
+            "decodedBytes": 7318,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 7.399999999906868,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 7.5,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 9.5,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 7.899999999906868,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 11.899999999906868,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 5.899999999906868,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 6.100000000093132,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 7.300000000279397,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 8.299999999813735,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 8.299999999813735,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 7.7000000001862645,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 8.899999999906868,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 8.799999999813735,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 9,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 10,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 13.200000000186265,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 13.800000000279397,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 13.799999999813735,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 14.699999999720603,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 14.799999999813735,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 17.199999999720603,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 16.199999999720603,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 6.099999999627471,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 3.3000000002793968,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 4.100000000093132,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 5.2999999998137355,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 8.600000000093132,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 2.900000000372529,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 3.7000000001862645,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 6.399999999906868,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 7.100000000093132,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 4.399999999906868,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 7.800000000279397,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 8.300000000279397,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 6,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 8.800000000279397,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 5.899999999906868,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      },
+      {
+        "profile": "10Mbps-40ms",
+        "sample": 0,
+        "ttfbMs": 1.6000000000931323,
+        "htmlMs": 58.200000000186265,
+        "fcpMs": 624,
+        "lcp": {
+          "startTime": 4964,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:65361/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 5202,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 253.39999999990687,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 243.09999999962747,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 133.10000000009313,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 212,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 173.5,
+            "transferBytes": 26627,
+            "decodedBytes": 26327,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 558.6000000000931,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 1910.6000000000931,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 4864.600000000093,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 576.5999999996275,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 1297.2999999998137,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 1445.0999999996275,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 2306.100000000093,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 216.89999999990687,
+            "transferBytes": 1681,
+            "decodedBytes": 1381,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 66.39999999990687,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 131,
+            "transferBytes": 4235,
+            "decodedBytes": 3935,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 156.39999999990687,
+            "transferBytes": 7618,
+            "decodedBytes": 7318,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 444.90000000037253,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 480.8000000002794,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 565,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 536.1000000000931,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 594.7999999998137,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 62.5,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 550.5,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 573.2999999998137,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 301.70000000018626,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 325.29999999981374,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 562.5999999996275,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 576.7000000001863,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 366.8000000002794,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 387.89999999990687,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 396.10000000009313,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 428.89999999990687,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 420.5,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 310.39999999990687,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 263.5,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 291.29999999981374,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 310.59999999962747,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 351.70000000018626,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 261.39999999990687,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 297,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 281.60000000009313,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 319.60000000009313,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 329.8000000002794,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 104.20000000018626,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 75.1999999997206,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 127.5,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 104.29999999981374,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 60.89999999990687,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 55.5,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 298.29999999981374,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 1865.3999999999069,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 2212.5,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 203.20000000018626,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 92.5,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 524.1000000000931,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 2673.7000000001863,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 3307.8000000002794,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 464.3000000002794,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      },
+      {
+        "profile": "10Mbps-40ms",
+        "sample": 1,
+        "ttfbMs": 1.6999999997206032,
+        "htmlMs": 921.6000000000931,
+        "fcpMs": 1464,
+        "lcp": {
+          "startTime": 5836,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:65361/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 6062.800000000279,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 248.89999999990687,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 134.79999999981374,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 237.5,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 173.59999999962747,
+            "transferBytes": 26627,
+            "decodedBytes": 26327,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 209.29999999981374,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 2123.100000000093,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 4875.800000000279,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 501.39999999990687,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 1358.7000000001863,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 1367.8999999999069,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 1225.1999999997206,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 2398.5999999996275,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 176.29999999981374,
+            "transferBytes": 1681,
+            "decodedBytes": 1381,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 71.5,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 109.89999999990687,
+            "transferBytes": 4235,
+            "decodedBytes": 3935,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 140.6999999997206,
+            "transferBytes": 7618,
+            "decodedBytes": 7318,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 167.5,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 177.79999999981374,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 515.2999999998137,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 482.3000000002794,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 537.8000000002794,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 60.39999999990687,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 493.29999999981374,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 506.39999999990687,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 476.39999999990687,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 504.20000000018626,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 275.5,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 309.6999999997206,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 414.90000000037253,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 498.70000000018626,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 317.60000000009313,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 340.09999999962747,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 361,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 381.39999999990687,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 366.10000000009313,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 409.29999999981374,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 407.60000000009313,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 450.29999999981374,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 242.29999999981374,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 256.60000000009313,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 284.39999999990687,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 316.29999999981374,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 298.5,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 106.10000000009313,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 85.60000000009313,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 135,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 112.39999999990687,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 168.70000000018626,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 87.09999999962747,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 362.79999999981374,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 2825,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 79.5,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 367.6999999997206,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 2000.1999999997206,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 2252.2000000001863,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 271.39999999990687,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 3562.399999999907,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 462,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      },
+      {
+        "profile": "10Mbps-40ms",
+        "sample": 2,
+        "ttfbMs": 1.6000000000931323,
+        "htmlMs": 59,
+        "fcpMs": 600,
+        "lcp": {
+          "startTime": 4976,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:65361/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 5206.600000000093,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 246,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 234.29999999981374,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 132.5,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 207.89999999990687,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 171.20000000018626,
+            "transferBytes": 26627,
+            "decodedBytes": 26327,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 2120.2000000001863,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 500.20000000018626,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 4873.800000000279,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 1365.8999999999069,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 1367.7999999998137,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 1224,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 184.5,
+            "transferBytes": 1681,
+            "decodedBytes": 1381,
+            "initiator": "script"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 2563.5999999996275,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 70.60000000009313,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 109.39999999990687,
+            "transferBytes": 4235,
+            "decodedBytes": 3935,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 141.20000000018626,
+            "transferBytes": 7618,
+            "decodedBytes": 7318,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 167.29999999981374,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 178.79999999981374,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 481.10000000009313,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 513.5,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 538.5,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 62.8000000002794,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 493.70000000018626,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 505.89999999990687,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 475.89999999990687,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 503.39999999990687,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 275.70000000018626,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 310.5,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 416.29999999981374,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 499.1999999997206,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 314.5,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 339.5,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 355.5,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 379.10000000009313,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 365.1999999997206,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 399,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 411.3000000002794,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 452.8000000002794,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 244.8000000002794,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 263.39999999990687,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 283.70000000018626,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 301.6999999997206,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 314.89999999990687,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 105.39999999990687,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 81.5,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 128.20000000018626,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 111.70000000018626,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 169,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 90.20000000018626,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 364.10000000009313,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 2826.7999999998137,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 81.39999999990687,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 385.5,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 1998.7999999998137,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 2254.5,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 272.60000000009313,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 3573.7999999998137,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 461.79999999981374,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      }
+    ]
+  },
+  "localAfter": {
+    "label": "investigation-after",
+    "date": "2026-10-21T15:29:41.636Z",
+    "node": "v24.15.0",
+    "chrome": "installed channel chrome",
+    "database": "temporary SQLite seeded by fixture",
+    "network": "10 Mbps download / 5 Mbps upload / 40 ms latency for constrained profile; cache disabled; desktop 1440x1000",
+    "connectMs": 19.51,
+    "select1Ms": [
+      4.25,
+      0.52,
+      0.58,
+      0.59,
+      0.44
+    ],
+    "api": [
+      {
+        "route": "/api/productos?pageSize=100",
+        "sample": 0,
+        "status": 200,
+        "ttfbMs": 63.75,
+        "totalMs": 65.83,
+        "bytes": 15177
+      },
+      {
+        "route": "/api/productos?pageSize=100",
+        "sample": 1,
+        "status": 200,
+        "ttfbMs": 14.52,
+        "totalMs": 14.87,
+        "bytes": 15177
+      },
+      {
+        "route": "/api/productos?pageSize=100",
+        "sample": 2,
+        "status": 200,
+        "ttfbMs": 9.4,
+        "totalMs": 9.69,
+        "bytes": 15177
+      },
+      {
+        "route": "/api/productos?pageSize=4",
+        "sample": 0,
+        "status": 200,
+        "ttfbMs": 7.67,
+        "totalMs": 7.97,
+        "bytes": 3262
+      },
+      {
+        "route": "/api/productos?pageSize=4",
+        "sample": 1,
+        "status": 200,
+        "ttfbMs": 7.33,
+        "totalMs": 7.7,
+        "bytes": 3262
+      },
+      {
+        "route": "/api/productos?pageSize=4",
+        "sample": 2,
+        "status": 200,
+        "ttfbMs": 6.04,
+        "totalMs": 6.28,
+        "bytes": 3262
+      },
+      {
+        "route": "/api/promociones",
+        "sample": 0,
+        "status": 200,
+        "ttfbMs": 10.93,
+        "totalMs": 11.32,
+        "bytes": 2347
+      },
+      {
+        "route": "/api/promociones",
+        "sample": 1,
+        "status": 200,
+        "ttfbMs": 8.07,
+        "totalMs": 8.35,
+        "bytes": 2347
+      },
+      {
+        "route": "/api/promociones",
+        "sample": 2,
+        "status": 200,
+        "ttfbMs": 5.99,
+        "totalMs": 6.22,
+        "bytes": 2347
+      }
+    ],
+    "samples": [
+      {
+        "profile": "local",
+        "sample": 0,
+        "ttfbMs": 5.7000000001862645,
+        "htmlMs": 830.4000000003725,
+        "fcpMs": 1200,
+        "lcp": {
+          "startTime": 1200,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:49685/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 3880.9000000003725,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 4,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 8.599999999627471,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 9,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 9.5,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 12.400000000372529,
+            "transferBytes": 26676,
+            "decodedBytes": 26376,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 32.09999999962747,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 44.5,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 23.100000000558794,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 23.299999999813735,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 30.5,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 31.699999999254942,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 21.40000000037253,
+            "transferBytes": 2109,
+            "decodedBytes": 1809,
+            "initiator": "script"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 3015.399999999441,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 12.400000000372529,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 7.5,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 9.300000000745058,
+            "transferBytes": 4252,
+            "decodedBytes": 3952,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 13.5,
+            "transferBytes": 7441,
+            "decodedBytes": 7141,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 14.099999999627471,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 14.200000000186265,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 15.199999999254942,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 14.5,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 17,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 4.6000000005587935,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 6.2000000001862645,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 7.3999999994412065,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 7.599999999627471,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 6.2999999998137355,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 6.7999999998137355,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 6.900000000372529,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 7.5,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 7.900000000372529,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 7.7999999998137355,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 9.699999999254942,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 10.699999999254942,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 12.299999999813735,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 12.700000000186265,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 12.5,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 14.5,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 16.90000000037253,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 19.200000000186265,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 20.600000000558794,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 21.200000000186265,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 21.200000000186265,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 8.799999999813735,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 7.7999999998137355,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 10.199999999254942,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 7,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 3.7999999998137355,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 1.800000000745058,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 3.400000000372529,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 5.2999999998137355,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 5.199999999254942,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 7.900000000372529,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 4.900000000372529,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 8,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 8.299999999813735,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 5.5,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 12.400000000372529,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      },
+      {
+        "profile": "local",
+        "sample": 1,
+        "ttfbMs": 1.800000000745058,
+        "htmlMs": 3.900000000372529,
+        "fcpMs": 392,
+        "lcp": {
+          "startTime": 392,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:49685/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 2278.7000000001863,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 4.7000000001862645,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 7.5,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 8.099999999627471,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 8.5,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 8.799999999813735,
+            "transferBytes": 26676,
+            "decodedBytes": 26376,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 20.799999999813735,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 18,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 18.700000000186265,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 25.700000000186265,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 19.09999999962747,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 21.700000000186265,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 16.399999999441206,
+            "transferBytes": 2109,
+            "decodedBytes": 1809,
+            "initiator": "script"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 2242.7999999998137,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 3.3999999994412065,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 4,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 5.2999999998137355,
+            "transferBytes": 4252,
+            "decodedBytes": 3952,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 5.5,
+            "transferBytes": 7441,
+            "decodedBytes": 7141,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 6.2000000001862645,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 8.5,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 9.200000000186265,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 13.200000000186265,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 17.299999999813735,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 10.299999999813735,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 11,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 10.299999999813735,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 11.100000000558794,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 5.7999999998137355,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 5.900000000372529,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 7.7000000001862645,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 6.8999999994412065,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 8,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 7.7000000001862645,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 9.700000000186265,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 9.200000000186265,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 10.5,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 10.700000000186265,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 11.600000000558794,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 11.900000000372529,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 13.399999999441206,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 14,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 13.700000000186265,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 14.200000000186265,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 14.299999999813735,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 4,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 5.2000000001862645,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 5.400000000372529,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 8.599999999627471,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 5.400000000372529,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 2.6000000005587935,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 3.599999999627471,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 5.7000000001862645,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 6.2000000001862645,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 4.099999999627471,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 8,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 8.299999999813735,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 6.199999999254942,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 9.299999999813735,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 6.2999999998137355,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      },
+      {
+        "profile": "local",
+        "sample": 2,
+        "ttfbMs": 1.7000000001862645,
+        "htmlMs": 868.8999999994412,
+        "fcpMs": 1140,
+        "lcp": {
+          "startTime": 1192,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:49685/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 3007.2999999998137,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 4.2999999998137355,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 7.3999999994412065,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 7.900000000372529,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 8.699999999254942,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 9.5,
+            "transferBytes": 26676,
+            "decodedBytes": 26376,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 15.400000000372529,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 23.90000000037253,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 45.80000000074506,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 18.5,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 19.299999999813735,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 25,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 16.699999999254942,
+            "transferBytes": 2109,
+            "decodedBytes": 1809,
+            "initiator": "script"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 2106.800000000745,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 10.100000000558794,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 6.599999999627471,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 8,
+            "transferBytes": 4252,
+            "decodedBytes": 3952,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 8.099999999627471,
+            "transferBytes": 7441,
+            "decodedBytes": 7141,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 9.200000000186265,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 9.299999999813735,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 11.5,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 13.5,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 14.200000000186265,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 7.2000000001862645,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 8.5,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 8.899999999441206,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 9,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 9.899999999441206,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 10.700000000186265,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 11.599999999627471,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 14.400000000372529,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 13.900000000372529,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 14.599999999627471,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 14.699999999254942,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 14.899999999441206,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 8.099999999627471,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 9.400000000372529,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 10,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 10.699999999254942,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 4.2999999998137355,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 5.8999999994412065,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 5.6000000005587935,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 6.7999999998137355,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 6.599999999627471,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 6.7999999998137355,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 7.5,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 7.8999999994412065,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 8.099999999627471,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 4.7999999998137355,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 2.1000000005587935,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 2.8999999994412065,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 5.7999999998137355,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 6.5,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 10.099999999627471,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 4.099999999627471,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 8.799999999813735,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 9.700000000186265,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 5.900000000372529,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 6.2999999998137355,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      },
+      {
+        "profile": "10Mbps-40ms",
+        "sample": 0,
+        "ttfbMs": 1.7000000001862645,
+        "htmlMs": 59.40000000037253,
+        "fcpMs": 588,
+        "lcp": {
+          "startTime": 4644,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:49685/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 5213.799999999814,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 244.1000000005588,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 229.5,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 133.1000000005588,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 207.69999999925494,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 171.70000000018626,
+            "transferBytes": 26676,
+            "decodedBytes": 26376,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 2317.2999999998137,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 4533.4000000003725,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 1205.3999999994412,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 1210.2999999998137,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 2713.399999999441,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 2597.7000000001863,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 2132.100000000559,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 175.80000000074506,
+            "transferBytes": 2109,
+            "decodedBytes": 1809,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 48.59999999962747,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 58.5,
+            "transferBytes": 4252,
+            "decodedBytes": 3952,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 75.8999999994412,
+            "transferBytes": 7441,
+            "decodedBytes": 7141,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 89.59999999962747,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 114.09999999962747,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 143.59999999962747,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 122.30000000074506,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 141.1000000005588,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 49.40000000037253,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 92,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 141.80000000074506,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 185.1000000005588,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 239.70000000018626,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 274.40000000037253,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 329.6000000005588,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 333.29999999981374,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 341.90000000037253,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 232.8999999994412,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 249.09999999962747,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 347.29999999981374,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 348.70000000018626,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 156.6000000005588,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 206.5,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 190.5,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 239.29999999981374,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 228.29999999981374,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 259.30000000074506,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 279.30000000074506,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 294.90000000037253,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 300.80000000074506,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 99.3999999994412,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 85.30000000074506,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 123.20000000018626,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 59.700000000186265,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 104.59999999962747,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 59.5,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 544.7999999998137,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 1509.7000000001863,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 1962.0999999996275,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 250.90000000037253,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 65.6000000005588,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 586.6000000005588,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 3368.5,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 3589.2000000001863,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 463.79999999981374,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      },
+      {
+        "profile": "10Mbps-40ms",
+        "sample": 1,
+        "ttfbMs": 2.7000000001862645,
+        "htmlMs": 927.2999999998137,
+        "fcpMs": 1468,
+        "lcp": {
+          "startTime": 5808,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:49685/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 6074.399999999441,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 253.29999999981374,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 135.59999999962747,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 235.8999999994412,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 209.29999999981374,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 172.59999999962747,
+            "transferBytes": 26676,
+            "decodedBytes": 26376,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 2119.7000000001863,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 4838.799999999814,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 505.5,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 1364.1000000005588,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 1367.5,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 1221.7999999998137,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 2453.2999999998137,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 178.3999999994412,
+            "transferBytes": 2109,
+            "decodedBytes": 1809,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 69.79999999981374,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 103.59999999962747,
+            "transferBytes": 4252,
+            "decodedBytes": 3952,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 140.6000000005588,
+            "transferBytes": 7441,
+            "decodedBytes": 7141,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 158.20000000018626,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 176.79999999981374,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 473.90000000037253,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 517.2999999998137,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 532.7000000001863,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 65.5,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 496.5,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 506.8999999994412,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 479.3999999994412,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 511.3999999994412,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 278.20000000018626,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 301,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 413.5,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 495,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 303.8999999994412,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 327.5,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 346.59999999962747,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 368.5,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 354.09999999962747,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 399.3999999994412,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 389.29999999981374,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 441.6000000005588,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 239.90000000037253,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 256.6000000005588,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 279.30000000074506,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 296.09999999962747,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 310.5,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 105,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 81.79999999981374,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 134.80000000074506,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 61.5,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 166,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 111.6000000005588,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 349.29999999981374,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 1938.4000000003725,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 2307,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 385.5,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 88.09999999962747,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 608.7000000001863,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 2725.0999999996275,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 3267.800000000745,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 459.29999999981374,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      },
+      {
+        "profile": "10Mbps-40ms",
+        "sample": 2,
+        "ttfbMs": 1.7999999998137355,
+        "htmlMs": 925,
+        "fcpMs": 1476,
+        "lcp": {
+          "startTime": 5796,
+          "size": 225120,
+          "tag": "IMG",
+          "url": "http://127.0.0.1:49685/assets/images/farmacia-fachada-reina.webp"
+        },
+        "loadMs": 6075,
+        "resources": [
+          {
+            "url": "/assets/vendor/bootstrap-grid.min.css",
+            "durationMs": 244.09999999962747,
+            "transferBytes": 52095,
+            "decodedBytes": 51795,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/styles.css",
+            "durationMs": 236.59999999962747,
+            "transferBytes": 47153,
+            "decodedBytes": 46853,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/accesibilidad.css",
+            "durationMs": 134.70000000018626,
+            "transferBytes": 18505,
+            "decodedBytes": 18205,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/shop.css",
+            "durationMs": 208.8999999994412,
+            "transferBytes": 37824,
+            "decodedBytes": 37524,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mvc.css",
+            "durationMs": 173.20000000018626,
+            "transferBytes": 26676,
+            "decodedBytes": 26376,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 2114.4000000003725,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-5.jpg",
+            "durationMs": 500.79999999981374,
+            "transferBytes": 74565,
+            "decodedBytes": 74265,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-fachada-reina.webp",
+            "durationMs": 4834.399999999441,
+            "transferBytes": 1648104,
+            "decodedBytes": 1647804,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-6.jpg",
+            "durationMs": 1363.2999999998137,
+            "transferBytes": 73180,
+            "decodedBytes": 72880,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-8.jpg",
+            "durationMs": 1227.0999999996275,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/farmacia-7.jpg",
+            "durationMs": 1365,
+            "transferBytes": 72997,
+            "decodedBytes": 72697,
+            "initiator": "img"
+          },
+          {
+            "url": "https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20KFX83WH8SSXwYfL46&output=embed",
+            "durationMs": 2431.0999999996275,
+            "transferBytes": 0,
+            "decodedBytes": 0,
+            "initiator": "iframe"
+          },
+          {
+            "url": "/controllers/app.js",
+            "durationMs": 178,
+            "transferBytes": 2109,
+            "decodedBytes": 1809,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/auth.js",
+            "durationMs": 67.79999999981374,
+            "transferBytes": 1220,
+            "decodedBytes": 920,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/layout.js",
+            "durationMs": 108.5,
+            "transferBytes": 4252,
+            "decodedBytes": 3952,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/catalog.js",
+            "durationMs": 138.29999999981374,
+            "transferBytes": 7441,
+            "decodedBytes": 7141,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/account.js",
+            "durationMs": 162.5,
+            "transferBytes": 3465,
+            "decodedBytes": 3165,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/checkout.js",
+            "durationMs": 176.6000000005588,
+            "transferBytes": 6777,
+            "decodedBytes": 6477,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/admin.js",
+            "durationMs": 515.3000000007451,
+            "transferBytes": 18034,
+            "decodedBytes": 17734,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/contact.js",
+            "durationMs": 478.70000000018626,
+            "transferBytes": 1308,
+            "decodedBytes": 1008,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/common.js",
+            "durationMs": 536.7999999998137,
+            "transferBytes": 2899,
+            "decodedBytes": 2599,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/vendor/fonts.css",
+            "durationMs": 57.90000000037253,
+            "transferBytes": 1256,
+            "decodedBytes": 956,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/api.js",
+            "durationMs": 496.1000000005588,
+            "transferBytes": 1762,
+            "decodedBytes": 1462,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/events.js",
+            "durationMs": 509.09999999962747,
+            "transferBytes": 675,
+            "decodedBytes": 375,
+            "initiator": "script"
+          },
+          {
+            "url": "/assets/fonts/fuente-1.ttf",
+            "durationMs": 281.5,
+            "transferBytes": 48580,
+            "decodedBytes": 48280,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-4.ttf",
+            "durationMs": 311.30000000074506,
+            "transferBytes": 48500,
+            "decodedBytes": 48200,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-5.ttf",
+            "durationMs": 419.29999999981374,
+            "transferBytes": 71932,
+            "decodedBytes": 71632,
+            "initiator": "css"
+          },
+          {
+            "url": "/assets/fonts/fuente-6.ttf",
+            "durationMs": 501,
+            "transferBytes": 71888,
+            "decodedBytes": 71588,
+            "initiator": "css"
+          },
+          {
+            "url": "/models/cart.js",
+            "durationMs": 268.40000000037253,
+            "transferBytes": 2191,
+            "decodedBytes": 1891,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/layout.js",
+            "durationMs": 296.19999999925494,
+            "transferBytes": 2150,
+            "decodedBytes": 1850,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/catalog.js",
+            "durationMs": 307.09999999962747,
+            "transferBytes": 897,
+            "decodedBytes": 597,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/products.js",
+            "durationMs": 329.20000000018626,
+            "transferBytes": 6985,
+            "decodedBytes": 6685,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/updates.js",
+            "durationMs": 348.30000000074506,
+            "transferBytes": 2780,
+            "decodedBytes": 2480,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/ecuador.js",
+            "durationMs": 367,
+            "transferBytes": 8849,
+            "decodedBytes": 8549,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/orders.js",
+            "durationMs": 357.40000000037253,
+            "transferBytes": 1261,
+            "decodedBytes": 961,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/orders.js",
+            "durationMs": 399.29999999981374,
+            "transferBytes": 10562,
+            "decodedBytes": 10262,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/dialog.js",
+            "durationMs": 393.8999999994412,
+            "transferBytes": 609,
+            "decodedBytes": 309,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/billing.js",
+            "durationMs": 442.69999999925494,
+            "transferBytes": 12910,
+            "decodedBytes": 12610,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/admin.js",
+            "durationMs": 238.1000000005588,
+            "transferBytes": 6917,
+            "decodedBytes": 6617,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin.js",
+            "durationMs": 286,
+            "transferBytes": 15081,
+            "decodedBytes": 14781,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/promotion-publication.js",
+            "durationMs": 256.6000000005588,
+            "transferBytes": 2420,
+            "decodedBytes": 2120,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/admin-dashboard.js",
+            "durationMs": 310.5,
+            "transferBytes": 9738,
+            "decodedBytes": 9438,
+            "initiator": "script"
+          },
+          {
+            "url": "/controllers/images.js",
+            "durationMs": 299.8999999994412,
+            "transferBytes": 2391,
+            "decodedBytes": 2091,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/pricing.js",
+            "durationMs": 106.1000000005588,
+            "transferBytes": 1370,
+            "decodedBytes": 1070,
+            "initiator": "script"
+          },
+          {
+            "url": "/models/billing.js",
+            "durationMs": 86,
+            "transferBytes": 2175,
+            "decodedBytes": 1875,
+            "initiator": "script"
+          },
+          {
+            "url": "/views/billing.js",
+            "durationMs": 137.6000000005588,
+            "transferBytes": 9827,
+            "decodedBytes": 9527,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/productos?pageSize=4",
+            "durationMs": 59.90000000037253,
+            "transferBytes": 3562,
+            "decodedBytes": 3262,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/controllers/mascota.js",
+            "durationMs": 164.40000000037253,
+            "transferBytes": 13607,
+            "decodedBytes": 13307,
+            "initiator": "script"
+          },
+          {
+            "url": "/api/promociones",
+            "durationMs": 117.8999999994412,
+            "transferBytes": 2647,
+            "decodedBytes": 2347,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/images/producto-vitaminas.jpg",
+            "durationMs": 350.90000000037253,
+            "transferBytes": 53386,
+            "decodedBytes": 53086,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-solar-eucerin.png",
+            "durationMs": 1926.5,
+            "transferBytes": 400664,
+            "decodedBytes": 400364,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-bebe-pigeon.png",
+            "durationMs": 2317.7000000001863,
+            "transferBytes": 520692,
+            "decodedBytes": 520392,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/producto-botiquin.jpg",
+            "durationMs": 390,
+            "transferBytes": 32668,
+            "decodedBytes": 32368,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/widget.css",
+            "durationMs": 93,
+            "transferBytes": 5096,
+            "decodedBytes": 4796,
+            "initiator": "link"
+          },
+          {
+            "url": "/assets/mascotas/sprites/manifest.json",
+            "durationMs": 609.3999999994412,
+            "transferBytes": 64810,
+            "decodedBytes": 64510,
+            "initiator": "fetch"
+          },
+          {
+            "url": "/assets/mascotas/art/goti-base.png",
+            "durationMs": 2724.7000000001863,
+            "transferBytes": 682407,
+            "decodedBytes": 682107,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/mascotas/sprites/goti.png?v=9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+            "durationMs": 3269,
+            "transferBytes": 1513827,
+            "decodedBytes": 1513527,
+            "initiator": "img"
+          },
+          {
+            "url": "/assets/images/logo-reina-del-cisne.png",
+            "durationMs": 462.90000000037253,
+            "transferBytes": 507662,
+            "decodedBytes": 507362,
+            "initiator": "other"
+          }
+        ],
+        "cards": 4,
+        "errors": []
+      }
+    ]
+  },
+  "delayedSessionBefore": {
+    "method": "temporary SQLite; real admin session; /auth/me delayed3500ms; desktop1440x1000;3fresh contexts",
+    "samples": [
+      {
+        "sample": 0,
+        "authDelayMs": 3500,
+        "productsReadyMs": 4998.53,
+        "role": "admin"
+      },
+      {
+        "sample": 1,
+        "authDelayMs": 3500,
+        "productsReadyMs": 4247.37,
+        "role": "admin"
+      },
+      {
+        "sample": 2,
+        "authDelayMs": 3500,
+        "productsReadyMs": 5073.08,
+        "role": "admin"
+      }
+    ]
+  },
+  "delayedSessionAfter": {
+    "method": "temporary SQLite; real admin session; /auth/me delayed3500ms; desktop1440x1000;3fresh contexts",
+    "samples": [
+      {
+        "sample": 0,
+        "authDelayMs": 3500,
+        "productsReadyMs": 1219.97,
+        "role": "admin"
+      },
+      {
+        "sample": 1,
+        "authDelayMs": 3500,
+        "productsReadyMs": 458.42,
+        "role": "admin"
+      },
+      {
+        "sample": 2,
+        "authDelayMs": 3500,
+        "productsReadyMs": 1290.84,
+        "role": "admin"
+      }
+    ]
+  },
+  "renderDashboard": {
+    "source": "authenticated dashboard UI, read only",
+    "serviceOrigin": "https://farmacia-reina-del-cisne.onrender.com",
+    "plan": "Free",
+    "region": "Virginia (US East)",
+    "deployedCommit": "1e5580596e89d0bac591a773210e99b220fd0dd0",
+    "buildCommand": "npm ci --include=dev && npm run setup:production",
+    "startCommand": "npm start",
+    "healthCheckPath": "/api/salud",
+    "previousInstance": "pvfx6",
+    "startedInstance": "6fz9m",
+    "logTimezone": "Times as displayed by dashboard, UTC-5; client and server clocks differ; correlate by requestId",
+    "timeline": [
+      {
+        "time": "10:18:07",
+        "message": "Running npm start"
+      },
+      {
+        "time": "10:18:09",
+        "message": "node server/index.cjs"
+      },
+      {
+        "time": "10:18:14",
+        "message": "PostgreSQL configured; HTTP listener ready"
+      },
+      {
+        "time": "10:18:22",
+        "route": "/api/salud",
+        "requestId": "a9d96722-8302-40fd-a6ca-20e092faf1fc",
+        "expressMs": 598
+      },
+      {
+        "time": "10:18:22",
+        "route": "/",
+        "requestId": "fd9f1819-47b9-496e-b34f-435351f4fc81",
+        "expressMs": 6
+      },
+      {
+        "time": "10:18:23",
+        "route": "/",
+        "requestId": "2ca7b344-6983-4fd8-b91b-67c7d839a980",
+        "expressMs": 1
+      },
+      {
+        "time": "10:18:23",
+        "route": "/api/salud",
+        "requestId": "b69cabcc-a0c1-4500-bc0f-7d7f74e5da9e",
+        "expressMs": 4
+      },
+      {
+        "time": "10:18:24",
+        "route": "/api/productos?pageSize=4",
+        "requestId": "a2262f68-ad01-4333-9482-2001ebed29bc",
+        "expressMs": 136
+      }
+    ],
+    "eventsReviewed": "Latest deploy displayed October16; no explicit suspension reason or crash event found for sampled restart."
+  },
+  "vercelDashboard": {
+    "source": "authenticated UI, current visible team only",
+    "farmaciaProjectSearch": "No projects, yet!",
+    "conclusion": "No matching pharmacy project or logs found in accessible team; other teams/domains not ruled out."
+  },
+  "updatedInterpretation": {
+    "confirmed": "Initial HTML took33113.93ms client-side while matching Express request took6ms; a new Render instance started immediately before serving it. Frontend and API share Render origin.",
+    "pending": "Why the instance restarted/resumed; actual cold-start decomposition; SQL server execution vs transport/pool; exact15-second visit without its trace.",
+    "noInfrastructureChanges": true
+  },
+  "localDiagnosticProbe": {
+    "environment": "temporary seeded SQLite; PERF_DIAGNOSTICS=1; isolated sequential requests, not PostgreSQL production",
+    "connection": [
+      {
+        "level": "info",
+        "event": "prisma_connect",
+        "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+        "at": "2026-10-21T15:36:59.511Z",
+        "uptimeMs": 4212,
+        "durationMs": 25.75,
+        "success": true
+      }
+    ],
+    "samples": [
+      {
+        "route": "/",
+        "status": 200,
+        "serverTiming": "express_headers;dur=8.75",
+        "events": [
+          {
+            "level": "info",
+            "event": "http_start",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.560Z",
+            "uptimeMs": 4260,
+            "requestId": "1a0f54c7-1eaa-4dfe-938f-0ab76ffd9609",
+            "method": "GET",
+            "kind": "static",
+            "route": "/"
+          },
+          {
+            "level": "info",
+            "event": "http_headers",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.569Z",
+            "uptimeMs": 4269,
+            "requestId": "1a0f54c7-1eaa-4dfe-938f-0ab76ffd9609",
+            "method": "GET",
+            "kind": "static",
+            "route": "/",
+            "durationMs": 8.75
+          },
+          {
+            "level": "info",
+            "event": "http_finish",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.572Z",
+            "uptimeMs": 4272,
+            "requestId": "1a0f54c7-1eaa-4dfe-938f-0ab76ffd9609",
+            "method": "GET",
+            "kind": "static",
+            "route": "/",
+            "status": 200,
+            "durationMs": 12.12
+          }
+        ]
+      },
+      {
+        "route": "/api/salud",
+        "status": 200,
+        "serverTiming": "express_headers;dur=12.94",
+        "events": [
+          {
+            "level": "info",
+            "event": "http_start",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.586Z",
+            "uptimeMs": 4285,
+            "requestId": "05fca7f0-73d2-428f-a924-9846343c241b",
+            "method": "GET",
+            "kind": "api",
+            "route": "/api/salud"
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.597Z",
+            "uptimeMs": 4296,
+            "ordinal": 1,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "http_headers",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.599Z",
+            "uptimeMs": 4298,
+            "requestId": "05fca7f0-73d2-428f-a924-9846343c241b",
+            "method": "GET",
+            "kind": "api",
+            "route": "/api/salud",
+            "durationMs": 12.94
+          },
+          {
+            "level": "info",
+            "event": "http_finish",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.599Z",
+            "uptimeMs": 4299,
+            "requestId": "05fca7f0-73d2-428f-a924-9846343c241b",
+            "method": "GET",
+            "kind": "api",
+            "route": "/api/salud",
+            "status": 200,
+            "durationMs": 13.37
+          }
+        ]
+      },
+      {
+        "route": "/api/productos?pageSize=4",
+        "status": 200,
+        "serverTiming": "express_headers;dur=24.66",
+        "events": [
+          {
+            "level": "info",
+            "event": "http_start",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.605Z",
+            "uptimeMs": 4305,
+            "requestId": "a74a0110-bacb-4571-a4aa-0cda31c8569a",
+            "method": "GET",
+            "kind": "api",
+            "route": "/api/productos"
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.620Z",
+            "uptimeMs": 4320,
+            "ordinal": 2,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.624Z",
+            "uptimeMs": 4323,
+            "ordinal": 3,
+            "queryRoundTripMs": 1
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.624Z",
+            "uptimeMs": 4324,
+            "ordinal": 4,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.625Z",
+            "uptimeMs": 4324,
+            "ordinal": 5,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.625Z",
+            "uptimeMs": 4325,
+            "ordinal": 6,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.626Z",
+            "uptimeMs": 4325,
+            "ordinal": 7,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.626Z",
+            "uptimeMs": 4325,
+            "ordinal": 8,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "http_headers",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.630Z",
+            "uptimeMs": 4329,
+            "requestId": "a74a0110-bacb-4571-a4aa-0cda31c8569a",
+            "method": "GET",
+            "kind": "api",
+            "route": "/api/productos",
+            "durationMs": 24.66
+          },
+          {
+            "level": "info",
+            "event": "http_finish",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.630Z",
+            "uptimeMs": 4330,
+            "requestId": "a74a0110-bacb-4571-a4aa-0cda31c8569a",
+            "method": "GET",
+            "kind": "api",
+            "route": "/api/productos",
+            "status": 200,
+            "durationMs": 25.2
+          }
+        ]
+      },
+      {
+        "route": "/api/promociones",
+        "status": 200,
+        "serverTiming": "express_headers;dur=9.63",
+        "events": [
+          {
+            "level": "info",
+            "event": "http_start",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.636Z",
+            "uptimeMs": 4336,
+            "requestId": "2fd6e905-ca22-4304-96db-1a8f349241fc",
+            "method": "GET",
+            "kind": "api",
+            "route": "/api/promociones"
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.640Z",
+            "uptimeMs": 4339,
+            "ordinal": 9,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.644Z",
+            "uptimeMs": 4343,
+            "ordinal": 10,
+            "queryRoundTripMs": 1
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.644Z",
+            "uptimeMs": 4344,
+            "ordinal": 11,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.645Z",
+            "uptimeMs": 4344,
+            "ordinal": 12,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "sql",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.645Z",
+            "uptimeMs": 4345,
+            "ordinal": 13,
+            "queryRoundTripMs": 0
+          },
+          {
+            "level": "info",
+            "event": "http_headers",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.646Z",
+            "uptimeMs": 4346,
+            "requestId": "2fd6e905-ca22-4304-96db-1a8f349241fc",
+            "method": "GET",
+            "kind": "api",
+            "route": "/api/promociones",
+            "durationMs": 9.63
+          },
+          {
+            "level": "info",
+            "event": "http_finish",
+            "bootId": "92524281-11f8-4759-87b9-d5571916114d",
+            "at": "2026-10-21T15:36:59.646Z",
+            "uptimeMs": 4346,
+            "requestId": "2fd6e905-ca22-4304-96db-1a8f349241fc",
+            "method": "GET",
+            "kind": "api",
+            "route": "/api/promociones",
+            "status": 200,
+            "durationMs": 9.99
+          }
+        ]
+      }
+    ]
+  },
+  "verification": {
+    "node": {
+      "command": "npm test",
+      "passed": 139,
+      "failed": 0
+    },
+    "historical": {
+      "command": "npm run test:reto1",
+      "passed": 34,
+      "failed": 0
+    },
+    "browserSelected": {
+      "runner": "Playwright with tests/reto2/playwright.config.cjs",
+      "files": [
+        "frontend.spec.cjs",
+        "performance.spec.cjs",
+        "order-tracking.spec.cjs"
+      ],
+      "projects": [
+        "escritorio",
+        "movil"
+      ],
+      "passed": 30,
+      "failed": 0,
+      "fullBrowserSuite": false
+    },
+    "diagnosticsRetest": {
+      "command": "node --test tests/reto2/diagnostics.test.cjs",
+      "passed": 3,
+      "failed": 0,
+      "includedInNodeTotal": true,
+      "reason": "after final safe route metadata adjustment"
+    },
+    "scope": {
+      "modified": 12,
+      "added": 3,
+      "removed": 0,
+      "historicalTestCapturesRestored": 4,
+      "packagesChanged": false,
+      "schemasMigrationsChanged": false,
+      "infrastructureChanged": false,
+      "deployed": false
+    },
+    "review": "Independent static review found no material regressions; .env/process_start limitation documented."
+  }
+}

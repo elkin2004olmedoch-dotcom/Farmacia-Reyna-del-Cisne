@@ -1,0 +1,78 @@
+CREATE TABLE "ZonaEntrega" (
+ "id" TEXT NOT NULL PRIMARY KEY,
+ "nombre" TEXT NOT NULL CHECK(length("nombre") BETWEEN 2 AND 120),
+ "provincia" TEXT NOT NULL CHECK(length("provincia") BETWEEN 2 AND 80),
+ "canton" TEXT NOT NULL CHECK(length("canton") BETWEEN 2 AND 80),
+ "tarifaCentavos" INTEGER CHECK("tarifaCentavos" IS NULL OR ("tarifaCentavos" BETWEEN 0 AND 10000000)),
+ "ivaCategoria" TEXT NOT NULL DEFAULT 'general' CHECK("ivaCategoria" IN ('general','cero')),
+ "fundamentoIva" TEXT CHECK("fundamentoIva" IS NULL OR length("fundamentoIva") BETWEEN 8 AND 300),
+ "activa" BOOLEAN NOT NULL DEFAULT true,
+ "version" INTEGER NOT NULL DEFAULT 1 CHECK("version">=1),
+ "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ "updatedAt" TIMESTAMP(3) NOT NULL,
+ CHECK("ivaCategoria"!='cero' OR "fundamentoIva" IS NOT NULL)
+);
+CREATE INDEX "ZonaEntrega_activa_nombre_idx" ON "ZonaEntrega"("activa","nombre");
+CREATE TABLE "ZonaEntregaTarifa" (
+ "id" TEXT NOT NULL PRIMARY KEY,
+ "zonaEntregaId" TEXT NOT NULL REFERENCES "ZonaEntrega"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "version" INTEGER NOT NULL CHECK("version">=1),
+ "tarifaCentavos" INTEGER CHECK("tarifaCentavos" IS NULL OR "tarifaCentavos" BETWEEN 0 AND 10000000),
+ "ivaCategoria" TEXT NOT NULL CHECK("ivaCategoria" IN ('general','cero')),
+ "fundamentoIva" TEXT CHECK("fundamentoIva" IS NULL OR length("fundamentoIva") BETWEEN 8 AND 300),
+ "actorId" TEXT REFERENCES "Usuario"("id") ON DELETE SET NULL ON UPDATE CASCADE,
+ "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ CHECK("ivaCategoria"!='cero' OR "fundamentoIva" IS NOT NULL)
+);
+CREATE UNIQUE INDEX "ZonaEntregaTarifa_zonaEntregaId_version_key" ON "ZonaEntregaTarifa"("zonaEntregaId","version");
+ALTER TABLE "Producto" ADD COLUMN "controlado" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Producto" ADD COLUMN "biologico" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Producto" ADD COLUMN "cadenaFrio" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Pedido" ADD COLUMN "subtotalProductos" DECIMAL(65,30) CHECK("subtotalProductos" IS NULL OR "subtotalProductos">=0);
+ALTER TABLE "Pedido" ADD COLUMN "costoEnvioCentavos" INTEGER NOT NULL DEFAULT 0 CHECK("costoEnvioCentavos" BETWEEN 0 AND 10000000);
+ALTER TABLE "Pedido" ADD COLUMN "envioIvaPorcentaje" INTEGER CHECK("envioIvaPorcentaje" IS NULL OR "envioIvaPorcentaje" IN (0,13,14,15));
+ALTER TABLE "Pedido" ADD COLUMN "envioBaseImponible" DECIMAL(65,30) CHECK("envioBaseImponible" IS NULL OR "envioBaseImponible">=0);
+ALTER TABLE "Pedido" ADD COLUMN "envioIvaMonto" DECIMAL(65,30) CHECK("envioIvaMonto" IS NULL OR "envioIvaMonto">=0);
+ALTER TABLE "Pedido" ADD COLUMN "zonaEntregaId" TEXT REFERENCES "ZonaEntrega"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Pedido" ADD COLUMN "latitudEntrega" DOUBLE PRECISION CHECK("latitudEntrega" IS NULL OR "latitudEntrega" BETWEEN -90 AND 90);
+ALTER TABLE "Pedido" ADD COLUMN "longitudEntrega" DOUBLE PRECISION CHECK("longitudEntrega" IS NULL OR "longitudEntrega" BETWEEN -180 AND 180);
+ALTER TABLE "Pedido" ADD COLUMN "ubicacionEntregaAceptadaAt" TIMESTAMP(3);
+CREATE INDEX "Pedido_zonaEntregaId_idx" ON "Pedido"("zonaEntregaId");
+CREATE TABLE "Entrega" (
+ "id" TEXT NOT NULL PRIMARY KEY,
+ "pedidoId" TEXT NOT NULL REFERENCES "Pedido"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "repartidorId" TEXT REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+ "estado" TEXT NOT NULL DEFAULT 'asignada' CHECK("estado" IN ('asignada','en_camino','en_destino','entregada','cancelada')),
+ "version" INTEGER NOT NULL DEFAULT 1 CHECK("version">=1),
+ "gpsVersion" INTEGER NOT NULL DEFAULT 0 CHECK("gpsVersion">=0),
+ "asignadaAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ "salidaAt" TIMESTAMP(3),
+ "llegadaAt" TIMESTAMP(3),
+ "finalizadaAt" TIMESTAMP(3),
+ "latitud" DOUBLE PRECISION CHECK("latitud" IS NULL OR "latitud" BETWEEN -90 AND 90),
+ "longitud" DOUBLE PRECISION CHECK("longitud" IS NULL OR "longitud" BETWEEN -180 AND 180),
+ "precision" DOUBLE PRECISION CHECK("precision" IS NULL OR "precision" BETWEEN 0 AND 10000),
+ "registradaAt" TIMESTAMP(3),
+ "recibidaAt" TIMESTAMP(3),
+ "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ "updatedAt" TIMESTAMP(3) NOT NULL,
+ CHECK(("latitud" IS NULL AND "longitud" IS NULL AND "precision" IS NULL AND "registradaAt" IS NULL AND "recibidaAt" IS NULL) OR ("latitud" IS NOT NULL AND "longitud" IS NOT NULL AND "precision" IS NOT NULL AND "registradaAt" IS NOT NULL AND "recibidaAt" IS NOT NULL AND "estado" IN ('en_camino','en_destino'))),
+ CHECK("estado" NOT IN ('entregada','cancelada') OR "finalizadaAt" IS NOT NULL)
+);
+CREATE UNIQUE INDEX "Entrega_pedidoId_key" ON "Entrega"("pedidoId");
+CREATE INDEX "Entrega_repartidorId_estado_idx" ON "Entrega"("repartidorId","estado");
+CREATE INDEX "Entrega_estado_createdAt_idx" ON "Entrega"("estado","createdAt");
+CREATE INDEX "Entrega_recibidaAt_idx" ON "Entrega"("recibidaAt");
+INSERT INTO "ZonaEntrega"("id","nombre","provincia","canton","tarifaCentavos","updatedAt") VALUES ('puerto-quito','Todo Puerto Quito','Pichincha','Puerto Quito',NULL,CURRENT_TIMESTAMP);
+INSERT INTO "ZonaEntregaTarifa"("id","zonaEntregaId","version","tarifaCentavos","ivaCategoria") VALUES ('puerto-quito-inicial','puerto-quito',1,NULL,'general');
+
+ALTER TABLE "Pedido" ADD CONSTRAINT "Pedido_envio_check" CHECK(("subtotalProductos" IS NULL OR abs("total"-"subtotalProductos"-"costoEnvioCentavos"/100.0)<0.000001) AND (("envioIvaPorcentaje" IS NULL AND "envioBaseImponible" IS NULL AND "envioIvaMonto" IS NULL AND "costoEnvioCentavos"=0) OR ("envioIvaPorcentaje" IS NOT NULL AND "envioBaseImponible" IS NOT NULL AND "envioIvaMonto" IS NOT NULL AND abs("costoEnvioCentavos"/100.0-"envioBaseImponible"-"envioIvaMonto")<0.000001)) AND (("latitudEntrega" IS NULL AND "longitudEntrega" IS NULL) OR ("latitudEntrega" IS NOT NULL AND "longitudEntrega" IS NOT NULL AND "ubicacionEntregaAceptadaAt" IS NOT NULL AND "entrega"='delivery')));
+ALTER TABLE "ZonaEntrega" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE "ZonaEntrega" FROM PUBLIC;
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN REVOKE ALL ON TABLE "ZonaEntrega" FROM anon; END IF; IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN REVOKE ALL ON TABLE "ZonaEntrega" FROM authenticated; END IF; END $$;
+ALTER TABLE "ZonaEntregaTarifa" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE "ZonaEntregaTarifa" FROM PUBLIC;
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN REVOKE ALL ON TABLE "ZonaEntregaTarifa" FROM anon; END IF; IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN REVOKE ALL ON TABLE "ZonaEntregaTarifa" FROM authenticated; END IF; END $$;
+ALTER TABLE "Entrega" ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE "Entrega" FROM PUBLIC;
+DO $$ BEGIN IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN REVOKE ALL ON TABLE "Entrega" FROM anon; END IF; IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN REVOKE ALL ON TABLE "Entrega" FROM authenticated; END IF; END $$;

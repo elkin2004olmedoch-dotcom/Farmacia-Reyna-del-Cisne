@@ -1,0 +1,188 @@
+{
+  "date": "2026-10-21T17:56:04.494Z",
+  "scope": "Separate resource inventory including cross-process iframe requests via Playwright. No throttled LCP claim; no scroll, private session, writes or response bodies.",
+  "guards": {
+    "exactOriginsOnly": true,
+    "readOnly": true,
+    "serviceWorkersBlocked": true
+  },
+  "allowedThirdPartyOrigins": [
+    "https://www.google.com",
+    "https://www.gstatic.com",
+    "https://maps.gstatic.com",
+    "https://maps.googleapis.com",
+    "https://fonts.gstatic.com",
+    "https://streetviewpixels-pa.googleapis.com",
+    "https://lh3.googleusercontent.com"
+  ],
+  "externalRequests": [
+    {
+      "origin": "https://www.google.com",
+      "path": "/maps",
+      "method": "GET",
+      "type": "document",
+      "finished": true,
+      "status": 301,
+      "bytes": 0
+    },
+    {
+      "origin": "https://www.google.com",
+      "path": "/maps/embed",
+      "method": "GET",
+      "type": "document",
+      "finished": true,
+      "status": 200,
+      "bytes": 1610
+    },
+    {
+      "origin": "https://maps.gstatic.com",
+      "path": "/maps-api-v3/embed/js/66/9d/intl/es_419/init_embed.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 76593
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps/api/js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 3161
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/geometry.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 2957
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/search.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 1204
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/main.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 86399
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps/api/mapsjs/gen_204",
+      "method": "GET",
+      "type": "xhr",
+      "finished": true,
+      "status": 200,
+      "bytes": 46
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/common.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 38241
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/util.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 72386
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/map.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 26046
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/controls.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 26737
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/places_impl.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 3671
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/places.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 97501
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps/api/js/StaticMapService.GetMapImage",
+      "method": "GET",
+      "type": "image",
+      "finished": true,
+      "status": 200,
+      "bytes": 70463
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/onion.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 9663
+    },
+    {
+      "origin": "https://maps.googleapis.com",
+      "path": "/maps-api-v3/api/js/66/9d/intl/es_419/search_impl.js",
+      "method": "GET",
+      "type": "script",
+      "finished": true,
+      "status": 200,
+      "bytes": 1343
+    }
+  ],
+  "blocked": [],
+  "frames": [
+    {
+      "origin": "https://farmacia-reyna-del-cisne-pruebas.pages.dev"
+    },
+    {
+      "origin": "https://www.google.com"
+    }
+  ],
+  "pageErrors": [],
+  "limits": [
+    "Main-CDP waterfall does not include all iframe subresources; this inventory complements it.",
+    "Google resources outside the explicit allowlist remain blocked.",
+    "Anonymous disposable context; no production account or cookies forwarded manually."
+  ]
+}

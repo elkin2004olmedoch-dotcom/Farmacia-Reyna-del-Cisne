@@ -14,6 +14,7 @@ async function fixture(page){
 }
 async function login(page,email,password){await page.goto('/cuenta.html');await page.locator('#login-email').fill(email);await page.locator('#login-password').fill(password);await page.locator('#login-form [type=submit]').focus();await page.keyboard.press('Enter');await expect(page.locator('#logout')).toBeVisible();}
 async function findRow(page,title){
+  await expect(page.locator('#admin-create')).toBeEnabled();
   for(let index=0;index<50;index++){const row=page.locator('#admin-table tbody tr').filter({hasText:title});if(await row.count())return row;const next=page.locator('#admin-next');if(await next.isDisabled())break;const current=await page.locator('#admin-page-info').textContent();await next.click();await expect(page.locator('#admin-page-info')).not.toHaveText(current);}
   throw new Error('No aparece la campaña sintética: '+title);
 }
@@ -46,6 +47,10 @@ test('publicar explícitamente una vista previa aplica el descuento una vez en c
 
 test('el panel distingue fechas, publicación programada y vista previa sin activar descuentos inadvertidos',async({page})=>{
   const data=await fixture(page),title='Campaña programada '+randomUUID().slice(0,8);
+  await page.route('**/api/admin/tablas?**',async route=>{
+    if(new URL(route.request().url()).searchParams.get('tabla')==='promociones')await new Promise(resolve=>setTimeout(resolve,250));
+    await route.continue();
+  });
   try{
     const tomorrow=Date.now()+86400000,later=Date.now()+2*86400000;
     const created=await page.request.post('/api/promociones',{headers:data.headers,data:{titulo:title,descripcion:'Campaña sintética programada',etiqueta:'Programada',productoId:data.item.id,activa:true,vistaPrevia:true,descuentoPorcentaje:26,orden:1,inicio:new Date(tomorrow).toISOString(),fin:new Date(later).toISOString()}});expect(created.status()).toBe(201);data.campaignId=(await created.json()).data.id;

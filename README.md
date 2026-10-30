@@ -1,4 +1,21 @@
-# Farmacia Reina del Cisne — Reto 2 Full Stack MVC
+# Farmacia Reina del Cisne — plataforma comercial MVC
+
+## Operación comercial y reparto
+
+La ampliación del 28 de octubre de 2026 conserva tres capas: presentación HTML/CSS/JavaScript, aplicación Express con autorización y reglas de negocio, y persistencia Prisma 6/PostgreSQL en Supabase. SQLite sigue disponible para desarrollo y pruebas. No se sustituyen la marca, los colores o los logos. El antecedente académico y la tienda histórica se conservan en sus secciones correspondientes.
+
+- La tienda MVC incorpora buscador destacado, categorías, filtros conservados y carrito con imágenes de producto. La estructura comercial toma como referencia patrones observados en Fybeca, con recursos y diseño propios.
+- La cobertura inicial es **todo Puerto Quito**. Administración define y modifica la tarifa por zona después de coordinar con los repartidores; una tarifa pendiente no se interpreta como envío gratuito. Retiro en farmacia sigue disponible. Los pueblos aledaños se habilitarán expresamente como ampliación futura.
+- [Entregas](frontend/entregas.html) ofrece gestión administrativa de zonas, tarifas, repartidores y asignación; cada repartidor consulta únicamente su bandeja. [Seguimiento](frontend/seguimiento.html) muestra al cliente su pedido y la última posición compartida durante el recorrido. El enlace completo se abre desde Mis pedidos.
+- Navegación mediante Google Maps URLs y mapa OpenStreetMap cargado por decisión del usuario. El botón de llamada aparece al marcar llegada y requiere un gesto del repartidor. Ubicación voluntaria, con precisión y hora; sin posiciones simuladas, ETA inventada o promesa de GPS con el teléfono bloqueado.
+- El envío y su IVA quedan guardados por pedido y se incorporan a la factura como servicio. Un cambio de tarifa exige revisar el nuevo importe antes de confirmar y no modifica pedidos anteriores.
+- Farmi ejecuta órdenes administrativas tipadas y abre los formularios cuando faltan datos. Conserva JWT, permisos, validaciones y versiones; no ejecuta SQL, código arbitrario, pagos o firmas privadas.
+
+Las migraciones aditivas están aplicadas en Supabase y conservan los datos anteriores. Al 29 de octubre de 2026, el backend `f373a59` está Live en [Render](https://farmacia-reina-del-cisne.onrender.com/) y el frontend `f373a59` está publicado en [Cloudflare Pages](https://farmacia-reyna-del-cisne-pruebas.pages.dev/), con 149 comprobaciones públicas aprobadas. PayPhone permanece desactivado hasta contar con una cuenta comercial validada. Consulta [pagos, capturas y evidencia](docs/PAGOS-2026-10-29.md), [arquitectura y modelo de datos](docs/ARQUITECTURA-COMERCIAL.md), [operación y privacidad de entregas](docs/ENTREGAS-Y-PRIVACIDAD.md), [criterios de Ecuador](docs/ECUADOR-FARMACIA.md) y [contrato de entregas](docs/superpowers/specs/2026-10-28-entregas-contract.md). El antecedente histórico se conserva más abajo.
+
+## Pagos preparados para PayPhone
+
+La pestaña [Pagos](frontend/pagos.html) conserva la marca y las mascotas. Ofrece una demostración aprobada/rechazada/cancelada que no cobra ni modifica pedidos y un resumen privado por pedido. El adaptador de PayPhone valida importes históricos, entorno y retorno en el servidor; las credenciales comerciales todavía no existen y el proveedor permanece cerrado. Consulta [activación, contrato y límites](docs/PAGOS-Y-PAYPHONE.md). Apple Pay se muestra como no disponible hasta contar con una pasarela compatible habilitada para la farmacia.
 
 ## Mascotas animadas para el bot
 
@@ -11,7 +28,11 @@ Farmi, Boti y Goti son compañeros pixel art con nueve gestos cada uno. El widge
 
 Plataforma de farmacia con catálogo, carrito persistente, registro/login, pedidos en base de datos y administración de productos, promociones, proveedores, lotes, inventario, IVA y facturación electrónica SRI. Mantiene la fachada del negocio, identidad crema/vino, ubicación, WhatsApp y las 18 referencias anteriores. **Abre la [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) o [inicia sesión](https://farmacia-reina-del-cisne.onrender.com/cuenta.html).**
 
-**Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite local o PostgreSQL en Supabase, y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago y la entrega se coordinan con la farmacia, sin pasarela bancaria.
+**Stack:** Node.js 22.13+ (probado en 24.15), Express 5, JavaScript ES modules, Prisma 6.19.3, SQLite local o PostgreSQL en Supabase, y Sharp 0.35.5 para imágenes. Se utiliza el motor relacional alternativo permitido por el enunciado y confirmado por el estudiante; no requiere SQL Server. El pago se coordina con la farmacia mientras PayPhone permanece pendiente de cuenta y activación comercial; existe una demostración sin cobros. La entrega se gestiona con cobertura, tarifas y repartidores propios.
+
+**Antecedente del frontend de prueba, verificado el 21 de octubre de 2026:** [Cloudflare Pages](https://farmacia-reyna-del-cisne-pruebas.pages.dev/) servía el commit `0672e41` y consultaba la API Render existente. La fachada WebP pasó de 1.647.804 a 391.110 bytes (−76,26 %), sin cambiar HTML, CSS, JavaScript ni dimensiones. Pasaron 297 pruebas locales, 102 comprobaciones estáticas públicas y tres escenarios del cliente publicado con API local temporal. En esa fecha Render conservaba `75aee3e`, rama configurada `main` y Auto-Deploy Off; no se modificaron dominio principal, DNS ni datos comerciales. Configuración y reversión históricas en [DEPLOY_CLOUDFLARE.md](docs/DEPLOY_CLOUDFLARE.md), mediciones en [RENDIMIENTO.md](docs/RENDIMIENTO.md#comparación-de-las-urls-publicadas) y alcance de seguridad en [SEGURIDAD_DESPLIEGUE.md](docs/SEGURIDAD_DESPLIEGUE.md).
+
+En la medición histórica del 21 de octubre de 2026, el LCP público mediano bajó de **4,18 s a 1,44 s** en tres pares antes/después con el mismo perfil de laboratorio; las tres muestras nuevas cumplieron 2,5 s. No es un percentil de usuarios. Se repitieron cinco escenarios públicos y 22 controles de API sin fallos. Tras el intervalo sin tráfico propio, la portada siguió en 1,67 s mientras el catálogo necesitó 31,38 s para recuperarse. En ese cierre histórico la candidata esperaba aprobación del frontend y el parche de auditoría del backend aún no se había desplegado. Esas mediciones y ese estado no describen la ampliación comercial del 28 de octubre.
 
 **Agente de reposición:** servicio adicional en C#/.NET 10, PostgreSQL/Npgsql y MailKit, con revisión diaria, auditoría, correo al proveedor y aprobación del gerente por Telegram/WhatsApp. El código y la arquitectura están en [services/inventory-agent](services/inventory-agent/) y [su guía de configuración](docs/AGENTE-INVENTARIO.md). Comienza desactivado; los envíos reales y el alojamiento de este servicio requieren completar la configuración privada del negocio.
 
@@ -21,7 +42,7 @@ En [el panel en línea](https://farmacia-reina-del-cisne.onrender.com/admin.html
 
 Una campaña **publicada y vigente** aplica el mismo precio efectivo en promociones, catálogo, ficha, carrito y confirmación del pedido. Una **vista previa** conserva una propuesta sin aplicar descuentos: el panel y la tarjeta deben identificarla como tal. La vigencia se introduce en hora de Ecuador y se vuelve a verificar al confirmar; los pedidos anteriores conservan su descuento histórico.
 
-**Farmi, asistente del panel:** solo aparece en la administración, requiere una sesión admin y funciona con reglas locales, sin API de IA. Puede actualizar precio, stock o descuento directo de un producto identificado por su nombre exacto, y crear/publicar una promoción con producto, porcentaje (1–85 %) y fecha final. Ejemplos: `actualiza el precio de "Vitaminas diarias" a 13,50 y el stock a 24` o `publica promoción de 20 % para "Vitaminas diarias" hasta 2026-12-31 titulada "Fin de año"`. La fecha final usa hora de Ecuador. Si falta información o el nombre es ambiguo, pregunta; las validaciones actuales de la API y del panel siguen aplicándose. El chat no gestiona pedidos, usuarios, impuestos ni facturación; esas secciones conservan sus controles administrativos.
+**Farmi, asistente del panel:** requiere una sesión admin y ejecuta comandos tipados con reglas locales, sin API de IA. Permite crear, modificar y desactivar productos; crear/publicar promociones; registrar proveedores, lotes y ajustes de inventario; cambiar estados de pedidos; configurar zonas y tarifas; asignar repartidores y avanzar entregas. Ejemplos: `actualiza el precio de "Vitaminas diarias" a 13,50 y el stock a 24`, `publica promoción de 20 % para "Vitaminas diarias" hasta 2026-12-31 titulada "Fin de año"` o `cambia pedido "ID" a preparado`. Las fechas usan hora de Ecuador; las validaciones sanitarias, permisos y versiones de la API siguen aplicándose. Cuando faltan datos, abre el formulario correspondiente o solicita el detalle. Administración debe definir la tarifa de Puerto Quito después de coordinarla con los repartidores; el asistente no inventa un importe. La creación de usuarios, las credenciales, la configuración fiscal, las firmas y la emisión SRI utilizan sus controles específicos. Consulta [formatos y alcance de los comandos](docs/ARQUITECTURA-COMERCIAL.md#farmi-y-comandos-administrativos).
 
 **Configuración de IVA** registra tarifa general 13, 14 o 15 %, fecha de inicio en hora de Ecuador y referencia normativa. Al 11 de octubre de 2026 rige **15 %**; el feriado turístico de 8 % no se aplica automáticamente a esta farmacia. La clasificación 0 % requiere revisión del producto concreto. Los precios conservan su carácter final: el impuesto se desglosa, no se añade por segunda vez. Carrito y pedido calculan centavos por línea, y el historial conserva la tarifa aplicada. Consulta [fuentes y criterios ecuatorianos](docs/ECUADOR-FARMACIA.md).
 
@@ -41,7 +62,7 @@ npm run setup
 npm start
 ~~~
 
-Abre **http://localhost:3000/**. Express sirve frontend y API en el mismo origen. Setup genera el cliente Prisma, aplica la migración, ejecuta seed y construye las nueve pantallas. Si .env no existe, genera JWT_SECRET y contraseña admin aleatorios; no sobrescribe un archivo existente.
+Abre **http://localhost:3000/**. Express sirve frontend y API en el mismo origen. Setup genera el cliente Prisma, aplica la migración, ejecuta seed y construye las doce pantallas. Si .env no existe, genera JWT_SECRET y contraseña admin aleatorios; no sobrescribe un archivo existente.
 
 Consulta ADMIN_EMAIL y ADMIN_PASSWORD en tu **archivo privado .env** e inicia sesión en /cuenta.html. Una cuenta admin entra automáticamente en /admin.html; una cuenta cliente conserva su cuenta, carrito e historial. No compartas ese archivo. Las cuentas normales se crean desde “Crear cuenta”; el registro nunca concede admin. Usa datos de prueba con formatos/verificadores ecuatorianos válidos durante la evaluación.
 
@@ -67,6 +88,7 @@ DATABASE_URL="file:./farmacia.db" se resuelve respecto al schema: la BD está en
 frontend/
   index.html, catalogo.html, producto.html, comparar.html
   cuenta.html, checkout.html, pedidos.html, admin.html, ayuda.html
+  entregas.html, seguimiento.html
   models/           API, sesión, catálogo, carrito, pedidos y administración
   views/            tarjetas, formularios, tablas, mensajes y confirmación
   controllers/      eventos, navegación y coordinación de modelos/vistas
@@ -117,7 +139,7 @@ El service worker consulta primero en internet los JSON de productos y promocion
 
 ### Publicar gratis la aplicación completa
 
-La [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) está desplegada con **Render Free + PostgreSQL y Storage de Supabase**. `render.yaml` permite reproducir la configuración; conserva el modo SQLite local y usa un cliente Prisma PostgreSQL independiente, migraciones con RLS e imágenes persistentes. Consulta [la guía paso a paso](docs/DESPLIEGUE-GRATUITO.md), incluido el traslado privado y los límites de los planes gratuitos.
+La [farmacia en línea](https://farmacia-reina-del-cisne.onrender.com/) está desplegada con **Render Free + PostgreSQL y Storage de Supabase**. `render.yaml` es una plantilla histórica; antes de usarla, revisa las diferencias de Auto-Deploy y CORS en [la configuración documentada de Render](docs/DEPLOY_CLOUDFLARE.md#render-existente). La aplicación conserva el modo SQLite local y usa un cliente Prisma PostgreSQL independiente, migraciones con RLS e imágenes persistentes. Consulta [la guía paso a paso](docs/DESPLIEGUE-GRATUITO.md), incluido el traslado privado y los límites de los planes gratuitos.
 
 **Render y Supabase se conectaron y comprobaron anteriormente:** se trasladaron un administrador, 18 productos, dos promociones y una foto; el recorrido de cuentas, administración, pedidos e imágenes pasó las comprobaciones de publicación. GitHub Pages ahora prioriza una tienda estática que no espera a Render; para editar el inventario y consultar registros persistentes abre la aplicación de Render e inicia sesión. Los planes gratuitos tienen pausas y límites; las copias de PostgreSQL y Storage deben hacerse por separado de los respaldos SQLite locales.
 
@@ -322,10 +344,11 @@ La BD, respaldos e imágenes de trabajo se excluyen de Git/ZIP. Conserva `server
 ~~~powershell
 npm test
 npm run test:browser
+npx playwright test --config tests/reto2/pages.config.cjs
 npm audit
 ~~~
 
-**136 pruebas Node:** API, fiscalidad, PVP, lotes/FEFO, migración histórica, firma/XML/SOAP SRI simulado, imágenes, respaldo, publicación de campañas y configuración de producción. **40 pruebas Chrome:** recorridos en escritorio/móvil, con comprobaciones adicionales a 320, 768 y 1920 px, teclado, axe y descuento consistente desde administrador hasta pedido. Las pruebas estáticas verifican las páginas de GitHub Pages, los recursos y la integración de mascotas. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración. Las suites SRI utilizan datos y certificados sintéticos; no autorizan comprobantes reales.
+**185 pruebas Node:** API, fiscalidad, PVP, lotes/FEFO, migración histórica, firma/XML/SOAP SRI simulado, imágenes, respaldo, publicación de campañas, configuración de producción y controles de seguridad/autenticación/auditoría. **54 pruebas Chrome en el mismo origen:** recorridos en escritorio/móvil, con comprobaciones adicionales a 320, 768 y 1920 px, teclado, axe y descuento consistente desde administrador hasta pedido. **20 pruebas Chrome entre orígenes** cubren Pages/API, roles, carga/error, imágenes y descargas privadas. **38 pruebas históricas** verifican las páginas de GitHub Pages, los recursos y la integración de mascotas. Las cuatro suites suman 297 pruebas aprobadas, sin fallos ni omisiones. Usa Chrome instalado y servidor aislado localhost:3300 sin modificar BD de trabajo. Alternativa: npx playwright install chromium y elimina channel:'chrome' de la configuración. Las suites SRI utilizan datos y certificados sintéticos; no autorizan comprobantes reales.
 
 El agente C# se prueba por separado con `dotnet test services/inventory-agent/tests/InventoryAgent.Tests.csproj --configuration Release` y .NET SDK 10. Las pruebas HTTP y de canales simulan los envíos. Las pruebas de PostgreSQL exigen la variable privada `INVENTORY_AGENT_TEST_CONNECTION`, crean esquemas temporales propios y los retiran al finalizar; sin esa variable se omiten explícitamente. El workflow [inventory-agent.yml](.github/workflows/inventory-agent.yml) utiliza PostgreSQL 17 independiente de la farmacia. Consulta [los resultados del agente](docs/pruebas/reto2/inventory-agent-results.json).
 
@@ -359,5 +382,15 @@ Genera **entrega/Reto2_Olmedo_Elkin.zip** con frontend/backend MVC, schema/migra
 
 ## Límites prácticos
 
-SQLite sirve para la instalación local; la aplicación pública utiliza PostgreSQL y Storage de Supabase. Rate limit en memoria de una instancia. Los respaldos automáticos SQLite requieren el servidor activo y espacio disponible; no cubren los servicios de nube. Render y Supabase gratuitos tienen límites y pausas por inactividad, sin garantía de disponibilidad continua. El nuevo agente todavía requiere cuentas, plantillas y configuración privada: para Gmail SMTP necesita alojamiento siempre activo con puertos SMTP disponibles; Render Free bloquea esos puertos. No se implementan pasarela bancaria, logística automática, MFA, recuperación de clave ni verificación de correo. El administrador actualiza los estados; el pago y la entrega se coordinan con la farmacia. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
+SQLite sirve para la instalación local; la aplicación pública utiliza PostgreSQL y Storage de Supabase. Rate limit en memoria de una instancia. Los respaldos automáticos SQLite requieren el servidor activo y espacio disponible; no cubren los servicios de nube. Render y Supabase gratuitos tienen límites y pausas por inactividad, sin garantía de disponibilidad continua. El nuevo agente todavía requiere cuentas, plantillas y configuración privada: para Gmail SMTP necesita alojamiento siempre activo con puertos SMTP disponibles; Render Free bloquea esos puertos. PayPhone está preparado y desactivado hasta validar una cuenta comercial; no se han probado pagos bancarios reales. No se implementan MFA, recuperación de clave ni verificación de correo. El administrador actualiza los estados; el pago y la entrega se coordinan con la farmacia. Mapa y WhatsApp dependen de servicios externos y el envío requiere confirmación del usuario.
 
+
+## Frontend estático independiente de Render
+
+La rama publica un artefacto MVC para Cloudflare Pages mediante `npm run build:pages`, sin sustituir la tienda histórica de GitHub Pages. El despliegue de prueba `8801c092-0a71-40f9-abeb-32b7cf2a97fd` sirve 94 archivos y conserva la API y la autorización en Express, el asistente administrativo, las estadísticas por categoría y las mascotas contextuales. La configuración pública permite un origen API exacto y las imágenes subidas permanecen en el backend/almacenamiento. El candidato backend `51d40d9`, que incluye diagnóstico opcional y auditoría de escrituras administrativas, está preparado y publicado en la rama con `CF-Pages-Skip`; no está desplegado en Render.
+
+Consulta el [plan y límites de la separación](docs/SEPARACION_FRONTEND_BACKEND.md), la [guía de Pages](docs/DEPLOY_CLOUDFLARE.md), el [diagnóstico de rendimiento](docs/RENDIMIENTO.md) y la [auditoría inicial](docs/AUDITORIA_INICIAL.md). La documentación distingue los ensayos locales, las mediciones públicas históricas y el control público previo a la compresión de la fachada. La integración conserva las funciones adicionales del historial remoto; su verificación anterior está en [integracion-cloudflare-2026-10-21.json](docs/pruebas/integracion-cloudflare-2026-10-21.json).
+
+## Recorrido verificado de roles
+
+La revisión posterior del 28 de octubre añade acceso inferior al carrito en catálogo/ficha y corrige el refresco de Entregas y la selección de provincia de la zona. El [recorrido completo con 24 capturas de prueba y cuatro de la web publicada](docs/RECORRIDO-ROLES-2026-10-28.md) muestra cliente, administrador, Farmi, repartidor y mapa real con datos y GPS sintéticos. [Resultados y publicación exactos](docs/pruebas/recorrido-roles-2026-10-28.json).

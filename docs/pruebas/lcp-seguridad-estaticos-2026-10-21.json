@@ -1,0 +1,3105 @@
+{
+  "date": "2026-10-21T17:39:18.899Z",
+  "mode": "static",
+  "origins": {
+    "pages": "https://farmacia-reyna-del-cisne-pruebas.pages.dev",
+    "api": "https://farmacia-reina-del-cisne.onrender.com"
+  },
+  "requests": 112,
+  "checks": [
+    {
+      "name": "404.html",
+      "status": 200,
+      "expectedStatus": [
+        200,
+        404
+      ],
+      "bytes": 518,
+      "sha256": "7808bdac623f5f35a040e067cc3a6e9c51175f5c9636c2ed02612106b77753ed",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [
+        {
+          "from": "/404.html",
+          "to": "/404"
+        }
+      ],
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "518",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "admin.html",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 36823,
+      "sha256": "f54d222e4df5c749b91100c993bd743444c3916ae6ea32bf04f26113fb976751",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [
+        {
+          "from": "/admin.html",
+          "to": "/admin"
+        }
+      ],
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "36823",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/accesibilidad.css",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 18205,
+      "sha256": "b4a2b260ccab424908f0f6cc261adb3672a8bc456f7dab78f9c2eee60ea7b71f",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "text/css; charset=utf-8",
+        "content-length": "18205",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/fonts/fuente-1.ttf",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 48280,
+      "sha256": "b0ae3e89a7d3ef2b1838bb4b1ceb0b17cc3435af061eee809d76aa623ff116e9",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "48280",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/fonts/fuente-2.ttf",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 48308,
+      "sha256": "376427b5322148d8de1e03f263bcca4935a2d60ba71d9f94f4947ab664c711ae",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "48308",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/fonts/fuente-3.ttf",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 48280,
+      "sha256": "b79a2ea7a38f33fd96a282fadb9ce97626bb0724a44d21075859f0e50239993a",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "48280",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/fonts/fuente-4.ttf",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 48200,
+      "sha256": "2a8e7f713ee79fbccdef3cef5c787aff47580299f7da60144961e7db2ec08211",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "48200",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/fonts/fuente-5.ttf",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 71632,
+      "sha256": "ff7cf63717c27756df857ca12045a83522569f7b561bedaff813a25274eb263f",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "71632",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/fonts/fuente-6.ttf",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 71588,
+      "sha256": "f0a9d39b9f14079c55070189562da36c794f824cbcf514b50a0ad0ef20c69379",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "font/ttf",
+        "content-length": "71588",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/farmacia-5.jpg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 74265,
+      "sha256": "d27fd9359d2ec6dfed82eeb8cce6b94d9d1b40864273d7b40902a74c91011ae1",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/jpeg",
+        "content-length": "74265",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/farmacia-6.jpg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 72880,
+      "sha256": "985018a4b2f35bebdc4011666506c0317ae56b2816128b91e2f8592f78d5c096",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/jpeg",
+        "content-length": "72880",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/farmacia-7.jpg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 72697,
+      "sha256": "53ddc1b77a25eb2337415fdb67ed623324f57af1eda536851e94d53810f1ff7d",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/jpeg",
+        "content-length": "72697",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/farmacia-8.jpg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 32368,
+      "sha256": "21eb52bebd7f9e543d926dbb0be9da54e7edf5810ef07901b4a5d6adfabc8156",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/jpeg",
+        "content-length": "32368",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/farmacia-9.jpg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 217975,
+      "sha256": "297628cedac9d9ea2138607aec76870a167992e470c45800d9fe3b48cb27c007",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/jpeg",
+        "content-length": "217975",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/farmacia-fachada-reina.png",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 2650904,
+      "sha256": "c3e431ff314c110aa28b73b105854e589bf223c3f54c7b2188e5f09633bd18c8",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "2650904",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/farmacia-fachada-reina.webp",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 391110,
+      "sha256": "3ad5cde310565c5c7de247af74ad987f97a7197402e7ae65c02ac2fea162e8ae",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/webp",
+        "content-length": "391110",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/logo-reina-del-cisne.png",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 507362,
+      "sha256": "4932c3048bb1ac5a458b767c5c0087804753e75dba704688dae51e6956fd989d",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "507362",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-alcohol-antiseptico-d13f81e66a94.webp",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 39056,
+      "sha256": "d13f81e66a94b02d67372782af123f982b080da8cd9289195317b7bb5c1f3f64",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/webp",
+        "content-length": "39056",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-alcohol-antiseptico.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 625,
+      "sha256": "eb9de3b1ed5760adf496dc210af8991a27677794f6da1ddc69aa72727073ec73",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "625",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-algodon.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 589,
+      "sha256": "5919c6d740db49cb799461281533b8d854211b4b95d29a0459a44f3eb22423bf",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "589",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-bebe-pigeon.png",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 520392,
+      "sha256": "8a3915cc8d8e694c0bcbb4d51d2d6f5e7080e76d79c0c4541f938138dcf840f4",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "520392",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-botiquin.jpg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 32368,
+      "sha256": "21eb52bebd7f9e543d926dbb0be9da54e7edf5810ef07901b4a5d6adfabc8156",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/jpeg",
+        "content-length": "32368",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-curitas-adhesivas.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 622,
+      "sha256": "d7c912d03867153250b4f2ff8dddf0c04b4fc2bc2cd74facbccd20aab1bedd89",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "622",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-frasco-tabletas.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 614,
+      "sha256": "2b5ebed566425e296952d61f81cc6cf933a8c8dbe7434169ff767a72769dfc0a",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "614",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-gasas-esteriles.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 597,
+      "sha256": "4f6bb3a0fabf9ce8f134eb1acdcb71eb21582710be46bf31c85757ad7a67d238",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "597",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-gel-antibacterial.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 623,
+      "sha256": "d2dddbd6c03df6ddacb5d66c80c7998e5cac93f2e8da370df882a94b01f90ef3",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "623",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-generico-referencia.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 611,
+      "sha256": "9aef01d485df63e9fc8180022defeb536727496a6099b0d5f116cbe9788f1968",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "611",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-mascarillas.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 621,
+      "sha256": "65f55e07e03f3a911d75915de16b2bdc1e5b5805d986b7360c5fde1658c5a172",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "621",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-medicamento-liquido.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 625,
+      "sha256": "aa38dd1a6f0082f101e60ac6e7fa851d3c530fbf63c0068ba0eeb8bd882cbe35",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "625",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-solar-eucerin.png",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 400364,
+      "sha256": "6f74945b6502f1012f63c067fb93881565d4d300ca09eb7d5db8168237be061d",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "400364",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-solucion-salina.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 621,
+      "sha256": "eccb7e697bead46b031aa351140cd92e95ea8d4f25f640eb79817448f077eb30",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "621",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-tabletas-blister.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1762,
+      "sha256": "3d9bebfa9db791d9ebe4e44002479db5fa1752aba6effbea1499958699ca3457",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "1762",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-termometro-digital.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 589,
+      "sha256": "1df61c11ecd38d50e65bc5288ae0bc6de9582c2f8116a44fe8de2b7cfd6e5794",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "589",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-toallitas-bebe.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 601,
+      "sha256": "e0417ea5fee0d0c7ad526150aa6572b68d1684f61c409699c106224aba97e8b6",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "601",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-venda-elastica.svg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 512,
+      "sha256": "779c57a31a69137dfee712728502b29e66fcf76ccee3f9f58986c2fbbadb3e4c",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/svg+xml",
+        "content-length": "512",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/images/producto-vitaminas.jpg",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 53086,
+      "sha256": "e32dca71a2852269499137d6d71981872f37a7fc8780cbc5e0bb9d5b8f32ca41",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/jpeg",
+        "content-length": "53086",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mascotas/admin-companion.css",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 3844,
+      "sha256": "cc67e6915aaab26575ffc87f8097456bbaf7c4a2ee509463956b5cdc2e03d72d",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "text/css; charset=utf-8",
+        "content-length": "3844",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mascotas/art/boti-base.png",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 686402,
+      "sha256": "1c665eba86a0c3bb7aa82d4eb58b5e21534859e8026cb92d2bdc940cec700bd5",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "686402",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mascotas/art/farmi-base.png",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 800903,
+      "sha256": "67a197aad68aed9ddb37982ddb42b600996a5ccd82ff1c0d7cb8aedd0bb4a045",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "800903",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mascotas/art/goti-base.png",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 682107,
+      "sha256": "6e772f5344ee41dea0c8c949073d2a2e87336aa34f7cf5ad371852b21d1d8d55",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "682107",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mascotas/sprites/boti.png",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1319994,
+      "sha256": "ecc6ec344f646778ac1f3d6e2133c4ac214d606e14db81438dafca6aa23efbe2",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "1319994",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mascotas/sprites/farmi.png",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1639099,
+      "sha256": "6d8617c82d718f1975c1d71bc3f01f05ed4ab7d6149c189bdbb5e39a58a8e37a",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "1639099",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mascotas/sprites/goti.png",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1513527,
+      "sha256": "9e4abcfdd7c13073f934335e3e74d5bfcffc721169fc4e3834550ef0ca7f828d",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "image/png",
+        "content-length": "1513527",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mascotas/sprites/manifest.json",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 62580,
+      "sha256": "18120336646860692f282c70f8be25a094ae2b12faaacd31e5626fe8c2d30a6d",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/json",
+        "content-length": "62580",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mascotas/widget-responsive.css",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1957,
+      "sha256": "ec072b6fb707dbd079b1a86564f9c7c1f61dca5b09304d279e31c0bc08e6fd9a",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "text/css; charset=utf-8",
+        "content-length": "1957",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mascotas/widget.css",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 4796,
+      "sha256": "2a934c29e7670caf9739473272bb4e0fac393491d7d9200df8bd2cc1aba0b684",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "text/css; charset=utf-8",
+        "content-length": "4796",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/mvc.css",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 28867,
+      "sha256": "a5804617780080446bf120ec59aa6db4d3a380212b11796f48ecfd1093306434",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "text/css; charset=utf-8",
+        "content-length": "28867",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/shop.css",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 37523,
+      "sha256": "80baf3c48ad13644a6bf56192660c6fdf979d5468160ceaa23f768200b33ae7b",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "text/css; charset=utf-8",
+        "content-length": "37523",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/styles.css",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 46853,
+      "sha256": "e00227845480abb7c9cd9cbf2a799f22a4f234a1845763135bbb98c81f2b23e5",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "text/css; charset=utf-8",
+        "content-length": "46853",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/vendor/bootstrap-grid.min.css",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 51795,
+      "sha256": "e670c73068b27d91e5dd45de3ee84b0d047d9dc3df051d4725e64b5f224d576e",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "text/css; charset=utf-8",
+        "content-length": "51795",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "assets/vendor/fonts.css",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 956,
+      "sha256": "6ddf948cb6757a4be67ba0867057e6db6301d78d98c4ccf18f96fe69833b5f50",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "text/css; charset=utf-8",
+        "content-length": "956",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "ayuda.html",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 6228,
+      "sha256": "7a8dca8d80d6e7c270dbbca53d2e473166e22fb3d0b66a1742ac53c019043151",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [
+        {
+          "from": "/ayuda.html",
+          "to": "/ayuda"
+        }
+      ],
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "6228",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "catalogo.html",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 5342,
+      "sha256": "8bcb4c0d7bc368f65b5cfb5381ede694ecc2f5f8cc1ae0deac7405937732e7a8",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [
+        {
+          "from": "/catalogo.html",
+          "to": "/catalogo"
+        }
+      ],
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "5342",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "checkout.html",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 9045,
+      "sha256": "fe3ee8fa0c58989871ebfaf3562b0c668ce1ba89efdd7c7c54b203f36ba4f970",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [
+        {
+          "from": "/checkout.html",
+          "to": "/checkout"
+        }
+      ],
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "9045",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "comparar.html",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 4555,
+      "sha256": "cad988bc280b8a5e2551ed75f58e7c0c1d979eeb80fcf1d4d6993c991a8575c4",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [
+        {
+          "from": "/comparar.html",
+          "to": "/comparar"
+        }
+      ],
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "4555",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "config.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 683,
+      "sha256": "9954bd475c682377342f7fb0c4bfd7b1913f6ac78d252f633d111b74e34f9769",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "683",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/account.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 3165,
+      "sha256": "a163b95d6c02bca007fe4c1e64b0b53ed67d8a3c56ee45e715f1d0e47b449800",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "3165",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/admin-command.mjs",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 4640,
+      "sha256": "68e9ef624260d315821257dd248685858ff389639fd75b4be8f746cadf241903",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "4640",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/admin-companion.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 8213,
+      "sha256": "f3e70e892e3ba37c7dd6ee2a7b83caca04b5edb1adf6f4316eade2113c14e778",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "8213",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/admin.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 17862,
+      "sha256": "990435358baa774e3afb0dad9200bce7248790a555f853465e758164e44c8f08",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "17862",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/app.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1809,
+      "sha256": "18257d3d47f9ee15cf6afb268267beeb0dd0f107fd46225dd7bc8fc6ee0d851e",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "1809",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/billing.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 12610,
+      "sha256": "bef846549070b48c972be4a31eaa569eee47e29e5b2f43c5070b948bc94e2bf5",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "12610",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/catalog.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 7284,
+      "sha256": "27c4ea5753bc9b9c6cacd511879b27fd20e09bf1ae809e29846ffdbd2b8493d9",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "7284",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/checkout.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 6477,
+      "sha256": "14704764808d456172b2ffa8a1b7ccfbcbafef6bba93292efc28b210a005f1d6",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "6477",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/contact.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1008,
+      "sha256": "012c65a3eecaa35dfff4f10ad1e3a9fb728501efe07b9494a0fdcd915594fe29",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "1008",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/dialog.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 309,
+      "sha256": "f3c0f79a341c8ab1bd51a32ec3c0cadfacdd2432bbd637afb8567a91ec482991",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "309",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/images.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 2091,
+      "sha256": "67f711adb201744869c0d05f10e2f9b232416df93a9f78ad3ac9773607f1b770",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "2091",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/layout.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 4043,
+      "sha256": "f6dd3b6529a7b0ba1bdbd9a79a4c8aba3b6c871f8678ee3d7841055c8194a5fa",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "4043",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/mascota-scope.mjs",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1791,
+      "sha256": "afe82fdcfe03b5505a1491b996621e92b866f518a0036e2b1623912ba52f5c76",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "1791",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/mascota.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 22381,
+      "sha256": "605c2dba32d566df7fcce78dd2d37ebec0374eb0fe864c25522db9983244600d",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "22381",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "controllers/updates.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 2480,
+      "sha256": "37e57cea25dd6809182e51a7c49b464db66880eebe53b9c819c62339bed17daf",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "2480",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "cuenta.html",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 8518,
+      "sha256": "54dd66f1c61b341eaca68702fb75768d2c5190b5201750e0d637f84a51edd791",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [
+        {
+          "from": "/cuenta.html",
+          "to": "/cuenta"
+        }
+      ],
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "8518",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "index.html",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 17672,
+      "sha256": "e47f23b7f60a3f91bd9ed84f030c7128f11e06e2b21aeb49e844c0739ec12861",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [
+        {
+          "from": "/index.html",
+          "to": "/"
+        }
+      ],
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "17672",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/admin.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 6877,
+      "sha256": "5d2453c7fe77c0ea1e8e15ecdf8691ac2e3ebdf96505b58ba431ef518087b9e8",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "6877",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/api.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 2950,
+      "sha256": "c8d8b4a085e035a7927c94188df9bff2bdc8f799062a80b9dafb77eb86c2b5af",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "2950",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/auth.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 920,
+      "sha256": "b4717d9b771383720adadcb51b50c464e9e12cdbb0898e7b6260c3f18bd04812",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "920",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/billing.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1804,
+      "sha256": "9767b611df2d995686b2bc4d0ca94b6a1b4c9616e27220ec2e3a71e4b4777a90",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "1804",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/cart.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1940,
+      "sha256": "b47c7cdcad0a217c2b7e4b4d2dc31bc2c22d0749e2acef24e74b371911c10453",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "1940",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/catalog.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 597,
+      "sha256": "84645f7d9237c8e6c7a9e530bc5188a4114f333399e7b0b5c27a906e23f289b5",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "597",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/ecuador.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 8549,
+      "sha256": "5ccbcafe68001ddd2611f178651043b333a78bea3c77e377a0185c50bffa84b8",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "8549",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/events.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 375,
+      "sha256": "0fac6ade46dbdc5530452770e1fb5288b232de2a5ad7514202d0ae4c067e09c8",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "375",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/orders.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 961,
+      "sha256": "e019b04bb6e3e43bbe47f7ec2b84b7b94953e97f35d3ce8a4560d5352e3fa2e8",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "961",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/pricing.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1070,
+      "sha256": "65e35b51059fc19864df86fae6d6409841fb827549d90878f0518ee5a02d4005",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "1070",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "models/promotion-publication.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 2120,
+      "sha256": "423efb2364908a627f85b43a482950df57d593ac5175da3a02d67ae53f7e8a3a",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "2120",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "pedidos.html",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 4683,
+      "sha256": "62bbe16645aaf02025adec9525bd1d87df55445062da1d8c4d61974baf5b5c93",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [
+        {
+          "from": "/pedidos.html",
+          "to": "/pedidos"
+        }
+      ],
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "4683",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "producto.html",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 4532,
+      "sha256": "daf272eae218c2f22baf1f3fa765c682473da4542bccbdcf414919ed25d62807",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [
+        {
+          "from": "/producto.html",
+          "to": "/producto"
+        }
+      ],
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "4532",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "views/admin-dashboard.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 11921,
+      "sha256": "f44670af7d2a22947d08ebab1e582b6a137204a565aa0c3e4ded1335df773b9c",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "11921",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "views/admin.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 14842,
+      "sha256": "1d56c8be956af779de78235f3bd80db58cb325c3099d05812c4c062dcb58a0dd",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "14842",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "views/billing.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 9527,
+      "sha256": "7078a54eebbc36a0fee15c607fa7b7d67eac6356957333fb1654420481dffd34",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "9527",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "views/common.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 2599,
+      "sha256": "01d26904fd85702e2d5432615630eb7b38fb4c5f556fcaf169177af97249dc12",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "2599",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "views/layout.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 1850,
+      "sha256": "58f4830958facfad8c47e4dcc55b0b3b338a17a16a8f7a72059cd75f75f4ce5c",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "1850",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "views/orders.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 10262,
+      "sha256": "bb10cdb5f1c5181051c29bc9d80ebf6157bd39f635a3cc0b085de0236902e753",
+      "byteMatch": false,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "10262",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "views/products.js",
+      "status": 200,
+      "expectedStatus": 200,
+      "bytes": 6579,
+      "sha256": "a8342588bf430b8787325fb40153e69442378b01f1ba48b9443ffce71f72c3bd",
+      "byteMatch": true,
+      "normalizedMatch": true,
+      "configOriginOk": true,
+      "redirects": [],
+      "headers": {
+        "content-type": "application/javascript",
+        "content-length": "6579",
+        "access-control-allow-origin": "*",
+        "cache-control": "public, max-age=0, must-revalidate",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "checks": {
+        "noCookie": true,
+        "cspPresent": true,
+        "noInlineOrEval": true,
+        "nosniff": true,
+        "cspExact": true,
+        "frameDenied": true,
+        "cacheRevalidates": true
+      },
+      "ok": true
+    },
+    {
+      "name": "/_headers",
+      "status": 404,
+      "expectedStatus": 404,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "518",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "ok": true
+    },
+    {
+      "name": "/.env",
+      "status": 404,
+      "expectedStatus": 404,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "518",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "ok": true
+    },
+    {
+      "name": "/.env.example",
+      "status": 404,
+      "expectedStatus": 404,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "518",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "ok": true
+    },
+    {
+      "name": "/.git/config",
+      "status": 404,
+      "expectedStatus": 404,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "518",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "ok": true
+    },
+    {
+      "name": "/server/index.cjs",
+      "status": 404,
+      "expectedStatus": 404,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "518",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "ok": true
+    },
+    {
+      "name": "/server/prisma/schema.prisma",
+      "status": 404,
+      "expectedStatus": 404,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "518",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "ok": true
+    },
+    {
+      "name": "/package.json",
+      "status": 404,
+      "expectedStatus": 404,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "518",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "ok": true
+    },
+    {
+      "name": "/backups/copia.zip",
+      "status": 404,
+      "expectedStatus": 404,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "518",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "ok": true
+    },
+    {
+      "name": "/assets/uploads/synthetic.webp",
+      "status": 404,
+      "expectedStatus": 404,
+      "headers": {
+        "content-type": "text/html; charset=utf-8",
+        "content-length": "518",
+        "access-control-allow-origin": "*",
+        "cache-control": "no-store",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://farmacia-reina-del-cisne.onrender.com https://xjxnnqasikxlytjaxjdt.supabase.co; connect-src 'self' https://farmacia-reina-del-cisne.onrender.com; frame-src https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "x-frame-options": "DENY"
+      },
+      "setCookiePresent": false,
+      "ok": true
+    }
+  ],
+  "limits": [
+    "No real credentials or private data; API response bodies discarded to NUL",
+    "One request at a time; no retry; fixed origin/method/path allowlists",
+    "Synthetic unauthorized writes only; no valid purchase, payment, or inventory payload",
+    "Static secret-pattern scans are heuristic and never report matched values"
+  ],
+  "artifact": {
+    "files": 94,
+    "servable": 93,
+    "privatePatternMatches": []
+  },
+  "privatePatternMatches": [],
+  "failed": 0,
+  "ok": true
+}
