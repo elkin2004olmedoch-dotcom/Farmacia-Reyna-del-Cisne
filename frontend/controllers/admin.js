@@ -138,7 +138,8 @@ export async function adminController() {
   stateDialog.addEventListener('cancel',event=>{if(stateForm.querySelector('[type=submit][aria-busy=true]'))event.preventDefault();});
   for(const button of document.querySelectorAll('[data-state-close]'))button.addEventListener('click',()=>stateDialog.close());
   for(const button of document.querySelectorAll('[data-editor-close]'))button.addEventListener('click',()=>dialog.close());
-  await render();
+  // The section has its recovery handlers; a data error must not lock navigation.
+  try{await render();}catch(error){message(error.message,true,true);}
   async function navigate(section){
     if(!auth.isAdmin)throw new Error('Inicia sesión nuevamente como administrador.');
     if(document.querySelector('dialog[open]'))throw new Error('Termina o cierra el formulario abierto antes de cambiar de sección.');

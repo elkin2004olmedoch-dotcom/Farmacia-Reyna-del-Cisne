@@ -1,7 +1,7 @@
 const db = require('./db.cjs');
 const {Prisma}=require('./prisma-client.cjs');
 const {AppError}=require('../middleware/errors.cjs');
-const {discountWhere,effectivePrice}=require('./prices.cjs');
+const {discountWhere,effectivePrice,priceLots}=require('./prices.cjs');
 const fiscal=require('./fiscal.cjs');
 const {trackedStock,serializable}=require('./inventario.cjs');
 const {allowsPromotion}=require('../../frontend/models/pharmacy-policy.js');
@@ -14,10 +14,10 @@ module.exports = {
   async list({page,pageSize,q,categoria}) {
     const now=new Date();
     const where={activo:true,...(categoria ? {categoria} : {}),...(q ? {OR:[{nombre:{contains:q}},{descripcion:{contains:q}}]} : {})};
-    const [items,total,tax]=await db.$transaction([db.producto.findMany({where,include:{lotes:true,promociones:{where:discountWhere(now)}},orderBy:{createdAt:'asc'},skip:(page-1)*pageSize,take:pageSize}),db.producto.count({where}),db.configuracionFiscal.findFirst({where:{inicioVigencia:{lte:now}},orderBy:{inicioVigencia:'desc'}})]);
+    const [items,total,tax]=await db.$transaction([db.producto.findMany({where,include:{lotes:priceLots(now),promociones:{where:discountWhere(now)}},orderBy:[{createdAt:'asc'},{id:'asc'}],skip:(page-1)*pageSize,take:pageSize}),db.producto.count({where}),db.configuracionFiscal.findFirst({where:{inicioVigencia:{lte:now}},orderBy:{inicioVigencia:'desc'}})]);
     return {items:items.map(product=>effectivePrice(product,product.promociones,now,tax?.tarifaGeneral || 15)),total,page,pageSize};
   },
-  async find(id) {const now=new Date();const [product,tax]=await Promise.all([db.producto.findFirst({where:{id,activo:true},include:{lotes:true,promociones:{where:discountWhere(now)}}}),fiscal.current(db,now)]);return product?effectivePrice(product,product.promociones,now,tax.tarifaGeneral):null;},
+  async find(id) {const now=new Date();const [product,tax]=await Promise.all([db.producto.findFirst({where:{id,activo:true},include:{lotes:priceLots(now),promociones:{where:discountWhere(now)}}}),fiscal.current(db,now)]);return product?effectivePrice(product,product.promociones,now,tax.tarifaGeneral):null;},
   async create(data,actorId){validatePvp(data);return db.$transaction(async tx=>{const product=await tx.producto.create({data});if(product.stock>0)await tx.movimientoInventario.create({data:{productoId:product.id,actorId,tipo:'entrada',cantidad:product.stock,motivo:'Stock inicial registrado en el catálogo'}});return product;},serializable);},
   async update(id,data,expectedUpdatedAt,actorId) {
     return db.$transaction(async tx=> {

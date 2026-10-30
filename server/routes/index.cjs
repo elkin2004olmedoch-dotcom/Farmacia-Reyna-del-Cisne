@@ -43,6 +43,5 @@ module.exports=config=> {
   router.post('/admin/inventario/ajustes',auth,admin,...V.adjustment,V.validated,inventory.adjust);
   router.get('/admin/tablas',auth,admin,query('tabla').isIn(['productos','usuarios','pedidos','detalles','promociones']),...V.pagination,require('../controllers/admin.cjs'));
   router.get('/admin/resumen',auth,admin,require('../controllers/admin-summary.cjs'));
-  router.get('/salud',require('../controllers/salud.cjs'));
   return router;
 };

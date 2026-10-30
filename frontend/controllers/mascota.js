@@ -35,7 +35,7 @@ export async function mascotaController(){
   const images=new Map();
   let selected=stored(STORED_CHARACTER)||'goti';if(!PEOPLE[selected])selected='goti';
   let paused=stored(STORED_MOTION)==='paused'||(stored(STORED_MOTION)===null && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  let manifest=null,state='idle',frame=0,elapsed=0,remaining=Infinity,lastTime=0,offset=0;
+  let manifest=null,state='idle',frame=0,elapsed=0,remaining=Infinity,lastTime=0,offset=0,fallbackAfter=0;
   let replyTimer=null,bubbleTimer=null,refreshTimer=null,requestVersion=0;
   let lastCartCount=cartCount();
   const quickQuestions={
@@ -87,7 +87,7 @@ export async function mascotaController(){
     if(!PEOPLE[id])return false;selected=id;remember(STORED_CHARACTER,id);
     find('#character').value=id;find('#title').textContent=`${PEOPLE[id]} te acompaña`;
     find('#avatar').setAttribute('aria-label',`Haz saltar a ${PEOPLE[id]}`);
-    image(`art/${id}-base.png`);state='idle';frame=0;elapsed=0;remaining=Infinity;
+    fallbackAfter=performance.now()+3000;state='idle';frame=0;elapsed=0;remaining=Infinity;
     setState('waving',{loops:1});
     host.dispatchEvent(new CustomEvent('mascota:character',{detail:{id,name:PEOPLE[id]},bubbles:true}));
     return true;
@@ -176,7 +176,8 @@ export async function mascotaController(){
     context.clearRect(0,0,192,208);context.imageSmoothingEnabled=false;
     const currentFrame=clip(),atlas=character()?.imagePath?image(character().imagePath):null;
     if(currentFrame && atlas?.complete && atlas.naturalWidth){const rect=currentFrame.frames[Math.min(frame,currentFrame.frames.length-1)];context.drawImage(atlas,rect.x,rect.y,rect.width,rect.height,8+offset,17.333,176,190.667);}
-    else{const base=image(`art/${selected}-base.png`);if(base.complete && base.naturalWidth){const scale=Math.min(180/base.naturalWidth,196/base.naturalHeight);const w=base.naturalWidth*scale,h=base.naturalHeight*scale;context.drawImage(base,(192-w)/2,208-h,w,h);}}
+    // Fetch the static portrait only if the atlas is absent, failed or slow.
+    else if(!currentFrame || !atlas || atlas.complete || time>=fallbackAfter){const base=image(`art/${selected}-base.png`);if(base.complete && base.naturalWidth){const scale=Math.min(180/base.naturalWidth,196/base.naturalHeight);const w=base.naturalWidth*scale,h=base.naturalHeight*scale;context.drawImage(base,(192-w)/2,208-h,w,h);}}
     requestAnimationFrame(tick);
   }
   find('#launcher').addEventListener('click',()=>open(find('#panel').hidden));

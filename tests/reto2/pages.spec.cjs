@@ -48,7 +48,7 @@ test('cliente inicia sesión entre orígenes y conserva carrito/formulario ante 
   await page.reload();await expect(page.locator('[data-shop-count]')).toHaveText('1');
   await page.goto('/checkout.html');await page.locator('#checkout-next').click();await expect(page).toHaveURL(/cuenta.html\?next=checkout.html/);
   await page.locator('#login-email').fill(user.email);await page.locator('#login-password').fill(user.password);await page.locator('#login-form [type=submit]').click();
-  await expect(page).toHaveURL(/checkout.html$/);await page.locator('#checkout-next').click();await expect(page.locator('#delivery-form')).toBeVisible();
+  await expect(page).toHaveURL(url=>url.pathname==='/checkout.html');await page.locator('#checkout-next').click();await expect(page.locator('#delivery-form')).toBeVisible();
   await page.locator('#checkout-document').fill('0102030400');await page.locator('#checkout-terms').check();
   let posts=0;const matcher=API+'/api/pedidos';
   await page.route(matcher,async route=>{

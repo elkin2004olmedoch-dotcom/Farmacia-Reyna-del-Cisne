@@ -57,7 +57,7 @@ async function create(userId,{carrito,comprador,claveSolicitud}) {
 }
 async function list({page,pageSize},userId) {
   const where=userId ? {userId} : {};
-  const [items,total]=await db.$transaction([db.pedido.findMany({where,include,orderBy:{createdAt:'desc'},skip:(page-1)*pageSize,take:pageSize}),db.pedido.count({where})]);
+  const [items,total]=await db.$transaction([db.pedido.findMany({where,include,orderBy:[{createdAt:'desc'},{id:'asc'}],skip:(page-1)*pageSize,take:pageSize}),db.pedido.count({where})]);
   return {items,total,page,pageSize};
 }
 async function updateStatus(id,{estado,esperadoUpdatedAt},actorId) {
