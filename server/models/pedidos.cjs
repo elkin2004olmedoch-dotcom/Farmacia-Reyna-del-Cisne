@@ -89,7 +89,7 @@ async function updateStatusTx(tx,id,{estado,esperadoUpdatedAt},actorId) {
   const changedAt=new Date(Math.max(Date.now(),current.updatedAt.getTime()+1));
   const changed=await tx.pedido.updateMany({where:{id,estado:current.estado,updatedAt:expected},data:{estado,updatedAt:changedAt,...(['cancelado','entregado'].includes(estado)?{latitudEntrega:null,longitudEntrega:null}:{})}});
   if(changed.count!==1)throw new AppError(409,'ORDER_CHANGED','El pedido cambió. Actualiza sus datos antes de cambiar el estado.');
-  if(delivery && ['cancelado','entregado'].includes(estado))await tx.entrega.update({where:{id:delivery.id},data:{estado:estado==='cancelado'?'cancelada':'entregada',finalizadaAt:changedAt,version:{increment:1},gpsVersion:{increment:1},latitud:null,longitud:null,precision:null,registradaAt:null,recibidaAt:null}});
+  if(delivery && ['cancelado','entregado'].includes(estado))await tx.entrega.update({where:{id:delivery.id},data:{estado:estado==='cancelado'?'cancelada':'entregada',finalizadaAt:changedAt,version:{increment:1},...require('./sesiones-moviles.cjs').GPS_CLEAR}});
   if(estado==='cancelado')await inventory.restore(tx,current.detalles,id,actorId);
   await tx.pedidoEstado.create({data:{pedidoId:id,anterior:current.estado,estado,actorId,createdAt:changedAt}});
   return {pedido:await tx.pedido.findUnique({where:{id},include}),replayed:false};
