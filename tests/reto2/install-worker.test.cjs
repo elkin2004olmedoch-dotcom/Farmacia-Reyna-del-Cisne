@@ -4,11 +4,11 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 
-function worker(){
+function worker({redirectedFallback=false}={}){
   const filename=path.resolve('frontend/app-worker.js');assert.ok(fs.existsSync(filename),'Falta el worker MVC con fallback público');
   const handlers={};const entries=new Map();const reads=[];const writes=[];const deletions=[];let network=async()=>new Response('private-session-response');
   const caches={
-    async open(name){return {async add(request){const key=new URL(typeof request==='string'?request:request.url,'https://farmacia.test');writes.push({name,path:key.pathname,request});entries.set(key.pathname,new Response('offline-public-fallback'));},async match(request){reads.push({name,request});return entries.get(typeof request==='string'?request:new URL(request.url).pathname)?.clone();}};},
+    async open(name){return {async add(request){const key=new URL(typeof request==='string'?request:request.url,'https://farmacia.test');writes.push({name,path:key.pathname,request});entries.set(key.pathname,new Response('offline-public-fallback',{headers:{'Content-Type':'text/html'}}));},async match(request){reads.push({name,request});const response=entries.get(typeof request==='string'?request:new URL(request.url).pathname)?.clone();if(response && redirectedFallback)Object.defineProperty(response,'redirected',{value:true});return response;}};},
     async keys(){return ['farmacia-mvc-offline-old','historical-store-cache'];},async delete(name){deletions.push(name);return true;}
   };
   const self={location:{origin:'https://farmacia.test'},addEventListener:(name,listener)=>{handlers[name]=listener;},skipWaiting:async()=>{},clients:{claim:async()=>{}}};
@@ -40,6 +40,11 @@ test('API, POST, recursos y otros orígenes jamás se interceptan aunque no haya
   const w=worker();await w.lifecycle('install');w.fail();
   for(const [url,options] of [['/api/auth/me',{}],['/api',{mode:'navigate'}],['/api/pedidos',{method:'POST'}],['/admin.html',{method:'POST'}],['/assets/logo.png',{mode:'no-cors'}],['https://api.farmacia.test/admin.html',{}]])assert.equal(await w.request(url,options),undefined);
   assert.equal(w.writes.length,1);assert.equal(w.reads.length,0);
+});
+
+test('fallback redirigido por el alojamiento se devuelve como respuesta local sin redirección',async()=>{
+  const w=worker({redirectedFallback:true});await w.lifecycle('install');w.fail();
+  const response=await w.request('/catalogo');assert.equal(response.redirected,false);assert.equal(await response.text(),'offline-public-fallback');assert.equal(response.headers.get('Content-Type'),'text/html');assert.equal(w.writes.length,1);
 });
 
 test('los manifiestos diferencian tienda y administración sin cambiar el alcance ni el destino',()=>{

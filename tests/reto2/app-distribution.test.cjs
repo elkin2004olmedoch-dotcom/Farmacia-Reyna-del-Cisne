@@ -12,6 +12,7 @@ test('Pages distribuye instalación y APK verificado sin depender de GitHub púb
  const apk=fs.readFileSync(path.join(output,'descargas/reparto-0.1.0.apk'));
  assert.equal(apk.length,5622178);
  assert.equal(createHash('sha256').update(apk).digest('hex'),'537d0b0ab5f3e5f365e5df05f4b4333f9115e6a409885cde39c2a7e488180cbd');
+ assert.match(fs.readFileSync(path.join(output,'descargas/SHA256SUMS.txt'),'utf8'),/537d0b0ab5f3e5f365e5df05f4b4333f9115e6a409885cde39c2a7e488180cbd  Reina-del-Cisne-Reparto-pruebas\.apk/);
  const home=fs.readFileSync(path.join(output,'index.html'),'utf8');
  assert.match(home,/data-app-open/);assert.match(home,/id="app-install-dialog"/);assert.match(home,/store\.webmanifest/);
  assert.match(home,/href="descargas\/reparto-0\.1\.0\.apk"/);assert.ok(!home.includes('releases/download'));

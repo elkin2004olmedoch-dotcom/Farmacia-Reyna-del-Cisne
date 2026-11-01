@@ -1,5 +1,5 @@
 const CACHE_PREFIX='farmacia-mvc-offline-';
-const CACHE_NAME=CACHE_PREFIX+'v1';
+const CACHE_NAME=CACHE_PREFIX+'v2';
 const OFFLINE_URL='/offline.html';
 
 self.addEventListener('install',event=>{
@@ -12,5 +12,9 @@ self.addEventListener('fetch',event=>{
   const request=event.request,url=new URL(request.url);
   if(request.method!=='GET' || request.mode!=='navigate' || url.origin!==self.location.origin || /^\/api(?:\/|$)/i.test(url.pathname))return;
   // Session HTML stays on the network. The only stored response is this public fallback.
-  event.respondWith(fetch(request).catch(()=>caches.open(CACHE_NAME).then(cache=>cache.match(OFFLINE_URL))));
+  event.respondWith(fetch(request).catch(async()=>{
+    const cached=await(await caches.open(CACHE_NAME)).match(OFFLINE_URL);
+    // Static hosts redirect .html to clean URLs; navigation cannot reuse that redirect.
+    return cached?new Response(cached.body,{status:cached.status,statusText:cached.statusText,headers:cached.headers}):Response.error();
+  }));
 });
