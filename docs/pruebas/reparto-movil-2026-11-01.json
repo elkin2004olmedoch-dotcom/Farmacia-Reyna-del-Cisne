@@ -1,0 +1,112 @@
+{
+  "date": "2026-11-01",
+  "codeCommit": "2fcbd2dcc25a263f57a70b22fed84563e494a6ce",
+  "deployedCommit": "cbd5b57d3f0ee6c43f43f858cacaa0ff56f615e2",
+  "pullRequest": 12,
+  "local": {
+    "backend": 287,
+    "mobile": 49,
+    "mobileUI": 10,
+    "mvcBrowser": 128,
+    "pagesBrowser": 22,
+    "total": 496,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0
+  },
+  "ci": {
+    "mvc": {
+      "run": 41360119990,
+      "conclusion": "success"
+    },
+    "mobile": {
+      "run": 41360119964,
+      "conclusion": "success",
+      "jobs": [
+        "tests",
+        "android",
+        "ios"
+      ]
+    }
+  },
+  "android": {
+    "build": "assembleDebug lintDebug",
+    "lintErrors": 0,
+    "lintWarnings": 19,
+    "npmAuditVulnerabilities": 0,
+    "bytes": 5622178,
+    "sha256": "537d0b0ab5f3e5f365e5df05f4b4333f9115e6a409885cde39c2a7e488180cbd",
+    "signature": "Android Debug, v2",
+    "publishedDigestMatches": true
+  },
+  "ios": {
+    "build": "Xcode simulator without signing",
+    "physicalInstallation": false
+  },
+  "live": {
+    "origin": "https://farmacia-reina-del-cisne.onrender.com",
+    "finished": "2026-11-01T23:16:43.729Z",
+    "results": [
+      {
+        "check": "health",
+        "status": 200
+      },
+      {
+        "check": "anonymous deliveries blocked",
+        "status": 401
+      },
+      {
+        "check": "mobile login rejects user",
+        "status": 401
+      },
+      {
+        "check": "mobile login rejects admin",
+        "status": 401
+      },
+      {
+        "check": "courier mobile login",
+        "status": 200
+      },
+      {
+        "check": "refresh rotation",
+        "status": 200
+      },
+      {
+        "check": "lost response retry is idempotent",
+        "status": 200
+      },
+      {
+        "check": "courier deliveries authorized read",
+        "status": 200
+      },
+      {
+        "check": "session revoked",
+        "status": 204
+      },
+      {
+        "check": "revoked JWT rejected",
+        "status": 401
+      }
+    ],
+    "ordersChanged": 0,
+    "gpsSamplesWritten": 0,
+    "payments": 0
+  },
+  "render": {
+    "plan": "Free",
+    "autoDeploy": "Off",
+    "status": "Live",
+    "paidPlanPurchased": false
+  },
+  "pending": [
+    "Android and iPhone physical GPS/lock/Maps/network/battery tests",
+    "iPhone signing and provisioning",
+    "Always-on hosting if commercially required"
+  ],
+  "localDatabase": {
+    "prismaClientsGenerated": "6.19.3, both providers",
+    "migrated": false,
+    "seeded": false
+  },
+  "release": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/releases/tag/reparto-v0.1.0-pruebas"
+}
