@@ -188,7 +188,7 @@ test('a missing sensor update marks the last captured position stale after two m
   await f.tracker.stop();
 });
 
-test('a successful PUT with a lost response is reconciled without resending that captured point', async () => {
+for (const offset of [0, 0.5]) test(`a successful PUT with a lost response is reconciled without resending that captured point (${offset} ms)`, async () => {
   let lose = true;
   const f = fixture((r, delivery) => {
     if (r.method === 'PUT' && lose) {
@@ -196,7 +196,7 @@ test('a successful PUT with a lost response is reconciled without resending that
       throw fault(0, 'NETWORK_ERROR');
     }
   });
-  await f.tracker.start(f.delivery); await f.capture(); await f.tick(12000);
+  await f.tracker.start(f.delivery); await f.capture({time:TIME+offset}); await f.tick(12000);
   assert.equal(f.requests.filter(r => r.method === 'PUT').length, 1);
   assert.equal(f.tracker.state.phase, 'sharing');
   await f.tracker.stop();

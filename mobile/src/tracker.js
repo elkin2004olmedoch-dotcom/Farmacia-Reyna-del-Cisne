@@ -71,7 +71,9 @@ export function createTracker({ session, gps, clock = { now: Date.now, setTimeou
     if (!shareable(dto)) { halt('closed', 'La entrega finalizó o fue cancelada. Ubicación detenida.'); return false; }
     if (dto.id !== delivery.id || !Number.isSafeInteger(dto.gpsVersion) || dto.gpsVersion < 0) throw problem('INVALID_RESPONSE', 'No se pudo verificar la entrega.', 502);
     delivery = dto;
-    if (latest && Date.parse(dto.ubicacion?.registradaAt) >= latest.time) {
+    // Core Location can provide fractional milliseconds; the API snapshot uses
+    // ISO dates with millisecond precision, as does the outgoing request.
+    if (latest && Date.parse(dto.ubicacion?.registradaAt) >= Math.trunc(latest.time)) {
       latest = null;
       emit('sharing', 'La ubicación reciente ya está confirmada en el servidor.');
     }
