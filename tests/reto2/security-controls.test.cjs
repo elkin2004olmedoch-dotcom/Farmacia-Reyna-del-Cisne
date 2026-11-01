@@ -119,6 +119,29 @@ test('idempotencia concurrente no comparte pedidos entre usuarios ni descuenta d
   assert.equal((await db.producto.findUnique({where:{id}})).stock,0);
 });
 
+test('un fallo transaccional recupera solo el pedido confirmado del mismo usuario y contenido',async()=>{
+  const other=await request.post('/api/auth/register').send({...credentials,email:'security-retry-other@example.ec'}).expect(201);
+  const created=await request.post('/api/productos').set('Authorization',authorization(adminToken)).send({...product,stock:2}).expect(201);
+  const id=created.body.data.id,key=randomUUID();
+  const body={claveSolicitud:key,carrito:[{productoId:id,cantidad:1}],comprador:{name:credentials.nombre,email:credentials.email,phone:credentials.telefono,documentType:'cedula',document:credentials.cedula,delivery:'pickup',province:'',city:'',address:'',postalCode:''}};
+  const confirmed=await request.post('/api/pedidos').set('Authorization',authorization(userToken)).send(body).expect(201);
+  const originalTransaction=db.$transaction;
+  try{
+    for(const code of ['P2034','P2028','P1008']){
+      db.$transaction=async()=>{throw Object.assign(new Error('Fallo transaccional sintético'),{code});};
+      const replay=await request.post('/api/pedidos').set('Authorization',authorization(userToken)).send(body).expect(200);
+      assert.equal(replay.body.data.id,confirmed.body.data.id);assert.equal(replay.body.data.userId,user.id);assert.equal(replay.body.replayed,true);
+      const changed=await request.post('/api/pedidos').set('Authorization',authorization(userToken)).send({...body,carrito:[{productoId:id,cantidad:2}]}).expect(409);
+      assert.equal(changed.body.error.code,'IDEMPOTENCY_CONFLICT');
+      const separate=await request.post('/api/pedidos').set('Authorization',authorization(other.body.data.token)).send(body).expect(409);
+      assert.equal(separate.body.error.code,'RETRY_ORDER');assert.equal(separate.body.data,undefined);
+    }
+  }finally{db.$transaction=originalTransaction;}
+  assert.equal(await db.pedido.count({where:{requestKey:key}}),1);
+  assert.equal((await db.producto.findUnique({where:{id}})).stock,1);
+  assert.equal(await db.movimientoInventario.count({where:{pedidoId:confirmed.body.data.id,tipo:'venta'}}),1);
+});
+
 test('logout revoca dos tokens válidos y permite iniciar una nueva sesión',async()=>{
   const second=signed({jwtid:randomUUID()});assert.notEqual(second,userToken);
   await request.get('/api/auth/me').set('Authorization',authorization(second)).expect(200);

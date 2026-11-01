@@ -46,7 +46,7 @@ async function create(userId,{carrito,comprador,claveSolicitud}) {
         return {pedido,replayed:false};
       },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable,maxWait:10000,timeout:15000});
     } catch(error) {
-      if(error.code==='P2002') {
+      if(['P2002','P2034','P2028','P1008'].includes(error.code)) {
         const prior=await db.pedido.findUnique({where:{userId_requestKey:{userId,requestKey:claveSolicitud}},include});
         if(prior)return same(prior);
       }
