@@ -15,6 +15,8 @@ Las migraciones aditivas están aplicadas en Supabase y conservan los datos ante
 
 ## Arquitectura y verificación continua
 
+La candidata de [app de reparto Android/iPhone](mobile/README.md) añade GPS nativo durante entregas, sesiones renovables y propiedad del seguimiento. Conserva la tienda y la API actuales; el Reto 3 sigue aplazado. Sus builds y pruebas de software se registran por separado de la validación física y la firma necesarias para instalar y comprobar la continuidad con pantalla bloqueada. No se declara GPS 24/7 operativo solo por disponer del código.
+
 La presentación carga los módulos de cada pantalla y habilita sus controles cuando están preparados. Las lecturas públicas de precios evitan recuperar el historial completo de lotes; los listados tienen desempate estable y el servidor coordina salud, errores de escucha y cierre con plazo. La portada realiza 46 peticiones frente a 71 en la medición local y reduce la transferencia observada un 15,5 %. No se presenta esa medición como una capacidad máxima ni una garantía de tiempos de producción.
 
 Se aprobaron **550 pruebas sin omisiones**: 270 Node con SQLite/PostgreSQL temporal, 38 históricas, 128 de navegador, 22 entre orígenes y 92 del agente .NET. El [workflow MVC](.github/workflows/verify-mvc.yml) y el [workflow del agente](.github/workflows/inventory-agent.yml) repiten la verificación en GitHub con datos sintéticos. Las capturas, los resultados intermedios, los límites de crecimiento y las dependencias externas pendientes están en el informe actual enlazado arriba.
