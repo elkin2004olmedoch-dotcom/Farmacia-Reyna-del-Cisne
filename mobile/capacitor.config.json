@@ -1,0 +1,19 @@
+{
+  "appId": "ec.reinadelcisne.reparto",
+  "appName": "Reina del Cisne · Reparto",
+  "webDir": "www",
+  "loggingBehavior": "none",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false,
+    "allowNavigation": []
+  },
+  "android": {
+    "useLegacyBridge": true,
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "allowsLinkPreview": false
+  }
+}
