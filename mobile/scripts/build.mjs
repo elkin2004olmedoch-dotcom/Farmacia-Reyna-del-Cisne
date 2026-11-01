@@ -1,0 +1,11 @@
+import {build} from 'esbuild';
+import {mkdir,copyFile} from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const output=path.join(root,'www');
+await mkdir(path.join(output,'assets'),{recursive:true});
+await build({entryPoints:[path.join(root,'src/app.js')],outfile:path.join(output,'app.js'),bundle:true,format:'esm',platform:'browser',target:['chrome100','safari15'],minify:true,legalComments:'eof',sourcemap:false});
+for(const file of ['index.html','styles.css'])await copyFile(path.join(root,'src',file),path.join(output,file));
+await copyFile(path.join(root,'../frontend/assets/images/logo-reina-del-cisne.png'),path.join(output,'assets/logo-reina-del-cisne.png'));
+console.log('App de reparto empaquetada con contenido local.');

@@ -1,12 +1,13 @@
 const {Router}=require('express');
 const {rateLimit}=require('express-rate-limit');
 const {query}=require('express-validator');
-const {authenticate,roles}=require('../middleware/auth.cjs');
+const {authenticate,roles,mobile}=require('../middleware/auth.cjs');
 const V=require('../middleware/validation.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 module.exports=config=> {
   const router=Router();const auth=authenticate(config);const admin=roles('admin');const buyer=roles('user','admin');
   const authController=require('../controllers/auth.cjs')(config);
+  const mobileController=require('../controllers/auth-mobile.cjs')(config);
   const products=require('../controllers/productos.cjs');
   const orders=require('../controllers/pedidos.cjs');
   const promos=require('../controllers/promociones.cjs');
@@ -16,6 +17,12 @@ module.exports=config=> {
   const limiter=rateLimit({windowMs:15*60*1000,limit:authLimit,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Demasiados intentos. Espera unos minutos.'))});
   router.post('/auth/register',limiter,...V.register,authController.register);
   router.post('/auth/login',limiter,...V.login,authController.login);
+  router.post('/auth/mobile/login',limiter,...V.login,mobileController.login);
+  router.post('/auth/mobile/renew',limiter,(req,res,next)=>{
+    if(!req.body||Array.isArray(req.body)||Object.keys(req.body).some(k=>!['refreshToken','nextSecret'].includes(k))||!require('../models/sesiones-moviles.cjs').validRenew(req.body))throw new AppError(422,'VALIDATION_ERROR','La renovación de sesión no tiene un formato válido.');
+    next();
+  },mobileController.renew);
+  router.post('/auth/mobile/logout',auth,mobile,mobileController.logout);
   router.get('/auth/me',auth,authController.me);
   router.post('/auth/logout',auth,authController.logout);
   router.get('/productos',...V.catalog,products.list);

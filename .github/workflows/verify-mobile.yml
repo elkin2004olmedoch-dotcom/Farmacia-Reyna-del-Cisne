@@ -1,0 +1,84 @@
+name: Verificar app de reparto
+
+on:
+  pull_request:
+    paths: ['mobile/**', '.github/workflows/verify-mobile.yml']
+  push:
+    branches: [main]
+    paths: ['mobile/**', '.github/workflows/verify-mobile.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: reparto-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v7.1.0
+        with: {node-version: '22', cache: npm, cache-dependency-path: 'mobile/package-lock.json'}
+      - run: npm ci --include=dev
+      - run: npm ci --prefix mobile --include=dev
+      - run: npm test --prefix mobile
+      - run: npm run build --prefix mobile
+      - run: npx --no-install playwright install --with-deps chrome
+      - run: npx --no-install playwright test mobile/test/ui.spec.cjs --workers=1 --reporter=line
+      - run: npm audit --prefix mobile
+
+  android:
+    needs: tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v7.1.0
+        with: {node-version: '22', cache: npm, cache-dependency-path: 'mobile/package-lock.json'}
+      - uses: actions/setup-java@v6.1.0
+        with: {distribution: temurin, java-version: '21'}
+      - run: npm ci --prefix mobile --include=dev
+      - run: npm run build --prefix mobile
+      - working-directory: mobile
+        run: npx --no-install cap sync android
+      - working-directory: mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon --max-workers=2 assembleDebug lintDebug
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: reparto-android-pruebas
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
+  ios:
+    needs: tests
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@v7.1.0
+        with: {node-version: '22', cache: npm, cache-dependency-path: 'mobile/package-lock.json'}
+      - run: npm ci --prefix mobile --include=dev
+      - run: npm run build --prefix mobile
+      - working-directory: mobile
+        run: npx --no-install cap sync ios
+      - name: Compilar para simulador, sin firma de distribución
+        run: |
+          xcodebuild -version
+          xcodebuild -project mobile/ios/App/App.xcodeproj -scheme App \
+            -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/reparto-ios" CODE_SIGNING_ALLOWED=NO build
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: reparto-ios-simulador
+          path: ${{ runner.temp }}/reparto-ios/Build/Products/Debug-iphonesimulator/App.app
+          if-no-files-found: error
+          retention-days: 7

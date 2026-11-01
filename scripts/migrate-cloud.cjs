@@ -2,7 +2,7 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
-const MODELS=Object.freeze(['usuario','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','semilla']);
+const MODELS=Object.freeze(['usuario','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','semilla']);
 const INITIAL_FISCAL=Object.freeze({id:'iva-general-inicial',tarifaGeneral:15,inicioVigencia:'2024-04-01T05:00:00.000Z',referenciaNormativa:'Ley de Régimen Tributario Interno, art. 65; Decreto Ejecutivo 198; Circular SRI NAC-DGECCGC25-00000006 (vigencia 2026).',actorId:null});
 const INITIAL_DEFAULTS=Object.freeze({
   configuracionFiscal:INITIAL_FISCAL,
@@ -55,9 +55,10 @@ function assertSnapshotRelations(snapshot){
     ids[model]=new Set(snapshot[model].map(row=>row.id));
     if(ids[model].size!==snapshot[model].length || snapshot[model].some(row=>typeof row.id!=='string' || !row.id))fail('SOURCE_DATA','La base local contiene identificadores inválidos.');
   }
-  const valid=snapshot.pedido.every(row=>ids.usuario.has(row.userId) && (row.zonaEntregaId==null || ids.zonaEntrega.has(row.zonaEntregaId)))
+  const valid=snapshot.sesionMovil.every(row=>ids.usuario.has(row.usuarioId))
+    && snapshot.pedido.every(row=>ids.usuario.has(row.userId) && (row.zonaEntregaId==null || ids.zonaEntrega.has(row.zonaEntregaId)))
     && snapshot.zonaEntregaTarifa.every(row=>ids.zonaEntrega.has(row.zonaEntregaId) && (row.actorId==null || ids.usuario.has(row.actorId)))
-    && snapshot.entrega.every(row=>ids.pedido.has(row.pedidoId) && (row.repartidorId==null || ids.usuario.has(row.repartidorId)))
+    && snapshot.entrega.every(row=>ids.pedido.has(row.pedidoId) && (row.repartidorId==null || ids.usuario.has(row.repartidorId)) && (row.sesionSeguimientoId==null || ids.sesionMovil.has(row.sesionSeguimientoId)))
     && snapshot.pago.every(row=>ids.pedido.has(row.pedidoId))
     && snapshot.pedidoDetalle.every(row=>ids.pedido.has(row.pedidoId) && ids.producto.has(row.productoId))
     && snapshot.promocion.every(row=>ids.producto.has(row.productoId))

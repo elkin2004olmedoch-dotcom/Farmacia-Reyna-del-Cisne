@@ -56,6 +56,7 @@ model Usuario {
   pedidos      Pedido[]
   cambiosPedidos PedidoEstado[]
   entregas Entrega[]
+  sesionesMoviles SesionMovil[]
   cambiosTarifa ZonaEntregaTarifa[]
   configuracionesFiscales ConfiguracionFiscal[]
   movimientos MovimientoInventario[]
@@ -324,6 +325,8 @@ model Entrega {
   estado String @default("asignada")
   version Int @default(1)
   gpsVersion Int @default(0)
+  sesionSeguimientoId String? @unique
+  sesionSeguimiento SesionMovil? @relation(fields:[sesionSeguimientoId],references:[id],onDelete:Restrict)
   asignadaAt DateTime @default(now())
   salidaAt DateTime?
   llegadaAt DateTime?
@@ -338,6 +341,22 @@ model Entrega {
   @@index([repartidorId,estado])
   @@index([estado,createdAt])
   @@index([recibidaAt])
+}
+
+model SesionMovil {
+  id String @id @default(uuid())
+  usuarioId String
+  usuario Usuario @relation(fields:[usuarioId],references:[id],onDelete:Restrict)
+  tokenVersion Int
+  secretHash String
+  previousSecretHash String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  entrega Entrega?
+  @@index([usuarioId,expiresAt])
+  @@index([expiresAt])
 }
 
 model Pago {
