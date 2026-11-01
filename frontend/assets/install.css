@@ -1,0 +1,32 @@
+.app-get-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; flex-shrink:0; padding:8px 15px; border:1px solid var(--line); border-radius:999px; background:var(--surface); color:var(--brand-dark); font:600 13px var(--sans); cursor:pointer; white-space:nowrap; }
+.app-get-button:hover { border-color:var(--brand-red); background:var(--cream); }
+.app-get-button svg,.app-install-dialog .button svg,.admin-install-card .button svg,.admin-app-link svg { width:20px; height:20px; flex-shrink:0; }
+.app-get-button:focus-visible,.app-close:focus-visible { outline:3px solid var(--brand-red); outline-offset:3px; }
+.app-install-dialog { width:min(620px,calc(100% - 32px)); max-height:calc(100dvh - 32px); padding:30px; border:1px solid var(--line); border-radius:22px; color:var(--ink); background:var(--surface); overscroll-behavior:contain; }
+.app-install-dialog::backdrop { background:rgb(24 19 17 / 55%); }
+.app-install-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; }
+.app-install-heading .eyebrow { margin:0; }
+.app-close { display:grid; place-items:center; width:44px; height:44px; flex-shrink:0; padding:0; border:1px solid var(--line); border-radius:50%; color:var(--ink); background:transparent; font-size:26px; cursor:pointer; }
+.app-install-logo { width:170px; height:58px; object-fit:contain; margin:16px 0; }
+.app-install-dialog h2 { font-size:clamp(30px,5vw,42px); line-height:1.1; margin:8px 0 16px; }
+.app-install-dialog h3 { font-size:20px; margin:0 0 12px; }
+.app-install-dialog p,.admin-install-card p { line-height:1.65; }
+.app-platforms { margin-top:24px; padding:22px; border:1px solid var(--line); border-radius:14px; }
+.app-platform-buttons { display:flex; flex-wrap:wrap; gap:10px; }
+.app-platform-buttons .button { flex:1; justify-content:space-between; min-width:140px; }
+.app-platform-buttons [aria-pressed="true"] { border-color:var(--brand-red); background:var(--cream); }
+.app-guidance { padding:14px 16px; border-left:3px solid var(--brand-red); background:var(--cream); font-size:14px; white-space:pre-line; }
+.app-courier { margin-top:24px; padding-top:24px; border-top:1px solid var(--line); }
+.app-checksum { display:block; width:fit-content; margin-top:12px; min-height:30px; font-size:13px; text-decoration:underline; text-underline-offset:3px; }
+.admin-app-link { display:inline-flex; align-items:center; gap:7px; min-height:44px; color:var(--brand-dark); font-size:12px; white-space:nowrap; }
+.admin-install-card { display:grid; grid-template-columns:1.2fr 1fr; gap:48px; max-width:1060px; margin:48px auto; padding:40px; border:1px solid var(--line); border-radius:22px; background:var(--surface); }
+.admin-install-card h1 { font-size:clamp(38px,5vw,64px); line-height:1.05; }
+.admin-install-card .button { min-height:48px; margin-top:18px; }
+.admin-install-card .text-link { display:inline-flex; min-height:44px; align-items:center; }
+.app-install-lead { font-size:20px; }
+.admin-install-preview { align-self:start; border-radius:18px; padding:28px; background:var(--cream); }
+.admin-install-preview img { object-fit:contain; margin-bottom:25px; }
+.admin-install-preview ul { padding-left:20px; line-height:2.2; }
+@media(max-width:900px) { .app-get-button { width:44px; height:44px; padding:0; } .app-get-button span { display:none; } .site-header.shop-header .header-inner { gap:6px; } .shop-header .brand img { width:100px; } .shop-actions { gap:7px; } }
+@media(max-width:600px) { .app-install-dialog { padding:20px; } .app-platforms { padding:16px; } .admin-app-link span { display:none; } .admin-header-label { font-size:11px; } .admin-install-card { grid-template-columns:1fr; gap:28px; padding:24px; margin:24px auto; } .admin-install-card .button { width:100%; text-align:center; } .admin-install-preview { padding:22px; } }
+@media(prefers-reduced-motion:reduce) { .app-install-dialog * { scroll-behavior:auto; } }

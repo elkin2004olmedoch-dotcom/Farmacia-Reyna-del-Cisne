@@ -2,6 +2,7 @@ import {auth} from '../models/auth.js';
 import {layoutController} from './layout.js';
 import {contactController} from './contact.js';
 import {message} from '../views/common.js';
+import {installController,adminInstallController} from './install.js';
 // Native module imports keep each screen's dependencies out of unrelated pages.
 const controllers={
   home:()=>import('./catalog.js').then(module=>module.homeController()),
@@ -12,6 +13,7 @@ const controllers={
   checkout:()=>import('./checkout.js').then(module=>module.checkoutController()),
   orders:()=>import('./checkout.js').then(module=>module.ordersController()),
   admin:()=>import('./admin.js').then(module=>module.adminController()),
+  'admin-install':()=>adminInstallController(),
   deliveries:()=>import('./deliveries.js').then(module=>module.deliveriesController()),
   tracking:()=>import('./deliveries.js').then(module=>module.trackingController()),
   payments:()=>import('./payments.js').then(module=>module.paymentsController())
@@ -32,9 +34,10 @@ async function initialize() {
   }
   try{await auth.restore();delete document.body.dataset.sessionPending;}catch(error){if(error.status===401){auth.clear();delete document.body.dataset.sessionPending;}else message(error.message,true);}
   if(auth.isAdmin && ['account','checkout','orders'].includes(page)){location.replace(page==='orders'?'admin.html?tabla=pedidos':'admin.html');return;}
-  if(auth.isCourier && ['account','checkout','orders','admin','payments'].includes(page)){location.replace('entregas.html');return;}
+  if(auth.isCourier && ['account','checkout','orders','admin','admin-install','payments'].includes(page)){location.replace('entregas.html');return;}
   if(updateSession)updateSession();else{layoutController();contactController();}
   if(!['admin','deliveries','tracking'].includes(page) && !auth.isStaff && !document.body.hasAttribute('data-session-pending'))import('./mascota.js').then(({mascotaController})=>mascotaController()).catch(()=>{});
   if(page!=='home')await renderPage(page);
 }
+installController();
 initialize();
