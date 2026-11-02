@@ -42,7 +42,7 @@ function buildPages({output=defaultOutput,apiOrigin=process.env.PUBLIC_API_ORIGI
     if(size>25*1024*1024 || ++files>20000)throw new Error('El artefacto supera los límites estáticos de Pages Free.');
     const target=path.join(output,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,content);bytes+=size;maxFileBytes=Math.max(maxFileBytes,size);
   };
-  const pages=['index.html','catalogo.html','producto.html','comparar.html','cuenta.html','checkout.html','pedidos.html','admin.html','ayuda.html','entregas.html','seguimiento.html','pagos.html','instalar-admin.html','offline.html'];
+  const pages=['index.html','catalogo.html','producto.html','comparar.html','cuenta.html','checkout.html','pedidos.html','admin.html','ayuda.html','entregas.html','seguimiento.html','pagos.html','instalar-admin.html','offline.html','clase.html'];
   for(const file of pages)write(file,read(file));
   for(const file of ['store.webmanifest','admin.webmanifest','app-worker.js','descargas/SHA256SUMS.txt'])write(file,read(file));
   const apk=read('descargas/reparto-0.1.0.apk');

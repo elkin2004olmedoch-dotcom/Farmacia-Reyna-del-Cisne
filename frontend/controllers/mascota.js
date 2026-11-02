@@ -1,5 +1,6 @@
 const ASSETS=new URL('../assets/mascotas/',import.meta.url);
 import {classifyMascotaQuestion} from './mascota-scope.mjs';
+import {isClassroom} from '../models/runtime.js';
 const PEOPLE={farmi:'Farmi',boti:'Boti',goti:'Goti'};
 const STORED_CHARACTER='farmacia-companion';
 const STORED_MOTION='farmacia-motion';
@@ -109,6 +110,7 @@ export async function mascotaController(){
     else find('#launcher').focus();
   }
   function append(text,type='bot',actions=[]){
+    if(isClassroom)actions=actions.filter(action=>!action.external && !/^(?:https?:|tel:|mailto:)/.test(action.href));
     const message=document.createElement('div');message.className=`message ${type}`;
     const paragraph=document.createElement('p');paragraph.textContent=text;message.append(paragraph);
     if(actions.length){const links=document.createElement('div');links.className='message-links';for(const action of actions){const link=document.createElement('a');link.textContent=action.label;link.href=action.href;if(action.external){link.target='_blank';link.rel='noopener noreferrer';}links.append(link);}message.append(links);}

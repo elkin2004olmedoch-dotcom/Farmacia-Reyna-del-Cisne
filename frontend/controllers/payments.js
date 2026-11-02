@@ -4,8 +4,9 @@ import {money,busy} from '../views/common.js';
 import {requireUser} from './layout.js';
 import {auth} from '../models/auth.js';
 import {events} from '../models/events.js';
+import {isClassroom} from '../models/runtime.js';
 export async function paymentsController(){
-  const params=new URLSearchParams(location.search),id=params.get('pedido');
+  const params=new URLSearchParams(location.search),classOrderId=isClassroom?params.get('pedido'):null,id=isClassroom?null:params.get('pedido');
   const form=document.getElementById('payment-form'),methods=document.getElementById('payment-methods'),button=document.getElementById('payment-submit');
   const errorPanel=document.getElementById('payment-error'),loading=document.getElementById('payment-loading');
   let order=demoOrder,config={payphone:{disponible:false,entorno:null}},payment=null,pending=false,loadingActive=false,active=true;
@@ -45,7 +46,7 @@ export async function paymentsController(){
   }else paymentSummary(order);
   async function load(){
     if(pending || loadingActive)return;loadingActive=true;pending=Boolean(id);errorPanel.hidden=true;loading.hidden=!id;methods.disabled=Boolean(id);render();
-    try{if(id){const data=await payments.forOrder(id);if(!active)return;order=data.pedido;payment=data.pago;config=data;paymentSummary(order);}else config=await payments.configuration();}
+    try{if(id || classOrderId){const data=await payments.forOrder(id || classOrderId);if(!active)return;order=data.pedido;payment=data.pago;config=data;paymentSummary(order);}else config=await payments.configuration();}
     catch(error){fail(error);if(error.status===401)requireUser(`pagos.html?pedido=${id}`);}
     finally{pending=false;loadingActive=false;loading.hidden=true;if(active){methods.disabled=Boolean(id && !order.id);render();}}
   }
@@ -55,7 +56,7 @@ export async function paymentsController(){
     if(!active || pending || id && (!order.id || method==='demo') || method==='card' && card.disabled)return;
     errorPanel.hidden=true;
     if(method==='demo'){paymentOutcome(demoResult(document.getElementById('payment-demo-result').value));return;}
-    if(method==='manual'){const url=new URL('https://api.whatsapp.com/send');url.searchParams.set('phone','593979275988');url.searchParams.set('text',id?`Hola, quiero coordinar el pago del pedido ${id}.`:'Hola, quiero consultar las formas de pago de la farmacia.');window.open(url.href,'_blank','noopener,noreferrer');return;}
+    if(method==='manual'){if(isClassroom){paymentOutcome(demoResult('aprobado'));return;}const url=new URL('https://api.whatsapp.com/send');url.searchParams.set('phone','593979275988');url.searchParams.set('text',id?`Hola, quiero coordinar el pago del pedido ${id}.`:'Hola, quiero consultar las formas de pago de la farmacia.');window.open(url.href,'_blank','noopener,noreferrer');return;}
     pending=true;busy(button,true);
     try{const result=await payments.prepare(id);if(!active)return;payment=result.pago;config=result;if(payment?.estado==='pendiente' && payment.urlPago){location.assign(payphoneUrl(payment.urlPago));return;}render();}
     catch(error){fail(error);if(error.status===401)requireUser(`pagos.html?pedido=${id}`);}

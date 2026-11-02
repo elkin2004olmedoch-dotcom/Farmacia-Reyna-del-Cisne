@@ -36,7 +36,7 @@ const homePage=categories=>`
 <section class="location" id="ubicacion" aria-labelledby="location-title">
   <div class="location-inner section-wrap">
     <div class="location-copy"><p class="eyebrow">Una farmacia de aquí</p><h2 id="location-title">Nos encuentras<br>en Puerto Quito.</h2><p>Visítanos para consultar disponibilidad, presentación y los productos que necesitas.</p><div class="contact-facts"><p><b aria-hidden="true">⌖</b><span><strong>Farmacia Reina del Cisne</strong>Consulta nuestra ubicación exacta en el mapa.</span></p><p><b aria-hidden="true">◷</b><span><strong>Horario de atención</strong>Lunes a sábado · 08:00 a 19:00</span></p></div><a class="button button-outline" href="https://www.google.com/maps/search/?api=1&amp;query=Farmacia+Reina+del+Cisne+Puerto+Quito" target="_blank" rel="noopener noreferrer">Abrir en Google Maps <span aria-hidden="true">↗</span></a></div>
-    <div class="map-art"><iframe src="https://www.google.com/maps?q=Farmacia%20Reina%20del%20Cisne%20Puerto%20Quito&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen title="Mapa de ubicación de Farmacia Reina del Cisne"></iframe></div>
+    <div class="map-art" id="home-map-panel"><button id="home-map-load" type="button" class="button button-outline">Cargar mapa de ubicación</button><p>Al abrirlo se consulta Google Maps.</p></div>
   </div>
 </section>
 <section class="contact contact-form-section section-wrap" id="contacto" aria-labelledby="contact-form-title">

@@ -1,4 +1,5 @@
 import {auth} from '../models/auth.js';
+import {isClassroom} from '../models/runtime.js';
 import {events} from '../models/events.js';
 import {deliveries,ZONE_FORM_DRAFT} from '../models/deliveries.js';
 import {administration} from '../models/admin.js';
@@ -71,6 +72,11 @@ export async function deliveriesController(){
   }
   async function retryRetirement(){for(const id of retirePending){try{await deliveries.stopSharing(id);retirePending.delete(id);}catch{gpsNotice('La retirada de ubicación sigue pendiente. Revisa la conexión y pulsa Actualizar entregas para reintentar.');}}}
   async function startGps(item){
+    if(isClassroom){
+      await action(byId('delivery-gps-'+item.id),()=>deliveries.shareLocation(item.id,{esperadoGpsVersion:item.gpsVersion}),'GPS simulado actualizado. No se ha solicitado tu ubicación real.');
+      gpsNotice('Posición de ejemplo de Puerto Quito. Puedes verla desde el seguimiento del cliente.');
+      return;
+    }
     await stopGps({notice:false,drawList:false});if(!live || !auth.user || !activeDelivery(item))return;
     if(!globalThis.isSecureContext || !navigator.geolocation){gpsNotice('Este dispositivo necesita una conexión HTTPS y geolocalización disponible. Puedes continuar con los estados de entrega.');return;}
     const generation=++gpsGeneration,session={item,watchId:undefined,pending:null,lastAttempt:0};sharing=session;
@@ -94,6 +100,8 @@ export async function deliveriesController(){
   }
   area.addEventListener('click',async event=>{
     const button=event.target.closest('button');if(!button || !live || working)return;
+    if(isClassroom && button.hasAttribute('data-classroom-call')){message('Llamada simulada: el cliente ha recibido el aviso de llegada. No se ha marcado ningún teléfono.');return;}
+    if(isClassroom && button.hasAttribute('data-classroom-route')){message('Ruta de ejemplo lista. Cambia a Cliente y abre el seguimiento para ver el mapa simulado.');return;}
     const item=result.items.find(entry=>entry.id===(button.dataset.id || button.dataset.deliveryGps || button.dataset.deliveryReassign));
     if(button.hasAttribute('data-delivery-gps') && courier && activeDelivery(item)){
       if(sharing?.item.id===item.id)await stopGps();else await startGps(item);return;

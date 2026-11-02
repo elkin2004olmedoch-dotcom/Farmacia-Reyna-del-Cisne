@@ -4,6 +4,7 @@ Tienda y gestión farmacéutica para Puerto Quito, con catálogo, carrito, pedid
 
 ## Abrir la aplicación
 
+- [Demostración para clase, con tres roles y datos ficticios](https://farmacia-reyna-del-cisne-pruebas.pages.dev/clase). [Guía del recorrido](docs/DEMO-PARA-CLASE.md).
 - [Tienda y botón Obtener app](https://farmacia-reyna-del-cisne-pruebas.pages.dev/).
 - [Administración instalable en Windows](https://farmacia-reyna-del-cisne-pruebas.pages.dev/instalar-admin): Edge/Chrome normal y cuenta de administrador.
 - [Entregas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/entregas): requiere cuenta de administrador o repartidor.
