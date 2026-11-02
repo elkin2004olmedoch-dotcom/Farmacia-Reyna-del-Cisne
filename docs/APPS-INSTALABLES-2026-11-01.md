@@ -24,3 +24,5 @@ El repositorio publicable conserva código, pruebas y documentación operativa. 
 Las capturas de pruebas se generan localmente en una carpeta excluida de Git. Los accesos de prueba y el respaldo privado no se publican. [Alcance de la revisión de seguridad](SEGURIDAD_DESPLIEGUE.md).
 
 Después de la limpieza aprobaron 43 comprobaciones de instalación, recursos, configuración de producción y empaquetado de Pages, además de 38 pruebas históricas. El ZIP web se generó y verificó: 380 entradas, sin .env privado, certificados, bases, capturas ni el servicio auxiliar retirado. No se repitió la suite completa de navegador porque esta limpieza conserva el código de frontend, backend, móvil y sus dependencias.
+
+El cierre documental del Reto 2 restituyó en README la tabla de endpoints/roles, tres riesgos OWASP con sus mitigaciones, ejecución local y ejemplos HTTP. Se repitió api.test.cjs en SQLite temporal: 26/26 aprobadas, cero omisiones. La entrega académica completa se genera desde el commit Git limpio; incluye también la fuente móvil opcional, sin historial, dependencias instaladas ni archivos privados. No se modificó la lógica publicada para este cierre.
