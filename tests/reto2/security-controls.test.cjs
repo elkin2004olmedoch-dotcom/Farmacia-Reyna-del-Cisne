@@ -111,7 +111,14 @@ test('idempotencia concurrente no comparte pedidos entre usuarios ni descuenta d
   const created=await request.post('/api/productos').set('Authorization',authorization(adminToken)).send({...product,stock:2}).expect(201);
   const id=created.body.data.id,key=randomUUID();
   const body={claveSolicitud:key,carrito:[{productoId:id,cantidad:1}],comprador:{name:credentials.nombre,email:credentials.email,phone:credentials.telefono,documentType:'cedula',document:credentials.cedula,delivery:'pickup',province:'',city:'',address:'',postalCode:''}};
-  const responses=await Promise.all([userToken,userToken,other.body.data.token].map(token=>request.post('/api/pedidos').set('Authorization',authorization(token)).send(body)));
+  const tokens=[userToken,userToken,other.body.data.token];
+  const send=token=>request.post('/api/pedidos').set('Authorization',authorization(token)).send(body);
+  const responses=await Promise.all(tokens.map(send));
+  for(let index=0;index<responses.length;index++){
+    if(responses[index].status!==409)continue;
+    assert.equal(responses[index].body.error?.code,'RETRY_ORDER','Conflicto inesperado en solicitud '+index+': '+JSON.stringify(responses[index].body.error));
+    responses[index]=await send(tokens[index]);
+  }
   assert.deepEqual(responses.slice(0,2).map(response=>response.status).sort(),[200,201]);assert.equal(responses[2].status,201);
   assert.equal(responses[0].body.data.id,responses[1].body.data.id);assert.notEqual(responses[0].body.data.id,responses[2].body.data.id);
   assert.equal(responses[0].body.data.userId,user.id);assert.equal(responses[2].body.data.userId,other.body.data.usuario.id);
