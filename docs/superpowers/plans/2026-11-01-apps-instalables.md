@@ -23,22 +23,22 @@ Sin cambios de BD, pagos, framework, mascota o plan. No cache sensible ni secret
 
 **Files:** frontend/controllers/install.js, frontend/{store,admin}.webmanifest, frontend/app-worker.js, frontend/offline.html, tests/reto2/install*. Controller/HTML IDs y exportaciones fijados en spec; no tocar generator/buildPages/app.js.
 
-- [ ] Pruebas fallidas de prompt/manual/admin y política worker.
-- [ ] Implementar control de instalación, manifiestos y fallback público mínimo.
-- [ ] Aprobar pruebas focalizadas y revisión independiente.
+- [x] Pruebas fallidas de prompt/manual/admin y política worker.
+- [x] Implementar control de instalación, manifiestos y fallback público mínimo.
+- [x] Aprobar pruebas focalizadas y revisión independiente.
 
 ## Task 2 — Vistas, activos y empaquetado
 
 **Files:** scripts/build-frontend.cjs, scripts/templates/install.cjs, frontend/controllers/app.js, frontend/assets/install.css, frontend/assets/app-icons, frontend/descargas, scripts/build-pages.cjs, server/app.cjs, tests/reto2/pages-build.test.cjs y UI.
 
-- [ ] Pruebas fallidas de distribución y recursos/roles.
-- [ ] Añadir botón/dialog y landing admin reutilizando cabecera; iconos desde logo, descargar APK verificado.
-- [ ] Integrar bootstrap, exportar todas las pantallas/manifiestos/SW/descarga con CSP y MIME.
-- [ ] Aprobar pruebas, accesibilidad y recorridos pertinentes.
+- [x] Pruebas fallidas de distribución y recursos/roles.
+- [x] Añadir botón/dialog y landing admin reutilizando cabecera; iconos desde logo, descargar APK verificado.
+- [x] Integrar bootstrap, exportar todas las pantallas/manifiestos/SW/descarga con CSP y MIME.
+- [x] Aprobar pruebas, accesibilidad y recorridos pertinentes.
 
 ## Task 3 — Despliegue y privacidad
 
-- [ ] Revisión final y comprobaciones sin cambios comerciales.
-- [ ] Publicar y verificar web/instalador/admin/API/APK en servicios existentes.
-- [ ] Privatizar repo autorizado, conservar acceso Git de integraciones y verificar ambos sitios anónimamente.
-- [ ] Sincronizar solo cambios propios a carpeta original, documentar evidencias y límites.
+- [x] Revisión final y comprobaciones sin cambios comerciales.
+- [x] Publicar y verificar web/instalador/admin/API/APK en servicios existentes.
+- [x] Privatizar repo autorizado, conservar acceso Git de integraciones y verificar ambos sitios anónimamente.
+- [x] Sincronizar solo cambios propios a carpeta original, documentar evidencias y límites.

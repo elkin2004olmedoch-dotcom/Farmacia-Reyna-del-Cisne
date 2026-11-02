@@ -15,6 +15,8 @@ Las migraciones aditivas están aplicadas en Supabase y conservan los datos ante
 
 ## Arquitectura y verificación continua
 
+**Apps instalables y fuente privada:** la [tienda publicada](https://farmacia-reyna-del-cisne-pruebas.pages.dev/) incluye **Obtener app** para clientes Android/iPhone y el reparto se descarga aparte desde ese mismo dominio. El [instalador administrativo para Windows](https://farmacia-reyna-del-cisne-pruebas.pages.dev/instalar-admin) requiere una cuenta admin y reutiliza la API/BD actuales. El repositorio es privado; Cloudflare y Render conservan sus publicaciones y Render sigue en Free. Consulta [instalación](docs/APPS-E-INSTALACION.md) y [publicación, seguridad y pruebas del 1 de noviembre](docs/APPS-INSTALABLES-2026-11-01.md). GitHub Pages histórico ya no es la publicación activa.
+
 La candidata de [app de reparto Android/iPhone](mobile/README.md) añade GPS nativo durante entregas, sesiones renovables y propiedad del seguimiento. Conserva la tienda y la API actuales; el Reto 3 sigue aplazado. El [informe del 1 de noviembre](docs/REPARTO-MOVIL-2026-11-01.md) registra 496 pruebas de software, builds, publicación y verificaciones físicas pendientes. No se declara GPS 24/7 operativo solo por disponer del código.
 
 La presentación carga los módulos de cada pantalla y habilita sus controles cuando están preparados. Las lecturas públicas de precios evitan recuperar el historial completo de lotes; los listados tienen desempate estable y el servidor coordina salud, errores de escucha y cierre con plazo. La portada realiza 46 peticiones frente a 71 en la medición local y reduce la transferencia observada un 15,5 %. No se presenta esa medición como una capacidad máxima ni una garantía de tiempos de producción.
