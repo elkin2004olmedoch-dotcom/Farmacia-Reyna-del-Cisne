@@ -3,16 +3,24 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const {pathToFileURL}=require('node:url');
 const path=require('node:path');
-async function executor(){
+async function executor(classroom=false){
   // Browser dependencies are injected; run the actual executor without a DOM.
   let source=fs.readFileSync(path.join(__dirname,'../../frontend/controllers/admin-companion.js'),'utf8');
   source=source.replace(/^import .*;\r?$/gm,'');
   source=source.replaceAll('import.meta.url',JSON.stringify(pathToFileURL(path.resolve(__dirname,'../../frontend/controllers/admin-companion.js')).href));
   const parser=pathToFileURL(path.resolve(__dirname,'../../frontend/controllers/admin-command.mjs')).href;
-  source=`import {interpretAdminCommand,ecuadorCommandDay} from '${parser}';\n${source}`;
+  source=`import {interpretAdminCommand,ecuadorCommandDay} from '${parser}';\nconst isClassroom=${JSON.stringify(classroom)};\n${source}`;
   const create=(await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'))).createAdminCommandExecutor;
   return options=>create({deliveryModel:{},...options});
 }
+test('clase bloquea secciones excluidas de Farmi sin navegar ni consultar modelos',async()=>{
+  const create=await executor(true);
+  const run=create({isAdmin:()=>true,model:{},navigate:()=>assert.fail('No debe navegar'),openEditor:()=>assert.fail('No debe abrir')});
+  for(const command of ['Abre proveedores','Abre lotes','Abre fiscal','Crea proveedor: nombre="Ejemplo"']){
+    assert.match((await run(command)).text,/oculta.*clase/);
+  }
+  const help=(await run('ayuda')).text;assert.match(help,/Vitamina C/);assert.doesNotMatch(help,/proveedor|lotes|RUC real/);
+});
 test('navegación y formularios incompletos no consultan el catálogo ni guardan',async()=>{
   const create=await executor();const actions=[];
   const run=create({isAdmin:()=>true,model:{products:()=>assert.fail('unexpected catalog')},navigate:async section=>actions.push(section),openEditor:async(section,values)=>actions.push({section,values})});

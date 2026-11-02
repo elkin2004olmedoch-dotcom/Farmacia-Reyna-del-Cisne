@@ -1,5 +1,6 @@
 import {deliveries,deliveryQuote} from '../models/deliveries.js';
 import {money} from '../views/common.js';
+import {isClassroom} from '../models/runtime.js';
 const normalized=value=>String(value || '').normalize('NFD').replace(/\p{M}/gu,'').trim().replace(/\s+/g,' ').toLocaleLowerCase('es');
 
 export function deliveryCheckout(form,onChange){
@@ -27,6 +28,7 @@ export function deliveryCheckout(form,onChange){
   byId('checkout-use-location').addEventListener('click',()=>{
     const status=byId('checkout-location-status'),button=byId('checkout-use-location');
     if(mode()!=='delivery' || !match()){status.textContent='Selecciona tu zona de entrega antes de compartir un punto.';return;}
+    if(isClassroom){position={latitudEntrega:0.124,longitudEntrega:-79.26,consienteUbicacion:true};status.textContent='Destino ficticio añadido para la demostración. No se utilizó tu GPS.';byId('checkout-remove-location').hidden=false;return;}
     if(!navigator.geolocation){status.textContent='Este navegador no ofrece ubicación. Puedes continuar con tu dirección escrita.';return;}
     const id=++locationRequest;button.disabled=true;status.textContent='Solicitando permiso para usar tu posición como destino de esta entrega…';
     navigator.geolocation.getCurrentPosition(value=>{

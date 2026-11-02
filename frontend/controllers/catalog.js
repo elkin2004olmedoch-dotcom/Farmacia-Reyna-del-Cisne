@@ -4,10 +4,11 @@ import {cart} from '../models/cart.js';
 import {catalogView,productView,promotionView,comparisonView} from '../views/products.js';
 import {message,busy} from '../views/common.js';
 import {watchUpdates,preserveFocus} from './updates.js';
-const selected=()=>{try{return JSON.parse(sessionStorage.getItem('farmacia-mvc-comparacion') || '[]').filter(id=>typeof id==='string').slice(0,4);}catch(_){return [];}};
+import {storageKey} from '../models/runtime.js';
+const selected=()=>{try{return JSON.parse(sessionStorage.getItem(storageKey('farmacia-mvc-comparacion')) || '[]').filter(id=>typeof id==='string').slice(0,4);}catch(_){return [];}};
 function actions(target) {
   target.addEventListener('click',async event=>{const button=event.target.closest('[data-add]');if(!button || button.disabled)return;const wasFocused=document.activeElement===button;busy(button,true);try{const product=await catalog.find(button.dataset.add);cart.add(product);message(`${product.nombre} se añadió al carrito.`);}catch(error){message(error.message,true);}finally{if(button.isConnected){busy(button,false);if(wasFocused)button.focus();}}});
-  target.addEventListener('change',event=>{if(!event.target.matches('[data-compare]'))return;let chosen=selected();if(event.target.checked){if(chosen.length>=4){event.target.checked=false;message('Puedes comparar hasta cuatro productos.',true);return;}chosen.push(event.target.dataset.compare);}else chosen=chosen.filter(id=>id!==event.target.dataset.compare);sessionStorage.setItem('farmacia-mvc-comparacion',JSON.stringify(chosen));});
+  target.addEventListener('change',event=>{if(!event.target.matches('[data-compare]'))return;let chosen=selected();if(event.target.checked){if(chosen.length>=4){event.target.checked=false;message('Puedes comparar hasta cuatro productos.',true);return;}chosen.push(event.target.dataset.compare);}else chosen=chosen.filter(id=>id!==event.target.dataset.compare);sessionStorage.setItem(storageKey('farmacia-mvc-comparacion'),JSON.stringify(chosen));});
   for(const field of target.querySelectorAll('[data-compare]'))field.checked=selected().includes(field.dataset.compare);
 }
 export async function homeController() {
@@ -57,6 +58,6 @@ export async function productController() {
 }
 export async function compareController() {
   let products=await catalog.all();let chosen=selected().filter(id=>products.some(p=>p.id===id));if(!chosen.length)chosen=products.slice(0,4).map(p=>p.id);comparisonView(products,chosen);
-  document.getElementById('compare-picks').addEventListener('change',event=>{if(!event.target.matches('[data-pick]'))return;const next=[...document.querySelectorAll('[data-pick]:checked')].map(field=>field.dataset.pick);if(next.length>4){event.target.checked=false;message('Puedes comparar hasta cuatro productos.',true);return;}chosen=next;sessionStorage.setItem('farmacia-mvc-comparacion',JSON.stringify(chosen));comparisonView(products,chosen);document.querySelector(`[data-pick="${event.target.dataset.pick}"]`)?.focus();});
+  document.getElementById('compare-picks').addEventListener('change',event=>{if(!event.target.matches('[data-pick]'))return;const next=[...document.querySelectorAll('[data-pick]:checked')].map(field=>field.dataset.pick);if(next.length>4){event.target.checked=false;message('Puedes comparar hasta cuatro productos.',true);return;}chosen=next;sessionStorage.setItem(storageKey('farmacia-mvc-comparacion'),JSON.stringify(chosen));comparisonView(products,chosen);document.querySelector(`[data-pick="${event.target.dataset.pick}"]`)?.focus();});
   watchUpdates(async()=>{const loaded=await catalog.all();if(JSON.stringify(loaded)!==JSON.stringify(products)){products=loaded;chosen=chosen.filter(id=>products.some(product=>product.id===id));preserveFocus(document.getElementById('compare-picks'),()=>comparisonView(products,chosen));}});
 }

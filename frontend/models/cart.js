@@ -1,5 +1,6 @@
 import {events} from './events.js';
-const KEY='farmacia-mvc-carrito';
+import {storageKey} from './runtime.js';
+const KEY=storageKey('farmacia-mvc-carrito');
 window.addEventListener('storage',event=>{if(event.key===KEY || event.key===null)events.dispatchEvent(new Event('cart:changed'));});
 export const cart={
   read(){

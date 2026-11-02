@@ -1,5 +1,6 @@
 import {request,ApiError,apiFetch} from './api.js';
 import {events} from './events.js';
+import {storageKey} from './runtime.js';
 export const billing={
   configuration:()=>request('/admin/facturacion/configuracion'),
   saveConfiguration:body=>request('/admin/facturacion/configuracion',{method:'PUT',body}),
@@ -11,10 +12,10 @@ export const billing={
 };
 export async function downloadInvoice(id,kind,{customer=false}={}) {
   if(!['xml','ride'].includes(kind))throw new Error('Formato de factura inválido.');
-  const token=sessionStorage.getItem('farmacia-mvc-token');
+  const token=sessionStorage.getItem(storageKey('farmacia-mvc-token'));
   const base=customer?'/facturacion/facturas/':'/admin/facturacion/facturas/';
   const blob=await apiFetch(`${base}${encodeURIComponent(id)}/${kind}`,{headers:{Authorization:`Bearer ${token || ''}`},timeoutMs:60000},async response=>{
-  if(!response.ok){if(response.status===401){sessionStorage.removeItem('farmacia-mvc-token');events.dispatchEvent(new Event('session:expired'));}let payload;try{payload=await response.json();}catch(_){}throw new ApiError(payload?.error?.message || 'No se pudo descargar el comprobante.',response.status);}
+  if(!response.ok){if(response.status===401){sessionStorage.removeItem(storageKey('farmacia-mvc-token'));events.dispatchEvent(new Event('session:expired'));}let payload;try{payload=await response.json();}catch(_){}throw new ApiError(payload?.error?.message || 'No se pudo descargar el comprobante.',response.status);}
   return response.blob();
   });
   const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`factura-${id}.${kind==='xml'?'xml':'html'}`;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);
