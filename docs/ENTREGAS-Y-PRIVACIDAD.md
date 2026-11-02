@@ -72,7 +72,7 @@ Antes de operar con datos reales, el responsable debe completar identidad/contac
 
 ## Contrato de la API de entregas
 
-Prefijo `/api`; éxito `{ok:true,data:...}`; rutas privadas con Bearer y `no-store`. La lista de entregas usa `page`/`pageSize` (predeterminado 1/50, máximo 100) y filtro `estado`; la interfaz pide páginas de veinte. Los cuerpos rechazan campos inesperados. Para el detalle de tipos véase [el contrato de integración](superpowers/specs/2026-10-28-entregas-contract.md).
+Prefijo `/api`; éxito `{ok:true,data:...}`; rutas privadas con Bearer y `no-store`. La lista de entregas usa `page`/`pageSize` (predeterminado 1/50, máximo 100) y filtro `estado`; la interfaz pide páginas de veinte. Los cuerpos rechazan campos inesperados. Para el detalle de tipos véase [el contrato de integración](CONTRATO-ENTREGAS.md).
 
 | Método y ruta | Permiso | Entrada/comportamiento |
 |---|---|---|

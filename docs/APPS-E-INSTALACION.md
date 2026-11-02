@@ -29,4 +29,4 @@ Precios, pedidos, pagos y administración requieren conexión. El worker guarda 
 
 El proyecto conserva Render Free por decisión del propietario: puede suspenderse por inactividad. No se ofrece disponibilidad 24/7 con ese alojamiento. No se añadieron dependencias, cambios de esquema, servicios de pago ni un framework del Reto 3.
 
-El repositorio privado limita el acceso a la fuente alojada en GitHub y a sus releases. La web y la descarga autorizada de reparto siguen siendo públicas; el HTML/JavaScript distribuido al navegador y las copias anteriores no desaparecen por cambiar la visibilidad del repositorio.
+El repositorio contiene código público y ejemplos de configuración. Las claves, accesos de prueba, certificados y respaldos se conservan fuera de Git. Los archivos `.env` y `.publish/` están excluidos: no los subas al repositorio ni los compartas.

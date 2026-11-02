@@ -5,9 +5,14 @@ __pycache__/
 .publish/
 .playwright-mcp/
 entrega/*
-!entrega/mascotas-v3/
-!entrega/mascotas-v3/**
-entrega/mascotas-v3/**/__pycache__/
+.superpowers/
+docs/pruebas/
+docs/agentes/
+docs/auditorias/
+docs/superpowers/
+services/inventory-agent/
+.github/workflows/inventory-agent.yml
+.github/workflows/pages.yml
 node_modules/
 .env
 .env.*

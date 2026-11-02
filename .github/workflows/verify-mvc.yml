@@ -1,11 +1,6 @@
 name: Verificar farmacia MVC
 
 on:
-  push:
-    branches: [main]
-    paths: ['frontend/**', 'server/**', 'scripts/**', 'tests/**', 'data/**', 'assets/**', '*.html', '*.js', '*.css', 'package*.json', '.github/workflows/verify-mvc.yml']
-  pull_request:
-    paths: ['frontend/**', 'server/**', 'scripts/**', 'tests/**', 'data/**', 'assets/**', '*.html', '*.js', '*.css', 'package*.json', '.github/workflows/verify-mvc.yml']
   workflow_dispatch:
 
 permissions:
@@ -72,7 +67,7 @@ jobs:
           path: |
             ci-node.tap
             ci-audit.json
-          retention-days: 7
+          retention-days: 3
 
   browser:
     runs-on: ubuntu-24.04
@@ -97,4 +92,4 @@ jobs:
             test-results/*-browser-results.json
             tests/reto2/test-results/reto2-artifacts/
             tests/reto2/test-results/pages-artifacts/
-          retention-days: 7
+          retention-days: 3

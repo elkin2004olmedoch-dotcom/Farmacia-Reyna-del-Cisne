@@ -1,11 +1,6 @@
 name: Verificar app de reparto
 
 on:
-  pull_request:
-    paths: ['mobile/**', '.github/workflows/verify-mobile.yml']
-  push:
-    branches: [main]
-    paths: ['mobile/**', '.github/workflows/verify-mobile.yml']
   workflow_dispatch:
 
 permissions:
@@ -55,7 +50,7 @@ jobs:
           name: reparto-android-pruebas
           path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 3
 
   ios:
     needs: tests
@@ -81,4 +76,4 @@ jobs:
           name: reparto-ios-simulador
           path: ${{ runner.temp }}/reparto-ios/Build/Products/Debug-iphonesimulator/App.app
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 3

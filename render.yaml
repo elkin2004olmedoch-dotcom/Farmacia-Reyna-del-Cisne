@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     branch: main
-    autoDeployTrigger: commit
+    autoDeployTrigger: 'off'
     buildCommand: npm ci --include=dev && npm run setup:production
     startCommand: npm start
     healthCheckPath: /api/salud
@@ -16,10 +16,7 @@ services:
       - key: HOST
         value: 0.0.0.0
       - key: CORS_ORIGIN
-        fromService:
-          type: web
-          name: farmacia-reina-del-cisne
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://farmacia-reyna-del-cisne-pruebas.pages.dev,https://farmacia-reina-del-cisne.onrender.com
       - key: IMAGE_STORAGE
         value: supabase
       - key: SUPABASE_STORAGE_BUCKET

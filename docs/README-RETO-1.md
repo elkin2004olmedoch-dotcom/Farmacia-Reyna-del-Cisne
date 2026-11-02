@@ -1,4 +1,4 @@
-﻿# Farmacia Reina del Cisne
+# Farmacia Reina del Cisne
 
 Tienda estática de farmacia adaptada al prototipo ATHLETIX ECOMMERCE: portada, búsqueda, catálogo, ficha, comparación, opiniones, cuentas locales, carrito, compra por pasos y consulta de pedidos. Conserva el contacto y los pedidos por WhatsApp.
 
@@ -45,7 +45,7 @@ Las reglas están centralizadas en `js/validation.js` y se aplican a contacto, d
 - Visa y Mastercard de 16 dígitos: marca, Luhn, mes, vencimiento vigente y CVV de 3 dígitos.
 - Cantidades enteras de 1 a 99 y aceptación de condiciones.
 
-La validación comprueba estructura y verificadores. No comprueba identidad con Registro Civil, registro activo en SRI, existencia de correo, titularidad de teléfono, dirección real, banco, tipo débito/crédito ni fondos. Las fuentes y el alcance están en [la revisión de adaptación y validaciones](docs/auditorias/AUDITORIA-10-tienda-ecuador.md).
+La validación comprueba estructura y verificadores. No comprueba identidad con Registro Civil, registro activo en SRI, existencia de correo, titularidad de teléfono, dirección real, banco, tipo débito/crédito ni fondos. Las fuentes y el alcance están en [la revisión de adaptación y validaciones](APPS-INSTALABLES-2026-11-01.md).
 
 ## Probar una compra
 
