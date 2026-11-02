@@ -6,8 +6,9 @@ import {message} from '../views/common.js';
 export function watchUpdates(refresh,{canRefresh=()=>true,intervalMs=30000}={}) {
   let stopped=false,running=false,pending=false,lastError='',lastNotice='';
   async function update(){
-    if(stopped || document.hidden || !canRefresh())return;
+    if(stopped || document.hidden)return;
     if(running){pending=true;return;}
+    if(!canRefresh())return;
     running=true;
     try{await refresh();if(lastNotice && document.getElementById('page-status').textContent===lastNotice)message('Datos actualizados.');lastError='';lastNotice='';}
     catch(error){if(error.status!==401 && error.message!==lastError){lastError=error.message;lastNotice=`${error.message} No se pudieron actualizar los datos visibles; volveremos a intentar.`;message(lastNotice,true);}}

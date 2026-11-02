@@ -164,8 +164,8 @@ export async function adminController() {
     if(section==='movimientos')await loadMovementLots();
     form.querySelector('input:not([type=hidden]),select,textarea')?.focus();
   }
-  adminCompanionController({refresh:()=>render({silent:true}),navigate,openEditor});
   const refresh=watchUpdates(()=>render({silent:true}),{canRefresh:()=>auth.isAdmin && !document.querySelector('dialog[open]') && !document.querySelector('#admin-area [aria-busy=true]')});
+  adminCompanionController({refresh,navigate,openEditor});
   dialog.addEventListener('close',()=>{lotRequest++;openingId++;productImage.reset();promoImage.reset();if(!auth.isAdmin || !dialog.isConnected)return;(previousFocus?.isConnected?previousFocus:document.getElementById('admin-create'))?.focus();void refresh();});
   stateDialog.addEventListener('close',()=>{if(!auth.isAdmin || !stateDialog.isConnected)return;if(stateFocus?.isConnected)stateFocus.focus();void refresh();});
   if(new URLSearchParams(location.search).get('crear')==='1' && editableSections.includes(name) && result && auth.isAdmin)await open();

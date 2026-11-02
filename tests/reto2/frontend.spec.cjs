@@ -226,8 +226,8 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
     await checkout.locator('#checkout-next').click();await expect(checkout.locator('#delivery-form')).toBeVisible();await checkout.locator('#checkout-name').fill('Cliente Formulario Conservado');await checkout.locator('#checkout-document').fill('0102030400');await checkout.locator('#checkout-terms').check();
     const formValues=await checkout.locator('#delivery-form').evaluate(form=>Object.fromEntries(new FormData(form)));
 
-    // A visible catalog detects external changes through its 30-second timer without a focus event.
-    await client.bringToFront();await setStock(1);await client.clock.runFor(30000);await expect(client.locator('.product-stock')).toHaveText('1 unidades disponibles');
+    // Verifica el refresco de 30 s sin otro foco ni reproducir cada frame de las mascotas.
+    await client.bringToFront();await setStock(1);await client.clock.fastForward(30000);await expect(client.locator('.product-stock')).toHaveText('1 unidades disponibles');
     await focus(checkout);await expect(checkout.locator('#checkout-next')).toBeDisabled();await expect(checkout.locator('#delivery-form [type=submit]')).toBeDisabled();await expect(checkout.locator('#qty-'+productId)).toHaveValue('2');expect(await checkout.locator('#delivery-form').evaluate(form=>Object.fromEntries(new FormData(form)))).toEqual(formValues);
     await setStock(4);await focus(checkout);await expect(checkout.locator('#checkout-next')).toBeEnabled();await expect(checkout.locator('#delivery-form [type=submit]')).toBeEnabled();expect(await checkout.locator('#delivery-form').evaluate(form=>Object.fromEntries(new FormData(form)))).toEqual(formValues);
 

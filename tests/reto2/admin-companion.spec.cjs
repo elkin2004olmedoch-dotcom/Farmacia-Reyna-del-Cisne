@@ -20,18 +20,28 @@ test('el asistente local del panel actualiza productos y publica promociones par
   expect(issues.map(issue=>({id:issue.id,targets:issue.nodes.map(node=>node.target)}))).toEqual([]);
 
   const headers={Authorization:'Bearer '+await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))};
-  let product,promotion,publicPage;
+  let product,promotion,publicPage,releaseSummary;
   try{
     const createdProduct=await page.request.post('/api/productos',{headers,data:{nombre:'Asistente '+randomUUID().slice(0,8),precio:12.5,stock:20,categoria:'cuidado',descripcion:'Producto sintético para probar el asistente administrativo.',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase sintético de prueba',descuentoPorcentaje:0,ivaCategoria:'general',tipoProducto:'cuidado',requiereReceta:false}});
     expect(createdProduct.status()).toBe(201);
     product=(await createdProduct.json()).data;
     const price=Number(product.precio)+0.01;
     const stock=product.stock+2;
+    // A pre-save snapshot must not cause parallel reads or hide the refresh needed after the write.
+    let summaryReads=0,summarySnapshots=0;
+    const summaryGate=new Promise(resolve=>{releaseSummary=resolve;});
+    await page.route('**/api/admin/resumen',async route=>{summaryReads++;const response=await route.fetch();summarySnapshots++;await summaryGate;await route.fulfill({response});});
+    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));
+    await expect.poll(()=>summarySnapshots).toBe(1);
     const priceResponse=page.waitForResponse(response=>response.request().method()==='PUT'&&new URL(response.url()).pathname==='/api/productos/'+product.id);
     await companion.locator('#input').fill(`Actualiza el precio de "${product.nombre}" a ${price.toFixed(2)} y el stock a ${stock}`);
     await companion.locator('#form [type=submit]').click();
     expect((await priceResponse).status()).toBe(200);
+    await expect.poll(()=>summaryReads).toBeGreaterThan(0);
+    await expect(companion.locator('#input')).toBeEnabled();
+    expect(summaryReads).toBe(1);
     await expect(companion.getByRole('log',{name:'Asistente de administración'})).toContainText('Producto actualizado');
+    releaseSummary();await expect.poll(()=>summaryReads).toBe(2);await page.unrouteAll({behavior:'wait'});
     const productAfter=(await (await page.request.get('/api/productos/'+product.id)).json()).data;
     expect(Number(productAfter.precio)).toBe(price);
     expect(productAfter.stock).toBe(stock);
@@ -58,6 +68,7 @@ test('el asistente local del panel actualiza productos y publica promociones par
     await expect(page.locator('farmacia-admin-companion')).toHaveCount(0);
     await expect(page.locator('farmacia-mascota')).toHaveCount(0);
   }finally{
+    releaseSummary?.();await page.unrouteAll({behavior:'wait'});
     if(publicPage)await publicPage.close();
     if(promotion)await page.request.delete('/api/promociones/'+promotion.id,{headers});
     if(product)await page.request.delete('/api/productos/'+product.id,{headers});
