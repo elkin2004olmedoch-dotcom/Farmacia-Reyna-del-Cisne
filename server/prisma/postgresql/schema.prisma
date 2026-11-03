@@ -61,6 +61,8 @@ model Usuario {
   cambiosPedidos PedidoEstado[]
   entregas Entrega[]
   sesionesMoviles SesionMovil[]
+  sesionesWeb SesionWeb[]
+  passwordReset PasswordReset?
   cambiosTarifa ZonaEntregaTarifa[]
   configuracionesFiscales ConfiguracionFiscal[]
   movimientos MovimientoInventario[]
@@ -403,4 +405,28 @@ model PagoPractica {
   marca String?
   totalCentavos Int
   createdAt DateTime @default(now())
+}
+
+model SesionWeb {
+ id String @id @default(uuid())
+ usuarioId String
+ usuario Usuario @relation(fields:[usuarioId],references:[id],onDelete:Restrict,onUpdate:Cascade)
+ tokenVersion Int
+ secretHash String
+ previousSecretHash String?
+ previousUntil DateTime?
+ expiresAt DateTime
+ revokedAt DateTime?
+ createdAt DateTime @default(now())
+ @@index([usuarioId,createdAt])
+ @@index([usuarioId,expiresAt])
+}
+
+model PasswordReset {
+ usuarioId String @id
+ usuario Usuario @relation(fields:[usuarioId],references:[id],onDelete:Restrict,onUpdate:Cascade)
+ email String
+ tokenHash String @unique
+ expiresAt DateTime
+ createdAt DateTime @default(now())
 }

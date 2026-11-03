@@ -1,0 +1,31 @@
+const {test,after}=require('node:test'),assert=require('node:assert/strict'),bcrypt=require('bcrypt');
+const {createFixture}=require('./email-api-fixture.cjs');
+const fixture=createFixture(),{db}=fixture;after(()=>fixture.close());
+test('recuperación: nonce hasheado, enlace único, expiración y cierre de sesiones',async()=>{
+ const {createPasswordReset}=require('../../server/models/password-reset.cjs'),sent=[];
+ const resets=createPasswordReset({deliver:async values=>sent.push(values)});
+ const admin=await db.usuario.findUnique({where:{email:'email-admin@example.ec'}});
+ const user=await db.usuario.create({data:{nombre:'Recuperación Sintética',email:'reset-'+require('node:crypto').randomUUID()+'@example.ec',telefono:'0991234567',passwordHash:admin.passwordHash,role:'repartidor'}});
+ const config={...fixture.config,emailVerification:{enabled:true,publicOrigin:'http://localhost:3300'}};
+ const old=await require('../../server/models/sesiones-web.cjs').create(user);
+ const mobile=await require('../../server/models/sesiones-moviles.cjs').create(user);
+ await resets.issue(user.email,config);await resets.issue(user.email,config);await resets.issue('no-existe@example.ec',config);assert.equal(sent.length,1);
+ const row=await db.passwordReset.findUnique({where:{usuarioId:user.id}}),token=sent[0].token;
+ assert.equal(token.length,43);assert.match(row.tokenHash,/^[a-f0-9]{64}$/);assert.notEqual(row.tokenHash,token);
+ await resets.consume(token,'NuevaClaveSegura2026!');
+ assert.equal(await db.passwordReset.count(),0);const current=await db.usuario.findUnique({where:{id:user.id}});assert.equal(current.tokenVersion,user.tokenVersion+1);assert.ok(await bcrypt.compare('NuevaClaveSegura2026!',current.passwordHash));assert.equal(current.emailVerifiedAt,user.emailVerifiedAt);
+ assert.ok((await db.sesionWeb.findUnique({where:{id:old.row.id}})).revokedAt);
+ assert.ok((await db.sesionMovil.findUnique({where:{id:mobile.row.id}})).revokedAt);
+ await assert.rejects(resets.consume(token,'OtraClaveSegura2026!'),e=>e.code==='PASSWORD_RESET_INVALID');
+ await resets.issue(user.email,config);const second=sent[1].token;
+ await db.passwordReset.update({where:{usuarioId:user.id},data:{createdAt:new Date(Date.now()-7200000),expiresAt:new Date(Date.now()-3600000)}});
+ await assert.rejects(resets.consume(second,'OtraClaveSegura2026!'),e=>e.code==='PASSWORD_RESET_INVALID');
+});
+test('recuperación API: respuesta genérica, rechaza campos y contraseñas débiles',async()=>{
+ const api=fixture.api(false);
+ const found=await api.post('/api/auth/forgot-password').send({email:'email-admin@example.ec'}).expect(202);
+ const missing=await api.post('/api/auth/forgot-password').send({email:'desconocido@example.ec'}).expect(202);assert.deepEqual(found.body,missing.body);
+ await api.post('/api/auth/forgot-password').send({email:'email-admin@example.ec',role:'admin'}).expect(422);
+ await api.post('/api/auth/reset-password').send({token:'x'.repeat(43),password:'abc'}).expect(422);
+ await api.post('/api/auth/reset-password').send({token:'x'.repeat(43),password:'SeguraClave2026!'}).expect(422);
+});

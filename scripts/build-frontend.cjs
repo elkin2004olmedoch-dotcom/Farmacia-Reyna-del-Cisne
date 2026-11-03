@@ -48,6 +48,8 @@ pages['ayuda.html'][2]+='<section class="shop-panel" id="pagos"><h2>Formas de pa
 pages['instalar-admin.html']=['admin-install','Instala tu espacio administrativo',adminInstallPage];
 pages['cuenta.html'][2]=pages['cuenta.html'][2].replace(/<\/section>$/,pendingEmailPanel(1)+'</section>');
 pages['confirmar-correo.html']=['email-verification','Confirma tu correo',emailVerificationPage];
+pages['recuperar-cuenta.html']=['password-reset','Recupera tu cuenta',require('./templates/password-reset.cjs')];
+pages['cuenta.html'][2]=pages['cuenta.html'][2].replace('<div class="account-switch">','<p><a class="text-link" href="recuperar-cuenta.html">¿Olvidaste tu contraseña?</a></p><div class="account-switch">');
 const storefrontAppHeader=storeHeader;
 const adminAppHeader=adminHeader.replace('<a href="index.html" class="admin-store-link">',`<a href="instalar-admin.html" class="admin-app-link" data-admin-session hidden aria-label="Instalar administración en Windows">${downloadIcon}<span>Instalar en Windows</span></a><a href="index.html" class="admin-store-link">`);
 for(const [file,[page,title,content]] of Object.entries(pages)) {

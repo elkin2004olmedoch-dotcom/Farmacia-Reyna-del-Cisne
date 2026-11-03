@@ -4,7 +4,6 @@ test('el resumen ajusta un nombre válido sin espacios y conserva su importe den
   const id='81045b3e-f0c9-4e28-9269-57db344494aa',nombre='Producto'.repeat(15);
   const user={id:'0bba25d2-02a7-409b-b7de-dd3f0549eca7',nombre:'Cliente Resumen',email:'resumen@example.ec',telefono:'0979275988',role:'user',activo:true,createdAt:'2026-10-29T12:00:00.000Z'};
   const dto={pedido:{id,estado:'pendiente',createdAt:'2026-10-29T12:00:00.000Z',total:25.5,totalCentavos:2550,subtotalCentavos:2550,costoEnvioCentavos:0,ivaCentavos:333,moneda:'USD',detalles:[{nombreProducto:nombre,cantidad:1,totalCentavos:2550}]},pago:null,payphone:{disponible:false,entorno:null},demostracion:true};
-  await page.addInitScript(()=>sessionStorage.setItem('farmacia-mvc-token','sesion-sintetica-resumen'));
   await page.route('**/api/**',route=>{
     const path=new URL(route.request().url()).pathname;
     if(path==='/api/auth/me')return route.fulfill({json:{ok:true,data:user}});

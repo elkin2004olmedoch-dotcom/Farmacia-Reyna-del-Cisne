@@ -64,7 +64,7 @@ export function emailVerificationController(){
       if(request!==generation)return;
       if(result?.verified!==true)throw new Error('No se pudo confirmar el correo. Inténtalo nuevamente.');
       token=null;completed=true;pendingPanel.hidden=true;
-      if(typeof result.token==='string'&&result.usuario?.role==='user'){
+      if(result.usuario?.role==='user'){
         auth.save(result);location.replace('catalogo.html');return;
       }
       status(message,'Correo confirmado. Ya puedes iniciar sesión');message.focus();

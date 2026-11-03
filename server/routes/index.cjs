@@ -15,9 +15,17 @@ module.exports=config=> {
   const inventory=require('../controllers/inventario.cjs');
   const authLimit=process.env.NODE_ENV==='test' && !config.production && Number.isInteger(config.testAuthLimit) && config.testAuthLimit>0?config.testAuthLimit:20;
   const limiter=rateLimit({windowMs:15*60*1000,limit:authLimit,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Demasiados intentos. Espera unos minutos.'))});
+  const web=require('../models/sesiones-web.cjs');
+  router.use('/auth',(req,res,next)=>{if(req.get('X-Farmacia-Web')==='1'&&!['GET','HEAD','OPTIONS'].includes(req.method))web.requireWeb(req,config);next();});
+  const webOnly=(req,res,next)=>{web.requireWeb(req,config);if(req.body&&Object.keys(req.body).length)throw new AppError(422,'UNEXPECTED_FIELDS','La solicitud contiene campos no permitidos.');next();};
+  router.post('/auth/web/refresh',limiter,webOnly,authController.refresh);
+  router.post('/auth/web/exchange',limiter,webOnly,auth,authController.exchange);
   router.post('/auth/register',limiter,...V.register,authController.register);
   router.post('/auth/login',limiter,...V.login,authController.login);
   const resendLimiter=rateLimit({windowMs:60*60*1000,limit:5,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'EMAIL_RATE_LIMIT','Espera antes de volver a solicitar un enlace de confirmación.'))});
+  const recoveryLimiter=rateLimit({windowMs:60*60*1000,limit:5,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'EMAIL_RATE_LIMIT','Espera antes de solicitar otro enlace.'))});
+  router.post('/auth/forgot-password',recoveryLimiter,...V.resendVerification,authController.forgotPassword);
+  router.post('/auth/reset-password',limiter,...V.resetPassword,authController.resetPassword);
   router.post('/auth/verify-email',limiter,...V.verifyEmail,authController.verifyEmail);
   router.post('/auth/resend-verification',resendLimiter,...V.resendVerification,authController.resendVerification);
   router.post('/auth/mobile/login',limiter,...V.login,mobileController.login);

@@ -17,6 +17,7 @@ const controllers={
   deliveries:()=>import('./deliveries.js').then(module=>module.deliveriesController()),
   tracking:()=>import('./deliveries.js').then(module=>module.trackingController()),
   payments:()=>import('./payments.js').then(module=>module.paymentsController()),
+  'password-reset':()=>import('./password-reset.js').then(module=>module.passwordResetController()),
   'email-verification':()=>import('./email-verification.js').then(module=>module.emailVerificationController())
 };
 async function renderPage(page){
@@ -29,6 +30,7 @@ async function renderPage(page){
 }
 async function initialize() {
   const page=document.body.dataset.page;
+  if(page==='password-reset'){layoutController();await renderPage(page);return;}
   let updateSession;
   if(['home','email-verification'].includes(page)){
     document.body.dataset.sessionPending='';updateSession=layoutController();if(page==='home')contactController();void renderPage(page);

@@ -15,6 +15,7 @@ function fixture(uploaded=false){
   const createdAt=new Date('2024-01-02T03:04:05.123Z');
   const updatedAt=new Date('2024-02-03T04:05:06.789Z');
   return {
+    passwordReset:[{usuarioId:'cliente-original',tokenHash:'b'.repeat(64)}],sesionWeb:[{id:'web-original',usuarioId:'cliente-original',secretHash:'d'.repeat(64)}],pagoPractica:[],
     usuario:[{id:'cliente-original',nombre:'Cliente privado',email:privateEmail,telefono:'0979275988',passwordHash:privateHash,role:'user',tokenVersion:7,activo:false,emailVerifiedAt:null,emailVerificationRequired:true,createdAt},{id:'repartidor-original',nombre:'Repartidor privado',email:'repartidor@example.ec',telefono:'0979275988',passwordHash:privateHash,role:'repartidor',tokenVersion:1,activo:true,emailVerifiedAt:updatedAt,emailVerificationRequired:false,createdAt}],
     emailVerification:[{usuarioId:'cliente-original',email:privateEmail,tokenHash:privateVerificationHash,createdAt,expiresAt:updatedAt}],
     sesionMovil:[{id:'sesion-movil-original',usuarioId:'repartidor-original',tokenVersion:1,secretHash:'a'.repeat(64),previousSecretHash:null,expiresAt:new Date('2030-01-01T00:00:00Z'),revokedAt:createdAt,createdAt,updatedAt}],
@@ -48,7 +49,7 @@ function technicalDefaults(){
 }
 function sourceClient(snapshot){
   let transactions=0;const reads=[];
-  const tx=Object.fromEntries(MODELS.map(model=>[model,{findMany:async options=>{reads.push(model);if(model==='emailVerification'){assert.deepEqual(options,{select:{usuarioId:true}});return snapshot[model].map(({usuarioId})=>({usuarioId}));}return snapshot[model];}}]));
+  const tx=Object.fromEntries(MODELS.map(model=>[model,{findMany:async options=>{reads.push(model);if(['emailVerification','passwordReset','sesionWeb'].includes(model)){const select={usuarioId:true,...(model==='sesionWeb'?{id:true}:{})};assert.deepEqual(options,{select});return snapshot[model].map(row=>Object.fromEntries(Object.keys(select).map(key=>[key,row[key]])));}return snapshot[model];}}]));
   return {$transaction:async fn=>{transactions++;return fn(tx);},$disconnect:async()=>{},get transactions(){return transactions;},reads};
 }
 function targetClient({initial={},failOn,beforeTransaction}={}){
@@ -81,7 +82,7 @@ const emptyCounts=()=>Object.fromEntries(MODELS.map(model=>[model,0]));
 test('el importador cubre todos los modelos Prisma y no omite futuras entidades de farmacia',async()=>{
  const schema=await fs.readFile(path.resolve(__dirname,'../../server/prisma/schema.prisma'),'utf8');
  const names=[...schema.matchAll(/^model (\w+) \{/gm)].map(match=>match[1][0].toLowerCase()+match[1].slice(1));
- assert.deepEqual([...MODELS].sort(),names.sort());assert.equal(MODELS.length,21);
+ assert.deepEqual([...MODELS].sort(),names.sort());
 });
 
 test('verificaciones se cuentan sin transferir hashes y los usuarios conservan el bloqueo o su fecha verificada',async()=>{
@@ -178,8 +179,9 @@ test('la simulación consulta un snapshot único y muestra solo cantidades sin e
 test('la transferencia conserva datos de negocio y usuarios e invalida enlaces transitorios de correo',async()=>{
   const snapshot=fixture(),source=sourceClient(snapshot),target=targetClient();
   const result=await migrate({source,target,apply:true});
-  assert.equal(result.modo,'aplicar');assert.deepEqual(target.writes,MODELS.filter(model=>model!=='emailVerification'));assert.equal(target.transactions,2);
-  for(const model of MODELS)assert.deepEqual(target.state[model],model==='emailVerification'?[]:snapshot[model]);
+  const ephemeral=['emailVerification','passwordReset','sesionWeb'];
+  assert.equal(result.modo,'aplicar');assert.deepEqual(target.writes,MODELS.filter(model=>!ephemeral.includes(model)&&snapshot[model].length));assert.equal(target.transactions,2);
+  for(const model of MODELS)assert.deepEqual(target.state[model],ephemeral.includes(model)?[]:snapshot[model]);
   assert.equal(target.state.usuario[0].passwordHash,privateHash);assert.equal(target.state.usuario[0].tokenVersion,7);
   assert.strictEqual(target.state.producto[0].precio,snapshot.producto[0].precio);assert.equal(target.state.producto[0].precio.toString(),'12.34567');
   assert.strictEqual(target.state.pedido[0].createdAt,snapshot.pedido[0].createdAt);assert.equal(target.state.pedido[0].updatedAt.toISOString(),'2024-02-03T04:05:06.789Z');

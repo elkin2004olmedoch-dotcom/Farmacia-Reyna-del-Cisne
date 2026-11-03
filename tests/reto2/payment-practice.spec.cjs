@@ -3,7 +3,6 @@ test.use({serviceWorkers:'block'});
 async function setup(page,method='card'){
  const user={id:'practice-user',nombre:'Cliente Práctica',email:'practice@example.ec',telefono:'0991234567',role:'user',activo:true,emailVerifiedAt:'2026-11-02T12:00:00Z'};
  const data={pedido:{id:'practice-order',estado:'pendiente',totalCentavos:1150,subtotalCentavos:1150,costoEnvioCentavos:0,ivaCentavos:150,detalles:[{nombreProducto:'Producto de cuidado',cantidad:1,totalCentavos:1150}]},pago:null,payphone:{disponible:false,entorno:null},transferencia:{disponible:true,banco:'Banco Ejemplo',tipo:'ahorros',numeroCuenta:'0123456789',titular:'Titular Sintético'},practica:{disponible:true,resultado:null}},writes=[];
- await page.addInitScript(()=>sessionStorage.setItem('farmacia-mvc-token','synthetic-practice-session'));
  await page.route('**/api/auth/me',route=>route.fulfill({json:{ok:true,data:user}}));
  await page.route('**/api/pedidos/practice-order/pago',route=>route.fulfill({json:{ok:true,data}}));
  await page.route('**/api/pedidos/practice-order/pago/practica',route=>{const body=route.request().postDataJSON();writes.push(body);data.practica.resultado={id:'practice-result',pedidoId:'practice-order',metodo:body.metodo,marca:body.marca||null,totalCentavos:1150};return route.fulfill({json:{ok:true,data}});});

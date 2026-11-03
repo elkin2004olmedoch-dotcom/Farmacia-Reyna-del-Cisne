@@ -4,17 +4,18 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
 const directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-pages-build-'));
 after(()=>{assert.ok(path.resolve(directory).startsWith(path.resolve(os.tmpdir())+path.sep+'farmacia-pages-'));fs.rmSync(directory,{recursive:true,force:true});});
 const {buildPages}=require('../../scripts/build-pages.cjs');
-test('artefacto solo publica estáticos cliente y configuración pública con CSP exacta',async()=>{
+test('artefacto publica cliente y proxy API de origen fijo con CSP exacta',async()=>{
   const output=path.join(directory,'public');
   const result=buildPages({output,apiOrigin:'https://api.example.test',imageOrigin:'https://images.example.test'});
   assert.ok(result.files>80);
   for(const file of ['index.html','admin.html','checkout.html','pagos.html','404.html','models/api.js','assets/images/farmacia-fachada-reina.webp'])assert.ok(fs.existsSync(path.join(output,file)),file);
   assert.deepEqual(fs.readdirSync(output).filter(file=>file.endsWith('.html') && file!=='404.html').sort(),fs.readdirSync(path.join('frontend')).filter(file=>file.endsWith('.html')).sort(),'Pages incluye todas las pantallas generadas de la aplicación');
-  for(const file of ['.env','.env.example','server','data','docs','node_modules','assets/uploads','functions','_worker.js'])assert.ok(!fs.existsSync(path.join(output,file)),file);
+  for(const file of ['.env','.env.example','server','data','docs','node_modules','assets/uploads','functions'])assert.ok(!fs.existsSync(path.join(output,file)),file);
+  assert.ok(fs.existsSync(path.join(output,'_worker.js')));assert.deepEqual(JSON.parse(fs.readFileSync(path.join(output,'_routes.json'),'utf8')),{version:1,include:['/api/*'],exclude:[]});
   for(const file of ['clase.html','models/classroom.js','controllers/classroom.js','assets/classroom.css'])assert.ok(!fs.existsSync(path.join(output,file)),file);
   assert.equal(fs.readFileSync(path.join(output,'_redirects'),'utf8'),'/clase / 302\n/clase.html / 302\n');
   const config=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync(path.join(output,'config.js'))).toString('base64'));
-  assert.equal(config.apiUrl('/productos?pageSize=4'),'https://api.example.test/api/productos?pageSize=4');
+  assert.equal(config.apiUrl('/productos?pageSize=4'),'/api/productos?pageSize=4');
   assert.equal(config.publicImageUrl('assets/uploads/00000000-0000-4000-8000-000000000000.webp'),'https://api.example.test/assets/uploads/00000000-0000-4000-8000-000000000000.webp');
   assert.equal(config.publicImageUrl('https://evil.example/secret'),'assets/images/logo-reina-del-cisne.png');
   assert.throws(()=>config.apiUrl('//evil.example'));

@@ -19,7 +19,7 @@ test('el asistente local del panel actualiza productos y publica promociones par
   const issues=(await new AxeBuilder({page}).include('farmacia-admin-companion').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze()).violations;
   expect(issues.map(issue=>({id:issue.id,targets:issue.nodes.map(node=>node.target)}))).toEqual([]);
 
-  const headers={Authorization:'Bearer '+await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))};
+  const headers={Origin:'http://localhost:3300','X-Farmacia-Web':'1'};
   let product,promotion,publicPage,releaseSummary;
   try{
     const createdProduct=await page.request.post('/api/productos',{headers,data:{nombre:'Asistente '+randomUUID().slice(0,8),precio:12.5,stock:20,categoria:'cuidado',descripcion:'Producto sintético para probar el asistente administrativo.',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase sintético de prueba',descuentoPorcentaje:0,ivaCategoria:'general',tipoProducto:'cuidado',requiereReceta:false}});

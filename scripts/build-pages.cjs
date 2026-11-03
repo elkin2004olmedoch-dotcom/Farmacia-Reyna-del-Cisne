@@ -42,7 +42,7 @@ function buildPages({output=defaultOutput,apiOrigin=process.env.PUBLIC_API_ORIGI
     if(size>25*1024*1024 || ++files>20000)throw new Error('El artefacto supera los límites estáticos de Pages Free.');
     const target=path.join(output,relative);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,content);bytes+=size;maxFileBytes=Math.max(maxFileBytes,size);
   };
-  const pages=['index.html','catalogo.html','producto.html','comparar.html','cuenta.html','confirmar-correo.html','checkout.html','pedidos.html','admin.html','ayuda.html','entregas.html','seguimiento.html','pagos.html','instalar-admin.html','offline.html'];
+  const pages=['index.html','catalogo.html','producto.html','comparar.html','cuenta.html','confirmar-correo.html','recuperar-cuenta.html','checkout.html','pedidos.html','admin.html','ayuda.html','entregas.html','seguimiento.html','pagos.html','instalar-admin.html','offline.html'];
   for(const file of pages)write(file,read(file));
   for(const file of ['store.webmanifest','admin.webmanifest','app-worker.js','descargas/SHA256SUMS.txt'])write(file,read(file));
   const apk=read('descargas/reparto-0.3.0.apk');
@@ -62,7 +62,9 @@ function buildPages({output=defaultOutput,apiOrigin=process.env.PUBLIC_API_ORIGI
   for(const directory of ['controllers','models','views','assets'])copy(directory);
   const source=read('config.js').toString('utf8');
   if(!source.includes("export const apiOrigin='';"))throw new Error('La plantilla de configuración pública no es válida.');
-  write('config.js',source.replace("export const apiOrigin='';",`export const apiOrigin=${JSON.stringify(apiOrigin)};`));
+  write('config.js',source.replace("export const imageOrigin='';",`export const imageOrigin=${JSON.stringify(apiOrigin)};`));
+  write('_worker.js',fs.readFileSync(path.join(__dirname,'pages-worker.mjs'),'utf8').replace("const upstream='https://farmacia-reina-del-cisne.onrender.com';",`const upstream=${JSON.stringify(apiOrigin)};`));
+  write('_routes.json',JSON.stringify({version:1,include:['/api/*'],exclude:[]}));
   const images=["'self'",'data:','https://tile.openstreetmap.org',apiOrigin,...(imageOrigin?[imageOrigin]:[])].join(' ');
   const csp=`default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src ${images}; connect-src 'self' ${apiOrigin}; frame-src https://www.google.com https://www.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
   write('_headers',`/*\n  Content-Security-Policy: ${csp}\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: DENY\n  Cross-Origin-Opener-Policy: same-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=(self)\n\n/*.webmanifest\n  Content-Type: application/manifest+json\n\n/descargas/reparto-0.3.0.apk\n  Content-Type: application/vnd.android.package-archive\n  Content-Disposition: attachment; filename="Reina-del-Cisne-Reparto-pruebas.apk"\n  Cache-Control: public, max-age=31536000, immutable\n`);

@@ -5,15 +5,26 @@ global.sessionStorage={getItem:()=>null,removeItem(){}};
 afterEach(()=>{global.fetch=originalFetch;});
 const client=()=>import('../../frontend/models/api.js');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
+test('fallo de red al salir conserva la sesión visible para poder reintentar',async()=>{
+ const {auth}=await import('../../frontend/models/auth.js');auth.save({usuario:{id:'synthetic-user',role:'user'}});
+ global.fetch=async()=>Response.json({error:{message:'Temporal'}},{status:503});
+ await assert.rejects(auth.logout());assert.equal(auth.user.id,'synthetic-user');auth.clear();
+});
+test('401 renueva una sola sesión y reintenta tras autenticar, sin guardar JWT ni reenviar contraseñas',async()=>{
+ const {request}=await client(),seen=[];let privateCalls=0;
+ global.fetch=async(url,opts)=>{seen.push({url,opts});if(url.endsWith('/auth/web/refresh'))return Response.json({data:{usuario:{id:'synthetic'}}});return ++privateCalls===1?Response.json({error:{message:'Venció'}},{status:401}):Response.json({data:{id:'pedido-sintetico'}});};
+ assert.deepEqual(await request('/pedidos',{method:'POST',body:{claveSolicitud:'synthetic'}}),{id:'pedido-sintetico'});
+ assert.equal(seen.length,3);assert.equal(seen[1].url,'/api/auth/web/refresh');assert.equal(seen[1].opts.headers['X-Farmacia-Web'],'1');assert.equal(seen[0].opts.headers.Authorization,undefined);assert.equal(seen[0].opts.credentials,'same-origin');
+});
 
-test('lectura pública reintenta una vez con backoff y omite cookies',async t=>{
+test('lectura pública reintenta una vez con backoff y sólo admite cookies del propio origen',async t=>{
   const {request}=await client();let calls=0,options;
   global.fetch=async(url,opts)=>{calls++;options=opts;return new Response(JSON.stringify(calls===1?{error:{message:'Temporal'}}:{data:{items:[]}}),{status:calls===1?503:200});};
   t.mock.timers.enable({apis:['setTimeout']});
   const pending=request('/productos?pageSize=4');await tick();assert.equal(calls,1);
   t.mock.timers.tick(499);await tick();assert.equal(calls,1);
   t.mock.timers.tick(1);await tick();assert.deepEqual(await pending,{items:[]});
-  assert.equal(calls,2);assert.equal(options.credentials,'omit');assert.equal(options.cache,'no-store');
+  assert.equal(calls,2);assert.equal(options.credentials,'same-origin');assert.equal(options.cache,'no-store');
 });
 
 test('crear pedidos, login y lecturas privadas nunca se reintentan',async()=>{
@@ -61,5 +72,5 @@ test('retirar ubicación permite completar el DELETE al cerrar sin cookies ni re
   const {request}=await client();let calls=0,options;
   global.fetch=async(url,value)=>{calls++;options=value;return new Response(null,{status:204});};
   await request('/entregas/entrega-sintetica/ubicacion',{method:'DELETE',keepalive:true});
-  assert.equal(calls,1);assert.equal(options.keepalive,true);assert.equal(options.method,'DELETE');assert.equal(options.credentials,'omit');
+  assert.equal(calls,1);assert.equal(options.keepalive,true);assert.equal(options.method,'DELETE');assert.equal(options.credentials,'same-origin');
 });

@@ -2,7 +2,8 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
-const MODELS=Object.freeze(['usuario','emailVerification','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','semilla']);
+const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','sesionWeb','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','pagoPractica','semilla']);
+const privateActions=new Set(['emailVerification','passwordReset','sesionWeb']);
 const INITIAL_FISCAL=Object.freeze({id:'iva-general-inicial',tarifaGeneral:15,inicioVigencia:'2024-04-01T05:00:00.000Z',referenciaNormativa:'Ley de Régimen Tributario Interno, art. 65; Decreto Ejecutivo 198; Circular SRI NAC-DGECCGC25-00000006 (vigencia 2026).',actorId:null});
 const INITIAL_DEFAULTS=Object.freeze({
   configuracionFiscal:INITIAL_FISCAL,
@@ -45,7 +46,7 @@ async function readSnapshot(source){
   return source.$transaction(async tx=>{
     const snapshot={};
     // Verification links do not cross environments; read only IDs to count and check their owners.
-    for(const model of MODELS)snapshot[model]=await tx[model].findMany(model==='emailVerification'?{select:{usuarioId:true}}:undefined);
+    for(const model of MODELS)snapshot[model]=await tx[model].findMany(privateActions.has(model)?{select:{usuarioId:true,...(model==='sesionWeb'?{id:true}:{})}}:undefined);
     return snapshot;
   },{maxWait:10000,timeout:120000});
 }
@@ -53,16 +54,19 @@ function assertSnapshotRelations(snapshot){
   const ids={};
   for(const model of MODELS){
     if(!Array.isArray(snapshot[model]))fail('SOURCE_DATA','La base local no contiene todas las entidades esperadas.');
-    const keys=snapshot[model].map(row=>model==='emailVerification'?row.usuarioId:row.id);
+    const keys=snapshot[model].map(row=>['emailVerification','passwordReset'].includes(model)?row.usuarioId:row.id);
     ids[model]=new Set(keys);
     if(ids[model].size!==snapshot[model].length || keys.some(id=>typeof id!=='string' || !id))fail('SOURCE_DATA','La base local contiene identificadores inválidos.');
   }
   const valid=snapshot.emailVerification.every(row=>ids.usuario.has(row.usuarioId))
+    && snapshot.passwordReset.every(row=>ids.usuario.has(row.usuarioId))
+    && snapshot.sesionWeb.every(row=>ids.usuario.has(row.usuarioId))
     && snapshot.sesionMovil.every(row=>ids.usuario.has(row.usuarioId))
     && snapshot.pedido.every(row=>ids.usuario.has(row.userId) && (row.zonaEntregaId==null || ids.zonaEntrega.has(row.zonaEntregaId)))
     && snapshot.zonaEntregaTarifa.every(row=>ids.zonaEntrega.has(row.zonaEntregaId) && (row.actorId==null || ids.usuario.has(row.actorId)))
     && snapshot.entrega.every(row=>ids.pedido.has(row.pedidoId) && (row.repartidorId==null || ids.usuario.has(row.repartidorId)) && (row.sesionSeguimientoId==null || ids.sesionMovil.has(row.sesionSeguimientoId)))
     && snapshot.pago.every(row=>ids.pedido.has(row.pedidoId))
+    && snapshot.pagoPractica.every(row=>ids.pedido.has(row.pedidoId))
     && snapshot.pedidoDetalle.every(row=>ids.pedido.has(row.pedidoId) && ids.producto.has(row.productoId))
     && snapshot.promocion.every(row=>ids.producto.has(row.productoId))
     && snapshot.pedidoEstado.every(row=>ids.pedido.has(row.pedidoId) && ids.usuario.has(row.actorId))
@@ -162,7 +166,7 @@ async function migrate({source,target,apply=false,frontendRoot,storage,inspectIm
         await tx.zonaEntrega.deleteMany({where:{id:INITIAL_DEFAULTS.zonaEntrega.id}});
       }
       for(const model of MODELS){
-        if(model==='emailVerification')continue;
+        if(privateActions.has(model))continue;
         const rows=snapshot[model];
         for(let offset=0;offset<rows.length;offset+=500)await tx[model].createMany({data:rows.slice(offset,offset+500)});
       }
