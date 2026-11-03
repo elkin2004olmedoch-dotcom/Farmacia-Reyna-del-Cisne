@@ -60,6 +60,32 @@ test('VACUUM INTO crea respaldo íntegro con imágenes referenciadas y restaura 
   const replaced=await restoreBackup({from:result.directory,targetDatabase:target,backupRoot:backups,uploadRoot,replace:true,offline:true});assert.ok(replaced.previousBackup);await validateBackup(replaced.previousBackup);
   assert.equal((await db.producto.findUnique({where:{id:product.id}})).stock,product.stock-1);
 });
+test('restaurar conserva estados de correo y no revive enlaces del respaldo original',async()=>{
+  const pending=await db.usuario.create({data:{email:'pending-backup@example.ec',nombre:'Cliente Pendiente',telefono:'+593979275988',passwordHash:'hash-sintetico',tokenVersion:7,emailVerifiedAt:null,emailVerificationRequired:true}});
+  const verifiedAt=new Date('2026-10-20T14:15:16.123Z');
+  const verified=await db.usuario.create({data:{email:'verified-backup@example.ec',nombre:'Cliente Verificado',telefono:'+593979275988',passwordHash:'hash-sintetico',emailVerifiedAt:verifiedAt,emailVerificationRequired:true}});
+  const createdAt=new Date(),expiresAt=new Date(createdAt.getTime()+3600000);
+  try{
+    await db.emailVerification.create({data:{usuarioId:pending.id,email:pending.email,tokenHash:'d'.repeat(64),createdAt,expiresAt}});
+    const source=await createBackup({client:db,backupRoot:backups});
+    // The link is consumed after this snapshot; restoring must not make it usable again.
+    await db.$transaction([db.emailVerification.delete({where:{usuarioId:pending.id}}),db.usuario.update({where:{id:pending.id},data:{emailVerifiedAt:new Date(),tokenVersion:{increment:1}}})]);
+    const target=path.join(directory,'email-restored.db');await restoreBackup({from:source.directory,targetDatabase:target,backupRoot:backups,offline:true});
+    const restored=new PrismaClient({datasources:{db:{url:'file:'+target.replaceAll('\\','/')}}});
+    const original=new PrismaClient({datasources:{db:{url:'file:'+path.join(source.directory,'farmacia.db').replaceAll('\\','/')}}});
+    try{
+      const pendingCopy=await restored.usuario.findUnique({where:{id:pending.id}}),verifiedCopy=await restored.usuario.findUnique({where:{id:verified.id}});
+      assert.equal(pendingCopy.emailVerifiedAt,null);assert.equal(pendingCopy.emailVerificationRequired,true);assert.equal(pendingCopy.tokenVersion,7);
+      assert.equal(verifiedCopy.emailVerificationRequired,true);assert.equal(verifiedCopy.emailVerifiedAt.toISOString(),verifiedAt.toISOString());
+      const legacy=await restored.usuario.findUnique({where:{email:'images-client@example.ec'}});assert.equal(legacy.emailVerificationRequired,false);assert.equal(legacy.emailVerifiedAt,null);
+      assert.equal(await restored.emailVerification.count(),0);assert.equal(await original.emailVerification.count(),1);
+    }finally{await Promise.all([restored.$disconnect(),original.$disconnect()]);}
+    await validateBackup(source.directory);
+  }finally{
+    await db.emailVerification.deleteMany({where:{usuarioId:{in:[pending.id,verified.id]}}});await db.usuario.deleteMany({where:{id:{in:[pending.id,verified.id]}}});
+  }
+});
+
 test('respaldo alterado, rutas ajenas y servidor activo impiden restauración',async()=>{
   const result=await createBackup({client:db,backupRoot:backups});const corrupted=path.join(directory,'corrupted');await fs.cp(result.directory,corrupted,{recursive:true});await fs.appendFile(path.join(corrupted,'farmacia.db'),'corrupto');await assert.rejects(validateBackup(corrupted),/SHA-256/);
   const outside=path.join(directory,'outside');await fs.cp(result.directory,outside,{recursive:true});const manifest=JSON.parse(await fs.readFile(path.join(outside,'manifest.json'),'utf8'));manifest.archivos[0].ruta='../test.db';await fs.writeFile(path.join(outside,'manifest.json'),JSON.stringify(manifest));await assert.rejects(validateBackup(outside),/ruta/);

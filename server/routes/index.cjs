@@ -17,6 +17,9 @@ module.exports=config=> {
   const limiter=rateLimit({windowMs:15*60*1000,limit:authLimit,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Demasiados intentos. Espera unos minutos.'))});
   router.post('/auth/register',limiter,...V.register,authController.register);
   router.post('/auth/login',limiter,...V.login,authController.login);
+  const resendLimiter=rateLimit({windowMs:60*60*1000,limit:5,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'EMAIL_RATE_LIMIT','Espera antes de volver a solicitar un enlace de confirmación.'))});
+  router.post('/auth/verify-email',limiter,...V.verifyEmail,authController.verifyEmail);
+  router.post('/auth/resend-verification',resendLimiter,...V.resendVerification,authController.resendVerification);
   router.post('/auth/mobile/login',limiter,...V.login,mobileController.login);
   router.post('/auth/mobile/renew',limiter,(req,res,next)=>{
     if(!req.body||Array.isArray(req.body)||Object.keys(req.body).some(k=>!['refreshToken','nextSecret'].includes(k))||!require('../models/sesiones-moviles.cjs').validRenew(req.body))throw new AppError(422,'VALIDATION_ERROR','La renovación de sesión no tiene un formato válido.');

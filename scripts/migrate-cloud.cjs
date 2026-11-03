@@ -2,7 +2,7 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
-const MODELS=Object.freeze(['usuario','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','semilla']);
+const MODELS=Object.freeze(['usuario','emailVerification','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','semilla']);
 const INITIAL_FISCAL=Object.freeze({id:'iva-general-inicial',tarifaGeneral:15,inicioVigencia:'2024-04-01T05:00:00.000Z',referenciaNormativa:'Ley de Régimen Tributario Interno, art. 65; Decreto Ejecutivo 198; Circular SRI NAC-DGECCGC25-00000006 (vigencia 2026).',actorId:null});
 const INITIAL_DEFAULTS=Object.freeze({
   configuracionFiscal:INITIAL_FISCAL,
@@ -44,7 +44,8 @@ async function readSnapshot(source){
   // All reads share one SQLite snapshot, even if the local application is open.
   return source.$transaction(async tx=>{
     const snapshot={};
-    for(const model of MODELS)snapshot[model]=await tx[model].findMany();
+    // Verification links do not cross environments; read only IDs to count and check their owners.
+    for(const model of MODELS)snapshot[model]=await tx[model].findMany(model==='emailVerification'?{select:{usuarioId:true}}:undefined);
     return snapshot;
   },{maxWait:10000,timeout:120000});
 }
@@ -52,10 +53,12 @@ function assertSnapshotRelations(snapshot){
   const ids={};
   for(const model of MODELS){
     if(!Array.isArray(snapshot[model]))fail('SOURCE_DATA','La base local no contiene todas las entidades esperadas.');
-    ids[model]=new Set(snapshot[model].map(row=>row.id));
-    if(ids[model].size!==snapshot[model].length || snapshot[model].some(row=>typeof row.id!=='string' || !row.id))fail('SOURCE_DATA','La base local contiene identificadores inválidos.');
+    const keys=snapshot[model].map(row=>model==='emailVerification'?row.usuarioId:row.id);
+    ids[model]=new Set(keys);
+    if(ids[model].size!==snapshot[model].length || keys.some(id=>typeof id!=='string' || !id))fail('SOURCE_DATA','La base local contiene identificadores inválidos.');
   }
-  const valid=snapshot.sesionMovil.every(row=>ids.usuario.has(row.usuarioId))
+  const valid=snapshot.emailVerification.every(row=>ids.usuario.has(row.usuarioId))
+    && snapshot.sesionMovil.every(row=>ids.usuario.has(row.usuarioId))
     && snapshot.pedido.every(row=>ids.usuario.has(row.userId) && (row.zonaEntregaId==null || ids.zonaEntrega.has(row.zonaEntregaId)))
     && snapshot.zonaEntregaTarifa.every(row=>ids.zonaEntrega.has(row.zonaEntregaId) && (row.actorId==null || ids.usuario.has(row.actorId)))
     && snapshot.entrega.every(row=>ids.pedido.has(row.pedidoId) && (row.repartidorId==null || ids.usuario.has(row.repartidorId)) && (row.sesionSeguimientoId==null || ids.sesionMovil.has(row.sesionSeguimientoId)))
@@ -139,7 +142,7 @@ async function migrate({source,target,apply=false,frontendRoot,storage,inspectIm
   const references=collectUploads(snapshot);
   const origin=Object.fromEntries(MODELS.map(model=>[model,snapshot[model].length]));
   const destination=await target.$transaction(async tx=>{const counts=await targetCounts(tx);await assertEmpty(tx,counts);return counts;},TRANSACTION_OPTIONS);
-  const summary={modo:apply?'aplicar':'simulacion',origen:origin,destino:destination,imagenes:references.length,firmasCifradas:snapshot.configuracionEmisor.filter(row=>row.certificadoCifrado).length};
+  const summary={modo:apply?'aplicar':'simulacion',origen:origin,destino:destination,imagenes:references.length,firmasCifradas:snapshot.configuracionEmisor.filter(row=>row.certificadoCifrado).length,verificacionesCorreoDescartadas:snapshot.emailVerification.length};
   if(!apply)return summary;
   const images=await inspectImages(references,{frontendRoot});
   if(images.length && (!storage?.isCloudStorage?.() || typeof storage.cloudImageExists!=='function' || typeof storage.uploadCloudImage!=='function'))fail('CLOUD_IMAGES','Configura el almacenamiento Supabase antes de transferir imágenes. No se ha guardado ningún registro.');
@@ -159,6 +162,7 @@ async function migrate({source,target,apply=false,frontendRoot,storage,inspectIm
         await tx.zonaEntrega.deleteMany({where:{id:INITIAL_DEFAULTS.zonaEntrega.id}});
       }
       for(const model of MODELS){
+        if(model==='emailVerification')continue;
         const rows=snapshot[model];
         for(let offset=0;offset<rows.length;offset+=500)await tx[model].createMany({data:rows.slice(offset,offset+500)});
       }

@@ -1,0 +1,18 @@
+.email-verification-layout{display:grid;gap:24px;width:min(660px,100%);margin:22px auto 50px}
+.email-verification-card{padding:36px;background:#fffdf7;border-radius:10px}
+.email-verification-icon{display:grid;place-items:center;width:64px;height:64px;margin-bottom:24px;border-radius:50%;background:var(--brand-soft);color:var(--brand-dark)}
+.email-verification-icon svg{width:34px;height:34px}
+.email-verification-card .eyebrow{margin:0 0 12px;color:var(--brand-dark);font-size:10px;letter-spacing:.12em}
+.email-verification-card h1,.email-pending-panel :is(h1,h2){margin:0 0 18px;font-family:var(--serif);font-size:clamp(30px,4vw,40px);font-weight:500;line-height:1.2;letter-spacing:-.035em}
+.email-verification-status,.email-pending-panel>p{font-size:14px;line-height:1.8;color:var(--muted);overflow-wrap:anywhere}
+.email-verification-status{margin:0 0 24px}
+.email-verification-status.is-error{padding:14px;border-left:3px solid var(--brand-red);color:var(--brand-dark);background:var(--brand-soft)}
+.email-verification-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.email-verification-actions .button,.email-pending-panel .button{min-height:46px;padding:12px 18px;border-radius:5px;font-size:13px}
+.email-pending-panel{padding:30px;border-radius:10px;background:var(--soft)}
+.account-card .email-pending-panel{padding:0;border:0;border-radius:0;background:transparent}
+.email-pending-panel .shop-form{gap:16px}
+.email-pending-panel .shop-form>.button{justify-self:start}
+.email-pending-panel .text-link{display:inline-flex;align-items:center;min-height:44px;margin-top:16px;font-size:13px}
+.email-pending-panel .form-alert{overflow-wrap:anywhere}
+@media(max-width:600px){.email-verification-layout{margin-top:6px}.email-verification-card,.email-pending-panel{padding:24px 20px}.email-verification-actions{align-items:stretch;flex-direction:column}.email-verification-actions .button{width:100%}.email-pending-panel .shop-form>.button{width:100%;justify-self:stretch}}

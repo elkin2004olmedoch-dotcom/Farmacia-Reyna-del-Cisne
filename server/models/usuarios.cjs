@@ -1,5 +1,5 @@
 const db = require('./db.cjs');
-const publicFields = {id:true,nombre:true,email:true,telefono:true,role:true,activo:true,createdAt:true};
+const publicFields = {id:true,nombre:true,email:true,telefono:true,role:true,activo:true,emailVerifiedAt:true,emailVerificationRequired:true,createdAt:true};
 module.exports = {
   findByEmail:email=>db.usuario.findUnique({where:{email}}),
   findById:id=>db.usuario.findUnique({where:{id}}),

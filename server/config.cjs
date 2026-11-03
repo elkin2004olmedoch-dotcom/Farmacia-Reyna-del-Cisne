@@ -1,4 +1,5 @@
 const path = require('node:path');
+const {configuration:emailConfiguration}=require('./models/email-delivery.cjs');
 require('dotenv').config({ path:path.join(__dirname,'../.env'), quiet:true });
 function exactOrigin(value) {
   try {
@@ -15,6 +16,7 @@ function config() {
   if (!origins.length || origins.some(value=>!exactOrigin(value))) throw new Error('CORS_ORIGIN debe contener orígenes exactos sin credenciales, rutas, consultas, fragmentos ni comodines.');
   const production = process.env.NODE_ENV === 'production';
   if (production && origins.some(origin=>!origin.startsWith('https://'))) throw new Error('En producción CORS_ORIGIN requiere HTTPS.');
-  return { secret, origins, production, port:Number(process.env.PORT || 3000), host:process.env.HOST || '127.0.0.1', expires:process.env.JWT_EXPIRES_IN || '30m' };
+  const emailVerification=emailConfiguration(process.env,{production,origins});
+  return { secret, origins, production, port:Number(process.env.PORT || 3000), host:process.env.HOST || '127.0.0.1', expires:process.env.JWT_EXPIRES_IN || '30m',emailVerification };
 }
 module.exports = config;

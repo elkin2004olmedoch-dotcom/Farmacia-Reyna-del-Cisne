@@ -114,6 +114,13 @@ async function restoreBackup({from,targetDatabase=databaseFile(),backupRoot=BACK
   const destinationRoot=await fs.realpath(uploadRoot);const staged=targetDatabase+'.restore-'+randomUUID();await fs.copyFile(path.join(checked.root,'farmacia.db'),staged);
   const previous=[];
   try{
+    // Never revive a verification link that may have been consumed after the backup.
+    // Only the unpublished copy changes; pending/verified user flags remain intact.
+    const stagedClient=clientFor(staged);
+    try{
+      const verification=await stagedClient.$queryRawUnsafe("SELECT name FROM sqlite_master WHERE type='table' AND name='EmailVerification'");
+      if(verification.length)await stagedClient.$executeRawUnsafe('DELETE FROM "EmailVerification"');
+    }finally{await stagedClient.$disconnect();}
     // Uploaded paths are immutable UUIDs; publish their verified bytes before the DB.
     for(const file of checked.manifest.archivos.filter(item=>item.referencia)){
       const destination=path.join(destinationRoot,path.basename(file.referencia));
