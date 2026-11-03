@@ -2,7 +2,8 @@ import {request} from './api.js';
 export const payments={
   configuration:()=>request('/pagos/configuracion'),
   forOrder:id=>request(`/pedidos/${encodeURIComponent(id)}/pago`),
-  prepare:id=>request(`/pedidos/${encodeURIComponent(id)}/pago/payphone`,{method:'POST',body:{}})
+  prepare:id=>request(`/pedidos/${encodeURIComponent(id)}/pago/payphone`,{method:'POST',body:{}}),
+  practice:(id,values)=>request(`/pedidos/${encodeURIComponent(id)}/pago/practica`,{method:'POST',body:values})
 };
 export function payphoneUrl(value){
   try{const url=new URL(value);if(url.protocol==='https:' && url.hostname==='pay.payphonetodoesposible.com' && !url.port && !url.username && !url.password && !url.hash && /^\/(Anonymous|PayPhone)\/Index$/.test(url.pathname) && url.searchParams.get('paymentId'))return url.href;}catch{}

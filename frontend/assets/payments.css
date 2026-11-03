@@ -25,6 +25,12 @@
 .payment-transfer-details dt{color:var(--muted)}
 .payment-transfer-details dd{margin:0;font-weight:600;text-align:right;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
 .payment-transfer-details #payment-transfer-reference{font-size:12px}
+#payment-practice-card label{display:block;font-size:14px;font-weight:700;margin-bottom:12px}
+#payment-practice-number{display:block;width:100%;min-height:50px;border:1px solid #a99a85;border-radius:7px;padding:13px;background:var(--surface);color:var(--ink);font:inherit;font-size:18px;letter-spacing:.08em}
+#payment-practice-number:focus-visible{outline:3px solid #bf6b13;outline-offset:3px}
+.payment-card-brand{font-weight:700;color:var(--brand-dark);font-size:17px;min-height:26px;margin:16px 0 6px}
+#payment-practice-result{margin-top:24px}
+#payment-practice-result:focus{outline:3px solid #bf6b13;outline-offset:3px}
 .payment-transfer-panel .button{min-height:44px;padding:11px 15px;border-radius:4px;font-size:12px}
 .payment-transfer-panel .payment-copy-status{margin:0;color:var(--brand-dark);font-size:12px;line-height:1.7}
 .payment-transfer-panel .payment-copy-status:not(:empty){margin-top:14px}

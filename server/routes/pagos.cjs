@@ -9,6 +9,11 @@ module.exports=config=>{
  const limit=()=>rateLimit({windowMs:60*1000,limit:20,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'PAYMENT_RATE_LIMIT','Espera un minuto antes de consultar el pago nuevamente.'))});
  router.get('/pagos/configuracion',controller.configuration);
  router.get('/pedidos/:id/pago',auth,buyer,V.id,V.validated,controller.find);
+ router.post('/pedidos/:id/pago/practica',auth,buyer,limit(),V.id,V.validated,(req,res,next)=>{
+  const body=req.body,brands=require('../../frontend/models/card-policy.js').brands;
+  if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).some(key=>!['metodo','marca'].includes(key))||!['card','transfer'].includes(body.metodo)||body.metodo==='card'&&(typeof body.marca!=='string'||!Object.hasOwn(brands,body.marca))||body.metodo==='transfer'&&body.marca!=null)throw new AppError(422,'INVALID_PRACTICE_PAYMENT','Selecciona tarjeta y marca reconocida, o transferencia. No envíes números de tarjeta ni otros datos.');
+  req.practiceInput={metodo:body.metodo,marca:body.metodo==='card'?body.marca:null};next();
+ },controller.practice);
  router.post('/pedidos/:id/pago/payphone',auth,buyer,limit(),V.id,V.validated,(req,res,next)=>{
   if(req.body!==undefined && (!req.body || typeof req.body!=='object' || Array.isArray(req.body) || Object.keys(req.body).length))throw new AppError(422,'UNEXPECTED_FIELDS','El pago no acepta importes ni datos de tarjeta.');next();
  },controller.start);
