@@ -1,5 +1,9 @@
 const ASSETS=new URL('../assets/mascotas/',import.meta.url);
 import {classifyMascotaQuestion} from './mascota-scope.mjs';
+import {createCustomerCommandExecutor} from './customer-command.mjs';
+import {companionControls,disableCompanionControls} from './companion-controls.js';
+import {catalog} from '../models/catalog.js';
+import {cart} from '../models/cart.js';
 const PEOPLE={farmi:'Farmi',boti:'Boti',goti:'Goti'};
 const STORED_CHARACTER='farmacia-companion';
 const STORED_MOTION='farmacia-motion';
@@ -24,9 +28,10 @@ export async function mascotaController(){
   if(document.querySelector('farmacia-mascota'))return;
   const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('widget.css',ASSETS).href;
   const responsiveStyle=document.createElement('link');responsiveStyle.rel='stylesheet';responsiveStyle.href=new URL('widget-responsive.css',ASSETS).href;
+  const conversationStyle=document.createElement('link');conversationStyle.rel='stylesheet';conversationStyle.href=new URL('conversation.css',ASSETS).href;
   const host=document.createElement('farmacia-mascota');
   const root=host.attachShadow({mode:'open'});
-  root.append(style,responsiveStyle);
+  root.append(style,responsiveStyle,conversationStyle);
   const template=document.createElement('template');
   template.innerHTML=`<div class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">TU COMPAÑERO DE FARMACIA</span><h2 id="title">Goti te acompaña</h2><p>Ayuda para navegar y preparar tu compra</p></div><button class="close" id="close" aria-label="Cerrar ayuda" type="button">×</button></header><div class="preferences"><label>Compañero<select id="character"><option value="farmi">Farmi</option><option value="boti">Boti</option><option value="goti">Goti</option></select></label><button id="motion" type="button" aria-pressed="false">Pausar movimiento</button></div><div class="messages" id="messages" role="log" aria-label="Ayuda de la farmacia" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Preguntas rápidas de esta sección"></nav><form id="form"><label for="input" class="sr-only">¿Qué necesitas?</label><input id="input" maxlength="180" autocomplete="off" placeholder="¿Qué necesitas?" required><button type="submit" aria-label="Enviar consulta">↑</button></form><p class="local-note">Guía local de la tienda · tus mensajes no se envían</p></section><div class="bubble" id="bubble" role="status" hidden></div><button class="avatar" id="avatar" type="button" aria-label="Haz saltar a Goti"><canvas id="canvas" width="192" height="208" aria-hidden="true"></canvas></button><button class="launcher" id="launcher" type="button" aria-expanded="false" aria-controls="panel"><span class="online" aria-hidden="true"></span><span id="launcher-label">¿Te ayudo?</span><span aria-hidden="true">↗</span></button></div>`;
   root.append(template.content.cloneNode(true));document.body.append(host);
@@ -145,13 +150,25 @@ export async function mascotaController(){
     const query=text.replace(/^(hola[, ]*)?(quiero |necesito |puedes |por favor )*(buscar |busca |encontrar |un producto[: ]*|producto[: ]*)/i,'').trim().slice(0,100)||text.slice(0,100);
     return{state:'waiting',text:`Puedes buscar «${query}» en el catálogo. Allí verás las presentaciones y los precios publicados. Confirma con la farmacia cualquier duda de disponibilidad o receta.`,actions:[{label:`Buscar ${query}`,href:`catalogo.html?q=${encodeURIComponent(query)}`},whatsapp]};
   }
-  function send(text){
+  const executeCustomer=createCustomerCommandExecutor({catalog,cart,allowed:product=>!globalThis.Farmacia.pharmacyPolicy.requiresProfessionalReview(product),navigate:href=>{location.href=href;}});
+  let commandBusy=false;
+  async function send(text){
+    if(commandBusy)return;
     const message=String(text||'').trim().slice(0,180);if(!message)return;
+    disableCompanionControls(root);
     clearTimeout(replyTimer);requestVersion+=1;const version=requestVersion;
     root.querySelectorAll('.message.thinking').forEach(node=>node.remove());
     append(message,'user');find('#input').value='';
     const pending=append(`${PEOPLE[selected]} está pensando…`,'thinking');
     setState('running',{loop:true});
+    commandBusy=true;
+    try{
+      const medical=classifyMascotaQuestion(message,knownProductNames())==='medical';
+      if(medical)await executeCustomer('cancelar');
+      const result=medical?null:await executeCustomer(message);
+      if(result){pending.remove();companionControls(append(result.text),result,send);setState('review');return;}
+    }catch(error){pending.remove();append(error.message||'No se pudo completar la consulta. Inténtalo nuevamente.');setState('waiting');return;}
+    finally{commandBusy=false;}
     replyTimer=setTimeout(()=>{
       if(version!==requestVersion)return;pending.remove();const response=answer(message);append(response.text,'bot',response.actions);
       if(!setState(response.state))setState('idle');
