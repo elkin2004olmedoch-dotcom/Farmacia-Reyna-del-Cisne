@@ -1,6 +1,8 @@
 const {test,expect}=require('@playwright/test');
 const AxeBuilder=require('@axe-core/playwright').default;
 const {randomUUID}=require('node:crypto');
+// Fault injection must reach Playwright routes rather than a newly claimed PWA worker.
+test.use({serviceWorkers:'block'});
 async function session(request,role){
  const adminResponse=await request.post('/api/auth/login',{data:{email:'admin-browser@example.ec',password:'AdminBrowser2026!'}});expect(adminResponse.status()).toBe(200);const admin=(await adminResponse.json()).data;
  if(role==='admin')return admin;
