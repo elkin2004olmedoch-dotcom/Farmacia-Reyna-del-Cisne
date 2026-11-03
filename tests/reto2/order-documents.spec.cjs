@@ -72,8 +72,9 @@ test('el mapa de confirmación se retira al cancelar desde otra sesión',async({
   const data=await fixture(request);
   await page.route('https://www.openstreetmap.org/**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html lang="es"><title>Mapa externo sustituido</title></html>'}));
   try{
-    await page.addInitScript(token=>sessionStorage.setItem('farmacia-mvc-token',token),data.user.token);
+    const exchanged=await page.request.post('/api/auth/web/exchange',{headers:{Authorization:'Bearer '+data.user.token,Origin:'http://localhost:3300','X-Farmacia-Web':'1'},data:{}});expect(exchanged.status()).toBe(200);
     await page.goto('/checkout.html');await expect(page.locator('#screen-controls')).toBeEnabled();
+    await expect.poll(()=>page.evaluate(async()=>{const {auth}=await import('/models/auth.js');return auth.user?.id;})).toBe(data.user.usuario.id);
     // Reuse the confirmation component with a real API order; the checkout watcher is now stopped.
     await page.evaluate(async order=>{const {confirmationView}=await import('/views/orders.js');const {connectOrderMaps}=await import('/controllers/order-map.js');confirmationView(order);connectOrderMaps(document.getElementById('order-confirmation'))([order]);},data.order);
     await expect(page.locator('#checkout-content')).toBeHidden();await page.locator('[data-order-map="'+data.order.id+'"]').click();await expect(page.locator('iframe')).toHaveCount(1);

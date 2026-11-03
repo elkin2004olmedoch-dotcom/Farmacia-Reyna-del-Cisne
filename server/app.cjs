@@ -14,7 +14,7 @@ module.exports=function createApp(settings=require('./config.cjs')()) {
   app.use((req,res,next)=>{res.setHeader('Permissions-Policy','camera=(), microphone=(), geolocation=(self)');next();});
   // PayPhone validates the storefront origin; the URL and order query remain private.
   app.get(['/pagos.html','/entregas.html'],(req,res,next)=>{res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');next();});
-  app.use('/api',(req,res,next)=>{res.setHeader('Cache-Control','no-store');next();},cors({origin(origin,callback){if(!origin || settings.origins.includes(origin))return callback(null,true);callback(new AppError(403,'CORS_FORBIDDEN','Origen no autorizado.'));},credentials:false,methods:['GET','POST','PUT','DELETE','OPTIONS'],allowedHeaders:['Content-Type','Authorization']}));
+  app.use('/api',(req,res,next)=>{res.setHeader('Cache-Control','no-store');next();},cors({origin(origin,callback){if(!origin || settings.origins.includes(origin))return callback(null,true);callback(new AppError(403,'CORS_FORBIDDEN','Origen no autorizado.'));},credentials:false,methods:['GET','POST','PUT','DELETE','OPTIONS'],allowedHeaders:['Content-Type','Authorization','X-Farmacia-Web']}));
   // Readiness has its own per-IP budget, independent of commercial traffic.
   app.get('/api/salud',rateLimit({windowMs:60*1000,limit:60,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'HEALTH_RATE_LIMIT','Espera antes de comprobar la disponibilidad.'))}),require('./controllers/salud.cjs'));
   const apiLimit=process.env.NODE_ENV==='test' && !settings.production && Number.isInteger(settings.testApiLimit) && settings.testApiLimit>0?settings.testApiLimit:300;
@@ -38,6 +38,7 @@ module.exports=function createApp(settings=require('./config.cjs')()) {
   });
   app.get('/descargas/reparto-0.3.0.apk',(req,res,next)=>{res.attachment('Reina-del-Cisne-Reparto-pruebas.apk');res.setHeader('Cache-Control','public, max-age=31536000, immutable');next();});
   app.get('/confirmar-correo',(req,res)=>{res.setHeader('Cache-Control','no-store');res.sendFile('confirmar-correo.html',{root:app.locals.frontendRoot});});
+  app.get('/recuperar-cuenta',(req,res)=>{res.setHeader('Cache-Control','no-store');res.sendFile('recuperar-cuenta.html',{root:app.locals.frontendRoot});});
   app.use(express.static(app.locals.frontendRoot,{dotfiles:'deny',index:'index.html',maxAge:0}));
   app.use((req,res,next)=>next(new AppError(404,'NOT_FOUND','La página solicitada no existe.')));
   app.use(errorHandler);return app;

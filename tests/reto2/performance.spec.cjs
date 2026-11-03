@@ -1,7 +1,6 @@
 const {test,expect}=require('@playwright/test');
 
 test('un error inicial del dashboard conserva el reintento por teclado',async({page})=>{
-  await page.addInitScript(()=>sessionStorage.setItem('farmacia-mvc-token','synthetic-admin-ui'));
   await page.route('**/api/auth/me',route=>route.fulfill({json:{data:{id:'synthetic-admin',nombre:'Administrador de prueba',email:'admin@example.ec',role:'admin',activo:true}}}));
   let requests=0;
   await page.route('**/api/admin/resumen',route=>{requests++;return route.fulfill({status:503,json:{error:{message:'Resumen temporalmente no disponible.'}}});});
@@ -133,13 +132,12 @@ test('la portada muestra productos mientras resuelve una sesión admin y mantien
 });
 
 test('una restauración 503 mantiene productos visibles y no trata el token como invitado',async({page})=>{
-  await page.addInitScript(()=>sessionStorage.setItem('farmacia-mvc-token','synthetic-pending-session'));
   await page.route('**/api/auth/me',route=>route.fulfill({status:503,json:{ok:false,error:{message:'Sesión temporalmente no disponible.'}}}));
   await page.goto('/');
   await expect(page.locator('#featured-products article')).toHaveCount(4);
   await expect(page.locator('#page-status')).toContainText('Sesión temporalmente');
   await expect(page.locator('[data-customer-only]:visible')).toHaveCount(0);
-  expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBe('synthetic-pending-session');
+  expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();
 });
 
 test('las promociones pendientes no frenan el refresco del stock público',async({page})=>{

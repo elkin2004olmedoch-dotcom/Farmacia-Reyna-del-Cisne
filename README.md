@@ -40,7 +40,7 @@ El HTML de frontend/ se genera desde scripts/build-frontend.cjs y scripts/templa
 
 La confirmación de correo conserva el backend JWT: enlace de un solo uso, caducidad de una hora y reenvío. En producción se exige confirmar el correo; si el envío está desactivado, el registro se pausa sin crear cuentas ni entregar JWT. Se eligió Brevo gratuito por API HTTPS; Resend sigue siendo compatible. El envío real requiere completar la cuenta, el remitente y las credenciales privadas. La [guía de correo y dominio](docs/CORREO-Y-DOMINIO.md) explica la activación y los pasos separados para un `.com` propio. Los correos usan la identidad de la farmacia e incluyen verificación, comprobante, factura autorizada y aviso de entrega.
 
-Al pulsar **Confirmar y entrar**, el cliente recibe su sesión web y vuelve al catálogo. El JWT se entrega por el POST de confirmación y se conserva en la sesión del navegador, nunca en el enlace. El token de correo se consume una sola vez e invalida las sesiones anteriores; confirmar un correo del personal no entrega una sesión administrativa. El formulario de tarjeta pertenece a PayPhone: aceptar tarjetas reales exige activar la cuenta comercial y guardar tarjetas para compras futuras requiere además autorización de tokenización del proveedor.
+Al pulsar **Confirmar y entrar**, el cliente recibe su sesión web y vuelve al catálogo. La sesión se entrega por el POST de confirmación mediante cookies HttpOnly, Secure y SameSite=Strict; el JWT no se guarda en el almacenamiento del navegador ni en el enlace. El token de correo se consume una sola vez e invalida las sesiones anteriores; confirmar un correo del personal no entrega una sesión administrativa. El formulario de tarjeta pertenece a PayPhone: aceptar tarjetas reales exige activar la cuenta comercial y guardar tarjetas para compras futuras requiere además autorización de tokenización del proveedor.
 
 ## Mascotas y confirmaciones
 
@@ -72,9 +72,11 @@ Los workflows de verificación se ejecutan manualmente desde Actions. No hay com
 
 ## Seguridad y proveedores
 
+La web usa sesiones persistentes revocables, renovación rotatoria, cookies HttpOnly y defensa CSRF. La API se solicita desde el mismo dominio con un proxy fijo de Pages al backend existente. **¿Olvidaste tu contraseña?** envía un enlace de un solo uso y cierra sesiones al cambiar la clave. [Sesiones y recuperación](docs/SESIONES-Y-RECUPERACION.md).
+
 No se incluyen claves, contraseñas de acceso, certificados, respaldos ni capturas con sesiones. .env, .publish/ y las salidas de pruebas están excluidos de Git. La administración exige autorización en la API; instalar una app no concede permisos.
 
-Farmi procesa órdenes locales del panel, sin API de IA. El seguimiento abre Maps mediante enlaces o un mapa voluntario. SRI exige configuración y certificado privados. [Entregas](docs/ENTREGAS-Y-PRIVACIDAD.md) y [seguridad de publicación](docs/SEGURIDAD_DESPLIEGUE.md).
+Farmi procesa órdenes locales del panel, sin API de IA. El seguimiento muestra un mapa voluntario y la app de reparto traza la ruta dentro de la farmacia. SRI exige configuración y certificado privados. [Entregas](docs/ENTREGAS-Y-PRIVACIDAD.md) y [seguridad de publicación](docs/SEGURIDAD_DESPLIEGUE.md).
 
 El pago se coordina con la farmacia desde el pedido registrado; elegir un método, pedir un enlace o imprimir el comprobante no acredita el pago. PayPhone permanece desactivado mientras faltan la cuenta comercial y sus credenciales; no se han verificado transacciones reales ni de pruebas contra el proveedor. No se contrataron servicios ni se activaron cobros. [Pagos](docs/PAGOS-Y-PAYPHONE.md).
 

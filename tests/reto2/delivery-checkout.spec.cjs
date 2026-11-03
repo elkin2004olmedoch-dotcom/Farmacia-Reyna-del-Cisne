@@ -9,7 +9,7 @@ test('checkout muestra tarifa pendiente, actualiza la cotización y exige revisa
   const createdZone=await request.post('/api/admin/zonas-entrega',{headers,data:zoneInput});expect(createdZone.status()).toBe(201);let zone=(await createdZone.json()).data;
   const createdProduct=await request.post('/api/productos',{headers,data:{nombre:'Artículo cotización '+suffix,precio:5,stock:10,categoria:'cuidado',descripcion:'Artículo sintético para comprobar cotización de entrega',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase de prueba',tipoProducto:'cuidado',requiereReceta:false}});expect(createdProduct.status()).toBe(201);const product=(await createdProduct.json()).data;
   try{
-    await page.goto('/cuenta.html');await page.evaluate(token=>sessionStorage.setItem('farmacia-mvc-token',token),customer.token);await page.goto('/producto.html?id='+product.id);
+    const exchanged=await page.request.post('/api/auth/web/exchange',{headers:{Authorization:'Bearer '+customer.token,Origin:'http://localhost:3300','X-Farmacia-Web':'1'},data:{}});expect(exchanged.status()).toBe(200);await page.goto('/producto.html?id='+product.id);
     await page.locator('#detail-add-button').click();await page.goto('/checkout.html');await expect(page.locator('.checkout-item-image')).toHaveCount(1);
     await page.locator('#checkout-next').click();await page.locator('[name=delivery][value=delivery]').check();await page.locator('#checkout-zone').selectOption(zone.id);await expect(page.locator('#checkout-province')).toHaveValue('Pichincha');
     await page.locator('#checkout-document').fill('0102030400');await page.locator('#checkout-address').fill('Calle de prueba frente al parque de Puerto Quito');await page.locator('#checkout-terms').check();

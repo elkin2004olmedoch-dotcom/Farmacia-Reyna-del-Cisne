@@ -46,9 +46,19 @@ async function start(){
   const settings={...require('../../server/config.cjs')(),testAuthLimit:200,testApiLimit:2000};
   apiServer=require('../../server/app.cjs')(settings).listen(3302,'127.0.0.1');
   const app=express();app.disable('x-powered-by');
+  const {createProxy}=await import(require('node:url').pathToFileURL(path.join(output,'_worker.js')).href);
+  const proxy=createProxy();
+  app.use('/api',express.raw({type:()=>true,limit:'3mb'}),async(req,res)=>{
+    try{
+      const response=await proxy(new Request(staticOrigin+req.originalUrl,{method:req.method,headers:req.headers,body:['GET','HEAD'].includes(req.method)?undefined:req.body}),{});
+      for(const [name,value] of response.headers)if(name!=='set-cookie')res.setHeader(name,value);
+      const cookies=response.headers.getSetCookie();if(cookies.length)res.setHeader('Set-Cookie',cookies);
+      res.status(response.status).send(Buffer.from(await response.arrayBuffer()));
+    }catch{res.sendStatus(503);}
+  });
   app.use((req,res,next)=>{
     for(const rule of rules)if(rule.matches.test(req.path))for(const [name,value] of rule.headers)res.setHeader(name,value);
-    if(/^\/api(?:\/|$)/.test(req.path) || /^\/assets\/uploads(?:\/|$)/.test(req.path) || ['/_headers','/_redirects'].includes(req.path)){res.sendStatus(404);return;}
+    if(/^\/assets\/uploads(?:\/|$)/.test(req.path) || ['/_headers','/_redirects','/_worker.js','/_routes.json'].includes(req.path)){res.sendStatus(404);return;}
     next();
   });
   app.use(express.static(output,{dotfiles:'deny',extensions:['html'],redirect:false,maxAge:0}));

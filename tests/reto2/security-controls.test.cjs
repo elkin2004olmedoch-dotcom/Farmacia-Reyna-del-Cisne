@@ -153,7 +153,7 @@ test('logout revoca dos tokens válidos y permite iniciar una nueva sesión',asy
   const second=signed({jwtid:randomUUID()});assert.notEqual(second,userToken);
   await request.get('/api/auth/me').set('Authorization',authorization(second)).expect(200);
   const logout=await request.post('/api/auth/logout').set('Authorization',authorization(userToken)).expect(204);
-  assert.equal(logout.headers['set-cookie'],undefined);
+  assert.equal(logout.headers['set-cookie'].length,2);assert.ok(logout.headers['set-cookie'].every(value=>value.includes('Expires=Thu, 01 Jan 1970')));
   for(const token of [userToken,second])await request.get('/api/auth/me').set('Authorization',authorization(token)).expect(401);
   const fresh=await request.post('/api/auth/login').send({email:credentials.email,password:credentials.password}).expect(200);
   assert.notEqual(fresh.body.data.token,userToken);assert.equal(fresh.headers['set-cookie'],undefined);

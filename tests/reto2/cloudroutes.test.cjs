@@ -62,7 +62,7 @@ test('referencia pública canónica redirige al bucket configurado sin claves y 
   assert.equal(response.headers['cache-control'],'public, max-age=86400');
   assert.equal(JSON.stringify({headers:response.headers,text:response.text}).includes(secret),false);
   const imgSrc=response.headers['content-security-policy'].split(';').find(directive=>directive.startsWith('img-src '));
-  assert.deepEqual(imgSrc.split(' '),['img-src',"'self'",'data:',origin]);
+  assert.deepEqual(imgSrc.split(' '),['img-src',"'self'",'data:','https://tile.openstreetmap.org',origin]);
   const document=await request.get('/index.html').expect(200);assert.equal(document.headers['content-security-policy'].split(';').find(directive=>directive.startsWith('img-src ')),imgSrc);
   assert.equal(remoteRequests.length,0);
 });

@@ -19,7 +19,7 @@ async function customer(api){
 async function withToken(page,token){await page.addInitScript(({token,origin})=>{if(location.origin===origin)sessionStorage.setItem('farmacia-mvc-token',token);},{token,origin:STATIC});}
 async function hold(page,predicate){
   let release,attempts=0;const paths=[];const gate=new Promise(resolve=>release=resolve);
-  await page.route(API+'/api/**',async route=>{
+  await page.route(STATIC+'/api/**',async route=>{
     if(!predicate(new URL(route.request().url())))return route.continue();
     attempts++;paths.push(new URL(route.request().url()).pathname);await gate;
     // Timed-out requests are deliberately cancelled while their gate is held.
@@ -29,7 +29,7 @@ async function hold(page,predicate){
 }
 
 test('artefacto estático separado conserva rutas, CSP, catálogo real y CORS exacto',async({page,api})=>{
-  for(const route of ['/api/productos','/assets/uploads/00000000-0000-4000-8000-000000000000.webp','/server/index.cjs'])expect((await api.get(STATIC+route)).status()).toBe(404);
+  for(const route of ['/assets/uploads/00000000-0000-4000-8000-000000000000.webp','/server/index.cjs'])expect((await api.get(STATIC+route)).status()).toBe(404);
   const html=await api.get(STATIC+'/catalogo');expect(html.status()).toBe(200);
   expect(html.headers()['content-security-policy']).toContain(API);
   const allowed=await api.fetch('/api/auth/login',{method:'OPTIONS',headers:{Origin:STATIC,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'authorization,content-type'}});
@@ -39,7 +39,7 @@ test('artefacto estático separado conserva rutas, CSP, catálogo real y CORS ex
   const requests=[];page.on('request',request=>{if(new URL(request.url()).pathname.startsWith('/api/'))requests.push(request.url());});
   const expected=(await (await api.get('/api/productos?pageSize=100')).json()).data.total;
   await page.goto('/catalogo');await expect(page.locator('#catalog-grid article')).toHaveCount(expected);
-  expect(requests.length).toBeGreaterThan(0);expect(requests.every(url=>new URL(url).origin===API)).toBe(true);
+  expect(requests.length).toBeGreaterThan(0);expect(requests.every(url=>new URL(url).origin===STATIC)).toBe(true);
 });
 
 test('el enlace de correo entre orígenes oculta el token y sólo lo envía por POST al confirmar',async({page})=>{
@@ -48,7 +48,7 @@ test('el enlace de correo entre orígenes oculta el token y sólo lo envía por 
   const response=await page.goto('/confirmar-correo#token='+token);expect(response.status()).toBe(200);
   await expect(page).toHaveURL(STATIC+'/confirmar-correo');await expect(page.locator('#verification-submit')).toBeEnabled();expect(sent).toEqual([]);
   const confirmed=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/auth/verify-email');await page.locator('#verification-submit').click();const rejected=await confirmed;
-  expect(rejected.status()).toBe(422);expect(rejected.headers()['access-control-allow-origin']).toBe(STATIC);expect(sent).toHaveLength(1);expect(sent[0].method()).toBe('POST');expect(sent[0].postDataJSON()).toEqual({token});
+  expect(rejected.status()).toBe(422);expect(rejected.headers()['access-control-allow-origin']).toBeUndefined();expect(sent).toHaveLength(1);expect(sent[0].method()).toBe('POST');expect(sent[0].postDataJSON()).toEqual({token});
   await expect(page.locator('#email-pending-panel')).toBeVisible();expect(leaks).toEqual([]);expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();
 });
 
@@ -60,7 +60,7 @@ test('cliente inicia sesión entre orígenes y conserva carrito/formulario ante 
   await page.locator('#login-email').fill(user.email);await page.locator('#login-password').fill(user.password);await page.locator('#login-form [type=submit]').click();
   await expect(page).toHaveURL(url=>url.pathname==='/checkout.html');await page.locator('#checkout-next').click();await expect(page.locator('#delivery-form')).toBeVisible();
   await page.locator('#checkout-document').fill('0102030400');await page.locator('#checkout-terms').check();
-  let posts=0;const matcher=API+'/api/pedidos';
+  let posts=0;const matcher=STATIC+'/api/pedidos';
   await page.route(matcher,async route=>{
     if(route.request().method()!=='POST')return route.continue();
     posts++;await route.fulfill({status:503,headers:{'Access-Control-Allow-Origin':STATIC},json:{ok:false,error:{message:'Pedido temporalmente no disponible.'}}});
@@ -69,7 +69,7 @@ test('cliente inicia sesión entre orígenes y conserva carrito/formulario ante 
   expect(posts).toBe(1);await expect(page.locator('#checkout-document')).toHaveValue('0102030400');await expect(page.locator('[data-shop-count]')).toHaveText('1');
   await page.unroute(matcher);await page.locator('#delivery-form [type=submit]').click();await expect(page.locator('#order-confirmation')).toContainText('Tu pedido quedó registrado.');
   await expect(page.locator('[data-shop-count]')).toHaveText('0');await page.goto('/pedidos.html');await expect(page.locator('.order-card')).toHaveCount(1);
-  const token=await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'));
+  const token=user.token;expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();
   const orders=await api.get('/api/pedidos/mis-pedidos',{headers:{Authorization:'Bearer '+token}});expect((await orders.json()).data.total).toBe(1);
 });
 
@@ -96,9 +96,9 @@ test('sesión vencida se limpia y un cliente normal no obtiene permisos administ
 
 test('503 al restaurar sesión conserva token y compras ocultas sin tratarlo como invitado',async({page,api})=>{
   const token=await login(api);await withToken(page,token);let attempts=0;
-  await page.route(API+'/api/auth/me',async route=>{attempts++;await route.fulfill({status:503,headers:{'Access-Control-Allow-Origin':STATIC},json:{ok:false,error:{message:'Sesión temporalmente no disponible.'}}});});
+  await page.route(STATIC+'/api/auth/me',async route=>{attempts++;await route.fulfill({status:503,headers:{'Access-Control-Allow-Origin':STATIC},json:{ok:false,error:{message:'Sesión temporalmente no disponible.'}}});});
   await page.goto('/');await expect(page.locator('#featured-products article')).toHaveCount(4);await expect(page.locator('#page-status')).toContainText('Sesión temporalmente');
-  expect(attempts).toBe(1);expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBe(token);await expect(page.locator('[data-customer-only]:visible')).toHaveCount(0);
+  expect(attempts).toBe(1);expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();await expect(page.locator('[data-customer-only]:visible')).toHaveCount(0);
 });
 
 test('admin carga imágenes en la API y la tienda estática muestra la subida y el stock agotado',async({page,api})=>{
@@ -117,7 +117,7 @@ test('admin carga imágenes en la API y la tienda estática muestra la subida y 
 
 test('un GET transitorio reintenta una vez y presenta datos reales',async({page})=>{
   let attempts=0;
-  await page.route(API+'/api/productos?*',async route=>{if(++attempts===1)return route.fulfill({status:503,headers:{'Access-Control-Allow-Origin':STATIC},json:{ok:false,error:{message:'Inicio temporal.'}}});return route.continue();});
+  await page.route(STATIC+'/api/productos?*',async route=>{if(++attempts===1)return route.fulfill({status:503,headers:{'Access-Control-Allow-Origin':STATIC},json:{ok:false,error:{message:'Inicio temporal.'}}});return route.continue();});
   await page.goto('/');await expect(page.locator('#featured-products article')).toHaveCount(4);expect(attempts).toBe(2);
 });
 
@@ -152,7 +152,7 @@ test('admin descarga el RIDE de un borrador autenticado entre orígenes sin emit
 
   await withToken(page,token);await page.goto('/admin.html?tabla=facturacion');
   const button=page.locator('[data-invoice-ride="'+invoice.id+'"]');await expect(button).toBeVisible();
-  const endpoint=API+'/api/admin/facturacion/facturas/'+invoice.id+'/ride';
+  const endpoint=STATIC+'/api/admin/facturacion/facturas/'+invoice.id+'/ride';
   const [download,response]=await Promise.all([
     page.waitForEvent('download'),
     page.waitForResponse(response=>response.url()===endpoint && response.request().method()==='GET'),
@@ -160,12 +160,12 @@ test('admin descarga el RIDE de un borrador autenticado entre orígenes sin emit
   ]);
   expect(response.status()).toBe(200);
   const responseHeaders=await response.allHeaders();
-  expect(responseHeaders['access-control-allow-origin']).toBe(STATIC);
+  expect(responseHeaders['access-control-allow-origin']).toBeUndefined();
   expect(responseHeaders['access-control-allow-credentials']).toBeUndefined();
   expect(responseHeaders['cache-control']).toBe('no-store');
   expect(responseHeaders['content-type']).toContain('text/html');
   expect(responseHeaders['content-security-policy']).toContain("default-src 'none'");
-  expect(response.request().headers().authorization).toBe('Bearer '+token);
+  expect(response.request().headers().authorization).toBeUndefined();
   expect(download.url()).toMatch(/^blob:http:\/\/127\.0\.0\.1:3301\//);
   expect(download.suggestedFilename()).toBe('factura-'+invoice.id+'.html');
   const stream=await download.createReadStream(),chunks=[];
@@ -205,5 +205,5 @@ test('Pages publica pagos sin importes inventados y conserva CSP, configuración
   await page.locator('farmacia-mascota #character').selectOption('farmi');await atlas;
   await expect.poll(()=>page.evaluate(()=>FarmaciaMascota.getStatus().character)).toBe('farmi');
   await expect.poll(()=>page.locator('farmacia-mascota #canvas').evaluate(canvas=>canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data.some((value,index)=>index%4===3 && value>0))).toBe(true);
-  expect(apiRequests).toEqual([]);expect(writes).toEqual([]);
+  expect(apiRequests.map(item=>item.path)).toEqual(['/api/auth/me','/api/auth/web/refresh']);expect(apiRequests.every(item=>item.origin===STATIC)).toBe(true);expect(writes).toEqual(['POST /api/auth/web/refresh']);
 });

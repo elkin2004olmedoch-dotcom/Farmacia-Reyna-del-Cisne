@@ -6,7 +6,7 @@ async function api(request,path,{token,method='get',data,status=200}={}){
   const response=await request[method]('/api'+path,{headers:token?{Authorization:'Bearer '+token}:{},...(data?{data}:{})});
   expect(response.status(),method+' '+path).toBe(status);return status===204?null:(await response.json()).data;
 }
-async function signedIn(page,token,path){await page.goto('/cuenta.html');await page.evaluate(value=>sessionStorage.setItem('farmacia-mvc-token',value),token);await page.goto(path);}
+async function signedIn(page,token,path){await page.goto('about:blank');const exchanged=await page.request.post('http://localhost:3300/api/auth/web/exchange',{headers:{Authorization:'Bearer '+token,Origin:'http://localhost:3300','X-Farmacia-Web':'1'},data:{}});expect(exchanged.status()).toBe(200);await page.goto(path);}
 async function basicFixture(request){
   const admin=await api(request,'/auth/login',{method:'post',data:{email:'admin-browser@example.ec',password:'AdminBrowser2026!'}});
   const suffix=randomUUID().slice(0,8),email='cliente-entregas-'+suffix+'@example.ec';
@@ -71,7 +71,7 @@ test('pedidos de administración enlaza la asignación del pedido seleccionado a
   await link.click();await expect(page.locator('#delivery-order-select')).toHaveValue(order.id);
   await expect(page.locator('#delivery-orders-info')).toContainText('Página 2');
   await expect(page.locator('#delivery-assignment-form [type=submit]')).toHaveText('Confirmar y asignar entrega');
-  await page.evaluate(()=>sessionStorage.removeItem('farmacia-mvc-token'));await page.reload();
+  await page.context().clearCookies();await page.reload();
   await expect(page).toHaveURL(/cuenta\.html\?next=/);
   await page.locator('#login-email').fill('admin-browser@example.ec');await page.locator('#login-password').fill('AdminBrowser2026!');await page.locator('#login-form [type=submit]').click();
   await expect(page.locator('#delivery-order-select')).toHaveValue(order.id);
@@ -195,6 +195,7 @@ test('seguimiento ajeno no expone datos y una sesión vencida retira contenido y
   const other=await api(request,'/auth/register',{method:'post',status:201,data:{nombre:'Otra cuenta',email:'otra-'+data.suffix+'@example.ec',telefono:'0979275988',cedula:'0102030400',password:'ClienteReparto2026!'}});
   await signedIn(page,other.token,'/seguimiento.html?pedido='+order.id);await expect(page.locator('#page-status')).toContainText('No se encontró');await expect(page.locator('#tracking-content')).not.toContainText(order.id.slice(0,8));
   await signedIn(page,data.customer.token,'/seguimiento.html?pedido='+order.id);await expect(page.locator('#tracking-content')).toContainText(order.id.slice(0,8));
+  await api(request,'/auth/logout',{token:data.customer.token,method:'post',status:204});
   await page.route('**/api/pedidos/*/seguimiento',route=>route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({ok:false,error:{message:'Sesión vencida'}})}));
   await page.locator('#tracking-refresh').click();await expect(page.locator('#tracking-area')).toBeHidden();await expect(page.locator('#tracking-area')).toBeEmpty();
   await page.goto('/cuenta.html?next='+encodeURIComponent('//destino-ajeno.example/seguimiento.html?pedido='+order.id));

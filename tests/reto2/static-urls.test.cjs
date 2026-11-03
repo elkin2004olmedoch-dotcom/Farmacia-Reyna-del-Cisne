@@ -76,6 +76,7 @@ test('navegación marca la página actual con URL .html, limpia y raíz',async()
     const {layoutController}=await load('frontend/controllers/layout.js',{
       '../models/auth.js':'export const auth={user:null};',
       '../models/cart.js':'export const cart={read:()=>({})};',
+      './cart-drawer.js':'export const cartDrawerController=()=>()=>{};',
       '../models/events.js':'export const events=new EventTarget();',
       '../views/layout.js':'export const sessionView=()=>{};',
       '../views/common.js':'export const message=()=>{},busy=()=>{};',

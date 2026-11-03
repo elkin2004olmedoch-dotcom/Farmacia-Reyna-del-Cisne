@@ -11,9 +11,8 @@ export const billing={
 };
 export async function downloadInvoice(id,kind,{customer=false}={}) {
   if(!['xml','ride'].includes(kind))throw new Error('Formato de factura inválido.');
-  const token=sessionStorage.getItem('farmacia-mvc-token');
   const base=customer?'/facturacion/facturas/':'/admin/facturacion/facturas/';
-  const blob=await apiFetch(`${base}${encodeURIComponent(id)}/${kind}`,{headers:{Authorization:`Bearer ${token || ''}`},timeoutMs:60000},async response=>{
+  const blob=await apiFetch(`${base}${encodeURIComponent(id)}/${kind}`,{timeoutMs:60000},async response=>{
   if(!response.ok){if(response.status===401){sessionStorage.removeItem('farmacia-mvc-token');events.dispatchEvent(new Event('session:expired'));}let payload;try{payload=await response.json();}catch(_){}throw new ApiError(payload?.error?.message || 'No se pudo descargar el comprobante.',response.status);}
   return response.blob();
   });
