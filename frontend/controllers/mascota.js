@@ -101,7 +101,7 @@ export async function mascotaController({administration=false,command,questions,
   }
   function setCharacter(id){
     if(!PEOPLE[id])return false;selected=id;remember(STORED_CHARACTER,id);
-    find('#character').value=id;find('#title').textContent=administration?'Farmi te ayuda a gestionar':`${PEOPLE[id]} te acompaña`;
+    find('#character').value=id;find('#title').textContent=`${PEOPLE[id]} ${administration?'te ayuda a gestionar':'te acompaña'}`;
     find('#avatar').setAttribute('aria-label',`Haz saltar a ${PEOPLE[id]}`);
     fallbackAfter=performance.now()+3000;state='idle';frame=0;elapsed=0;remaining=Infinity;
     setState('waving',{loops:1});
@@ -210,7 +210,7 @@ export async function mascotaController({administration=false,command,questions,
   find('#launcher').addEventListener('click',()=>open(find('#panel').hidden));
   find('#close').addEventListener('click',()=>open(false));
   root.addEventListener('keydown',event=>{if(event.key==='Escape'&&!find('#panel').hidden){event.preventDefault();open(false);}});
-  find('#avatar').addEventListener('click',()=>{setState('jumping',{loops:1});sayBubble('¡Aquí estoy! Pulsa «¿Te ayudo?» para conversar.');});
+  find('#avatar').addEventListener('click',()=>{setState('jumping',{loops:1});sayBubble(administration?'¡Aquí estoy! Pulsa «Ayuda administrativa» para gestionar.':'¡Aquí estoy! Pulsa «¿Te ayudo?» para conversar.');});
   find('#avatar').addEventListener('pointerenter',()=>{if(state==='idle')setState('waving',{loops:1});});
   find('#avatar').addEventListener('pointermove',event=>{if(state==='jumping')return;const box=canvas.getBoundingClientRect();offset=Math.max(-8,Math.min(8,(event.clientX-box.left-box.width/2)/4));if(Math.abs(offset)>5 && state==='idle')setState(offset>0?'running-right':'running-left',{loops:1});});
   find('#avatar').addEventListener('pointerleave',()=>{offset=0;});

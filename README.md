@@ -153,6 +153,8 @@ Para repetir las 26 comprobaciones de API mínimas, después de instalar depende
 
 Se revisa un solo proyecto, un repositorio y la misma farmacia publicada. No se entregan ZIP separados por reto. La aplicación MVC conserva y amplía el catálogo, carrito, identidad, accesibilidad y navegación del trabajo inicial, incorporando API, persistencia relacional, autenticación y permisos.
 
+La [guía del recorrido conjunto](docs/RECORRIDO-RETOS-1-Y-2.md) indica qué mostrar como cliente, administrador y repartidor, las órdenes de la mascota y cómo repetir la grabación con `npm run test:journey`. El recorrido usa una base temporal y desactiva correos y cobros comerciales; las capturas y videos se guardan como evidencias locales, fuera del repositorio.
+
 | Contenido | Dónde comprobarlo en el mismo proyecto |
 | --- | --- |
 | Reto 1: HTML, CSS, JavaScript, adaptación y teclado | Tienda publicada, catálogo, ficha y carrito; pruebas de tests/ |

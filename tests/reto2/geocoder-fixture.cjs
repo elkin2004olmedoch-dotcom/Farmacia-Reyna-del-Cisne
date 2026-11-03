@@ -2,6 +2,7 @@
 module.exports=function install(){
  const {AppError}=require('../../server/middleware/errors.cjs');
  require('../../server/models/geocoding.cjs').resolve=async target=>{if(String(target.direccion).startsWith('Sin ubicación'))throw new AppError(409,'ADDRESS_NOT_FOUND','Destino sintético no localizado.');return {latitud:.125,longitud:-79.25,fuente:'direccion',precisionDestino:'calle'};};
+ if(process.env.PHARMACY_BROWSER_LIVE_ROUTING==='true')return;
  // Replace only the external OSRM transport; route authorization and validation stay real.
  const routing=require('../../server/models/rutas.cjs');
  Object.assign(routing,routing.createRouting({fetch:async url=>{
