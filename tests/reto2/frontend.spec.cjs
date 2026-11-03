@@ -73,8 +73,8 @@ test('administrador crea, edita y elimina; consulta todas las tablas y publica p
   await page.goto('/admin.html');await expect(page).toHaveURL(/cuenta.html\?next=admin.html$/);await expect(page.locator('#page-status')).toContainText('administrador');
 });
 test('errores de red y 500 se anuncian sin reemplazarlos por datos ficticios',async({page})=>{
-  await page.route('**/api/productos?*',route=>route.abort());await page.goto('/catalogo.html');await expect(page.locator('#page-status')).toContainText('conectar');await expect(page.locator('#catalog-grid article')).toHaveCount(0);
-  await page.unroute('**/api/productos?*');await page.route('**/api/productos?*',route=>route.fulfill({status:500,json:{ok:false,error:{message:'Servicio temporalmente no disponible.'}}}));await page.reload();await expect(page.locator('#page-status')).toContainText('Servicio temporalmente');
+  await page.route('**/api/productos?*',route=>route.abort());await page.goto('/catalogo.html');await expect(page.locator('#catalog-error')).toContainText('conectar');await expect(page.locator('#catalog-retry')).toBeEnabled();await expect(page.locator('#catalog-grid article')).toHaveCount(0);
+  await page.unroute('**/api/productos?*');await page.route('**/api/productos?*',route=>route.fulfill({status:500,json:{ok:false,error:{message:'Servicio temporalmente no disponible.'}}}));await page.reload();await expect(page.locator('#catalog-error')).toContainText('Servicio temporalmente');
 });
 test('el panel ignora respuestas atrasadas y bloquea una sesión vencida',async({page})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
@@ -151,6 +151,9 @@ test('dashboard ERP con datos reales, enlaces de gestión y recuperación de err
 });
 
 test('administración y cliente comparten datos persistidos y actualizan pantallas abiertas',async({page,browser,baseURL},testInfo)=>{
+  // This full cross-role journey includes uploads, several axe audits, two orders and captures in multiple tabs.
+  // Individual assertions retain their normal timeout; the trace shows no stalled operation.
+  test.slow();
   const clientContext=await browser.newContext({baseURL,viewport:page.viewportSize()});
   const client=await clientContext.newPage();const home=await clientContext.newPage();
   const errors=[];for(const tab of [page,client,home])tab.on('pageerror',error=>errors.push(error.message));
@@ -163,6 +166,7 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
     const audit=new AxeBuilder({page:tab}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']);if(include)audit.include(include);const violations=(await audit.analyze()).violations;expect(violations.map(item=>({id:item.id,nodes:item.nodes.map(node=>node.target)})),label).toEqual([]);
   }
   async function capture(tab,filename,label){
+    await tab.bringToFront();
     await tab.evaluate(()=>{document.activeElement?.blur?.();window.scrollTo(0,0);document.querySelectorAll('.table-scroll').forEach(table=>{table.scrollLeft=0;table.scrollTop=0;});});await tab.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));const path=testInfo.outputPath(filename);await tab.screenshot({path,fullPage:true});await testInfo.attach(label,{path,contentType:'image/png'});
   }
   const findRow=(text,tab=page)=>findAdminRow(tab,text);
