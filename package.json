@@ -21,6 +21,7 @@
     "test": "node --test --test-concurrency=1 tests/*.test.cjs tests/reto2/*.test.cjs",
     "test:reto1": "node --test tests/*.test.cjs",
     "test:browser": "playwright test --config tests/reto2/playwright.config.cjs",
+    "test:journey": "playwright test --config tests/reto2/role-journey.config.cjs",
     "build:frontend": "node scripts/build-frontend.cjs",
     "cert:dev": "node scripts/create-dev-cert.cjs",
     "start:https": "node scripts/https-dev.cjs",

@@ -12,6 +12,8 @@ body:not(.admin-page):not(.admin-install-page) .ref-search input { min-height:42
 body:not(.admin-page):not(.admin-install-page) .ref-search button { min-height:42px; font-size:12px; }
 body:not(.admin-page):not(.admin-install-page) .ref-search svg { display:block; width:18px; height:18px; }
 body:not(.admin-page):not(.admin-install-page) .ref-actions { grid-area:actions; position:relative; gap:14px; margin-left:0; }
+body:not(.admin-page):not(.admin-install-page) .ref-actions .account-menu-wrap { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:0 14px; min-width:0; }
+body:not(.admin-page):not(.admin-install-page) .ref-actions .account-menu-wrap>a { display:inline-flex; align-items:center; min-height:44px; line-height:1.3; }
 body:not(.admin-page):not(.admin-install-page) .ref-actions :is(button,a) { -webkit-tap-highlight-color:transparent; }
 body:not(.admin-page):not(.admin-install-page) .ref-actions > button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-width:44px; min-height:44px; padding:8px; border:0; background:transparent; color:var(--ink); }
 body:not(.admin-page):not(.admin-install-page) .ref-actions svg { width:21px; height:21px; flex-shrink:0; }
@@ -259,7 +261,7 @@ body:not(.admin-page):not(.admin-install-page) .ref-store-intro h1 em{color:#ffd
 body:not(.admin-page):not(.admin-install-page) .ref-store-intro-copy p{color:var(--brand-cream)}
 body:not(.admin-page):not(.admin-install-page) .ref-store-intro-copy .text-link{display:inline-flex;align-items:center;gap:12px;padding:12px 17px;border:1px solid #ffdfaa;border-radius:8px;background:var(--brand-cream);color:var(--brand-wine)}
 body:not(.admin-page):not(.admin-install-page) .ref-store-category{overflow:hidden;border:1px solid #dec7b9;border-bottom:4px solid var(--brand-dark);border-radius:14px;background:#f4eddf}
-body:not(.admin-page):not(.admin-install-page) .ref-store-category>span{padding-inline:18px}
+body:not(.admin-page):not(.admin-install-page) .ref-store-category>span:not(.ref-store-category-arrow){display:block;padding:0 22px 6px}
 body:not(.admin-page):not(.admin-install-page) .ref-store-category .ref-store-category-arrow{right:12px;padding:0;color:var(--brand-dark)}
 body:not(.admin-page):not(.admin-install-page) .ref-store-offers{border-color:#d6b6ae;border-radius:18px;background:#f3ded7}
 body:not(.admin-page):not(.admin-install-page) .ref-store-help{border-radius:18px;background:#681e2a}
