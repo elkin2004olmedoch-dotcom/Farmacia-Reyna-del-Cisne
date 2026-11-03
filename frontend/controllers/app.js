@@ -3,7 +3,6 @@ import {layoutController} from './layout.js';
 import {contactController} from './contact.js';
 import {message} from '../views/common.js';
 import {installController,adminInstallController} from './install.js';
-import {isClassroom} from '../models/runtime.js';
 // Native module imports keep each screen's dependencies out of unrelated pages.
 const controllers={
   home:()=>import('./catalog.js').then(module=>module.homeController()),
@@ -40,7 +39,5 @@ async function initialize() {
   if(!['admin','deliveries','tracking'].includes(page) && !auth.isStaff && !document.body.hasAttribute('data-session-pending'))import('./mascota.js').then(({mascotaController})=>mascotaController()).catch(()=>{});
   if(page!=='home')await renderPage(page);
 }
-if(isClassroom){
-  const {classroomController}=await import('./classroom.js');
-  if(await classroomController())initialize();
-}else{installController();initialize();}
+installController();
+initialize();

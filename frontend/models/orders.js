@@ -1,6 +1,5 @@
 import {request} from './api.js';
-import {storageKey} from './runtime.js';
-const KEY=storageKey('farmacia-mvc-confirmacion');
+const KEY='farmacia-mvc-confirmacion';
 export const orders={
   mine:page=>request(`/pedidos/mis-pedidos?page=${page||1}&pageSize=20`),
   all:page=>request(`/pedidos?page=${page||1}&pageSize=20`),

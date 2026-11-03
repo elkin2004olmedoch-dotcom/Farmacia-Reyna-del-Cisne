@@ -1,4 +1,3 @@
-import {storageKey} from '../models/runtime.js';
 import '../models/ecuador.js';
 import {auth} from '../models/auth.js';
 import {accountView} from '../views/layout.js';
@@ -8,7 +7,7 @@ export function accountController() {
   const next=new URLSearchParams(location.search).get('next');
   const destination=['checkout.html','pedidos.html','admin.html','instalar-admin.html','entregas.html','pagos.html'].includes(next) || /^(seguimiento|pagos)\.html\?pedido=[a-zA-Z0-9_-]{1,100}$/.test(next)?next:null;
   if(auth.user){accountView(auth.user);return;}
-  const note=sessionStorage.getItem(storageKey('farmacia-mvc-login-message'));if(note){message(note,false);sessionStorage.removeItem(storageKey('farmacia-mvc-login-message'));}
+  const note=sessionStorage.getItem('farmacia-mvc-login-message');if(note){message(note,false);sessionStorage.removeItem('farmacia-mvc-login-message');}
   const login=document.getElementById('login-panel');const register=document.getElementById('register-panel');
   function switchPanel(show){login.hidden=show;register.hidden=!show;(show?register:login).querySelector('input').focus();message('');}
   document.getElementById('show-register').addEventListener('click',()=>switchPanel(true));document.getElementById('show-login').addEventListener('click',()=>switchPanel(false));

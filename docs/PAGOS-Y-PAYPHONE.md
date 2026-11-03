@@ -1,16 +1,18 @@
 # Pagos y preparación de PayPhone
 
-La farmacia incorpora una demostración visual y el código de integración con el formulario alojado de PayPhone. **El propietario confirmó que todavía no tiene cuenta comercial. No se han proporcionado credenciales, conectado una cuenta ni probado pagos contra PayPhone, tampoco en su ambiente de pruebas.** `PAYPHONE_ENABLED=false` conserva el servicio cerrado. El código está publicado y la tabla aditiva aplicada; la [evidencia de pagos](APPS-INSTALABLES-2026-11-01.md) registra despliegues y comprobaciones. Esto no acredita una habilitación comercial.
+La tienda permite consultar el importe de un pedido registrado y coordinar su pago con la farmacia. El repositorio conserva el código de integración con el formulario alojado de PayPhone. **El propietario confirmó que todavía no tiene cuenta comercial. No se han proporcionado credenciales, conectado una cuenta ni probado pagos contra PayPhone, tampoco en su ambiente de pruebas.** `PAYPHONE_ENABLED=false` conserva el servicio cerrado. La [evidencia histórica de pagos](APPS-INSTALABLES-2026-11-01.md) registra despliegues y comprobaciones de la integración; no acredita una habilitación comercial ni cobros reales verificados.
 
-## Tres experiencias distintas
+## Pago del pedido y entornos PayPhone
 
 | Experiencia | Requisitos y efecto |
 |---|---|
-| Demostración en `/pagos.html` | Usa artículos e importes ficticios y permite representar aprobación, rechazo o cancelación. Funciona sin cuenta PayPhone; no recoge tarjetas, crea pedidos, reserva stock ni escribe pagos. Una API caída no convierte el ejemplo en una compra. |
+| Coordinación con la farmacia | Desde **Mis pedidos**, el cliente abre el pago de su pedido, consulta su importe guardado y contacta a la farmacia para acordar el pago. Abrir el contacto no registra ni acredita un pago. |
 | PayPhone en pruebas | Requiere cuenta, aplicación WEB marcada **PRUEBAS**, token y StoreID de esa aplicación. `PAYPHONE_ENVIRONMENT=sandbox` etiqueta y conserva ese ambiente; la variable no transforma un token de producción en uno de pruebas. Usa el mismo host PayPhone que producción. |
 | PayPhone en producción | Requiere habilitación y credenciales reales del comercio, dominio autorizado y validación previa del flujo completo. Puede cobrar dinero. Solo se activa deliberadamente con `PAYPHONE_ENABLED=true` y `PAYPHONE_ENVIRONMENT=production`. |
 
-El pedido registrado abre `/pagos.html?pedido=ID`, exige sesión y consulta su importe histórico. La demostración se abre aparte: sus resultados nunca se aplican al pedido. «Coordinar con la farmacia» abre un mensaje de contacto por decisión del cliente; ese mensaje no acredita pago. Apple Pay permanece anunciado como no disponible hasta que exista una pasarela compatible habilitada para esta farmacia.
+El pedido registrado abre `/pagos.html?pedido=ID`, exige sesión y consulta su importe histórico. Mientras PayPhone no esté disponible, la pantalla muestra **Pago por coordinar con la farmacia** y ofrece contactar al equipo; la opción de tarjeta permanece oculta. El cliente revisa y envía el mensaje en WhatsApp por su propia decisión. El estado del pedido y el del pago se mantienen separados.
+
+Abrir `/pagos.html` sin un pedido muestra **Ver mis pedidos** para elegir una compra. No presenta un importe de ejemplo, resultados simulados ni un formulario de tarjeta. La interfaz tampoco anuncia Apple Pay como opción pendiente.
 
 ## Capas y contrato
 
@@ -43,6 +45,8 @@ El DTO de consulta/preparación tiene esta forma; `pago` es `null` antes del pri
 ```
 
 `ivaCentavos` puede ser `null` en pedidos antiguos. Su fiscalidad incompleta impide preparar un cobro: no se inventan impuestos. El DTO excluye identificación, correo, teléfono, dirección y credenciales del comprador. `urlPago` solo se entrega mientras está pendiente, habilitado y coincide el ambiente guardado; cambiar de ambiente impide reutilizar el intento con `PAYMENT_ENVIRONMENT_CHANGED`.
+
+El campo `demostracion` se conserva en el contrato existente de la API; no habilita importes de ejemplo ni resultados simulados en la pantalla pública.
 
 ## Importes, confirmación y límites
 
@@ -86,5 +90,3 @@ Ante `creando` persistente, `revision`, cobro aparentemente realizado sin confir
 Registra la evidencia y decisión sin datos sensibles. Si procede una reversión/devolución, debe gestionarse por los mecanismos que PayPhone habilite al comercio; esta aplicación no la ejecuta ni la detecta automáticamente. El bloqueo de cancelación no desaparece por consultar el portal o devolver dinero externamente. Resolver el estado local requiere un procedimiento de soporte auditado o una ampliación explícita: no improvisar cambios de estado o importes mediante SQL. [Operación de reversos del proveedor](https://docs.payphone.app/boton-de-pago).
 
 Las pruebas de `tests/reto2/payments.test.cjs` utilizan Fetch simulado y SQLite temporal; la prueba PostgreSQL existente es optativa, exige una URL explícita de base sintética local y también simula PayPhone. Cubren autorización, snapshots, concurrencia, repeticiones, fallos, ambientes, redirecciones y conciliación. No acreditan una conexión al proveedor ni una transacción sandbox real. Los resultados completos y el estado de publicación se registran separadamente de esta guía.
-
-Las referencias de presentación son [Stripe Checkout](https://docs.stripe.com/payments/checkout) para el resumen y flujo alojado y [Apple Human Interface Guidelines: Apple Pay](https://developer.apple.com/design/human-interface-guidelines/apple-pay) para claridad de la acción y disponibilidad. Son referencias de interfaz; no se integró Stripe ni se habilitó Apple Pay.

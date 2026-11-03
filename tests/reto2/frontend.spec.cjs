@@ -1,6 +1,9 @@
 const {test,expect}=require('@playwright/test');
 const AxeBuilder=require('@axe-core/playwright').default;
 const tinyPNG=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGP4fGkRVsQwtCQAJ4yZwRji18kAAAAASUVORK5CYII=','base64');
+async function closeCartDrawer(page){
+  const drawer=page.locator('#cart-drawer');await expect(drawer).toBeVisible();await drawer.locator('[data-cart-close]').first().click();await expect(drawer).toBeHidden();
+}
 async function findAdminRow(page,text){
   const row=page.locator('#admin-table tbody tr').filter({hasText:text});
   await expect(page.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');
@@ -15,11 +18,12 @@ test('catálogo, persistencia, login obligatorio, registro y pedido real',async(
   const createdZone=await page.request.post('/api/admin/zonas-entrega',{headers,data:zoneInput});expect(createdZone.status()).toBe(201);const zone=(await createdZone.json()).data;
   try{
   await page.goto('/');await expect(page.locator('#featured-products article')).toHaveCount(4);await expect(page.locator('.promotion-card')).toHaveCount(2);
-  await expect(page.locator('.business-photo img')).toBeVisible();
+  await expect(page.locator('.ref-store-category-image img')).toHaveCount(3);await expect(page.locator('.ref-store-category-image img').first()).toBeVisible();await expect.poll(()=>page.locator('.ref-store-category-image img').first().evaluate(img=>img.complete && img.naturalWidth>0)).toBe(true);
+  if(!await page.locator('#global-search').isVisible()){await page.locator('#search-toggle').focus();await page.keyboard.press('Enter');await expect(page.locator('#global-search')).toBeFocused();}
   await page.locator('#global-search').fill('solar');await page.locator('.header-search button').click();await expect(page.locator('#catalog-grid article')).toHaveCount(1);
-  await page.locator('[data-add=solar]').click();await expect(page.locator('[data-shop-count]')).toHaveText('1');
+  await page.locator('[data-add=solar]').click();await closeCartDrawer(page);await expect(page.locator('[data-shop-count]')).toHaveText('1');
   await page.reload();await expect(page.locator('[data-shop-count]')).toHaveText('1');
-  await page.goto('/producto.html?id=vitaminas');await expect(page.locator('#detail-add-form')).toBeVisible();await page.locator('#detail-quantity').fill('2');await page.locator('#detail-add-form [type=submit]').click();await expect(page.locator('[data-shop-count]')).toHaveText('3');
+  await page.goto('/producto.html?id=vitaminas');await expect(page.locator('#detail-add-form')).toBeVisible();await page.locator('#detail-quantity').fill('2');await page.locator('#detail-add-form [type=submit]').click();await closeCartDrawer(page);await expect(page.locator('[data-shop-count]')).toHaveText('3');
   await page.goto('/checkout.html');await expect(page.locator('.checkout-cart-item')).toHaveCount(2);
   await page.locator('[data-cart-plus=solar]').click();await expect(page.locator('#qty-solar')).toHaveValue('2');await page.locator('[data-cart-minus=solar]').click();await expect(page.locator('#qty-solar')).toHaveValue('1');
   await page.locator('[data-cart-remove=solar]').click();await expect(page.locator('#confirm-dialog')).toBeVisible();await page.keyboard.press('Escape');await expect(page.locator('.checkout-cart-item')).toHaveCount(2);
@@ -200,7 +204,7 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
     const productImage=await uploadImage('product');await assertAccessible(page,'Editor con selector de archivo y vista previa','#editor-dialog');
     const createdResponse=page.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/productos');
     await page.locator('#product-form [type=submit]').click();const created=await createdResponse;expect(created.status()).toBe(201);productId=(await created.json()).data.id;await expect(page.locator('#editor-dialog')).toBeHidden();
-    await focus(client);await expect(client.locator('#catalog-grid article')).toHaveCount(1);await expect(client.locator('#catalog-grid')).toContainText(currency(6.25));await expect(client.locator('.product-stock')).toHaveText('4 unidades disponibles');await expect(client.locator('#catalog-search')).toHaveValue(productName);expect(client.url()).toBe(catalogURL);
+    await focus(client);await expect(client.locator('#catalog-grid article')).toHaveCount(1);await expect(client.locator('#catalog-grid')).toContainText(currency(6.25));await expect(client.locator('#catalog-grid .product-stock')).toHaveText('4 unidades disponibles');await expect(client.locator('#catalog-search')).toHaveValue(productName);expect(client.url()).toBe(catalogURL);
     await expect(client.locator('#catalog-grid img')).toHaveAttribute('src',productImage);await expect.poll(()=>client.locator('#catalog-grid img').evaluate(img=>img.naturalWidth)).toBe(8);
 
     let productRow=await findRow(productName);await productRow.locator('[data-edit]').click();await page.locator('#product-precio').fill('7.50');await page.locator('#product-descripcion').fill('Precio editado y guardado desde administración');await page.locator('#product-form [type=submit]').click();await expect(page.locator('#editor-dialog')).toBeHidden();
@@ -219,7 +223,7 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
 
     // Keep an order table open separately while the main admin tab edits the product.
     adminOrders=await page.context().newPage();adminOrders.on('pageerror',error=>errors.push(error.message));await adminOrders.addInitScript(token=>sessionStorage.setItem('farmacia-mvc-token',token),adminToken);await adminOrders.goto('/admin.html?tabla=pedidos');await expect(adminOrders.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');await expect(adminOrders.locator('#admin-table')).not.toContainText(email);
-    await client.locator('[data-add="'+productId+'"]').click();await client.locator('[data-add="'+productId+'"]').click();await expect(client.locator('[data-shop-count]')).toHaveText('2');await expect(home.locator('[data-shop-count]')).toHaveText('2');expect(await page.evaluate(()=>localStorage.getItem('farmacia-mvc-carrito'))).toBeNull();
+    for(let added=0;added<2;added++){await client.locator('[data-add="'+productId+'"]').click();await closeCartDrawer(client);}await expect(client.locator('[data-shop-count]')).toHaveText('2');await expect(home.locator('[data-shop-count]')).toHaveText('2');expect(await page.evaluate(()=>localStorage.getItem('farmacia-mvc-carrito'))).toBeNull();
     const checkout=await clientContext.newPage();checkout.on('pageerror',error=>errors.push(error.message));
     // A second tab restores this client's JWT through /auth/me; it does not log in again.
     await checkout.addInitScript(token=>sessionStorage.setItem('farmacia-mvc-token',token),clientToken);await checkout.goto('/checkout.html');await expect(checkout.locator('.checkout-cart-item')).toHaveCount(1);await expect(checkout.locator('#checkout-summary')).toContainText(currency(15));
@@ -227,7 +231,7 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
     const formValues=await checkout.locator('#delivery-form').evaluate(form=>Object.fromEntries(new FormData(form)));
 
     // Verifica el refresco de 30 s sin otro foco ni reproducir cada frame de las mascotas.
-    await client.bringToFront();await setStock(1);await client.clock.fastForward(30000);await expect(client.locator('.product-stock')).toHaveText('1 unidades disponibles');
+    await client.bringToFront();await setStock(1);await client.clock.fastForward(30000);await expect(client.locator('#catalog-grid .product-stock')).toHaveText('1 unidades disponibles');
     await focus(checkout);await expect(checkout.locator('#checkout-next')).toBeDisabled();await expect(checkout.locator('#delivery-form [type=submit]')).toBeDisabled();await expect(checkout.locator('#qty-'+productId)).toHaveValue('2');expect(await checkout.locator('#delivery-form').evaluate(form=>Object.fromEntries(new FormData(form)))).toEqual(formValues);
     await setStock(4);await focus(checkout);await expect(checkout.locator('#checkout-next')).toBeEnabled();await expect(checkout.locator('#delivery-form [type=submit]')).toBeEnabled();expect(await checkout.locator('#delivery-form').evaluate(form=>Object.fromEntries(new FormData(form)))).toEqual(formValues);
 
@@ -241,7 +245,7 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
     const preserved=await client.request.get('/api/productos/'+productId);expect(preserved.status()).toBe(200);const actual=(await preserved.json()).data;expect(actual.stock).toBe(2);expect(Number(actual.precio)).toBe(7.5);
     await page.locator('#product-form [data-editor-close]').click();await expect(page.locator('#editor-dialog')).toBeHidden();await expect(productRow.locator('td').nth(2)).toHaveText('2');await productRow.locator('[data-edit]').click();await expect(page.locator('#product-stock')).toHaveValue('2');await expect(page.locator('#product-precio')).toHaveValue(/^7\.50?$/);await page.locator('#product-form [data-editor-close]').click();await expect(page.locator('#editor-dialog')).toBeHidden();
     await focus(adminOrders);const orderRow=await findRow(order.id,adminOrders);await expect(orderRow).toContainText(email);await expect(orderRow).toContainText(currency(15));
-    await focus(client);await expect(client.locator('.product-stock')).toHaveText('2 unidades disponibles');expect(client.url()).toBe(catalogURL);
+    await focus(client);await expect(client.locator('#catalog-grid .product-stock')).toHaveText('2 unidades disponibles');expect(client.url()).toBe(catalogURL);
     await page.locator('#admin-table-choice').selectOption('detalles');const detailRow=await findRow(productName);await expect(detailRow).toContainText(order.id);await expect(detailRow.locator('td').nth(3)).toHaveText('2');await expect(detailRow.locator('td').nth(4)).toHaveText(currency(7.5));
     await page.locator('#admin-table-choice').selectOption('productos');productRow=await findRow(productName);await expect(productRow.locator('td').nth(2)).toHaveText('2');
     await page.goto('/admin.html');await expect(page.locator('[data-metric=pendientes] .admin-metric-value')).toHaveText(String(before.pedidosPendientes+1));await expect(page.locator('[data-metric=clientes] .admin-metric-value')).toHaveText(String(before.clientesActivos+1));await expect(page.locator('[data-metric=productos] .admin-metric-value')).toHaveText(String(before.productosActivos+1));await expect(page.locator('[data-metric=total] .admin-metric-value')).toHaveText(currency((before.pedidosTotales.totalCentavos+1500)/100));await expect(page.locator('.admin-recent-table')).toContainText(order.id.slice(0,8));
@@ -265,14 +269,14 @@ test('administración y cliente comparten datos persistidos y actualizan pantall
     await capture(client,'catalogo-promocion.png','Catálogo con promoción y foto subida');
     await capture(detail,'detalle-promocion.png','Detalle con precio promocional');
 
-    await client.locator('[data-add="'+productId+'"]').click();await checkout.goto('/checkout.html');await expect(checkout.locator('#checkout-summary')).toContainText(currency(5.63));await checkout.locator('#checkout-next').click();await checkout.locator('#checkout-document').fill('0102030400');await checkout.locator('#checkout-terms').check();
+    await client.locator('[data-add="'+productId+'"]').click();await closeCartDrawer(client);await checkout.goto('/checkout.html');await expect(checkout.locator('#checkout-summary')).toContainText(currency(5.63));await checkout.locator('#checkout-next').click();await checkout.locator('#checkout-document').fill('0102030400');await checkout.locator('#checkout-terms').check();
     const discountedOrderResponse=checkout.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/pedidos');await checkout.locator('#delivery-form [type=submit]').click();const purchased=await discountedOrderResponse;expect(purchased.status()).toBe(201);const discountedOrder=(await purchased.json()).data;expect(Number(discountedOrder.total)).toBe(5.63);expect(Number(discountedOrder.detalles[0].precioUnitario)).toBe(5.63);
     const consumed=await client.request.get('/api/productos/'+productId);expect((await consumed.json()).data.stock).toBe(1);await checkout.goto('/pedidos.html');
     // The open admin tab may be on a later page than this newly created order.
     while(await adminOrders.locator('#admin-next').isEnabled()){await adminOrders.locator('#admin-next').click();await expect(adminOrders.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');}
     const cancelled=await changeState(discountedOrder.id,'cancelado');await focus(checkout);await expect(checkout.locator('.order-card').filter({hasText:discountedOrder.id.slice(0,8)}).locator('.product-label')).toContainText(/cancelado/i);
     const restored=await client.request.get('/api/productos/'+productId);expect((await restored.json()).data.stock).toBe(2);
-    const repeated=await page.request.put('/api/pedidos/'+discountedOrder.id+'/estado',{headers:{Authorization:'Bearer '+adminToken},data:{estado:'cancelado',esperadoUpdatedAt:cancelled.updatedAt}});expect([200,409]).toContain(repeated.status());const onceOnly=await client.request.get('/api/productos/'+productId);expect((await onceOnly.json()).data.stock).toBe(2);await focus(client);await expect(client.locator('.product-stock')).toHaveText('2 unidades disponibles');
+    const repeated=await page.request.put('/api/pedidos/'+discountedOrder.id+'/estado',{headers:{Authorization:'Bearer '+adminToken},data:{estado:'cancelado',esperadoUpdatedAt:cancelled.updatedAt}});expect([200,409]).toContain(repeated.status());const onceOnly=await client.request.get('/api/productos/'+productId);expect((await onceOnly.json()).data.stock).toBe(2);await focus(client);await expect(client.locator('#catalog-grid .product-stock')).toHaveText('2 unidades disponibles');
     await capture(adminOrders,'administracion-estados-pedidos.png','Gestión de estados de pedidos de prueba');
     await checkout.reload();await expect(checkout.locator('.order-card').filter({hasText:order.id.slice(0,8)})).toContainText(/entregado/i);await expect(checkout.locator('.order-card').filter({hasText:discountedOrder.id.slice(0,8)})).toContainText(/cancelado/i);expect(errors).toEqual([]);
   }finally{

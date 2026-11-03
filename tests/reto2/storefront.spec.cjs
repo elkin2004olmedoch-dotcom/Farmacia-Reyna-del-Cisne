@@ -1,5 +1,8 @@
 const {test,expect}=require('@playwright/test');
 
+async function closeCartDrawer(page){
+  const drawer=page.locator('#cart-drawer');await expect(drawer).toBeVisible();await drawer.locator('[data-cart-close]').first().focus();await page.keyboard.press('Enter');await expect(drawer).toBeHidden();
+}
 async function availableProducts(page){
   const response=await page.request.get('/api/productos?pageSize=100');
   expect(response.ok()).toBeTruthy();
@@ -7,10 +10,13 @@ async function availableProducts(page){
   return data.items.filter(product=>product.stock>1 && !product.requiereReceta && !product.controlado && !product.biologico && !product.cadenaFrio);
 }
 
-test('cabecera permite buscar con teclado y navegar por categorías y cobertura',async({page})=>{
+test('cabecera permite buscar con teclado y navegar por categorías, cobertura y cuenta',async({page},testInfo)=>{
   const products=await availableProducts(page);expect(products.length).toBeGreaterThan(0);
   const product=products[0];
   await page.goto('/');
+  if(testInfo.project.name==='movil'){
+    await expect(page.locator('#header-search')).toBeHidden();await page.locator('#search-toggle').focus();await page.keyboard.press('Enter');await expect(page.locator('#search-toggle')).toHaveAttribute('aria-expanded','true');await expect(page.locator('#global-search')).toBeFocused();
+  }
   const search=page.getByRole('search').getByRole('searchbox');
   await search.fill(product.nombre);await search.focus();await page.keyboard.press('Enter');
   await expect(page).toHaveURL(new RegExp('catalogo.html\\?q='));
@@ -18,14 +24,17 @@ test('cabecera permite buscar con teclado y navegar por categorías y cobertura'
   await expect(page.locator('#catalog-grid article').filter({hasText:product.nombre})).toHaveCount(1);
   await expect(page.locator('#catalog-grid article img').first()).toHaveAttribute('width','320');
   await expect(page.locator('#catalog-grid article img').first()).toHaveAttribute('height','320');
-  const categories=page.getByRole('navigation',{name:'Categorías de productos'});
-  const care=categories.getByRole('link',{name:'Cuidado personal',exact:true});
+  await page.locator('.ref-brand').focus();await page.keyboard.press('Enter');await expect(page).toHaveURL(/index.html$/);
+  const care=page.locator('#servicios').getByRole('link',{name:/^Cuidado personal/});
   await care.focus();await page.keyboard.press('Enter');
   await expect(page.locator('#catalog-category')).toHaveValue('cuidado');
-  await page.locator('.shop-coverage').focus();await page.keyboard.press('Enter');
+  await expect(page.locator('#catalog-grid article').first()).toBeVisible();expect(new URL(page.url()).searchParams.get('category')).toBe('cuidado');
+  await page.locator('.site-footer').getByRole('link',{name:'Entrega en Puerto Quito',exact:true}).focus();await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/index.html#cobertura$/);
-  await expect(page.locator('#cobertura')).toContainText('todo Puerto Quito');
-  await expect(page.locator('.shop-actions a[href="pedidos.html"]')).toHaveCount(1);
+  const coverage=page.locator('#cobertura');await coverage.locator('summary').focus();await page.keyboard.press('Enter');await expect(coverage).toHaveJSProperty('open',true);await expect(coverage.locator('p')).toBeVisible();await expect(coverage.locator('p')).toContainText('todo Puerto Quito');
+  const account=page.locator('#account-menu-toggle');await account.focus();await page.keyboard.press('Enter');await expect(account).toHaveAttribute('aria-expanded','true');
+  const orders=page.locator('#account-menu').getByRole('link',{name:'Mis pedidos',exact:true});await expect(orders).toBeVisible();await expect(orders).toHaveAttribute('href','pedidos.html');await orders.focus();await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/cuenta.html\?next=pedidos.html$/);await expect(page.locator('#login-form')).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBeTruthy();
 });
 
@@ -65,7 +74,7 @@ test('barra inferior del carrito sigue las unidades entre catálogo, ficha y otr
   await page.goto('/catalogo.html');
   const dock=page.getByRole('region',{name:'Resumen del carrito',includeHidden:true});
   await expect(dock).toBeHidden();
-  const add=page.locator(`[data-add="${product.id}"]`);await add.focus();await page.keyboard.press('Enter');
+  const add=page.locator(`[data-add="${product.id}"]`);await add.focus();await page.keyboard.press('Enter');await closeCartDrawer(page);
   await expect(dock).toBeVisible();await expect(dock).toContainText('1 unidad');await expect(add).toBeFocused();
   await page.goto('/producto.html?id='+encodeURIComponent(product.id));
   await expect(dock).toBeVisible();await expect(dock).toContainText('1 unidad');
@@ -74,7 +83,7 @@ test('barra inferior del carrito sigue las unidades entre catálogo, ficha y otr
   await expect(dock).toContainText('2 unidades');
   await other.evaluate(async()=>{const {cart}=await import('/models/cart.js');cart.clear();});
   await expect(dock).toBeHidden();
-  await page.locator('#detail-add-button').click();await expect(dock).toBeVisible();
+  await page.locator('#detail-add-button').click();await closeCartDrawer(page);await expect(dock).toBeVisible();
   await dock.getByRole('link',{name:'Ver carrito'}).focus();await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/checkout.html$/);await expect(page.locator('#checkout-items')).toContainText(product.nombre);
   await expect(dock).toHaveCount(0);await other.close();
@@ -83,7 +92,7 @@ test('barra inferior del carrito sigue las unidades entre catálogo, ficha y otr
 test('barra inferior del carrito respeta sesión y deja accesible el pie a 320 px',async({page})=>{
   const [product]=await availableProducts(page);expect(product).toBeTruthy();
   await page.goto('/catalogo.html');
-  await page.evaluate(async id=>{const {cart}=await import('/models/cart.js');cart.add({id,stock:5});},product.id);
+  await page.evaluate(async product=>{const {cart}=await import('/models/cart.js');cart.add(product);},product);await closeCartDrawer(page);
   const dock=page.getByRole('region',{name:'Resumen del carrito',includeHidden:true});
   await expect(dock).toBeVisible();
   await page.setViewportSize({width:320,height:740});

@@ -9,7 +9,7 @@ async function offer(page,outcome='dismissed'){
 test.describe('tienda instalable',()=>{
  test.use({userAgent:android});
  test('opciones accesibles, guías iPhone y retorno de foco con Escape',async({page})=>{
-  await page.goto('/');const open=page.getByRole('button',{name:'Obtener app',exact:true});await expect(open).toBeVisible();
+  await page.goto('/');const open=page.locator('.site-footer').getByRole('button',{name:'Instalar aplicación',exact:true});await expect(open).toBeVisible();
   await open.focus();await page.keyboard.press('Enter');await expect(page.getByRole('dialog',{name:'Tu cuidado, más cerca.'})).toBeVisible();
   await page.getByRole('button',{name:'iPhone y iPad'}).click();await expect(page.locator('#install-guidance')).toContainText('Añadir a pantalla de inicio');await expect(page.locator('#app-install-action')).toBeHidden();
   await expect(page.locator('a[download]')).toHaveAttribute('href','descargas/reparto-0.1.0.apk');
@@ -18,14 +18,14 @@ test.describe('tienda instalable',()=>{
   await page.keyboard.press('Escape');await expect(page.locator('#app-install-dialog')).not.toBeVisible();await expect(open).toBeFocused();
  });
  test('prompt cancelado no afirma instalación y appinstalled confirma por separado',async({page})=>{
-  await page.goto('/');await page.getByRole('button',{name:'Obtener app',exact:true}).click();await offer(page);
+  await page.goto('/');await page.locator('.site-footer').getByRole('button',{name:'Instalar aplicación',exact:true}).click();await offer(page);
   await expect(page.locator('#app-install-action')).toBeVisible();await page.locator('#app-install-action').click();await expect(page.locator('#install-guidance')).toContainText('cancelada');expect(await page.evaluate(()=>window.promptCalls)).toBe(1);
   await offer(page,'accepted');await page.locator('#app-install-action').click();await expect(page.locator('#install-guidance')).toContainText('Solicitud aceptada');await expect(page.locator('#install-guidance')).not.toContainText('está instalada');
   await page.evaluate(()=>window.dispatchEvent(new Event('appinstalled')));await expect(page.locator('#install-guidance')).toContainText('confirmada por el dispositivo');await expect(page.locator('#app-install-action')).toBeHidden();
  });
  test('botón y dialog se adaptan de 320 a 1440 px sin desbordar',async({page})=>{
-  await page.goto('/');for(const width of [320,375,768,1440]){await page.setViewportSize({width,height:900});const box=await page.getByRole('button',{name:'Obtener app',exact:true}).boundingBox();expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
-  await page.setViewportSize({width:375,height:800});await page.getByRole('button',{name:'Obtener app',exact:true}).click();expect(await page.locator('#app-install-dialog').evaluate(el=>el.scrollWidth<=el.clientWidth+1)).toBe(true);
+  await page.goto('/');for(const width of [320,375,768,1440]){await page.setViewportSize({width,height:900});const box=await page.locator('.site-footer').getByRole('button',{name:'Instalar aplicación',exact:true}).boundingBox();expect(box.width).toBeGreaterThanOrEqual(44);expect(box.height).toBeGreaterThanOrEqual(44);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
+  await page.setViewportSize({width:375,height:800});await page.locator('.site-footer').getByRole('button',{name:'Instalar aplicación',exact:true}).click();expect(await page.locator('#app-install-dialog').evaluate(el=>el.scrollWidth<=el.clientWidth+1)).toBe(true);
  });
 });
 test.describe('administración instalable',()=>{

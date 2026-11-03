@@ -1,6 +1,8 @@
 import {escape} from './common.js';
 export function sessionView(user,count) {
   const admin=user?.role==='admin',courier=user?.role==='repartidor';document.body.dataset.sessionRole=admin?'admin':courier?'repartidor':user?'user':'guest';
+  const accountToggle=document.getElementById('account-menu-toggle');if(accountToggle)accountToggle.hidden=admin||courier;
+  for(const link of document.querySelectorAll('[data-staff-account]'))link.hidden=!admin&&!courier;
   for(const link of document.querySelectorAll('[data-account-link]')){link.textContent=admin?'Panel':courier?'Mis entregas':user?`Hola, ${user.nombre.split(' ')[0]}`:'Ingresar';link.href=admin?'admin.html':courier?'entregas.html':'cuenta.html';}
   for(const link of document.querySelectorAll('[data-deliveries-link]'))link.hidden=!admin && !courier;
   for(const link of document.querySelectorAll('a[href="pedidos.html"]'))if(courier){link.href='entregas.html';link.textContent='Mis entregas';}
