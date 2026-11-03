@@ -16,13 +16,19 @@ export function couriersView(couriers){
   const select=document.getElementById('delivery-courier-select'),selected=select.value;
   select.innerHTML='<option value="">Selecciona un repartidor</option>'+couriers.filter(c=>c.activo).map(c=>`<option value="${escape(c.id)}">${escape(c.nombre)}</option>`).join('');if([...select.options].some(o=>o.value===selected))select.value=selected;
 }
-export function assignmentOrdersView(result){
+export function assignmentOrdersView(result,reassign=null){
   const select=document.getElementById('delivery-order-select'),selected=select.value;
-  const orders=result.items.filter(order=>order.entrega==='delivery' && ['confirmado','preparado'].includes(order.estado));
-  select.innerHTML='<option value="">Selecciona un pedido</option>'+orders.map(order=>`<option value="${escape(order.id)}">${escape(order.id.slice(0,8))} · ${escape(orderLabels[order.estado])} · ${escape(order.nombre || order.nombreComprador || 'Pedido a domicilio')}</option>`).join('');
+  const orders=result.items.filter(order=>order.entrega==='delivery' && ['pendiente','confirmado','preparado'].includes(order.estado));
+  const retained=reassign?.pedidoId===selected && !orders.some(order=>order.id===selected)?`<option value="${escape(selected)}">${escape(selected.slice(0,8))} · Reasignar</option>`:'';
+  select.innerHTML='<option value="">Selecciona un pedido</option>'+orders.map(order=>`<option value="${escape(order.id)}">${escape(order.id.slice(0,8))} · ${escape(orderLabels[order.estado])} · ${escape(order.nombre || order.nombreComprador || 'Pedido a domicilio')}</option>`).join('')+retained;
   if([...select.options].some(o=>o.value===selected))select.value=selected;
   document.getElementById('delivery-order-codes').innerHTML=orders.length?orders.map(order=>reference('Pedido '+(order.nombre || order.nombreComprador || ''),order.id)).join(''):'<p>No hay pedidos asignables en esta página.</p>';
   deliveryPagination('delivery-orders',result);
+}
+export function assignmentStateView(order){
+  const pending=order?.estado==='pendiente';
+  document.querySelector('#delivery-assignment-form [type=submit]').textContent=pending?'Confirmar y asignar entrega':'Asignar entrega';
+  document.getElementById('delivery-assignment-status').textContent=pending?'Este pedido está pendiente. Te pediremos confirmar su aceptación antes de asignarlo. La salida requiere que esté preparado.':order?'La salida requiere un pedido preparado. Sólo se puede reasignar antes de salir.':'Selecciona un pedido y un repartidor activo. Los pedidos pendientes requieren confirmación.';
 }
 export function deliveriesView(result,{admin=false,sharingId=null}={}){
   const openCodes=new Set([...document.querySelectorAll('#deliveries-list [data-delivery-codes][open]')].map(details=>details.dataset.deliveryCodes));

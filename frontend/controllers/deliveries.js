@@ -3,9 +3,10 @@ import {events} from '../models/events.js';
 import {deliveries,ZONE_FORM_DRAFT} from '../models/deliveries.js';
 import {administration} from '../models/admin.js';
 import {requireUser} from './layout.js';
+import {confirmAction} from './dialog.js';
 import {watchUpdates,preserveFocus} from './updates.js';
 import {message,busy,formErrors} from '../views/common.js';
-import {zonesView,couriersView,assignmentOrdersView,deliveriesView,trackingView,trackingLocationView,trackingMapView,recentLocation} from '../views/deliveries.js';
+import {zonesView,couriersView,assignmentOrdersView,assignmentStateView,deliveriesView,trackingView,trackingLocationView,trackingMapView,recentLocation} from '../views/deliveries.js';
 
 const byId=id=>document.getElementById(id);
 const activeDelivery=item=>item && ['en_camino','en_destino'].includes(item.estado);
@@ -16,12 +17,17 @@ function formValid(form){
 function clearPrivate(area){area.hidden=true;area.querySelectorAll('form').forEach(form=>form.reset());area.replaceChildren();}
 
 export async function deliveriesController(){
-  if(!requireUser('entregas.html'))return;
+  const requestedOrder=new URLSearchParams(location.search).get('pedido');
+  let seekOrder=requestedOrder && /^[a-zA-Z0-9_-]{1,100}$/.test(requestedOrder)?requestedOrder:null;
+  if(!requireUser('entregas.html'+(seekOrder?'?pedido='+encodeURIComponent(seekOrder):'')))return;
   const admin=auth.user.role==='admin',courier=auth.user.role==='repartidor';
   if(!admin && !courier){message('Esta ventana está disponible para administradores y repartidores.',true,true);return;}
   const area=byId('deliveries-area'),list=byId('deliveries-list'),zoneForm=byId('delivery-zone-form'),courierForm=byId('courier-form'),assignment=byId('delivery-assignment-form');
   area.hidden=false;byId('delivery-admin').hidden=!admin;
   let live=true,page=1,orderPage=1,requestId=0,ordersRequestId=0,working=false,listLoading=false,listPending=false,snapshot='',result={items:[]},zones=[],couriers=[],reassign=null,sharing=null,gpsGeneration=0;
+  let orders=[],ordersSnapshot='',confirmingAssignment=false;
+  const selectedOrder=()=>orders.find(order=>order.id===byId('delivery-order-select').value);
+  const assignmentState=()=>assignmentStateView(selectedOrder());
   const gpsNotice=text=>{if(live)byId('delivery-gps-status').textContent=text;};
   function draw(){if(live)preserveFocus(list,()=>deliveriesView(result,{admin,sharingId:sharing?.item.id}));}
   function resetZone(){zoneForm.reset();zoneForm.elements.id.value='';zoneForm.elements.esperadoVersion.value='';formErrors(zoneForm,{});}
@@ -38,7 +44,7 @@ export async function deliveriesController(){
     catch{if(notice)gpsNotice('Se detuvo el GPS local. No se pudo confirmar la retirada en el servidor; la ubicación dejará de mostrarse al vencer en dos minutos. Puedes reintentar la retirada.');if(live && auth.user)retirePending.add(previous.item.id);}
   }
   const retirePending=new Set();
-  function expire(){if(!live)return;live=false;requestId++;ordersRequestId++;stopLocal();zones=[];couriers=[];result={items:[]};reassign=null;clearPrivate(area);}
+  function expire(){if(!live)return;live=false;requestId++;ordersRequestId++;stopLocal();zones=[];couriers=[];orders=[];result={items:[]};reassign=null;clearPrivate(area);}
   events.addEventListener('session:expired',expire);
   events.addEventListener('session:changed',()=>{if(!auth.user)expire();});
   window.addEventListener('pagehide',()=>{void stopGps({notice:false,drawList:false,keepalive:true});});
@@ -53,9 +59,19 @@ export async function deliveriesController(){
     }finally{listLoading=false;if(listPending && live && !working){listPending=false;await refreshList();}}
   }
   async function refreshOrders(requested=orderPage){
-    const id=++ordersRequestId;const loaded=await administration.table('pedidos',requested);
+    const id=++ordersRequestId;let loaded;
+    do{
+      loaded=await administration.table('pedidos',requested);
+      if(!live || !auth.user || id!==ordersRequestId)return;
+      if(!seekOrder || loaded.items.some(order=>order.id===seekOrder) || requested*loaded.pageSize>=loaded.total)break;
+      requested++;
+    }while(live);
     if(!live || !auth.user || id!==ordersRequestId)return;
-    orderPage=requested;preserveFocus(assignment,()=>assignmentOrdersView(loaded));
+    orderPage=requested;orders=loaded.items;
+    const next=JSON.stringify(loaded);
+    if(next!==ordersSnapshot){ordersSnapshot=next;preserveFocus(assignment,()=>assignmentOrdersView(loaded,reassign));}
+    if(seekOrder){byId('delivery-order-select').value=seekOrder;seekOrder=null;byId('delivery-courier-select').focus();}
+    assignmentState();
   }
   async function metadata(){
     const [loadedZones,loadedCouriers]=await Promise.all([deliveries.adminZones(),deliveries.couriers()]);
@@ -100,7 +116,7 @@ export async function deliveriesController(){
     }
     if(button.hasAttribute('data-delivery-state') && item){await action(button,async()=>{await deliveries.changeState(item.id,button.dataset.deliveryState,item.version);if(['entregada','cancelada'].includes(button.dataset.deliveryState) && sharing?.item.id===item.id)await stopGps({notice:false,drawList:false});},'Estado de entrega actualizado.');return;}
     if(admin && button.hasAttribute('data-delivery-reassign') && item?.estado==='asignada'){
-      reassign={pedidoId:item.pedidoId,esperadoVersion:item.version};const select=byId('delivery-order-select');if(![...select.options].some(option=>option.value===item.pedidoId)){const option=new Option(item.pedidoId.slice(0,8)+' · Reasignar',item.pedidoId);select.add(option);}select.value=item.pedidoId;byId('delivery-courier-select').value=item.repartidorId;byId('delivery-courier-select').focus();return;
+      reassign={pedidoId:item.pedidoId,esperadoVersion:item.version};const select=byId('delivery-order-select');if(![...select.options].some(option=>option.value===item.pedidoId)){const option=new Option(item.pedidoId.slice(0,8)+' · Reasignar',item.pedidoId);select.add(option);}select.value=item.pedidoId;assignmentState();byId('delivery-courier-select').value=item.repartidorId;byId('delivery-courier-select').focus();return;
     }
     if(admin && button.hasAttribute('data-zone-edit')){
       const zone=zones.find(entry=>entry.id===button.dataset.zoneEdit);if(!zone)return;resetZone();
@@ -124,11 +140,25 @@ export async function deliveriesController(){
       void action(zoneForm.querySelector('[type=submit]'),async()=>{await deliveries.saveZone(payload,values.id);if(live){resetZone();await metadata();}},'Zona y tarifa guardadas. Los pedidos anteriores conservan su tarifa.');
     });
     courierForm.addEventListener('submit',event=>{event.preventDefault();if(working || !formValid(courierForm))return;const values=Object.fromEntries(new FormData(courierForm));void action(courierForm.querySelector('[type=submit]'),async()=>{await deliveries.createCourier(values);if(live){courierForm.reset();await metadata();}},'Repartidor creado.');});
-    byId('delivery-order-select').addEventListener('change',()=>{reassign=null;});
-    assignment.addEventListener('submit',event=>{event.preventDefault();if(working || !formValid(assignment))return;const values=Object.fromEntries(new FormData(assignment));if(reassign?.pedidoId===values.pedidoId)values.esperadoVersion=reassign.esperadoVersion;void action(assignment.querySelector('[type=submit]'),async()=>{await deliveries.assign(values);reassign=null;},'Entrega asignada.');});
+    byId('delivery-order-select').addEventListener('change',()=>{reassign=null;assignmentState();});
+    assignment.addEventListener('submit',async event=>{
+      event.preventDefault();if(working || confirmingAssignment || !formValid(assignment))return;
+      const values=Object.fromEntries(new FormData(assignment)),order=selectedOrder(),button=assignment.querySelector('[type=submit]');
+      if(reassign?.pedidoId===values.pedidoId)values.esperadoVersion=reassign.esperadoVersion;
+      if(order?.estado==='pendiente'){
+        confirmingAssignment=true;busy(button,true);let accepted;
+        try{accepted=await confirmAction('¿Confirmar el pedido '+order.id.slice(0,8)+' y asignarlo a '+(couriers.find(person=>person.id===values.repartidorId)?.nombre || 'este repartidor')+'? El pedido deberá prepararse antes de la salida.');}
+        finally{confirmingAssignment=false;if(live && button.isConnected)busy(button,false);}
+        if(!accepted || !live || !auth.user)return;
+      }
+      await action(button,async()=>{
+        if(order?.estado==='pendiente'){const saved=await administration.changeOrderState(order.id,'confirmado',order.updatedAt);Object.assign(order,saved);assignmentState();}
+        await deliveries.assign(values);reassign=null;await refreshOrders();
+      },'Entrega asignada.');
+    });
     for(const [id,offset]of [['delivery-orders-prev',-1],['delivery-orders-next',1]])byId(id).addEventListener('click',event=>{void action(event.currentTarget,()=>refreshOrders(Math.max(1,orderPage+offset)),'Página de pedidos actualizada.');});
   }
-  const refresh=watchUpdates(refreshList,{canRefresh:()=>live && Boolean(auth.user) && !working,intervalMs:5000});
+  const refresh=watchUpdates(()=>Promise.all([refreshList(),...(admin?[refreshOrders()]:[])]),{canRefresh:()=>live && Boolean(auth.user) && !working && !confirmingAssignment,intervalMs:5000});
   try{await Promise.all([refreshList(),...(admin?[metadata(),refreshOrders()]:[])]);}catch(error){if(error.status!==401 && live)message(error.message,true);}
   if(admin && live && auth.isAdmin && location.hash==='#delivery-zone-editor'){
     const stored=sessionStorage.getItem(ZONE_FORM_DRAFT);sessionStorage.removeItem(ZONE_FORM_DRAFT);resetZone();
