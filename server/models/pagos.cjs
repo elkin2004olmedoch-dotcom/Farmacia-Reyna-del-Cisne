@@ -3,7 +3,8 @@ const db=require('./db.cjs');
 const {Prisma}=require('./prisma-client.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 const provider=require('./payphone.cjs');
-const select={id:true,userId:true,estado:true,total:true,subtotalProductos:true,costoEnvioCentavos:true,ivaMonto:true,envioIvaPorcentaje:true,envioBaseImponible:true,envioIvaMonto:true,createdAt:true,updatedAt:true,pago:true,detalles:{select:{nombreProducto:true,cantidad:true,precioUnitario:true,totalLinea:true,ivaPorcentaje:true,baseImponible:true,ivaMonto:true}}};
+const select={id:true,userId:true,estado:true,total:true,subtotalProductos:true,costoEnvioCentavos:true,ivaMonto:true,envioIvaPorcentaje:true,envioBaseImponible:true,envioIvaMonto:true,createdAt:true,updatedAt:true,pago:true,pagoPractica:true,detalles:{select:{nombreProducto:true,cantidad:true,precioUnitario:true,totalLinea:true,ivaPorcentaje:true,baseImponible:true,ivaMonto:true}}};
+const practiceAvailable=()=>process.env.PAYMENT_PRACTICE_ENABLED==='true';
 function cents(value) {const decimal=new Prisma.Decimal(value).mul(100);if(!decimal.isInteger() || decimal.lt(0) || decimal.gt(2147483647))throw new AppError(409,'PAYMENT_SNAPSHOT_INVALID','El importe histórico necesita revisión de la farmacia.');return decimal.toNumber();}
 function transferConfiguration(){
  const banco=(process.env.TRANSFER_BANK_NAME||'').trim(),titular=(process.env.TRANSFER_ACCOUNT_HOLDER||'').trim(),numeroCuenta=process.env.TRANSFER_ACCOUNT_NUMBER||'',tipo=process.env.TRANSFER_ACCOUNT_TYPE||'';
@@ -17,7 +18,7 @@ function dto(pedido) {
  const pago=pedido.pago,config=provider.configuration();
  return {pedido:{id:pedido.id,estado:pedido.estado,createdAt:pedido.createdAt,total:pedido.total,totalCentavos:Math.round(Number(pedido.total)*100),subtotalCentavos:Math.round(Number(pedido.subtotalProductos ?? pedido.total)*100),costoEnvioCentavos:pedido.costoEnvioCentavos,ivaCentavos:pedido.ivaMonto===null?null:Math.round(Number(pedido.ivaMonto)*100),moneda:'USD',detalles:pedido.detalles.map(line=>({nombreProducto:line.nombreProducto,cantidad:line.cantidad,totalCentavos:Math.round(Number(line.totalLinea ?? new Prisma.Decimal(line.precioUnitario).mul(line.cantidad))*100)}))},pago:pago?{estado:pago.estado,proveedor:pago.proveedor,entorno:pago.entorno,moneda:pago.moneda,totalCentavos:pago.totalCentavos,createdAt:pago.createdAt,updatedAt:pago.updatedAt,urlPago:config.available && config.environment===pago.entorno && pago.estado==='pendiente' && pago.urlPago?provider.hostedUrl(pago.urlPago,pago.paymentId):null}:null,...provider.publicConfiguration()};
 }
-async function find(id,user) {return {...dto(await owned(db,id,user)),transferencia:transferConfiguration()};}
+async function find(id,user) {const pedido=await owned(db,id,user);return {...dto(pedido),transferencia:transferConfiguration(),practica:{disponible:practiceAvailable(),resultado:pedido.pagoPractica}};}
 function snapshot(pedido) {
  let sinIvaCentavos=0,baseIvaCentavos=0,ivaCentavos=0;
  const lines=[...pedido.detalles];
@@ -38,7 +39,7 @@ async function transaction(work) {
 }
 async function start(id,user) {
  // Authorize even when the provider is disabled, before revealing order details.
- await owned(db,id,user);const config=provider.requireAvailable();
+ await owned(db,id,user);if(practiceAvailable())throw new AppError(409,'PAYMENT_PRACTICE_MODE','El recorrido sin cobro real está activo. No se pueden iniciar cobros comerciales.');const config=provider.requireAvailable();
  const reserved=await transaction(async tx=>{
   const pedido=await owned(tx,id,user);
   if(pedido.pago) {
@@ -64,6 +65,21 @@ async function start(id,user) {
  }
  return {data:await find(id,user),created:reserved.created};
 }
+async function practice(id,user,input){
+ await owned(db,id,user);
+ if(!practiceAvailable())throw new AppError(503,'PRACTICE_UNAVAILABLE','Este recorrido de práctica no está habilitado.');
+ await transaction(async tx=>{
+  const pedido=await owned(tx,id,user);
+  if(pedido.pago)throw new AppError(409,'PAYMENT_EXISTS','Hay una solicitud de pago real. Consulta su estado antes de continuar.');
+  if(['cancelado','entregado'].includes(pedido.estado))throw new AppError(409,'PAYMENT_ORDER_CLOSED','Este pedido está cerrado.');
+  if(pedido.pagoPractica)return;
+  const totalCentavos=cents(pedido.total);if(totalCentavos<1)throw new AppError(409,'PAYMENT_SNAPSHOT_INVALID','Revisa el importe del pedido.');
+  const updatedAt=new Date(Math.max(Date.now(),pedido.updatedAt.getTime()+1));
+  const locked=await tx.pedido.updateMany({where:{id,estado:pedido.estado,updatedAt:pedido.updatedAt},data:{updatedAt}});if(locked.count!==1)throw new AppError(409,'ORDER_CHANGED','El pedido cambió. Actualiza sus datos.');
+  await tx.pagoPractica.create({data:{pedidoId:id,metodo:input.metodo,marca:input.marca||null,totalCentavos}});
+ });
+ return find(id,user);
+}
 async function confirm(transactionId,clientTransactionId) {
  const pago=await db.pago.findUnique({where:{id:clientTransactionId}});
  if(!pago)throw new AppError(404,'NOT_FOUND','No se encontró el pago.');
@@ -82,4 +98,4 @@ async function confirm(transactionId,clientTransactionId) {
  } catch {await db.pago.updateMany({where:{id:pago.id,estado:'revision',revisionMotivo:'confirmacion_en_curso'},data:{revisionMotivo:'confirmacion_incierta',urlPago:null}});}
  return provider.storefront(pago.pedidoId);
 }
-module.exports={find,start,confirm};
+module.exports={find,start,confirm,practice};

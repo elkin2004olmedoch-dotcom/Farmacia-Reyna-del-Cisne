@@ -111,6 +111,7 @@ model Pedido {
   movimientos    MovimientoInventario[]
   factura        FacturaPedido?
   pago           Pago?
+  pagoPractica   PagoPractica?
   @@unique([userId, requestKey])
   @@index([userId, createdAt])
   @@index([zonaEntregaId])
@@ -391,4 +392,14 @@ model Pago {
   revisionMotivo String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PagoPractica {
+  id String @id @default(uuid())
+  pedidoId String @unique
+  pedido Pedido @relation(fields:[pedidoId],references:[id],onDelete:Restrict)
+  metodo String
+  marca String?
+  totalCentavos Int
+  createdAt DateTime @default(now())
 }
