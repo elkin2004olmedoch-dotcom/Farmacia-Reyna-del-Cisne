@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 const {randomUUID}=require('node:crypto');
 
 async function customerSession(page){

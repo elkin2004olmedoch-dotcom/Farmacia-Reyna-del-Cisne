@@ -50,5 +50,5 @@ test('fallback redirigido por el alojamiento se devuelve como respuesta local si
 test('los manifiestos diferencian tienda y administración sin cambiar el alcance ni el destino',()=>{
   const read=name=>{const file=path.resolve('frontend',name+'.webmanifest');assert.ok(fs.existsSync(file),'Falta manifiesto '+name);return JSON.parse(fs.readFileSync(file,'utf8'));};
   const store=read('store');const admin=read('admin');assert.notEqual(store.id,admin.id);assert.equal(store.start_url,'/');assert.equal(admin.start_url,'/admin.html?app=administracion');
-  for(const manifest of [store,admin]){assert.equal(manifest.scope,'/');assert.equal(manifest.display,'standalone');assert.equal(manifest.theme_color,'#b51c36');for(const size of [192,512])assert.ok(manifest.icons.some(icon=>icon.src===`/assets/app-icons/icon-${size}.png`&&icon.sizes===`${size}x${size}`&&icon.type==='image/png'));}
+  for(const manifest of [store,admin]){assert.equal(manifest.scope,'/');assert.equal(manifest.display,'standalone');assert.equal(manifest.theme_color,'#681e2a');for(const size of [192,512])assert.ok(manifest.icons.some(icon=>icon.src===`/assets/app-icons/icon-${size}.png`&&icon.sizes===`${size}x${size}`&&icon.type==='image/png'));}
 });

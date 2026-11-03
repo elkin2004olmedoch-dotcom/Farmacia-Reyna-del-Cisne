@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 const AxeBuilder=require('@axe-core/playwright').default;
 const {randomUUID}=require('node:crypto');
 async function fixture(page){await page.goto('/cuenta.html');await page.locator('#login-email').fill('admin-browser@example.ec');await page.locator('#login-password').fill('AdminBrowser2026!');await page.locator('#login-form button[type=submit]').click();await expect(page).toHaveURL(/admin.html$/);const headers={Origin:'http://localhost:3300','X-Farmacia-Web':'1'};const r=await page.request.post('/api/productos',{headers,data:{nombre:'Gel conversación '+randomUUID().slice(0,8),precio:8,stock:15,categoria:'cuidado',descripcion:'Producto sintético para comprobar confirmaciones.',imagen:'assets/images/producto-vitaminas.jpg',alt:'Gel sintético',tipoProducto:'cuidado',ivaCategoria:'general'}});expect(r.status()).toBe(201);return {product:(await r.json()).data,headers};}

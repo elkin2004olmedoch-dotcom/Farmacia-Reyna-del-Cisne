@@ -1,6 +1,10 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const views=()=>import('../../frontend/views/order-map.js');
+test('retirar en farmacia apunta al marcador exacto de Consulab compartido por el titular',async()=>{
+ const {orderMapData}=await views(),data=orderMapData({id:'retiro',estado:'preparado',entrega:'pickup'}),url=new URL(data.directionsUrl);
+ assert.equal(url.origin,'https://www.google.com');assert.equal(url.searchParams.get('query'),'0.1200092,-79.2580379');
+});
 const order={id:'pedido-mapa',userId:'cliente-mapa',estado:'preparado',entrega:'delivery',direccion:'Calle Central s/n & Parque',ciudad:'Puerto Quito',provincia:'Pichincha',latitudEntrega:0.125,longitudEntrega:-79.25,ubicacionEntregaAceptadaAt:'2026-11-02T12:00:00Z'};
 
 test('mapa de destino exige coordenadas válidas y consentimiento explícito del pedido',async()=>{
@@ -28,10 +32,10 @@ test('estados finales no generan coordenadas, direcciones ni enlaces Maps aunque
   }
 });
 
-test('retiro usa la búsqueda existente de la farmacia sin inventar un punto GPS',async()=>{
+test('retiro usa el punto público del local sin atribuir coordenadas al cliente',async()=>{
   const {orderMapData,orderMapPanel}=await views(),pickup={...order,entrega:'pickup'};
-  const data=orderMapData(pickup);assert.equal(data.kind,'pickup');assert.equal(data.point,null);assert.equal(data.embedUrl,null);assert.equal(new URL(data.directionsUrl).searchParams.get('query'),'Farmacia Reina del Cisne Puerto Quito');
-  assert.doesNotMatch(orderMapPanel(pickup),/<iframe|data-order-map=|0\.125|-79\.25/);
+  const data=orderMapData(pickup);assert.equal(data.kind,'pickup');assert.equal(data.point,null);assert.equal(data.embedUrl,null);assert.equal(new URL(data.directionsUrl).searchParams.get('query'),'0.1200092,-79.2580379');
+  assert.doesNotMatch(orderMapPanel(pickup),/<iframe|data-order-map=|0\.125|Calle Central/);
 });
 
 test('direcciones inseguras e identificadores inválidos no se interpolan en enlaces',async()=>{

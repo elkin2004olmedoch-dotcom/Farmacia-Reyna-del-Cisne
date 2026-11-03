@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 test.use({serviceWorkers:'block'});
 test('sesión web privada: login, recarga, renovación y logout sin JWT en almacenamiento',async({page,context})=>{
  await page.goto('/cuenta.html');await page.locator('#login-email').fill('admin-browser@example.ec');await page.locator('#login-password').fill('AdminBrowser2026!');

@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 
 async function closeCartDrawer(page){
   const drawer=page.locator('#cart-drawer');await expect(drawer).toBeVisible();await drawer.locator('[data-cart-close]').first().focus();await page.keyboard.press('Enter');await expect(drawer).toBeHidden();
@@ -29,9 +29,9 @@ test('cabecera permite buscar con teclado y navegar por categorías, cobertura y
   await care.focus();await page.keyboard.press('Enter');
   await expect(page.locator('#catalog-category')).toHaveValue('cuidado');
   await expect(page.locator('#catalog-grid article').first()).toBeVisible();expect(new URL(page.url()).searchParams.get('category')).toBe('cuidado');
-  await page.locator('.site-footer').getByRole('link',{name:'Entrega en Puerto Quito',exact:true}).focus();await page.keyboard.press('Enter');
+  await page.locator('.site-footer').getByRole('link',{name:'Entrega en Ecuador',exact:true}).focus();await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/index.html#cobertura$/);
-  const coverage=page.locator('#cobertura');await coverage.locator('summary').focus();await page.keyboard.press('Enter');await expect(coverage).toHaveJSProperty('open',true);await expect(coverage.locator('p')).toBeVisible();await expect(coverage.locator('p')).toContainText('todo Puerto Quito');
+  const coverage=page.locator('#cobertura');await coverage.locator('summary').focus();await page.keyboard.press('Enter');await expect(coverage).toHaveJSProperty('open',true);await expect(coverage.locator('p')).toBeVisible();await expect(coverage.locator('p')).toContainText('todo Ecuador');
   const account=page.locator('#account-menu-toggle');await account.focus();await page.keyboard.press('Enter');await expect(account).toHaveAttribute('aria-expanded','true');
   const orders=page.locator('#account-menu').getByRole('link',{name:'Mis pedidos',exact:true});await expect(orders).toBeVisible();await expect(orders).toHaveAttribute('href','pedidos.html');await orders.focus();await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/cuenta.html\?next=pedidos.html$/);await expect(page.locator('#login-form')).toBeVisible();

@@ -17,3 +17,12 @@ test('configuración de producción rechaza secreto débil y orígenes inseguros
   const config=require('../../server/config.cjs');const before={...process.env};
   try{process.env.DATABASE_URL='file:./test.db';process.env.JWT_SECRET='corta';process.env.CORS_ORIGIN='http://localhost:3000';assert.throws(config);process.env.JWT_SECRET='a'.repeat(64);process.env.CORS_ORIGIN='*';assert.throws(config);process.env.CORS_ORIGIN='http://localhost:3000';process.env.NODE_ENV='production';assert.throws(config);process.env.CORS_ORIGIN='https://farmacia.example.ec';assert.equal(config().production,true);}finally{for(const key of Object.keys(process.env))if(!(key in before))delete process.env[key];Object.assign(process.env,before);}
 });
+test('el ejemplo permite registro local sin proveedor y producción exige verificar por defecto',()=>{
+  const config=require('../../server/config.cjs'),before={...process.env};
+  try{
+    Object.assign(process.env,require('dotenv').parse(fs.readFileSync(path.join(root,'.env.example'))),{NODE_ENV:'development',JWT_SECRET:'x'.repeat(64)});
+    assert.equal(config().requireVerifiedRegistration,false);
+    process.env.NODE_ENV='production';process.env.CORS_ORIGIN='https://farmacia.example.ec';
+    assert.equal(config().requireVerifiedRegistration,true);
+  }finally{for(const key of Object.keys(process.env))if(!(key in before))delete process.env[key];Object.assign(process.env,before);}
+});

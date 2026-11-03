@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 const AxeBuilder=require('@axe-core/playwright').default;
 const tinyPNG=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGP4fGkRVsQwtCQAJ4yZwRji18kAAAAASUVORK5CYII=','base64');
 const currency=value=>new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(value);

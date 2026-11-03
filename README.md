@@ -31,13 +31,15 @@ Tres capas: presentación HTML/CSS/JavaScript, aplicación Node.js/Express y per
 
 El HTML de frontend/ se genera desde scripts/build-frontend.cjs y scripts/templates/. Cloudflare publica únicamente la salida de scripts/build-pages.cjs; Render mantiene la API existente. [Arquitectura comercial](docs/ARQUITECTURA-COMERCIAL.md).
 
+La ubicación pública y el enlace de retiro usan el mismo marcador de Consulab compartido por el titular, definido en `frontend/models/pharmacy.js`. Abrir **Visítanos** carga el mapa; cerrar la sección lo descarga. Se mantienen los colores vino, rojo y crema. [Revisión y preparación del Reto 2](docs/REVISION-RETO-2-2026-11-03.md).
+
 ## Compra, pago y seguimiento
 
 - Con pagos de prueba habilitados, el checkout revisa tarjeta o transferencia y total antes de guardar; pedido y pago se registran juntos. Cancelar conserva el carrito. El comprobante se solicita por correo después de confirmar. [Compra, seguridad y privacidad](docs/COMPRA-SEGURIDAD-Y-PRIVACIDAD.md).
 - La pantalla de pago muestra el importe guardado del pedido. Tarjeta permite solicitar un enlace seguro por WhatsApp cuando PayPhone no está habilitado. Transferencia muestra banco, tipo, cuenta y titular configurados por el negocio y permite copiarlos junto al importe y referencia; el envío del comprobante queda pendiente de verificación.
 - Con `PAYMENT_PRACTICE_ENABLED=true`, tarjeta y transferencia muestran **Pagar** y completan un recorrido identificado como **Sin cobro real**. El formulario valida marca, Luhn, vencimiento, CVV y titular en el navegador y descarta sus datos; la API recibe método y marca, nunca el número ni CVV. El resultado se guarda en `PagoPractica`, separado de los pagos comerciales, y el modo bloquea iniciar cobros PayPhone. Apagarlo es obligatorio antes de habilitar cobros reales.
 - **Ver comprobante**, disponible en la confirmación y en **Mis pedidos**, abre el resumen imprimible. **Guardar PDF / imprimir** permite elegir **Guardar como PDF** en el navegador. Es un comprobante del pedido sin validez tributaria: no acredita un pago ni sustituye la factura SRI.
-- Con el correo habilitado, los pedidos nuevos solicitan automáticamente el envío del comprobante al correo verificado de la cuenta. **Enviar a mi correo** permite reintentarlo; si existe una factura autorizada, envía su XML y representación imprimible. Los envíos siguen desactivados hasta configurar el proveedor y el remitente. La aceptación del proveedor no garantiza recepción en bandeja.
+- Con el correo habilitado, los pedidos nuevos solicitan automáticamente el envío del comprobante al correo verificado de la cuenta. **Enviar a mi correo** permite reintentarlo; si existe una factura autorizada, envía su XML y representación imprimible. Una instalación nueva mantiene los envíos desactivados hasta configurar el proveedor y el remitente. La aceptación del proveedor no garantiza recepción en bandeja.
 - La confirmación y **Mis pedidos** incluyen una vista de mapa voluntaria. **Ver mapa** utiliza un destino autorizado por el comprador o la ubicación reciente compartida por el repartidor, cuando existen. El seguimiento habitual sigue disponible; los pedidos cerrados no muestran ubicaciones.
 
 La confirmación de correo conserva el backend JWT: enlace de un solo uso, caducidad de una hora y reenvío. En producción se exige confirmar el correo; si el envío está desactivado, el registro se pausa sin crear cuentas ni entregar JWT. Se eligió Brevo gratuito por API HTTPS; Resend sigue siendo compatible. El envío real requiere completar la cuenta, el remitente y las credenciales privadas. La [guía de correo y dominio](docs/CORREO-Y-DOMINIO.md) explica la activación y los pasos separados para un `.com` propio. Los correos usan la identidad de la farmacia e incluyen verificación, comprobante, factura autorizada y aviso de entrega.
@@ -67,6 +69,8 @@ npm start
 Express sirve el frontend y la API en http://localhost:3000. Abre esa dirección para navegar y http://localhost:3000/cuenta.html para iniciar sesión. setup crea un .env privado con JWT_SECRET y contraseña administrativa aleatorios, genera Prisma, aplica migraciones SQLite y carga el catálogo inicial. Consulta ADMIN_EMAIL y ADMIN_PASSWORD en ese archivo local. El registro de la web crea cuentas user; el administrador inicial procede del seed.
 
 Este procedimiento es para una carpeta nueva y SQLite local: no debe ejecutarse con credenciales de producción ni para reemplazar una base existente. El despliegue PostgreSQL utiliza su esquema y variables privadas separados, como explica la [guía de despliegue](docs/DESPLIEGUE-GRATUITO.md). .env.example contiene únicamente ejemplos; los accesos de la web publicada se entregan por separado.
+
+`CUSTOMER_REGISTRATION_REQUIRE_EMAIL` vacío conserva el valor por entorno: en desarrollo permite registrar usuarios sin un proveedor de correo; en producción exige verificación por defecto. No copies una configuración de clase sobre las variables del servicio publicado.
 
 Comandos habituales: npm start, npm run build:frontend, npm run build:pages, npm test, npm run test:reto1 y npm run test:browser. Las pruebas de PostgreSQL requieren un servidor temporal separado. No se prueba con pedidos o pagos comerciales.
 
@@ -100,8 +104,8 @@ Las rutas tienen prefijo /api. Las operaciones privadas reciben Authorization: B
 
 | Método y ruta | Acceso | Resultado normal |
 | --- | --- | --- |
-| POST /api/auth/register | Público, validado y limitado | 201: usuario user y JWT |
-| POST /api/auth/login | Público, validado y limitado | 200: JWT y usuario sin contraseña/hash |
+| POST /api/auth/register | Público, validado y limitado | 201 en desarrollo sin verificación; 202 pendiente de correo cuando está habilitada, sin entregar JWT |
+| POST /api/auth/login | Público, validado y limitado | 200: sesión/JWT y usuario sin hash; con MFA administrativo activo devuelve primero un desafío |
 | GET /api/auth/me | Sesión válida | 200: perfil de la sesión |
 | POST /api/auth/logout | Sesión válida | 204: revoca la sesión |
 | GET /api/productos | Público | 200: catálogo paginado |
@@ -115,6 +119,8 @@ Las rutas tienen prefijo /api. Las operaciones privadas reciben Authorization: B
 | GET /api/admin/tablas?tabla=productos | admin | 200: consulta administrativa; también usuarios, pedidos, detalles y promociones |
 
 El panel permite CRUD de productos y consulta de las cuatro tablas mínimas. Las entidades Producto, Usuario, Pedido y PedidoDetalle, sus relaciones, migraciones y seed están en ambos esquemas Prisma. El enunciado permite otro motor relacional: PostgreSQL/Supabase es el motor publicado; SQLite sirve para desarrollo.
+
+La web solicita JWT en cookies HttpOnly con `X-Farmacia-Web: 1` y origen autorizado; no expone el token a JavaScript. Clientes API pueden usar `Authorization: Bearer <JWT>`, como en los ejemplos siguientes. Con MFA, el desafío se completa en `/api/auth/mfa/login` antes de obtener acceso.
 
 ### Ejemplos de endpoints probados
 
@@ -152,6 +158,8 @@ git archive --format=zip --prefix=Farmacia-Reyna-del-Cisne/ --output=entrega/Ret
 ```
 
 Crea antes la carpeta entrega si no existe. El archivo se obtiene del commit indicado: confirma tus cambios antes de generarlo. Los node_modules, .env, bases, certificados y respaldos privados no pertenecen a Git ni a la entrega. El código móvil se incluye como ampliación opcional; pagos reales, GPS continuo, firma iPhone y el framework del Reto 3 no son requisitos obligatorios del Reto 2.
+
+En Windows, también puede prepararse el proyecto desde una extracción sin Git: `powershell -ExecutionPolicy Bypass -File scripts/crear-reto2.ps1 -Nombre Reto2_Olmedo_Elkin.zip`. Este empaquetador incluye el código móvil opcional para conservar las comprobaciones de distribución, excluyendo sus compilaciones, cachés, configuración local y claves de firma. Excluye también `.env.*` privados, respaldos, certificados, resultados de pruebas y carpetas de auditorías privadas; conserva `.env.example` y la documentación pública de seguridad. No elimina las auditorías originales ni sigue junctions o enlaces a archivos externos. Publica el ZIP sólo cuando termina su creación.
 
 ## Evidencias
 

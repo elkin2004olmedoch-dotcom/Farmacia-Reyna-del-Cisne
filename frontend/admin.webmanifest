@@ -6,7 +6,7 @@
   "start_url": "/admin.html?app=administracion",
   "scope": "/",
   "display": "standalone",
-  "theme_color": "#b51c36",
+  "theme_color": "#681e2a",
   "background_color": "#fffaf1",
   "icons": [
     {"src": "/assets/app-icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},

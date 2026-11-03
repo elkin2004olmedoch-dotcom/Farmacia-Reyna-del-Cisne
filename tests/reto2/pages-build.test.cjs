@@ -8,7 +8,8 @@ test('artefacto publica cliente y proxy API de origen fijo con CSP exacta',async
   const output=path.join(directory,'public');
   const result=buildPages({output,apiOrigin:'https://api.example.test',imageOrigin:'https://images.example.test'});
   assert.ok(result.files>80);
-  for(const file of ['index.html','admin.html','checkout.html','pagos.html','404.html','models/api.js','assets/images/farmacia-fachada-reina.webp'])assert.ok(fs.existsSync(path.join(output,file)),file);
+  for(const file of ['index.html','admin.html','checkout.html','pagos.html','404.html','models/api.js','assets/images/logo-reina-del-cisne.png'])assert.ok(fs.existsSync(path.join(output,file)),file);
+  for(const file of ['farmacia-5.jpg','farmacia-9.jpg','farmacia-fachada-reina.webp'])assert.ok(!fs.existsSync(path.join(output,'assets/images',file)),file);
   assert.deepEqual(fs.readdirSync(output).filter(file=>file.endsWith('.html') && file!=='404.html').sort(),fs.readdirSync(path.join('frontend')).filter(file=>file.endsWith('.html')).sort(),'Pages incluye todas las pantallas generadas de la aplicación');
   for(const file of ['.env','.env.example','server','data','docs','node_modules','assets/uploads','functions'])assert.ok(!fs.existsSync(path.join(output,file)),file);
   assert.ok(fs.existsSync(path.join(output,'_worker.js')));assert.deepEqual(JSON.parse(fs.readFileSync(path.join(output,'_routes.json'),'utf8')),{version:1,include:['/api/*'],exclude:[]});

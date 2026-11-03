@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 const AxeBuilder=require('@axe-core/playwright').default;
 const {randomUUID}=require('node:crypto');
 const stageKeys=['pendiente','confirmado','preparado','entregado'];

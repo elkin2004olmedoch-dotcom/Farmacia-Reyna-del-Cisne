@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect,apiToken}=require('./browser-fixture.cjs');
 const {randomUUID}=require('node:crypto');
 const {writeFile}=require('node:fs/promises');
 
@@ -7,13 +7,14 @@ async function api(request,path,{token,method='get',data,status=200}={}){
   expect(response.status(),method+' '+path).toBe(status);return status===204?null:(await response.json()).data;
 }
 async function login(page,email,password,destination){
-  await page.goto('/cuenta.html');await page.locator('#login-email').fill(email);await page.locator('#login-password').fill(password);await page.locator('#login-form [type=submit]').click();await expect(page).toHaveURL(destination);
+  await page.goto('/cuenta.html');await expect(page.locator('#login-form')).toBeVisible();await page.locator('#login-email').fill(email);await page.locator('#login-password').fill(password);await page.locator('#login-form [type=submit]').click();await expect(page).toHaveURL(destination);
 }
 async function command(page,text,path,method='PUT',status=200){
   const farmi=page.locator('farmacia-admin-companion');
   if(await farmi.locator('#panel').isHidden())await farmi.getByRole('button',{name:'Abrir asistente administrativo'}).click();
   const response=page.waitForResponse(response=>response.request().method()===method && new URL(response.url()).pathname==='/api'+path);
   await farmi.locator('#input').fill(text);await farmi.locator('#form [type=submit]').click();
+  await expect(farmi.getByRole('button',{name:'Sí, confirmar'})).toBeVisible();await farmi.getByRole('button',{name:'Sí, confirmar'}).click();
   const result=await response;expect(result.status()).toBe(status);await expect(farmi.locator('#input')).toBeEnabled();return (await result.json()).data;
 }
 
@@ -27,13 +28,13 @@ test('recorrido visual real: cliente compra, Farmi administra y repartidor compl
   const customer=await customerContext.newPage(),courierPage=await courierContext.newPage(),adminDeliveries=await page.context().newPage();
   const screenshots=[],errors=[],mapNetwork=[],liveMap=process.env.PHARMACY_DEMO_LIVE_MAP==='true';let product,promotion,zone,courier,order,adminToken,mapRequests=0,mapFailure=null;
   const capture=async(subject,name,{viewport=false}={})=>{const path=testInfo.outputPath(name+'.png');if(!viewport)await subject.evaluate(()=>{document.activeElement?.blur();window.scrollTo({top:0,behavior:'instant'});});await subject.screenshot({path,fullPage:!viewport,animations:'disabled'});screenshots.push(path);await testInfo.attach(name,{path,contentType:'image/png'});};
-  for(const subject of [page,customer,courierPage,adminDeliveries])subject.on('pageerror',error=>errors.push(error.message));
+  for(const subject of [page,customer,courierPage,adminDeliveries]){subject.setDefaultTimeout(15000);subject.setDefaultNavigationTimeout(30000);subject.on('pageerror',error=>errors.push(error.message));}
   customer.on('request',req=>{if(new URL(req.url()).hostname==='www.openstreetmap.org')mapRequests++;});
   customer.on('requestfailed',req=>{if(/openstreetmap/.test(req.url()))mapNetwork.push({url:req.url(),error:req.failure()?.errorText});});
   customer.on('response',response=>{if(/openstreetmap/.test(response.url()))mapNetwork.push({url:response.url(),status:response.status()});});
   if(!liveMap)await customer.route('https://www.openstreetmap.org/**',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html lang="es"><meta charset="utf-8"><title>Proveedor de mapa sustituido para prueba</title><body style="font:18px system-ui;background:#efe8d5;padding:24px"><h1>Mapa externo: fixture de prueba</h1><p>Coordenadas y GPS sintéticos. La API de la farmacia es real y temporal.</p><p>Última posición simulada: 0.12, −79.24</p></body></html>'}));
   try{
-    await login(page,'admin-browser@example.ec','AdminBrowser2026!',/\/admin\.html$/);adminToken=await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'));
+    await login(page,'admin-browser@example.ec','AdminBrowser2026!',/\/admin\.html$/);adminToken=await apiToken(request,'admin-browser@example.ec','AdminBrowser2026!');expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();
     product=await api(request,'/productos',{token:adminToken,method:'post',status:201,data:{nombre:'Cuidado de prueba '+suffix,precio:10,stock:10,categoria:'cuidado',descripcion:'Artículo sintético del recorrido de roles, sin dispensación médica.',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase de prueba del recorrido',ivaCategoria:'general',tipoProducto:'cuidado',requiereReceta:false,stockMinimo:1}});
     zone=await api(request,'/admin/zonas-entrega',{token:adminToken,method:'post',status:201,data:{nombre:'Puerto Quito prueba '+suffix,provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,activa:true}});
     await customer.goto('/cuenta.html');await customer.locator('#show-register').click();
@@ -42,11 +43,13 @@ test('recorrido visual real: cliente compra, Farmi administra y repartidor compl
     product=await command(page,`Actualiza el precio de "${product.nombre}" a 12.50`,'/productos/'+product.id);expect(Number(product.precio)).toBe(12.5);
     promotion=await command(page,`Publica una promoción de 20% para "${product.nombre}" hasta 2030-12-31 titulada "Recorrido ${suffix}"`,'/promociones','POST',201);
     expect(promotion.descuentoPorcentaje).toBe(20);await expect(page.locator('farmacia-admin-companion #messages')).toContainText('Promoción publicada');await capture(page,'02-farmi-precio-y-promocion');
-    await login(adminDeliveries,'admin-browser@example.ec','AdminBrowser2026!',/\/admin\.html$/);await adminDeliveries.goto('/entregas.html');await expect(adminDeliveries.locator('#delivery-zones-list code').filter({hasText:zone.id})).toHaveText(zone.id);
+    await adminDeliveries.goto('/entregas.html');await expect(adminDeliveries.locator('#delivery-zones-list code').filter({hasText:zone.id})).toHaveText(zone.id);
     await adminDeliveries.locator('#courier-form').locator('..').locator('summary').click();
     for(const [id,value]of Object.entries({name:'Mensajero de Prueba',email:courierEmail,phone:'0990000000',password}))await adminDeliveries.locator('#courier-'+id).fill(value);
     const createdCourier=adminDeliveries.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/admin/repartidores');await adminDeliveries.locator('#courier-form [type=submit]').click();const courierResponse=await createdCourier;expect(courierResponse.status()).toBe(201);courier=(await courierResponse.json()).data;
     await expect(adminDeliveries.locator('#couriers-list code').filter({hasText:courier.id})).toHaveText(courier.id);await capture(adminDeliveries,'03-admin-zona-pendiente-y-repartidor');
+    // Con dos repartidores, esta prueba evidencia la asignación explícita de Farmi; el caso de un único repartidor se prueba por separado.
+    await api(request,'/admin/repartidores',{token:adminToken,method:'post',status:201,data:{nombre:'Mensajero Alternativo',email:'alternativo-'+suffix+'@example.ec',telefono:'0990000000',password}});
     await customer.goto('/catalogo.html');await customer.locator('#catalog-search').fill(product.nombre);const card=customer.locator('.featured-card').filter({hasText:product.nombre});await expect(card.locator('.promotion-ribbon')).toContainText('20%');await expect(card).toContainText('10,00');
     await card.locator('[data-add]').click();await expect(customer.locator('#cart-drawer')).toBeVisible();await customer.locator('#cart-drawer [data-cart-close]').first().click();await expect(customer.locator('#cart-drawer')).toBeHidden();await expect(customer.locator('#cart-dock')).toBeVisible();await expect(customer.locator('#cart-dock-summary')).toContainText('1 unidad');await capture(customer,'04-catalogo-descuento-y-barra-inferior');
     await customer.locator('#cart-dock a').click();await expect(customer).toHaveURL(/\/checkout\.html$/);await expect(customer.locator('.checkout-item-image')).toHaveCount(1);expect(await customer.locator('.checkout-item-image').evaluate(img=>img.complete && img.naturalWidth>0)).toBe(true);await capture(customer,'05-carrito-con-imagen');
@@ -67,10 +70,10 @@ test('recorrido visual real: cliente compra, Farmi administra y repartidor compl
     await adminDeliveries.locator('#delivery-order-select').selectOption(order.id);await adminDeliveries.getByText('Códigos de pedidos para Farmi',{exact:true}).click();await expect(adminDeliveries.locator('#delivery-order-codes code').filter({hasText:order.id})).toBeVisible();
     const assigned=await command(page,`Asigna pedido "${order.id}" a repartidor "${courier.id}"`,'/entregas/asignar','POST');expect(assigned.repartidorId).toBe(courier.id);
     await adminDeliveries.locator('#deliveries-refresh').click();const assignedCard=adminDeliveries.locator('[data-delivery="'+assigned.id+'"]').first();await expect(assignedCard).toContainText('Asignada');await assignedCard.locator('summary').click();await expect(assignedCard.locator('code').filter({hasText:assigned.id})).toBeVisible();await capture(adminDeliveries,'09-pedido-y-repartidor-asignados-por-farmi');
-    await courierPage.addInitScript(()=>{window.demoGps={callback:null,watches:0,cleared:0};Object.defineProperty(navigator,'geolocation',{configurable:true,value:{watchPosition(callback){window.demoGps.callback=callback;window.demoGps.watches++;return 7;},clearWatch(){window.demoGps.cleared++;}}});});
-    await login(courierPage,courierEmail,password,/\/entregas\.html$/);await expect(courierPage.locator('#delivery-admin')).toBeHidden();const delivery=courierPage.locator('[data-delivery="'+assigned.id+'"]');await expect(delivery).toBeVisible();await expect(delivery.locator('a[href^="tel:"]')).toHaveCount(0);await expect(delivery.locator('a[href^="https://www.google.com/maps/dir/"]')).toHaveAttribute('href',/destination=0.125%2C-79.25/);expect(await courierPage.evaluate(()=>window.demoGps.watches)).toBe(0);
+    await courierPage.addInitScript(()=>{window.demoGps={callback:null,watches:0,cleared:0};Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition(callback){callback({coords:{latitude:0.12,longitude:-79.24,accuracy:18},timestamp:Date.now()});},watchPosition(callback){window.demoGps.callback=callback;window.demoGps.watches++;return 7;},clearWatch(){window.demoGps.cleared++;}}});});
+    await login(courierPage,courierEmail,password,/\/entregas\.html$/);await expect(courierPage.locator('#delivery-admin')).toBeHidden();const delivery=courierPage.locator('[data-delivery="'+assigned.id+'"]');await expect(delivery).toBeVisible();await expect(delivery.locator('a[href^="tel:"]')).toHaveCount(0);await expect(delivery.locator('[data-delivery-route]')).toBeVisible();expect(await courierPage.evaluate(()=>window.demoGps.watches)).toBe(0);
     await customer.locator('#order-confirmation a[href^="seguimiento.html?pedido="]').click();await expect(customer.locator('#tracking-content')).toContainText('Asignada');expect(mapRequests).toBe(0);await expect(customer.locator('#tracking-map-panel iframe')).toHaveCount(0);
-    await delivery.locator('[data-delivery-state="en_camino"]').click();await expect(delivery).toContainText('En camino');await delivery.locator('[data-delivery-gps]').click();await expect.poll(()=>courierPage.evaluate(()=>window.demoGps.watches)).toBe(1);
+    await delivery.locator('[data-delivery-state="en_camino"]').click();await expect(delivery).toContainText('En camino');await expect.poll(()=>courierPage.evaluate(()=>window.demoGps.watches)).toBe(1);
     await courierPage.evaluate(()=>window.demoGps.callback({coords:{latitude:0.12,longitude:-79.24,accuracy:18},timestamp:Date.now()}));await expect(courierPage.locator('#delivery-gps-status')).toContainText('Ubicación compartida');
     await delivery.locator('[data-delivery-state="en_destino"]').click();await expect(delivery.locator('a[href^="tel:"]')).toHaveAttribute('href',/^tel:\+?\d+$/);await capture(courierPage,'10-repartidor-llegada-google-maps-y-llamada');
     await customer.locator('#tracking-refresh').click();await expect(customer.locator('#tracking-content')).toContainText('En destino');await expect(customer.locator('#tracking-location')).toContainText('18 metros');expect(mapRequests).toBe(0);
@@ -84,10 +87,10 @@ test('recorrido visual real: cliente compra, Farmi administra y repartidor compl
     }catch(error){mapFailure=error.message;mapNetwork.push({domLoaded:false,error:mapFailure});await testInfo.attach('mapa-real-limitacion',{body:mapFailure,contentType:'text/plain'});}}
     else await expect(customer.frameLocator('#tracking-map-panel iframe').getByRole('heading',{name:'Mapa externo: fixture de prueba'})).toBeVisible();
     expect(mapRequests).toBeGreaterThan(0);await expect(customer.locator('#tracking-google-map')).toHaveAttribute('href',/query=0.12%2C-79.24/);await capture(customer,'11-cliente-seguimiento-privado-mapa-voluntario',{viewport:true});
-    await delivery.locator('[data-delivery-state="entregada"]').click();await expect(delivery).toContainText('Entrega cerrada');await expect(delivery.locator('a[href^="tel:"]')).toHaveCount(0);await expect(delivery).not.toContainText('Calle Sintética');await expect.poll(()=>courierPage.evaluate(()=>window.demoGps.cleared)).toBe(1);
+    await delivery.locator('[data-delivery-state="entregada"]').click();await expect(courierPage.locator('#confirm-dialog')).toBeVisible();await courierPage.locator('#confirm-dialog [value=confirm]').click();await expect(delivery).toContainText('Entrega cerrada');await expect(delivery.locator('a[href^="tel:"]')).toHaveCount(0);await expect(delivery).not.toContainText('Calle Sintética');await expect.poll(()=>courierPage.evaluate(()=>window.demoGps.cleared)).toBe(1);
     await customer.locator('#tracking-refresh').click();await expect(customer.locator('#tracking-content')).toContainText('Entregada');await expect(customer.locator('#tracking-map-panel iframe')).toHaveCount(0);await expect(customer.locator('[data-delivery-step="entregada"]')).toHaveAttribute('aria-current','step');
-    const customerToken=await customer.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'));const tracking=await api(request,'/pedidos/'+order.id+'/seguimiento',{token:customerToken});expect(tracking.entrega.ubicacion).toBeNull();expect(tracking.estadoPedido).toBe('entregado');
-    const courierToken=await courierPage.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token')),closed=(await api(request,'/entregas?page=1&pageSize=20',{token:courierToken})).items.find(item=>item.id===assigned.id);expect(closed.destino).toBeNull();expect(closed.ubicacion).toBeNull();await capture(customer,'12-cliente-entrega-cerrada-sin-ubicacion');expect(errors).toEqual([]);if(liveMap)expect(mapFailure,'El mapa externo debe cargar sus teselas reales').toBeNull();
+    const customerToken=await apiToken(request,email,password);const tracking=await api(request,'/pedidos/'+order.id+'/seguimiento',{token:customerToken});expect(tracking.entrega.ubicacion).toBeNull();expect(tracking.estadoPedido).toBe('entregado');
+    const courierToken=await apiToken(request,courierEmail,password),closed=(await api(request,'/entregas?page=1&pageSize=20',{token:courierToken})).items.find(item=>item.id===assigned.id);expect(closed.destino).toBeNull();expect(closed.ubicacion).toBeNull();await capture(customer,'12-cliente-entrega-cerrada-sin-ubicacion');expect(errors).toEqual([]);if(liveMap)expect(mapFailure,'El mapa externo debe cargar sus teselas reales').toBeNull();
   }finally{
     const cleanup=[];
     for(const [name,operation]of [
