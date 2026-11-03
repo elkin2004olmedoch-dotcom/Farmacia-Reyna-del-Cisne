@@ -1,4 +1,4 @@
-import {escape,money,priceMarkup} from './common.js';
+import {privateEmail,escape,money,priceMarkup} from './common.js';
 import {publicImageUrl} from '../config.js';
 import {cartPricing} from '../models/pricing.js';
 import '../models/pharmacy-policy.js';
@@ -25,5 +25,5 @@ const initials=user=>user.nombre.trim().split(/\s+/).slice(0,2).map(part=>Array.
 export function accountMenuView(button,menu,user){
   button.innerHTML=user?`<span class="account-avatar" aria-hidden="true">${escape(initials(user))}</span><span class="account-toggle-label">${escape(user.nombre.split(' ')[0])}</span>`:`${accountIcon}<span class="account-toggle-label">Mi cuenta</span>`;
   button.setAttribute('aria-label',user?`Abrir menú de ${user.nombre}`:'Abrir menú de cuenta');
-  menu.innerHTML=`${user?`<div class="account-menu-identity"><span class="account-avatar" aria-hidden="true">${escape(initials(user))}</span><div><strong>${escape(user.nombre)}</strong><small>${escape(user.email)}</small></div></div>`:''}<nav class="account-menu-links" aria-label="Tu cuenta"><a href="cuenta.html">${user?'Mi cuenta':'Iniciar sesión'}</a><a href="pedidos.html">Mis pedidos</a>${user?'<button type="button" class="text-link" data-customer-logout>Cerrar sesión</button>':''}</nav>`;
+  menu.innerHTML=`${user?`<div class="account-menu-identity"><span class="account-avatar" aria-hidden="true">${escape(initials(user))}</span><div><strong>${escape(user.nombre)}</strong><small>${escape(privateEmail(user.email))}</small></div></div>`:''}<nav class="account-menu-links" aria-label="Tu cuenta"><a href="cuenta.html">${user?'Mi cuenta':'Iniciar sesión'}</a><a href="pedidos.html">Mis pedidos</a>${user?'<button type="button" class="text-link" data-customer-logout>Cerrar sesión</button>':''}</nav>`;
 }

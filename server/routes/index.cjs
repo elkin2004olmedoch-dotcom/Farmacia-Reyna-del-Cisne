@@ -22,6 +22,13 @@ module.exports=config=> {
   router.post('/auth/web/exchange',limiter,webOnly,auth,authController.exchange);
   router.post('/auth/register',limiter,...V.register,authController.register);
   router.post('/auth/login',limiter,...V.login,authController.login);
+  const mfaBody=fields=>(req,res,next)=>{if(!req.body||Array.isArray(req.body)||Object.keys(req.body).some(key=>!fields.includes(key))||fields.some(key=>typeof req.body[key]!=='string'||!req.body[key]||req.body[key].length>(key==='challenge'?1024:key==='password'?128:20)))throw new AppError(422,'VALIDATION_ERROR','Completa únicamente los campos de seguridad solicitados.');next();};
+  const mfaLimit=rateLimit({windowMs:15*60000,limit:20,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'MFA_RATE_LIMIT','Espera antes de volver a intentar la verificación.'))});
+  router.post('/auth/mfa/login',mfaLimit,mfaBody(['challenge','code']),authController.mfaLogin);
+  router.get('/auth/mfa',auth,admin,authController.mfaStatus);
+  router.post('/auth/mfa/setup',auth,admin,mfaLimit,mfaBody(['password']),authController.mfaSetup);
+  router.post('/auth/mfa/enable',auth,admin,mfaLimit,mfaBody(['code']),authController.mfaEnable);
+  router.post('/auth/mfa/disable',auth,admin,mfaLimit,mfaBody(['password','code']),authController.mfaDisable);
   const resendLimiter=rateLimit({windowMs:60*60*1000,limit:5,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'EMAIL_RATE_LIMIT','Espera antes de volver a solicitar un enlace de confirmación.'))});
   const recoveryLimiter=rateLimit({windowMs:60*60*1000,limit:5,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'EMAIL_RATE_LIMIT','Espera antes de solicitar otro enlace.'))});
   router.post('/auth/forgot-password',recoveryLimiter,...V.resendVerification,authController.forgotPassword);
@@ -63,6 +70,7 @@ module.exports=config=> {
   router.get('/admin/inventario/movimientos',auth,admin,...V.inventoryPagination,inventory.movements);
   router.post('/admin/inventario/ajustes',auth,admin,...V.adjustment,V.validated,inventory.adjust);
   router.get('/admin/tablas',auth,admin,query('tabla').isIn(['productos','usuarios','pedidos','detalles','promociones']),...V.pagination,require('../controllers/admin.cjs'));
+  router.get('/admin/auditoria',auth,admin,...V.pagination,async(req,res)=>res.json({ok:true,data:await require('../models/admin-audit.cjs').list(req.input)}));
   router.get('/admin/resumen',auth,admin,require('../controllers/admin-summary.cjs'));
   return router;
 };

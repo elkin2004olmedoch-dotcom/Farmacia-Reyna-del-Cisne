@@ -8,6 +8,7 @@ module.exports=config=>{
  const router=Router(),auth=authenticate(config),buyer=roles('user','admin');
  const limit=()=>rateLimit({windowMs:60*1000,limit:20,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'PAYMENT_RATE_LIMIT','Espera un minuto antes de consultar el pago nuevamente.'))});
  router.get('/pagos/configuracion',controller.configuration);
+ router.get('/pagos/checkout-configuracion',auth,buyer,controller.checkoutConfiguration);
  router.get('/pedidos/:id/pago',auth,buyer,V.id,V.validated,controller.find);
  router.post('/pedidos/:id/pago/practica',auth,buyer,limit(),V.id,V.validated,(req,res,next)=>{
   const body=req.body,brands=require('../../frontend/models/card-policy.js').brands;

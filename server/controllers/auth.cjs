@@ -8,7 +8,7 @@ const dummyHash=bcrypt.hashSync('dummy-unusable-password',12);
 module.exports = config=> {
   async function session(req,res,user) {
     if(req.get('X-Farmacia-Web')==='1'){web.requireWeb(req,config);return web.write(res,config,await web.create(user));}
-    return {token:jwt.sign({version:user.tokenVersion},config.secret,{algorithm:'HS256',subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:config.expires}),usuario:users.publicUser(user)};
+    return {token:jwt.sign({version:user.tokenVersion,epoch:user.tokenEpoch||undefined},config.secret,{algorithm:'HS256',subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:config.expires}),usuario:users.publicUser(user)};
   }
   return {
     async register(req,res) {
@@ -29,8 +29,15 @@ module.exports = config=> {
       const valid=await bcrypt.compare(req.input.password,user?.passwordHash || dummyHash);
       if (!user || !valid || !user.activo) throw new AppError(401,'INVALID_CREDENTIALS','Correo o contraseña incorrectos.');
       if(verification.requiresVerification(user,config.requireVerifiedRegistration&&user.role==='user'))throw new AppError(403,'EMAIL_NOT_VERIFIED','Confirma tu correo antes de iniciar sesión. Puedes solicitar otro enlace.');
+      const challenge=user.role==='admin'?await require('../models/admin-mfa.cjs').challenge(user,config):null;
+      if(challenge){res.json({ok:true,data:{mfaRequired:true,challenge}});return;}
       res.json({ok:true,data:await session(req,res,user)});
     },
+    async mfaStatus(req,res){res.json({ok:true,data:await require('../models/admin-mfa.cjs').status(req.user.id)});},
+    async mfaSetup(req,res){res.json({ok:true,data:await require('../models/admin-mfa.cjs').setup(req.user,req.body.password,config)});},
+    async mfaEnable(req,res){const result=await require('../models/admin-mfa.cjs').enable(req.user,req.body.code,config);res.json({ok:true,data:{...await session(req,res,result.user),recoveryCodes:result.recoveryCodes}});},
+    async mfaDisable(req,res){const user=await require('../models/admin-mfa.cjs').disable(req.user,req.body.password,req.body.code,config);res.json({ok:true,data:await session(req,res,user)});},
+    async mfaLogin(req,res){const user=await require('../models/admin-mfa.cjs').login(req.body.challenge,req.body.code,config);res.json({ok:true,data:await session(req,res,user)});},
     me(req,res) { res.json({ok:true,data:users.publicUser(req.user)}); },
     async updateProfile(req,res){res.json({ok:true,data:await users.updateProfile(req.user.id,req.input)});},
     async logout(req,res) { await users.revoke(req.user.id);web.clear(res,config);res.status(204).end(); },
@@ -55,7 +62,7 @@ module.exports = config=> {
     },
     async verifyEmail(req,res){
       const {usuarioId}=await verification.consume(req.input.token);
-      const user=await users.findById(usuarioId,{...users.publicFields,tokenVersion:true});
+      const user=await users.findById(usuarioId,{...users.publicFields,tokenVersion:true,tokenEpoch:true});
       const enter=user?.activo&&user.emailVerifiedAt&&user.role==='user';
       res.json({ok:true,data:{verified:true,...(enter?await session(req,res,user):{}),message:enter?'Correo confirmado. Bienvenido a la farmacia.':'Correo confirmado. Inicia sesión para continuar.'}});
     },

@@ -36,10 +36,18 @@ export async function mascotaController(){
   template.innerHTML=`<div class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">TU COMPAÑERO DE FARMACIA</span><h2 id="title">Goti te acompaña</h2><p>Ayuda para navegar y preparar tu compra</p></div><button class="close" id="close" aria-label="Cerrar ayuda" type="button">×</button></header><div class="preferences"><label>Compañero<select id="character"><option value="farmi">Farmi</option><option value="boti">Boti</option><option value="goti">Goti</option></select></label><button id="motion" type="button" aria-pressed="false">Pausar movimiento</button></div><div class="messages" id="messages" role="log" aria-label="Ayuda de la farmacia" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Preguntas rápidas de esta sección"></nav><form id="form"><label for="input" class="sr-only">¿Qué necesitas?</label><input id="input" maxlength="180" autocomplete="off" placeholder="¿Qué necesitas?" required><button type="submit" aria-label="Enviar consulta">↑</button></form><p class="local-note">Guía local de la tienda · tus mensajes no se envían</p></section><div class="bubble" id="bubble" role="status" hidden></div><button class="avatar" id="avatar" type="button" aria-label="Haz saltar a Goti"><canvas id="canvas" width="192" height="208" aria-hidden="true"></canvas></button><button class="launcher" id="launcher" type="button" aria-expanded="false" aria-controls="panel"><span class="online" aria-hidden="true"></span><span id="launcher-label">¿Te ayudo?</span><span aria-hidden="true">↗</span></button></div>`;
   root.append(template.content.cloneNode(true));document.body.append(host);
   const find=selector=>root.querySelector(selector);
-  const canvas=find('#canvas'),context=canvas.getContext('2d');
+  const canvas=find('#canvas');let context;try{context=canvas.getContext('2d');}catch{context=null;}
+  // SVG keeps the same atlas and animation usable when Canvas is unavailable.
+  const ns='http://www.w3.org/2000/svg',fallback=document.createElementNS(ns,'svg'),crop=document.createElementNS(ns,'svg'),portrait=document.createElementNS(ns,'image');
+  fallback.id='sprite-fallback';fallback.setAttribute('viewBox','0 0 192 208');fallback.setAttribute('aria-hidden','true');fallback.setAttribute('hidden','');
+  for(const [name,value]of Object.entries({x:8,y:17.333,width:176,height:190.667,overflow:'hidden'}))crop.setAttribute(name,value);
+  crop.append(portrait);fallback.append(crop);find('#avatar').append(fallback);
+  const motionControls=document.createElement('div'),motionToggle=document.createElement('button'),motionStatus=document.createElement('small');
+  motionControls.className='motion-controls';motionToggle.type='button';motionToggle.id='motion-toggle';motionToggle.className='motion-toggle';motionStatus.id='motion-status';motionStatus.setAttribute('role','status');motionControls.append(motionToggle,motionStatus);find('#launcher').after(motionControls);
   const images=new Map();
   let selected=stored(STORED_CHARACTER)||'goti';if(!PEOPLE[selected])selected='goti';
-  let paused=stored(STORED_MOTION)==='paused'||(stored(STORED_MOTION)===null && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  let paused=stored(STORED_MOTION)==='paused'||(stored(STORED_MOTION)===null && reducedMotion.matches);
   let manifest=null,state='idle',frame=0,elapsed=0,remaining=Infinity,lastTime=0,offset=0,fallbackAfter=0;
   let replyTimer=null,bubbleTimer=null,refreshTimer=null,requestVersion=0;
   let lastCartCount=cartCount();
@@ -97,10 +105,13 @@ export async function mascotaController(){
     host.dispatchEvent(new CustomEvent('mascota:character',{detail:{id,name:PEOPLE[id]},bubbles:true}));
     return true;
   }
-  function setPaused(value){
-    paused=Boolean(value);remember(STORED_MOTION,paused?'paused':'active');
+  function setPaused(value,{rememberChoice=true}={}){
+    paused=Boolean(value);if(rememberChoice)remember(STORED_MOTION,paused?'paused':'active');
     find('#motion').textContent=paused?'Activar movimiento':'Pausar movimiento';
     find('#motion').setAttribute('aria-pressed',String(paused));
+    motionToggle.textContent=paused?'▶':'Ⅱ';motionToggle.setAttribute('aria-label',paused?'Activar movimiento de la mascota':'Pausar movimiento de la mascota');motionToggle.setAttribute('aria-pressed',String(paused));
+    motionStatus.textContent=paused?(stored(STORED_MOTION)===null&&reducedMotion.matches?'Movimiento pausado por tu preferencia de movimiento reducido.':'Movimiento pausado. Puedes activarlo aquí.'):'Movimiento activo';motionStatus.hidden=!paused;
+    lastTime=0;
   }
   function sayBubble(text){
     clearTimeout(bubbleTimer);find('#bubble').textContent=text;find('#bubble').hidden=false;
@@ -190,11 +201,13 @@ export async function mascotaController(){
       elapsed+=delta;while(elapsed>=current.durations[frame]){elapsed-=current.durations[frame];frame=(frame+1)%current.frames.length;}
       if(Number.isFinite(remaining)){remaining-=delta;if(remaining<=0){offset=0;setState('idle');}}
     }
-    context.clearRect(0,0,192,208);context.imageSmoothingEnabled=false;
     const currentFrame=clip(),atlas=character()?.imagePath?image(character().imagePath):null;
-    if(currentFrame && atlas?.complete && atlas.naturalWidth){const rect=currentFrame.frames[Math.min(frame,currentFrame.frames.length-1)];context.drawImage(atlas,rect.x,rect.y,rect.width,rect.height,8+offset,17.333,176,190.667);}
+    let source=null,rect=null;
+    if(currentFrame && atlas?.complete && atlas.naturalWidth){source=atlas;rect=currentFrame.frames[Math.min(frame,currentFrame.frames.length-1)];}
     // Fetch the static portrait only if the atlas is absent, failed or slow.
-    else if(!currentFrame || !atlas || atlas.complete || time>=fallbackAfter){const base=image(`art/${selected}-base.png`);if(base.complete && base.naturalWidth){const scale=Math.min(180/base.naturalWidth,196/base.naturalHeight);const w=base.naturalWidth*scale,h=base.naturalHeight*scale;context.drawImage(base,(192-w)/2,208-h,w,h);}}
+    else if(!currentFrame || !atlas || atlas.complete || time>=fallbackAfter){const base=image(`art/${selected}-base.png`);if(base.complete&&base.naturalWidth){source=base;rect={x:0,y:0,width:base.naturalWidth,height:base.naturalHeight};}}
+    if(context)try{context.clearRect(0,0,192,208);context.imageSmoothingEnabled=false;if(source)context.drawImage(source,rect.x,rect.y,rect.width,rect.height,8+offset,17.333,176,190.667);}catch{context=null;}
+    if(!context){canvas.hidden=true;fallback.removeAttribute('hidden');if(source){crop.setAttribute('x',8+offset);crop.setAttribute('viewBox',`${rect.x} ${rect.y} ${rect.width} ${rect.height}`);portrait.setAttribute('href',source.src);portrait.setAttribute('width',source.naturalWidth);portrait.setAttribute('height',source.naturalHeight);}}
     requestAnimationFrame(tick);
   }
   find('#launcher').addEventListener('click',()=>open(find('#panel').hidden));
@@ -206,6 +219,9 @@ export async function mascotaController(){
   find('#avatar').addEventListener('pointerleave',()=>{offset=0;});
   find('#character').addEventListener('change',event=>setCharacter(event.target.value));
   find('#motion').addEventListener('click',()=>setPaused(!paused));
+  motionToggle.addEventListener('click',()=>setPaused(!paused));
+  reducedMotion.addEventListener('change',()=>{if(stored(STORED_MOTION)===null)setPaused(reducedMotion.matches,{rememberChoice:false});});
+  document.addEventListener('visibilitychange',()=>{lastTime=0;});
   find('#form').addEventListener('submit',event=>{event.preventDefault();send(find('#input').value);});
   refreshQuickQuestions();
   const questionObserver=new MutationObserver(()=>{const next=contextSignature();if(next!==currentSignature||find('#shortcuts').children.length===0)refreshQuickQuestions();});
@@ -217,7 +233,7 @@ export async function mascotaController(){
     else if(count!==lastCartCount)setState('review',{loops:1});
     lastCartCount=count;
   });
-  setCharacter(selected);setPaused(paused);
+  setCharacter(selected);setPaused(paused,{rememberChoice:false});
   append(`¡Hola! Soy ${PEOPLE[selected]}. Te ayudo a encontrar productos y a preparar tu compra. Elige una opción o escribe el nombre de un producto.`, 'bot',[{label:'Explorar catálogo',href:'catalogo.html'}]);
   await loadManifest();refreshTimer=manifest?.complete?null:setInterval(loadManifest,15000);
   requestAnimationFrame(tick);

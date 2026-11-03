@@ -75,6 +75,16 @@ test('sin diagnóstico se conserva el registro HTTP anterior en producción',asy
   });
 });
 
+test('JWT anterior no revive si una restauración repite tokenVersion; la época no se expone',async()=>{
+  const old=signed(),epoch=randomUUID();await db.usuario.update({where:{id:user.id},data:{tokenEpoch:epoch}});
+  try{
+    await request.get('/api/auth/me').set('Authorization',authorization(old)).expect(401);
+    const login=await request.post('/api/auth/login').send({email:credentials.email,password:credentials.password}).expect(200);
+    assert.equal(jwt.decode(login.body.data.token).epoch,epoch);assert.equal(login.body.data.usuario.tokenEpoch,undefined);
+    await request.get('/api/auth/me').set('Authorization',authorization(login.body.data.token)).expect(200);
+  }finally{await db.usuario.update({where:{id:user.id},data:{tokenEpoch:null}});}
+});
+
 test('JWT rechaza por separado emisor, audiencia y algoritmo incorrectos',async()=>{
   await request.get('/api/auth/me').set('Authorization',authorization(signed())).expect(200);
   for(const options of [{issuer:'otro-emisor'},{audience:'otra-audiencia'},{algorithm:'HS384'}]){

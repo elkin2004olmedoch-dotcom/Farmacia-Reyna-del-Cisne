@@ -22,6 +22,18 @@ test('web: cookies privadas, CSRF, rotación y revocación inmediata sin exponer
  await api.post('/api/auth/web/refresh').set(web).set('Cookie',cookie(renewed)).send({}).expect(204);
  const rows=await db.sesionWeb.findMany();assert.ok(rows.length);assert.ok(rows.every(row=>/^[a-f0-9]{64}$/.test(row.secretHash)));assert.ok(rows.every(row=>row.revokedAt));
 });
+test('web: una nueva época invalida acceso anterior y permite login y renovación nuevos',async()=>{
+ const credentials={email:'email-admin@example.ec',password:'SyntheticEmailAdmin2026!'},old=await api.post('/api/auth/login').set(web).send(credentials).expect(200),id=old.body.data.usuario.id;
+ await db.usuario.update({where:{id},data:{tokenEpoch:require('node:crypto').randomUUID()}});
+ try{
+  await api.get('/api/auth/me').set('Cookie',cookie(old)).expect(401);
+  const login=await api.post('/api/auth/login').set(web).send(credentials).expect(200);assert.equal(login.body.data.usuario.tokenEpoch,undefined);
+  await api.get('/api/auth/me').set('Cookie',cookie(login)).expect(200);
+  const renewed=await api.post('/api/auth/web/refresh').set(web).set('Cookie',cookie(login)).send({}).expect(200);
+  await api.get('/api/auth/me').set('Cookie',cookie(renewed)).expect(200);
+ }finally{await db.usuario.update({where:{id},data:{tokenEpoch:null}});}
+});
+
 test('web: canje de sesión anterior y cookies Secure en producción',async()=>{
  const legacy=await api.post('/api/auth/login').send({email:'email-admin@example.ec',password:'SyntheticEmailAdmin2026!'}).expect(200);
  const token=legacy.body.data.token;assert.equal(typeof token,'string');

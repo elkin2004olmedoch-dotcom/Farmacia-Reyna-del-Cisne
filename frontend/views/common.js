@@ -1,4 +1,5 @@
 export const money=cents=>new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(cents/100);
+export const privateEmail=value=>{const [local,domain]=String(value||'').split('@');return domain?local.slice(0,1)+'•••@'+domain:'Correo privado';};
 export const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const price=product=>money(Math.round(Number(product.precio)*100));
 export const priceMarkup=product=>product.descuentoPorcentaje>0?`<span class="price-with-discount"><del><span class="sr-only">Precio anterior: </span>${money(Math.round(Number(product.precioOriginal)*100))}</del><strong>${price(product)}</strong></span>`:`<strong>${price(product)}</strong>`;

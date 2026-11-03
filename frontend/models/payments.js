@@ -1,5 +1,6 @@
 import {request} from './api.js';
 export const payments={
+  checkoutConfiguration:()=>request('/pagos/checkout-configuracion'),
   configuration:()=>request('/pagos/configuracion'),
   forOrder:id=>request(`/pedidos/${encodeURIComponent(id)}/pago`),
   prepare:id=>request(`/pedidos/${encodeURIComponent(id)}/pago/payphone`,{method:'POST',body:{}}),

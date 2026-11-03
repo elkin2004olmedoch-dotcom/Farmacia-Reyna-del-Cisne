@@ -6,11 +6,15 @@ const {discountWhere,effectivePrice}=require('./prices.cjs');
 const fiscal=require('./fiscal.cjs');
 const inventory=require('./inventario.cjs');
 const {requiresProfessionalReview,restrictionReason}=require('../../frontend/models/pharmacy-policy.js');
-const include={detalles:{include:{lotes:true}},historial:{orderBy:[{createdAt:'asc'},{id:'asc'}]}};
+const include={pagoPractica:true,detalles:{include:{lotes:true}},historial:{orderBy:[{createdAt:'asc'},{id:'asc'}]}};
 const transitions={pendiente:['confirmado','cancelado'],confirmado:['preparado','cancelado'],preparado:['entregado','cancelado'],entregado:[],cancelado:[]};
-async function create(userId,{carrito,comprador,claveSolicitud},{actor}={}) {
+async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTotalCentavos},{actor}={}) {
+  const payments=require('./pagos.cjs');
+  if(payments.practiceAvailable()&&!pago)throw new AppError(409,'CHECKOUT_PAYMENT_REQUIRED','Completa el pago antes de confirmar la compra.');
+  if(pago&&(!payments.practiceAvailable()||!payments.validPractice(pago)))throw new AppError(422,'CHECKOUT_PAYMENT_INVALID','El método de pago no está disponible.');
+  if(pago&&(!Number.isSafeInteger(esperadoTotalCentavos)||esperadoTotalCentavos<1))throw new AppError(422,'CHECKOUT_TOTAL_REQUIRED','Revisa el total antes de pagar.');
   const sorted=[...carrito].sort((a,b)=>a.productoId.localeCompare(b.productoId));
-  const fingerprint=createHash('sha256').update(JSON.stringify({carrito:sorted,comprador:Object.fromEntries(Object.entries(comprador).sort())})).digest('hex');
+  const fingerprint=createHash('sha256').update(JSON.stringify({carrito:sorted,...(pago?{pago,esperadoTotalCentavos}:{}),comprador:Object.fromEntries(Object.entries(comprador).sort())})).digest('hex');
   function same(existing) {
     if(existing.fingerprint!==fingerprint)throw new AppError(409,'IDEMPOTENCY_CONFLICT','Esta confirmación ya se usó para otro pedido.');
     return {pedido:existing,replayed:true};
@@ -50,7 +54,8 @@ async function create(userId,{carrito,comprador,claveSolicitud},{actor}={}) {
         const subtotalProductos=new Prisma.Decimal(cents).div(100);
         cents+=shipping.costoEnvioCentavos;
         baseCents+=Math.round(Number(shipping.envioBaseImponible||0)*100);ivaCents+=Math.round(Number(shipping.envioIvaMonto||0)*100);
-        const pedido=await tx.pedido.create({data:{userId,subtotalProductos,...shipping,total:new Prisma.Decimal(cents).div(100),baseImponible:new Prisma.Decimal(baseCents).div(100),ivaMonto:new Prisma.Decimal(ivaCents).div(100),requestKey:claveSolicitud,fingerprint,createdAt:now,updatedAt:now,entrega:comprador.delivery,nombre:comprador.name,email:comprador.email.toLowerCase(),telefono:require('../../frontend/models/ecuador.js').normalizePhone(comprador.phone),documento:'••••••'+comprador.document.slice(-4),provincia:comprador.delivery==='delivery'?comprador.province:null,ciudad:comprador.delivery==='delivery'?comprador.city:null,direccion:comprador.delivery==='delivery'?comprador.address:null,codigoPostal:comprador.delivery==='delivery'?comprador.postalCode || null:null,detalles:{create:details},historial:{create:{estado:'pendiente',actorId:userId,createdAt:now}}},include});
+        if(pago&&cents!==esperadoTotalCentavos)throw new AppError(409,'CHECKOUT_TOTAL_CHANGED','El total cambió. Revisa productos y envío antes de pagar nuevamente.');
+        const pedido=await tx.pedido.create({data:{...(pago?{pagoPractica:{create:{metodo:pago.metodo,marca:pago.marca||null,totalCentavos:cents}}}:{}),userId,subtotalProductos,...shipping,total:new Prisma.Decimal(cents).div(100),baseImponible:new Prisma.Decimal(baseCents).div(100),ivaMonto:new Prisma.Decimal(ivaCents).div(100),requestKey:claveSolicitud,fingerprint,createdAt:now,updatedAt:now,entrega:comprador.delivery,nombre:comprador.name,email:comprador.email.toLowerCase(),telefono:require('../../frontend/models/ecuador.js').normalizePhone(comprador.phone),documento:'••••••'+comprador.document.slice(-4),provincia:comprador.delivery==='delivery'?comprador.province:null,ciudad:comprador.delivery==='delivery'?comprador.city:null,direccion:comprador.delivery==='delivery'?comprador.address:null,codigoPostal:comprador.delivery==='delivery'?comprador.postalCode || null:null,detalles:{create:details},historial:{create:{estado:'pendiente',actorId:userId,createdAt:now}}},include});
         await inventory.saleMovements(tx,pedido.detalles,pedido.id,userId);
         await require('./entregas.cjs').autoAssign(tx,pedido);
         return {pedido,replayed:false};

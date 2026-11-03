@@ -61,6 +61,17 @@ test('login móvil restringe credenciales/rol, emite 15 minutos y guarda solo ha
  assert.equal(row.secretHash,hash(s.refreshToken.split('.')[1]));assert.equal(row.previousSecretHash,null);assert.equal(row.expiresAt.toISOString(),s.refreshExpiresAt);
  assert.ok(Math.abs(Date.parse(s.refreshExpiresAt)-Date.now()-30*86400000)<5000);assert.ok(!JSON.stringify(row).includes(s.refreshToken.split('.')[1]));
 });
+test('móvil: una nueva época invalida JWT anteriores y permite login y renovación nuevos',async()=>{
+ const old=await login(),epoch=randomUUID();await db.usuario.update({where:{id:driver.id},data:{tokenEpoch:epoch}});
+ try{
+  await api.get('/api/auth/me').set('Authorization',auth(old)).expect(401);
+  const fresh=await login();assert.equal(jwt.decode(fresh.token).epoch,epoch);assert.equal(fresh.usuario.tokenEpoch,undefined);
+  await api.get('/api/auth/me').set('Authorization',auth(fresh)).expect(200);
+  const next=(await renew(fresh,secret()).expect(200)).body.data;
+  await api.get('/api/auth/me').set('Authorization',auth(next)).expect(200);
+ }finally{await db.usuario.update({where:{id:driver.id},data:{tokenEpoch:null}});}
+});
+
 test('renovación rota y repetir el par perdido es idempotente sin ampliar expiración',async()=>{
  const original=await login(),next=secret();
  const first=(await renew(original,next).expect(200)).body.data;

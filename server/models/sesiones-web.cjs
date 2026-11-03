@@ -4,7 +4,7 @@ const db=require('./db.cjs');
 const {transaction}=require('./sesiones-moviles.cjs');
 const users=require('./usuarios.cjs');
 const {AppError}=require('../middleware/errors.cjs');
-const withUser={usuario:{select:{...users.publicFields,tokenVersion:true}}};
+const withUser={usuario:{select:{...users.publicFields,tokenVersion:true,tokenEpoch:true}}};
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const equal=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 const active=(row,now=new Date())=>row&&!row.revokedAt&&row.expiresAt>now&&row.usuario.activo&&row.tokenVersion===row.usuario.tokenVersion;
@@ -19,7 +19,7 @@ function requireWeb(req,config){
 }
 function clear(res,config){for(const name of Object.values(names(config)))res.clearCookie(name,options(config));}
 function write(res,config,{row,refreshToken}){
- const token=jwt.sign({version:row.tokenVersion,webSession:row.id},config.secret,{algorithm:'HS256',subject:row.usuarioId,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'15m'});
+ const token=jwt.sign({version:row.tokenVersion,epoch:row.usuario.tokenEpoch||undefined,webSession:row.id},config.secret,{algorithm:'HS256',subject:row.usuarioId,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'15m'});
  res.cookie(names(config).access,token,{...options(config),maxAge:15*60000});
  res.cookie(names(config).refresh,refreshToken,{...options(config),maxAge:Math.max(0,row.expiresAt-Date.now())});
  return {usuario:users.publicUser(row.usuario)};
@@ -27,7 +27,7 @@ function write(res,config,{row,refreshToken}){
 async function create(user){
  const secret=randomBytes(32).toString('base64url');
  const row=await transaction(async tx=>{
-  const current=await tx.usuario.findUnique({where:{id:user.id},select:{...users.publicFields,tokenVersion:true}});
+  const current=await tx.usuario.findUnique({where:{id:user.id},select:{...users.publicFields,tokenVersion:true,tokenEpoch:true}});
   if(!current?.activo||current.tokenVersion!==user.tokenVersion)throw new AppError(401,'INVALID_TOKEN','Inicia sesión nuevamente.');
   await tx.sesionWeb.deleteMany({where:{usuarioId:current.id,expiresAt:{lte:new Date()}}});
   // Bound live sessions per account without touching business records.

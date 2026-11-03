@@ -304,3 +304,5 @@ body[data-session-pending] [data-customer-only] { display:none !important; }
 .billing-pages { display:flex; align-items:center; flex-wrap:wrap; gap:16px; margin-top:16px; }
 @media(max-width:1100px){.billing-grid{grid-template-columns:minmax(0,1fr);}}
 @media(max-width:600px){#admin-billing .admin-card{padding:16px;}.billing-pages .button{width:auto;}}
+
+.mfa-secret{overflow-wrap:anywhere;user-select:all}.shop-dialog .shop-field{margin-block:1rem}.shop-dialog [role=status]{overflow-wrap:anywhere}

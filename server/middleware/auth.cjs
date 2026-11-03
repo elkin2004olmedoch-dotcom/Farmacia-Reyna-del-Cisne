@@ -23,7 +23,7 @@ function authenticate(config) {
       if(!session)throw new AppError(401,'INVALID_TOKEN','Tu sesión web ya no es válida.');
       req.webSession=session.id;user={...session.usuario,webSession:session.id};
     }else if(!fromCookie)user=typeof payload.sub==='string' ? await users.findById(payload.sub) : null;
-    if (!user || !user.activo || payload.version!==user.tokenVersion) throw new AppError(401,'INVALID_TOKEN','Tu sesión ya no es válida.');
+    if (!user || !user.activo || payload.version!==user.tokenVersion || (payload.epoch??null)!==(user.tokenEpoch??null)) throw new AppError(401,'INVALID_TOKEN','Tu sesión ya no es válida.');
     if(require('../models/email-verification.cjs').requiresVerification(user,config.requireVerifiedRegistration&&user.role==='user'))throw new AppError(403,'EMAIL_NOT_VERIFIED','Confirma tu correo antes de continuar.');
     req.user=user;next();
   };

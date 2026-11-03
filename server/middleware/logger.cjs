@@ -3,6 +3,7 @@ const {performance}=require('node:perf_hooks');
 const diagnostics=require('../diagnostics.cjs');
 const timedRoutes=new Set(['/','/index.html','/api/salud','/api/productos','/api/promociones','/api/auth/me','/api/auth/login','/api/auth/register']);
 const adminWrites=new Map([
+  ['POST /api/auth/mfa/enable','security.mfa.enable'],['POST /api/auth/mfa/disable','security.mfa.disable'],
   ['POST /api/productos','product.create'],['PUT /api/productos/:id','product.update'],['DELETE /api/productos/:id','product.delete'],
   ['POST /api/promociones','promotion.create'],['PUT /api/promociones/:id','promotion.update'],['DELETE /api/promociones/:id','promotion.delete'],
   ['POST /api/admin/imagenes','image.upload'],['POST /api/admin/configuracion/fiscal','fiscal.configuration.create'],
@@ -38,7 +39,7 @@ module.exports = function logger(req,res,next) {
     // Express restores baseUrl while propagating errors; registered templates remain available.
     const route=template.startsWith('/api/')?template:'/api'+template;
     const action=adminWrites.get(req.method+' '+route);
-    if(action && req.user?.role==='admin')console.info(JSON.stringify({level:'info',event:'admin_write',at:new Date().toISOString(),requestId:req.id,actorId:req.user.id,action,route,status:res.statusCode}));
+    if(action && req.user?.role==='admin'){void require('../models/admin-audit.cjs').record({actorId:req.user.id,accion:action,ruta:route,status:res.statusCode}).catch(()=>console.error(JSON.stringify({event:'admin_audit_failed',requestId:req.id})));console.info(JSON.stringify({level:'info',event:'admin_write',at:new Date().toISOString(),requestId:req.id,actorId:req.user.id,action,route,status:res.statusCode}));}
   });
   next();
 };

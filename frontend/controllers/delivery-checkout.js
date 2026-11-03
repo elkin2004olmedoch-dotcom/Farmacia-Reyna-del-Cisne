@@ -25,7 +25,8 @@ export function deliveryCheckout(form,onChange){
   }
   select.addEventListener('change',()=>{position=null;locationRequest++;byId('checkout-remove-location').hidden=true;byId('checkout-location-status').textContent='No se ha compartido tu ubicación.';syncAddress();});
   byId('checkout-refresh-zone').addEventListener('click',async event=>{const button=event.currentTarget;button.disabled=true;try{await reload();}finally{button.disabled=false;}});
-  for(const field of [form.elements.province,form.elements.city])field.addEventListener('change',onChange);
+  function chooseAddressZone(){const buyer={province:form.elements.province.value,city:form.elements.city.value};const candidates=zones.filter(item=>matchesDeliveryZone(item,buyer));const best=candidates.find(item=>item.alcance!=='nacional')||candidates[0];if(best&&best.id!==select.value){select.value=best.id;position=null;locationRequest++;byId('checkout-remove-location').hidden=true;byId('checkout-location-status').textContent='Cobertura ajustada a tu dirección. Revisa la tarifa.';}onChange();}
+  for(const field of [form.elements.province,form.elements.city])field.addEventListener('change',chooseAddressZone);
   byId('checkout-remove-location').addEventListener('click',()=>{position=null;locationRequest++;byId('checkout-remove-location').hidden=true;byId('checkout-location-status').textContent='Ubicación retirada. Se usará únicamente tu dirección escrita.';});
   byId('checkout-use-location').addEventListener('click',()=>{
     const status=byId('checkout-location-status'),button=byId('checkout-use-location');
@@ -43,6 +44,8 @@ export function deliveryCheckout(form,onChange){
   return {
     ready:reload(),reload,
     pickup,
+    fee:()=>deliveryQuote(0,mode(),zone()).shipping,
+
     verify:values=>deliveries.verifyDestination(Object.fromEntries(['province','city','address','zonaEntregaId','latitudEntrega','longitudEntrega','consienteUbicacion'].filter(key=>values[key]!==undefined).map(key=>[key,values[key]]))),
     values(){return mode()==='delivery'?{zonaEntregaId:zone()?.id,esperadoTarifaVersion:zone()?.version,...(position || {})}:{};},
     issues(){return mode()!=='delivery'?{}:!match()?{city:'Revisa provincia y cantón: deben corresponder a la cobertura seleccionada.'}:deliveryQuote(0,'delivery',zone()).enabled?{}:{zonaEntregaId:failed?'No pudimos consultar la cobertura. Reintenta o elige retiro en farmacia.':'La tarifa de esta zona todavía no está definida. Puedes elegir retiro.'};},

@@ -55,7 +55,7 @@ test('VACUUM INTO crea respaldo íntegro con imágenes referenciadas y restaura 
   await assert.rejects(restoreBackup({from:result.directory,targetDatabase:target,backupRoot:backups,uploadRoot}),/offline/);
   await restoreBackup({from:result.directory,targetDatabase:target,backupRoot:backups,uploadRoot,offline:true});
   const restored=new PrismaClient({datasources:{db:{url:'file:'+target.replaceAll('\\','/')}}});
-  try{assert.equal(await restored.producto.count(),await db.producto.count());assert.equal((await restored.producto.findUnique({where:{id:product.id}})).imagen,uploaded);const recoveredUser=await restored.usuario.findUnique({where:{id:sourceUser.id}});assert.equal(recoveredUser.passwordHash,sourceUser.passwordHash);assert.equal(recoveredUser.tokenVersion,sourceUser.tokenVersion);const recoveredOrder=await restored.pedido.findUnique({where:{id:order.id},include:{detalles:true,historial:true}});assert.equal(recoveredOrder.requestKey,key);assert.equal(recoveredOrder.detalles.length,1);assert.equal(recoveredOrder.historial.length,1);assert.equal(recoveredOrder.detalles[0].productoId,product.id);await restored.producto.update({where:{id:product.id},data:{stock:2}});}finally{await restored.$disconnect();}
+  try{assert.equal(await restored.producto.count(),await db.producto.count());assert.equal((await restored.producto.findUnique({where:{id:product.id}})).imagen,uploaded);const recoveredUser=await restored.usuario.findUnique({where:{id:sourceUser.id}});assert.equal(recoveredUser.passwordHash,sourceUser.passwordHash);assert.equal(recoveredUser.tokenVersion,sourceUser.tokenVersion+1);const recoveredOrder=await restored.pedido.findUnique({where:{id:order.id},include:{detalles:true,historial:true}});assert.equal(recoveredOrder.requestKey,key);assert.equal(recoveredOrder.detalles.length,1);assert.equal(recoveredOrder.historial.length,1);assert.equal(recoveredOrder.detalles[0].productoId,product.id);await restored.producto.update({where:{id:product.id},data:{stock:2}});}finally{await restored.$disconnect();}
   await assert.rejects(restoreBackup({from:result.directory,targetDatabase:target,backupRoot:backups,uploadRoot,offline:true}),/--replace/);
   const replaced=await restoreBackup({from:result.directory,targetDatabase:target,backupRoot:backups,uploadRoot,replace:true,offline:true});assert.ok(replaced.previousBackup);await validateBackup(replaced.previousBackup);
   assert.equal((await db.producto.findUnique({where:{id:product.id}})).stock,product.stock-1);
@@ -75,7 +75,7 @@ test('restaurar conserva estados de correo y no revive enlaces del respaldo orig
     const original=new PrismaClient({datasources:{db:{url:'file:'+path.join(source.directory,'farmacia.db').replaceAll('\\','/')}}});
     try{
       const pendingCopy=await restored.usuario.findUnique({where:{id:pending.id}}),verifiedCopy=await restored.usuario.findUnique({where:{id:verified.id}});
-      assert.equal(pendingCopy.emailVerifiedAt,null);assert.equal(pendingCopy.emailVerificationRequired,true);assert.equal(pendingCopy.tokenVersion,7);
+      assert.equal(pendingCopy.emailVerifiedAt,null);assert.equal(pendingCopy.emailVerificationRequired,true);assert.equal(pendingCopy.tokenVersion,8);
       assert.equal(verifiedCopy.emailVerificationRequired,true);assert.equal(verifiedCopy.emailVerifiedAt.toISOString(),verifiedAt.toISOString());
       const legacy=await restored.usuario.findUnique({where:{email:'images-client@example.ec'}});assert.equal(legacy.emailVerificationRequired,false);assert.equal(legacy.emailVerifiedAt,null);
       assert.equal(await restored.emailVerification.count(),0);assert.equal(await original.emailVerification.count(),1);
@@ -84,6 +84,25 @@ test('restaurar conserva estados de correo y no revive enlaces del respaldo orig
   }finally{
     await db.emailVerification.deleteMany({where:{usuarioId:{in:[pending.id,verified.id]}}});await db.usuario.deleteMany({where:{id:{in:[pending.id,verified.id]}}});
   }
+});
+
+test('restaurar invalida sesiones, recuperación y códigos MFA usados sin desactivar el segundo factor',async()=>{
+ const user=await db.usuario.create({data:{nombre:'Administrador Respaldo',email:'backup-mfa@example.ec',telefono:'0991234567',passwordHash:'fixture',role:'admin'}}),expiresAt=new Date(Date.now()+3600000);
+ await db.adminMfa.create({data:{usuarioId:user.id,secretCipher:'cifrado-sintetico',enabled:true,lastCounter:1,recoveryHashes:JSON.stringify(['a'.repeat(64)]),challengeHash:'b'.repeat(64),challengeUntil:expiresAt}});
+ await db.passwordReset.create({data:{usuarioId:user.id,email:user.email,tokenHash:'c'.repeat(64),expiresAt}});await db.sesionWeb.create({data:{usuarioId:user.id,tokenVersion:user.tokenVersion,secretHash:'d'.repeat(64),expiresAt}});
+ const source=await createBackup({client:db,backupRoot:backups}),target=path.join(directory,'security-restored.db');await restoreBackup({from:source.directory,targetDatabase:target,backupRoot:backups,offline:true});
+ const restored=new PrismaClient({datasources:{db:{url:'file:'+target.replaceAll('\\','/')}}});
+ try{const mfa=await restored.adminMfa.findUnique({where:{usuarioId:user.id}});assert.equal(mfa.enabled,true);assert.equal(mfa.secretCipher,'cifrado-sintetico');assert.equal(mfa.recoveryHashes,'[]');assert.equal(mfa.challengeHash,null);assert.ok(mfa.lastCounter>=Math.floor(Date.now()/30000)-1);assert.equal(await restored.passwordReset.count(),0);assert.equal(await restored.sesionWeb.count({where:{revokedAt:null}}),0);assert.ok((await restored.usuario.findUnique({where:{id:user.id}})).tokenVersion>user.tokenVersion);assert.equal((await db.adminMfa.findUnique({where:{usuarioId:user.id}})).lastCounter,1);}
+ finally{await restored.$disconnect();await db.adminMfa.delete({where:{usuarioId:user.id}});}
+});
+test('cada restauración cambia la época JWT aunque se repita la versión del respaldo',async()=>{
+ const source=await createBackup({client:db,backupRoot:backups}),target=path.join(directory,'epoch-restored.db'),user=await db.usuario.findUnique({where:{email:'images-client@example.ec'}});
+ await restoreBackup({from:source.directory,targetDatabase:target,backupRoot:backups,offline:true});
+ let restored=new PrismaClient({datasources:{db:{url:'file:'+target.replaceAll('\\','/')}}}),first;
+ try{first=await restored.usuario.findUnique({where:{id:user.id}});assert.match(first.tokenEpoch,/^[0-9a-f-]{36}$/);}finally{await restored.$disconnect();}
+ await restoreBackup({from:source.directory,targetDatabase:target,backupRoot:backups,offline:true,replace:true});
+ restored=new PrismaClient({datasources:{db:{url:'file:'+target.replaceAll('\\','/')}}});
+ try{const second=await restored.usuario.findUnique({where:{id:user.id}});assert.notEqual(second.tokenEpoch,first.tokenEpoch);assert.equal(second.tokenVersion,first.tokenVersion);}finally{await restored.$disconnect();}
 });
 
 test('respaldo alterado, rutas ajenas y servidor activo impiden restauración',async()=>{

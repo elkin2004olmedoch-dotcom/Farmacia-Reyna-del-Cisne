@@ -15,7 +15,7 @@ function fixture(uploaded=false){
   const createdAt=new Date('2024-01-02T03:04:05.123Z');
   const updatedAt=new Date('2024-02-03T04:05:06.789Z');
   return {
-    passwordReset:[{usuarioId:'cliente-original',tokenHash:'b'.repeat(64)}],sesionWeb:[{id:'web-original',usuarioId:'cliente-original',secretHash:'d'.repeat(64)}],pagoPractica:[],
+    adminMfa:[],auditoriaAdmin:[],passwordReset:[{usuarioId:'cliente-original',tokenHash:'b'.repeat(64)}],sesionWeb:[{id:'web-original',usuarioId:'cliente-original',secretHash:'d'.repeat(64)}],pagoPractica:[],
     usuario:[{id:'cliente-original',nombre:'Cliente privado',email:privateEmail,telefono:'0979275988',passwordHash:privateHash,role:'user',tokenVersion:7,activo:false,emailVerifiedAt:null,emailVerificationRequired:true,createdAt},{id:'repartidor-original',nombre:'Repartidor privado',email:'repartidor@example.ec',telefono:'0979275988',passwordHash:privateHash,role:'repartidor',tokenVersion:1,activo:true,emailVerifiedAt:updatedAt,emailVerificationRequired:false,createdAt}],
     emailVerification:[{usuarioId:'cliente-original',email:privateEmail,tokenHash:privateVerificationHash,createdAt,expiresAt:updatedAt}],
     sesionMovil:[{id:'sesion-movil-original',usuarioId:'repartidor-original',tokenVersion:1,secretHash:'a'.repeat(64),previousSecretHash:null,expiresAt:new Date('2030-01-01T00:00:00Z'),revokedAt:createdAt,createdAt,updatedAt}],
@@ -49,7 +49,7 @@ function technicalDefaults(){
 }
 function sourceClient(snapshot){
   let transactions=0;const reads=[];
-  const tx=Object.fromEntries(MODELS.map(model=>[model,{findMany:async options=>{reads.push(model);if(['emailVerification','passwordReset','sesionWeb'].includes(model)){const select={usuarioId:true,...(model==='sesionWeb'?{id:true}:{})};assert.deepEqual(options,{select});return snapshot[model].map(row=>Object.fromEntries(Object.keys(select).map(key=>[key,row[key]])));}return snapshot[model];}}]));
+  const tx=Object.fromEntries(MODELS.map(model=>[model,{findMany:async options=>{reads.push(model);if(['emailVerification','passwordReset','sesionWeb','adminMfa'].includes(model)){const select={usuarioId:true,...(model==='sesionWeb'?{id:true}:{})};assert.deepEqual(options,{select});return snapshot[model].map(row=>Object.fromEntries(Object.keys(select).map(key=>[key,row[key]])));}return snapshot[model];}}]));
   return {$transaction:async fn=>{transactions++;return fn(tx);},$disconnect:async()=>{},get transactions(){return transactions;},reads};
 }
 function targetClient({initial={},failOn,beforeTransaction}={}){

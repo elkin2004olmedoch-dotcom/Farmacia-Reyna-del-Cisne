@@ -4,8 +4,8 @@ export const orders={
   email:id=>request(`/pedidos/${encodeURIComponent(id)}/correo`,{method:'POST',body:{}}),
   mine:page=>request(`/pedidos/mis-pedidos?page=${page||1}&pageSize=20`),
   all:page=>request(`/pedidos?page=${page||1}&pageSize=20`),
-  async create(carrito,comprador){
-    const payload={carrito,comprador};const signature=JSON.stringify(payload);
+  async create(carrito,comprador,payment){
+    const payload={carrito,comprador,...(payment||{})};const signature=JSON.stringify(payload);
     // Solo se guarda la clave y una huella, nunca el documento completo.
     const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(signature));
     const digest=[...new Uint8Array(bytes)].map(v=>v.toString(16).padStart(2,'0')).join('');

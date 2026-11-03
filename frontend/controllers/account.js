@@ -1,5 +1,6 @@
 import '../models/ecuador.js';
 import {auth} from '../models/auth.js';
+import {mfaAccount,mfaPrompt} from './mfa.js';
 import {accountView} from '../views/layout.js';
 import {formErrors,message,busy} from '../views/common.js';
 import {connectVerificationResend} from './email-verification.js';
@@ -10,6 +11,7 @@ export function accountController() {
   const deliveryDestination=destination==='entregas.html' || destination?.startsWith('entregas.html?pedido=');
   if(auth.user){
     accountView(auth.user);
+    if(auth.isAdmin)void mfaAccount();
     const form=document.getElementById('profile-form'),status=document.getElementById('profile-status'),cancel=document.getElementById('profile-cancel');let saving=false;
     function restore(){form.elements.nombre.value=auth.user.nombre;form.elements.telefono.value=auth.user.telefono;formErrors(form,{});}
     cancel.addEventListener('click',()=>{if(saving)return;restore();status.textContent='Cambios descartados.';form.elements.nombre.focus();});
@@ -48,7 +50,7 @@ export function accountController() {
     if(registering){if(!V.validName(values.nombre))issues.nombre='Usa letras y espacios en tu nombre completo.';if(!V.normalizePhone(values.telefono))issues.telefono='Escribe un teléfono de Ecuador válido.';if(!V.validCedula(values.cedula))issues.cedula='Escribe una cédula ecuatoriana válida.';if(values.password.length<10 || new TextEncoder().encode(values.password).length>72 || !/\p{L}/u.test(values.password)||!/\d/.test(values.password))issues.password='Usa al menos 10 caracteres, letra y número (máximo 72 bytes).';if(values.confirm!==values.password)issues.confirm='Las contraseñas deben coincidir.';if(!values.terms)issues.terms='Acepta las condiciones para continuar.';}
     if(!formErrors(form,issues)){message('Revisa los campos indicados.',true);return;}
     const button=form.querySelector('[type=submit]');busy(button,true);
-    try{if(registering){const {nombre,email,telefono,cedula,password}=values;const result=await auth.register({nombre,email,telefono,cedula,password});if(result.requiresEmailVerification){showPending(email,result.message);form.reset();return;}}else await auth.login({email:values.email,password:values.password});location.assign(auth.isAdmin?(destination==='instalar-admin.html' || deliveryDestination?destination:'admin.html'):auth.isCourier?(deliveryDestination?destination:'entregas.html'):destination || 'cuenta.html');}
+    try{if(registering){const {nombre,email,telefono,cedula,password}=values;const result=await auth.register({nombre,email,telefono,cedula,password});if(result.requiresEmailVerification){showPending(email,result.message);form.reset();return;}}else{const result=await auth.login({email:values.email,password:values.password});form.elements.password.value='';if(result?.mfaRequired){await mfaPrompt(result.challenge);}}location.assign(auth.isAdmin?(destination==='instalar-admin.html' || deliveryDestination?destination:'admin.html'):auth.isCourier?(deliveryDestination?destination:'entregas.html'):destination || 'cuenta.html');}
     catch(error){if(error.code==='EMAIL_NOT_VERIFIED'){showPending(values.email,error.message);return;}if(registering&&error.code==='EMAIL_UNAVAILABLE'){message('Para crear tu cuenta necesitas confirmar el correo. Ahora no podemos enviar el mensaje; inténtalo más tarde.',true);return;}const fields=Object.fromEntries((error.details || []).map(issue=>[issue.field,issue.message]));if(Object.keys(fields).length)formErrors(form,fields);message(error.message,true);}finally{busy(button,false);}
   });
   for(const button of document.querySelectorAll('[data-password]'))button.addEventListener('click',()=>{const input=document.getElementById(button.dataset.password);input.type=input.type==='password'?'text':'password';button.textContent=input.type==='password'?'Mostrar contraseña':'Ocultar contraseña';button.setAttribute('aria-pressed',String(input.type==='text'));});

@@ -6,7 +6,7 @@ const {AppError}=require('../middleware/errors.cjs');
 const dummyHash=bcrypt.hashSync('dummy-unusable-mobile-password',12);
 module.exports=config=>{
  function response({row,refreshToken}){
-  const token=jwt.sign({version:row.tokenVersion,mobileSession:row.id},config.secret,{algorithm:'HS256',subject:row.usuarioId,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'15m'});
+  const token=jwt.sign({version:row.tokenVersion,epoch:row.usuario.tokenEpoch||undefined,mobileSession:row.id},config.secret,{algorithm:'HS256',subject:row.usuarioId,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'15m'});
   return {usuario:users.publicUser(row.usuario),token,refreshToken,expiresAt:new Date(jwt.decode(token).exp*1000).toISOString(),refreshExpiresAt:row.expiresAt.toISOString()};
  }
  return {
