@@ -22,7 +22,7 @@ body[data-page="catalog"] #catalog-page-info { flex:1; color:var(--muted); font-
 body[data-page="catalog"] .pagination button[aria-disabled="true"] { opacity:.55; cursor:default; }
 
 body:not(.admin-page) .featured-card.pharmacy-product-card { overflow:hidden; padding:0; border:1px solid #dfcdb8; border-radius:10px; background:#fffaf1; }
-body:not(.admin-page) .featured-card.pharmacy-product-card .featured-image { height:220px; border:0; border-bottom:1px solid #eadfce; border-radius:0; background:#fffdf8; }
+body:not(.admin-page) .featured-card.pharmacy-product-card .featured-image { display:block; height:220px; border:0; border-bottom:1px solid #eadfce; border-radius:0; background:#fffdf8; }
 body:not(.admin-page) .featured-card.pharmacy-product-card .featured-image img { display:block; width:100%; height:100%; padding:24px; object-fit:contain; mix-blend-mode:normal; transition:none; }
 body:not(.admin-page) .featured-card.pharmacy-product-card .featured-image:hover img { transform:none; }
 body:not(.admin-page) .featured-card.pharmacy-product-card .product-sold-out { top:12px; left:12px; background:#681e2a; font-size:11px; }

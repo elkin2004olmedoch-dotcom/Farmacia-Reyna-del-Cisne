@@ -4,11 +4,11 @@ async function openSearch(page,testInfo){await page.goto('/');if(testInfo.projec
 
 test('predictivo muestra precios e imágenes y permite elegir con flechas sin perder la búsqueda',async({page},testInfo)=>{
   const input=await openSearch(page,testInfo);await expect(input).toHaveAttribute('role','combobox');
-  await input.fill('vitamina');const options=page.locator('#global-search-suggestions [role=option]');await expect(options.first()).toBeVisible();
+  await input.fill('ensure');const options=page.locator('#global-search-suggestions [role=option]');await expect(options.first()).toBeVisible();
   await expect(options.first().locator('img')).toHaveAttribute('width','48');await expect(options.first().locator('.predictive-price')).toContainText('$');
   await page.keyboard.press('ArrowDown');await expect(input).toHaveAttribute('aria-activedescendant',/suggestions-0$/);await expect(input).toBeFocused();
-  await page.keyboard.press('Escape');await expect(input).toHaveAttribute('aria-expanded','false');await expect(input).toHaveValue('vitamina');
-  await input.fill('vitaminas');await expect(options.first()).toBeVisible();const destination=await options.first().getAttribute('href');
+  await page.keyboard.press('Escape');await expect(input).toHaveAttribute('aria-expanded','false');await expect(input).toHaveValue('ensure');
+  await input.fill('ensure advance');await expect(options.first()).toBeVisible();const destination=await options.first().getAttribute('href');
   const violations=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations;expect(violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)}))).toEqual([]);
   await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');await expect(page).toHaveURL(new RegExp(destination.replace(/[?]/g,'\\?')+'$'));await expect(page.locator('#detail-add-button')).toBeVisible();
 });
@@ -23,9 +23,9 @@ test('Escape cancela sugerencias pendientes y una respuesta antigua no reaparece
 });
 
 test('las coincidencias aproximadas se anuncian y solo navegan al elegir un producto',async({page},testInfo)=>{
-  const input=await openSearch(page,testInfo);await input.fill('vitamnias');
+  const input=await openSearch(page,testInfo);await input.fill('ensrue');
   const panel=page.locator('#header-search .predictive-panel');await expect(panel.locator('.predictive-note')).toContainText('Coincidencias aproximadas');
-  await expect(input).toHaveValue('vitamnias');await expect(page.locator('#header-search [role=status]')).toContainText('Revisa nombre y presentación');
+  await expect(input).toHaveValue('ensrue');await expect(page.locator('#header-search [role=status]')).toContainText('Revisa nombre y presentación');
   const option=panel.getByRole('option').first(),destination=await option.getAttribute('href');await option.click();await expect(page).toHaveURL(new RegExp(destination.replace(/[?]/g,'\\?')+'$'));
 });
 
@@ -65,7 +65,8 @@ test('volver a una página con búsqueda pendiente recupera resultados y control
 });
 
 test('ficha conserva compra y amplía una imagen alternativa sin desbordar ni inventar información',async({page})=>{
-  await page.route('**/assets/images/producto-vitaminas.jpg',route=>route.fulfill({status:404,body:''}));
+  const response=await page.request.get('/api/productos/vitaminas');const product=(await response.json()).data;
+  await page.route('**/'+product.imagen,route=>route.fulfill({status:404,body:''}));
   await page.goto('/producto.html?id=vitaminas');const photo=page.locator('#zoom-product img');await expect(photo).toHaveAttribute('src','assets/images/producto-sin-imagen.svg');
   await page.locator('#zoom-product').click();await expect(page.locator('#image-dialog img')).toHaveAttribute('src',/producto-sin-imagen.svg$/);await page.getByRole('button',{name:'Cerrar imagen'}).click();
   await expect(page.locator('#product-detail')).toContainText('Retiro en farmacia');await expect(page.locator('#product-detail')).toContainText(/tarifa al confirmar la dirección/i);

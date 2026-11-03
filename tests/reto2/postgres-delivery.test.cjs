@@ -153,7 +153,7 @@ test('PostgreSQL aislado: migraciones, API, entrega, fiscalidad, permisos e impo
    }
   }
  });
- await t.test('importador real SQLite→PostgreSQL acepta baseline 008 y conserva historial, pagos y milisegundos',async()=>{
+ await t.test('importador real SQLite→PostgreSQL acepta defaults locales/nacionales y conserva historial, pagos y milisegundos',async()=>{
   const target=await database('import');migrate('postgresql',target.url);
   const sourceUrl='file:'+path.join(directory,'source.db').replaceAll('\\','/');migrate('sqlite',sourceUrl);
   const source=new (require('@prisma/client').PrismaClient)({datasources:{db:{url:sourceUrl}}});clients.push(source);
@@ -165,11 +165,12 @@ test('PostgreSQL aislado: migraciones, API, entrega, fiscalidad, permisos e impo
    for(const model of MODELS)if(synthetic[model].length)await tx[model].createMany({data:synthetic[model]});
   });
   const stamp=new Date('2024-02-03T04:05:06.789Z');
-  const nextVersion=synthetic.zonaEntrega[0].version+1;
+  const nextVersion=synthetic.zonaEntrega.find(zone=>zone.id==='puerto-quito').version+1;
   await source.zonaEntrega.update({where:{id:'puerto-quito'},data:{tarifaCentavos:230,version:nextVersion,createdAt:stamp,updatedAt:stamp}});
   await source.zonaEntregaTarifa.create({data:{zonaEntregaId:'puerto-quito',version:nextVersion,tarifaCentavos:230,ivaCategoria:'general',createdAt:stamp}});
   await source.facturaPedido.create({data:{pedidoId:order.id,ambiente:'1',emisorRuc:sriFixture.emitter.ruc,establecimiento:'001',puntoEmision:'001',fechaEmision:stamp,snapshot:JSON.stringify(snapshot),xmlBorrador:'<factura-sintetica-sin-validez/>'}});
-  const baseline=await targetCounts(target.client);assert.equal(baseline.zonaEntrega,1);assert.equal(baseline.zonaEntregaTarifa,1);
+  const baseline=await targetCounts(target.client);assert.equal(baseline.zonaEntrega,2);assert.equal(baseline.zonaEntregaTarifa,2);
+  assert.deepEqual((await target.client.zonaEntrega.findMany({select:{id:true},orderBy:{id:'asc'}})).map(zone=>zone.id),['ecuador-nacional','puerto-quito']);
   const report=await transfer({source,target:target.client,apply:true});assert.equal(report.destino.zonaEntregaTarifa,synthetic.zonaEntregaTarifa.length+1);
   assert.equal(report.destino.entrega,1);assert.equal(report.destino.facturaPedido,1);
   for(const model of MODELS){
