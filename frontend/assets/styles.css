@@ -1,6 +1,8 @@
 @import url('vendor/fonts.css');
 
 :root {
+  --brand-wine: #681e2a;
+  --brand-cream: #fff3df;
   --brand-red: #c61025;
   --brand-dark: #920d1d;
   --ink: #302e2b;
@@ -10,8 +12,8 @@
   --surface: #fffaf1;
   --accent: #c61025;
   --brand-soft: #faf0ef;
-  --on-brand: #fff3df;
-  --footer-bg: #681e2a;
+  --on-brand: var(--brand-cream);
+  --footer-bg: var(--brand-wine);
   --footer-muted: #f0dcd2;
   --footer-accent: #ffdfaa;
   --white: #fff;

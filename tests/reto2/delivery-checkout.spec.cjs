@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 const {randomUUID}=require('node:crypto');
 
 test('checkout muestra tarifa pendiente, actualiza la cotización y exige revisar un cambio antes de confirmar',async({page,request})=>{

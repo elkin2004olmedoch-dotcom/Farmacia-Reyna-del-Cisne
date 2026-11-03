@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test'),OTP=require('otpauth');
+const {test,expect}=require('./browser-fixture.cjs'),OTP=require('otpauth');
 test('perfil administrativo activa MFA, guarda recuperación, verifica login y protege correos del listado',async({page,request},testInfo)=>{
  const admin=(await (await request.post('/api/auth/login',{data:{email:'admin-browser@example.ec',password:'AdminBrowser2026!'}})).json()).data;
  await page.request.post('/api/auth/web/exchange',{headers:{Authorization:'Bearer '+admin.token,Origin:'http://localhost:3300','X-Farmacia-Web':'1'},data:{}});await page.goto('/cuenta.html');

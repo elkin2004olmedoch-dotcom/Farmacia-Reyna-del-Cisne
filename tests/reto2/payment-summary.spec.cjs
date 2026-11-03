@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 
 test('el resumen ajusta un nombre válido sin espacios y conserva su importe dentro del panel móvil',async({page})=>{
   const id='81045b3e-f0c9-4e28-9269-57db344494aa',nombre='Producto'.repeat(15);

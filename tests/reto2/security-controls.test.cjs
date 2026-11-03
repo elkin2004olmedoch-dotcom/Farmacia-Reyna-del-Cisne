@@ -25,6 +25,9 @@ after(async()=>{
 function signed(options={},claims={}){
   return jwt.sign({version:0,...claims},process.env.JWT_SECRET,{algorithm:'HS256',subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m',...options});
 }
+test('la aplicación de negocio no expone el reinicio de las bases de prueba',async()=>{
+ await request.post('/_test/reset').set('X-Test-Reset','fixture').send({}).expect(404);
+});
 async function captureDiagnostics(flag,work){
   const previous=process.env.PERF_DIAGNOSTICS,original=console.info,messages=[];
   process.env.PERF_DIAGNOSTICS=flag;console.info=value=>messages.push(value);

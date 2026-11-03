@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 
 test('un error inicial del dashboard conserva el reintento por teclado',async({page})=>{
   await page.route('**/api/auth/me',route=>route.fulfill({json:{data:{id:'synthetic-admin',nombre:'Administrador de prueba',email:'admin@example.ec',role:'admin',activo:true}}}));

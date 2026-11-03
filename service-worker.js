@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'farmacia-reina-shell-cloud-2d6191ff05d1-sin-boton-whatsapp';
+const CACHE_NAME = 'farmacia-reina-shell-20261103-recursos-vigentes';
 const APP_FILES = [
   'js/mascota.js', 'frontend/controllers/mascota.js',
   'frontend/assets/mascotas/widget.css', 'frontend/assets/mascotas/widget-responsive.css',
@@ -34,7 +34,7 @@ const APP_FILES = [
   'assets/fonts/fuente-4.ttf', 'assets/fonts/fuente-5.ttf', 'assets/fonts/fuente-6.ttf',
   'assets/images/logo-reina-del-cisne.png', 'assets/images/farmacia-fachada-reina.png',
   'assets/images/farmacia-5.jpg', 'assets/images/farmacia-6.jpg', 'assets/images/farmacia-7.jpg',
-  'assets/images/farmacia-8.jpg', 'assets/images/farmacia-9.jpg', 'assets/images/producto-vitaminas.jpg',
+  'assets/images/farmacia-8.jpg', 'assets/images/producto-vitaminas.jpg',
   'assets/images/producto-solar-eucerin.png', 'assets/images/producto-botiquin.jpg',
   'assets/images/producto-bebe-pigeon.png'
 ];

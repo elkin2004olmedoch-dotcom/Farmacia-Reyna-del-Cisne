@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 const AxeBuilder=require('@axe-core/playwright').default;
 const {randomUUID}=require('node:crypto');
 const {certificateFixture,emitter,buyer}=require('./sri-fixture.cjs');
@@ -28,9 +28,10 @@ async function realTestOrder(page,headers){
   return {user,product,order:orders.sort((left,right)=>left.id.localeCompare(right.id)).at(-1)};
 }
 
-test('facturación protege los roles y valida emisor ecuatoriano y confirmación de producción por teclado',async({page})=>{
+test('facturación protege los roles y valida emisor ecuatoriano y confirmación de producción por teclado',async({page,browser,baseURL})=>{
   const headers=await staff(page);await resetEmitter(page,headers);expect((await page.request.get('/api/admin/facturacion/configuracion')).status()).toBe(401);const user=await customer(page);expect((await page.request.get('/api/admin/facturacion/configuracion',{headers:{Authorization:'Bearer '+user.token}})).status()).toBe(403);
-  const normal=await page.context().newPage();try{await normal.goto('/cuenta.html');await normal.locator('#login-email').fill(user.email);await normal.locator('#login-password').fill(user.password);await normal.locator('#login-form [type=submit]').click();await expect(normal.locator('#logout')).toBeVisible();await normal.goto('/admin.html?tabla=facturacion');await expect(normal.locator('#admin-area')).toBeHidden();await expect(normal.locator('#page-status')).toContainText('administradores');}finally{await normal.close();}
+  // Dos usuarios necesitan contextos separados: las cookies HttpOnly se comparten entre pestañas.
+  const normalContext=await browser.newContext({baseURL}),normal=await normalContext.newPage();try{await normal.goto('/cuenta.html');await normal.locator('#login-email').fill(user.email);await normal.locator('#login-password').fill(user.password);await normal.locator('#login-form [type=submit]').click();await expect(normal.locator('#logout')).toBeVisible();await normal.goto('/admin.html?tabla=facturacion');await expect(normal.locator('#admin-area')).toBeHidden();await expect(normal.locator('#page-status')).toContainText('administradores');}finally{await normalContext.close();}
   await loginAdmin(page);await page.goto('/admin.html?tabla=facturacion');await expect(page.locator('#billing-config-form')).toBeVisible();await expect(page.locator('#admin-records')).toBeHidden();
   await page.locator('#billing-ruc').fill('0000000000000');await page.locator('#billing-config-form [type=submit]').focus();await page.keyboard.press('Enter');await expect(page.locator('#billing-ruc')).toHaveAttribute('aria-invalid','true');await expect(page.locator('#billing-ruc')).toBeFocused();await page.locator('#billing-ruc').fill(emitter.ruc);
   await page.locator('#billing-establecimiento').fill('000');await page.locator('#billing-config-form [type=submit]').click();await expect(page.locator('#billing-establecimiento')).toHaveAttribute('aria-invalid','true');await page.locator('#billing-establecimiento').fill('001');

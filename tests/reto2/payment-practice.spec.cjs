@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test'),AxeBuilder=require('@axe-core/playwright').default;
+const {test,expect}=require('./browser-fixture.cjs'),AxeBuilder=require('@axe-core/playwright').default;
 test.use({serviceWorkers:'block'});
 async function setup(page,method='card'){
  const user={id:'practice-user',nombre:'Cliente Práctica',email:'practice@example.ec',telefono:'0991234567',role:'user',activo:true,emailVerifiedAt:'2026-11-02T12:00:00Z'};

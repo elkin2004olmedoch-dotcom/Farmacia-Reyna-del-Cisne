@@ -1,9 +1,9 @@
 import {escape} from './common.js';
 import {mapsDirectionsUrl,embedMapUrl} from '../models/deliveries.js';
 import {recentLocation} from './deliveries.js';
+import {pharmacy} from '../models/pharmacy.js';
 
-// This is the pharmacy's existing Maps search from the location section, not a GPS coordinate.
-const pharmacyUrl='https://www.google.com/maps/search/?api=1&query=Farmacia+Reina+del+Cisne+Puerto+Quito';
+const pharmacyUrl=pharmacy.mapsUrl;
 const active=order=>['pendiente','confirmado','preparado'].includes(order?.estado);
 const validDate=value=>typeof value==='string' && Number.isFinite(Date.parse(value));
 export function orderMapData(order,tracking=null,now=Date.now()){

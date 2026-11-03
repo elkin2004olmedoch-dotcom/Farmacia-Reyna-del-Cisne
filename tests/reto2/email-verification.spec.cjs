@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test');
+const {test,expect}=require('./browser-fixture.cjs');
 const AxeBuilder=require('@axe-core/playwright').default;
 const token='A'.repeat(43);
 const verifyPath='/api/auth/verify-email',resendPath='/api/auth/resend-verification';

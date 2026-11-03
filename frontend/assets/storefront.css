@@ -252,19 +252,19 @@ body:not(.admin-page):not(.admin-install-page) .cart-drawer-actions .button { wi
 }
 /* Identidad Reina del Cisne: vino, rojo y crema. */
 body:not(.admin-page):not(.admin-install-page) .site-shell{background:radial-gradient(ellipse at 0 0,#f3ded7,transparent 42rem),var(--surface)}
-body:not(.admin-page):not(.admin-install-page) .ref-header{border-top:5px solid var(--brand-red);border-bottom-color:#d4b5ac;background:#fff3df}
-body:not(.admin-page):not(.admin-install-page) .ref-store-intro{margin-top:28px;margin-bottom:30px;padding:42px clamp(22px,4vw,48px);border-radius:22px;background:#681e2a;color:#fff3df;box-shadow:0 16px 38px #681e2a16}
+body:not(.admin-page):not(.admin-install-page) .ref-header{border-top:5px solid var(--brand-red);border-bottom-color:#d4b5ac;background:var(--brand-cream)}
+body:not(.admin-page):not(.admin-install-page) .ref-store-intro{margin-top:28px;margin-bottom:30px;padding:42px clamp(22px,4vw,48px);border-radius:22px;background:var(--brand-wine);color:var(--brand-cream);box-shadow:0 16px 38px #681e2a16}
 body:not(.admin-page):not(.admin-install-page) .ref-store-intro .eyebrow{color:#ffdfaa}
 body:not(.admin-page):not(.admin-install-page) .ref-store-intro h1 em{color:#ffdfaa}
-body:not(.admin-page):not(.admin-install-page) .ref-store-intro-copy p{color:#fff3df}
-body:not(.admin-page):not(.admin-install-page) .ref-store-intro-copy .text-link{display:inline-flex;align-items:center;gap:12px;padding:12px 17px;border:1px solid #ffdfaa;border-radius:8px;background:#fff3df;color:#681e2a}
-body:not(.admin-page):not(.admin-install-page) .ref-store-category{overflow:hidden;border:1px solid #dec7b9;border-bottom:4px solid #920d1d;border-radius:14px;background:#f4eddf}
+body:not(.admin-page):not(.admin-install-page) .ref-store-intro-copy p{color:var(--brand-cream)}
+body:not(.admin-page):not(.admin-install-page) .ref-store-intro-copy .text-link{display:inline-flex;align-items:center;gap:12px;padding:12px 17px;border:1px solid #ffdfaa;border-radius:8px;background:var(--brand-cream);color:var(--brand-wine)}
+body:not(.admin-page):not(.admin-install-page) .ref-store-category{overflow:hidden;border:1px solid #dec7b9;border-bottom:4px solid var(--brand-dark);border-radius:14px;background:#f4eddf}
 body:not(.admin-page):not(.admin-install-page) .ref-store-category>span{padding-inline:18px}
-body:not(.admin-page):not(.admin-install-page) .ref-store-category .ref-store-category-arrow{right:12px;padding:0;color:#920d1d}
+body:not(.admin-page):not(.admin-install-page) .ref-store-category .ref-store-category-arrow{right:12px;padding:0;color:var(--brand-dark)}
 body:not(.admin-page):not(.admin-install-page) .ref-store-offers{border-color:#d6b6ae;border-radius:18px;background:#f3ded7}
 body:not(.admin-page):not(.admin-install-page) .ref-store-help{border-radius:18px;background:#681e2a}
-body:not(.admin-page):not(.admin-install-page) :is(.purchase-panel,.purchase-summary,.payment-summary){border-color:#dfc6b6;border-top:4px solid #920d1d;background:#fffaf1}
-body:not(.admin-page):not(.admin-install-page) :is(.purchase-heading,.payment-heading) h1{color:#681e2a}
+body:not(.admin-page):not(.admin-install-page) :is(.purchase-panel,.purchase-summary,.payment-summary){border-color:#dfc6b6;border-top:4px solid var(--brand-dark);background:#fffaf1}
+body:not(.admin-page):not(.admin-install-page) :is(.purchase-heading,.payment-heading) h1{color:var(--brand-wine)}
 body:not(.admin-page):not(.admin-install-page) .ref-store-intro :focus-visible{outline-color:#ffdfaa}
 @media(max-width:640px){body:not(.admin-page):not(.admin-install-page) .ref-store-intro{margin-top:16px;padding:28px 22px;gap:24px;border-radius:16px}}
-body:not(.admin-page):not(.admin-install-page) .ref-store-intro h1{color:#fff3df}
+body:not(.admin-page):not(.admin-install-page) .ref-store-intro h1{color:var(--brand-cream)}

@@ -1,4 +1,4 @@
-const {test,expect}=require('@playwright/test'),AxeBuilder=require('@axe-core/playwright').default;
+const {test,expect}=require('./browser-fixture.cjs'),AxeBuilder=require('@axe-core/playwright').default;
 test.use({serviceWorkers:'block'});
 async function setup(page,{destination=true,routeError=false,denied=false}={}){
  const user={id:'courier-map',nombre:'Repartidor Ruta',email:'ruta@example.ec',telefono:'0991234567',role:'repartidor',activo:true};

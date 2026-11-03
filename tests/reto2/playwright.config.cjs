@@ -1,5 +1,6 @@
 const {defineConfig}=require('@playwright/test');
 const path=require('node:path');
+process.env.PHARMACY_BROWSER_RESET_KEY ||= require('node:crypto').randomBytes(32).toString('hex');
 module.exports=defineConfig({
   testDir:__dirname,testMatch:'*.spec.cjs',testIgnore:'**/pages.spec.cjs',workers:1,fullyParallel:false,timeout:60000,
   outputDir:path.join(__dirname,'test-results/reto2-artifacts'),

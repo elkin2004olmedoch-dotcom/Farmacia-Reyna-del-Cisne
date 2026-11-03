@@ -4,8 +4,16 @@ import {events} from '../models/events.js';
 import {sessionView} from '../views/layout.js';
 import {message,busy} from '../views/common.js';
 import {cartDrawerController} from './cart-drawer.js';
+import {pharmacy} from '../models/pharmacy.js';
 export function layoutController() {
   const updateCustomerTools=cartDrawerController();
+  const locationDetails=document.getElementById('ubicacion'),locationMap=locationDetails?.querySelector?.('iframe[data-pharmacy-map]');
+  if(locationMap){
+    const show=()=>{if(!locationDetails.open)locationMap.removeAttribute('src');else if(locationMap.getAttribute('src')!==pharmacy.embedUrl)locationMap.src=pharmacy.embedUrl;};
+    const openFromLink=()=>{if(location.hash==='#ubicacion'){locationDetails.open=true;show();}};
+    locationDetails.addEventListener('toggle',show);globalThis.addEventListener('hashchange',openFromLink);openFromLink();
+    document.addEventListener('click',event=>{if(event.target.closest('a[href="#ubicacion"],a[href="index.html#ubicacion"]')){locationDetails.open=true;show();}});
+  }
   function update(){sessionView(auth.user,Object.values(cart.read()).reduce((sum,n)=>sum+n,0));updateCustomerTools?.();}
   update();for(const name of ['cart:changed','session:changed'])events.addEventListener(name,update);
   events.addEventListener('session:expired',()=>{
