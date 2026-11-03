@@ -19,7 +19,7 @@ export async function adminController() {
   if(!requireUser('admin.html',true))return;
   document.getElementById('admin-area').hidden=false;
   const requested=new URLSearchParams(location.search).get('tabla');
-  let name=[...editableSections,'pedidos','usuarios','detalles','fiscal','facturacion'].includes(requested)?requested:requested?'productos':'dashboard',page=1,result,editing=null,editingVersion=null,summarySnapshot='',requestId=0,openingId=0,previousFocus=null,stateFocus=null,lotRequest=0;
+  let name=[...editableSections,'pedidos','usuarios','detalles','auditoria','fiscal','facturacion'].includes(requested)?requested:requested?'productos':'dashboard',page=1,result,editing=null,editingVersion=null,summarySnapshot='',requestId=0,openingId=0,previousFocus=null,stateFocus=null,lotRequest=0;
   const dialog=document.getElementById('editor-dialog');const forms=Object.fromEntries(Object.entries(sectionForms).map(([section,id])=>[section,document.getElementById(id)]));
   const productImage=imageController(forms.productos,'product');const promoImage=imageController(forms.promociones,'promotion');
   const stateDialog=document.getElementById('order-state-dialog');const stateForm=document.getElementById('order-state-form');let stateOrder=null;

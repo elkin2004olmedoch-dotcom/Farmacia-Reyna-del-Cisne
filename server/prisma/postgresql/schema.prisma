@@ -52,6 +52,7 @@ model Usuario {
   passwordHash String
   role         String   @default("user")
   tokenVersion Int      @default(0)
+  tokenEpoch String?
   activo       Boolean  @default(true)
   emailVerifiedAt DateTime?
   emailVerificationRequired Boolean @default(false)
@@ -63,6 +64,7 @@ model Usuario {
   sesionesMoviles SesionMovil[]
   sesionesWeb SesionWeb[]
   passwordReset PasswordReset?
+  adminMfa AdminMfa?
   cambiosTarifa ZonaEntregaTarifa[]
   configuracionesFiscales ConfiguracionFiscal[]
   movimientos MovimientoInventario[]
@@ -431,4 +433,28 @@ model PasswordReset {
  tokenHash String @unique
  expiresAt DateTime
  createdAt DateTime @default(now())
+}
+
+model AdminMfa {
+ usuarioId String @id
+ usuario Usuario @relation(fields:[usuarioId],references:[id],onDelete:Restrict,onUpdate:Cascade)
+ secretCipher String
+ enabled Boolean @default(false)
+ setupExpiresAt DateTime?
+ lastCounter Int @default(-1)
+ recoveryHashes String @default("[]")
+ challengeHash String?
+ challengeUntil DateTime?
+ failedAttempts Int @default(0)
+ blockedUntil DateTime?
+}
+
+model AuditoriaAdmin {
+ id String @id @default(uuid())
+ actorId String
+ accion String
+ ruta String
+ status Int
+ createdAt DateTime @default(now())
+ @@index([createdAt,id])
 }

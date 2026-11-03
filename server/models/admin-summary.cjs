@@ -54,7 +54,9 @@ module.exports=async function summary(now=new Date()) {
     const trend=periods.map((period,index)=>({periodo:period.periodo,etiqueta:period.etiqueta,cantidad:monthly[index]._count._all,totalCentavos:cents(monthly[index]._sum.total)}));
     const vencidos=await tx.lote.count({where:{stock:{gt:0},vencimiento:{lt:ecuadorDay(now)},producto:{activo:true}}});
     const proximos=await tx.lote.count({where:{stock:{gt:0},vencimiento:{gte:ecuadorDay(now),lte:ecuadorDay(new Date(now.getTime()+90*86400000))},producto:{activo:true}}});
+    const lotAlerts=await tx.lote.findMany({where:{stock:{gt:0},vencimiento:{lte:ecuadorDay(new Date(now.getTime()+90*86400000))},producto:{activo:true}},select:{id:true,numero:true,vencimiento:true,stock:true,producto:{select:{nombre:true}}},orderBy:[{vencimiento:'asc'},{id:'asc'}],take:10});
     return {
+      lotesAlertas:lotAlerts,
       generadoEn:now.toISOString(),zonaHoraria:TIME_ZONE,umbralStock:LOW_STOCK,
       indicadores:{pedidosMes:{cantidad:trend[5].cantidad,totalCentavos:trend[5].totalCentavos},pedidosTotales:total,pedidosPendientes:states.find(state=>state.estado==='pendiente')?.cantidad || 0,productosActivos:products,clientesActivos:customers,administradoresActivos:administrators,stockBajo:lowStock,campanasVisibles:campaigns,lotesVencidos:vencidos,lotesPorVencer:proximos},
       estados:states,tendencia:trend,alertas:alerts,masVendidosPorCategoria:bestSellers,

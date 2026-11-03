@@ -9,6 +9,8 @@ export function layoutController() {
   function update(){sessionView(auth.user,Object.values(cart.read()).reduce((sum,n)=>sum+n,0));updateCustomerTools?.();}
   update();for(const name of ['cart:changed','session:changed'])events.addEventListener(name,update);
   events.addEventListener('session:expired',()=>{
+    // A first anonymous visit has no previous session to expire.
+    if(document.body.dataset.page==='home'&&document.body.hasAttribute('data-session-pending')&&!auth.user){auth.clear();return;}
     auth.clear();
     if(document.body.dataset.page==='account'){document.getElementById('account-area').replaceChildren();sessionStorage.setItem('farmacia-mvc-login-message','Tu sesión venció. Inicia sesión nuevamente para editar tu perfil.');location.replace('cuenta.html');return;}
     if(document.body.dataset.page==='admin'){

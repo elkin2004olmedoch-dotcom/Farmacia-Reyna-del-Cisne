@@ -2,8 +2,8 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
-const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','sesionWeb','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','pagoPractica','semilla']);
-const privateActions=new Set(['emailVerification','passwordReset','sesionWeb']);
+const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','adminMfa','sesionWeb','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','pagoPractica','auditoriaAdmin','semilla']);
+const privateActions=new Set(['emailVerification','passwordReset','sesionWeb','adminMfa']);
 const INITIAL_FISCAL=Object.freeze({id:'iva-general-inicial',tarifaGeneral:15,inicioVigencia:'2024-04-01T05:00:00.000Z',referenciaNormativa:'Ley de Régimen Tributario Interno, art. 65; Decreto Ejecutivo 198; Circular SRI NAC-DGECCGC25-00000006 (vigencia 2026).',actorId:null});
 const INITIAL_DEFAULTS=Object.freeze({
   configuracionFiscal:INITIAL_FISCAL,
@@ -55,10 +55,11 @@ async function readSnapshot(source){
   },{maxWait:10000,timeout:120000});
 }
 function assertSnapshotRelations(snapshot){
+  if(snapshot.adminMfa?.length)fail('SOURCE_MFA_ACTIVE','El origen tiene un segundo factor configurado. Transfiere la base con un respaldo completo; el importador no desactiva ni copia secretos MFA entre entornos.');
   const ids={};
   for(const model of MODELS){
     if(!Array.isArray(snapshot[model]))fail('SOURCE_DATA','La base local no contiene todas las entidades esperadas.');
-    const keys=snapshot[model].map(row=>['emailVerification','passwordReset'].includes(model)?row.usuarioId:row.id);
+    const keys=snapshot[model].map(row=>['emailVerification','passwordReset','adminMfa'].includes(model)?row.usuarioId:row.id);
     ids[model]=new Set(keys);
     if(ids[model].size!==snapshot[model].length || keys.some(id=>typeof id!=='string' || !id))fail('SOURCE_DATA','La base local contiene identificadores inválidos.');
   }

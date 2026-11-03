@@ -5,6 +5,7 @@ const {AppError}=require('../middleware/errors.cjs');
 const provider=require('./payphone.cjs');
 const select={id:true,userId:true,estado:true,total:true,subtotalProductos:true,costoEnvioCentavos:true,ivaMonto:true,envioIvaPorcentaje:true,envioBaseImponible:true,envioIvaMonto:true,createdAt:true,updatedAt:true,pago:true,pagoPractica:true,detalles:{select:{nombreProducto:true,cantidad:true,precioUnitario:true,totalLinea:true,ivaPorcentaje:true,baseImponible:true,ivaMonto:true}}};
 const practiceAvailable=()=>process.env.PAYMENT_PRACTICE_ENABLED==='true';
+function validPractice(value){return Boolean(value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).every(key=>['metodo','marca'].includes(key))&&(value.metodo==='transfer'?value.marca==null:value.metodo==='card'&&typeof value.marca==='string'&&Object.hasOwn(require('../../frontend/models/card-policy.js').brands,value.marca)));}
 function cents(value) {const decimal=new Prisma.Decimal(value).mul(100);if(!decimal.isInteger() || decimal.lt(0) || decimal.gt(2147483647))throw new AppError(409,'PAYMENT_SNAPSHOT_INVALID','El importe histórico necesita revisión de la farmacia.');return decimal.toNumber();}
 function transferConfiguration(){
  const banco=(process.env.TRANSFER_BANK_NAME||'').trim(),titular=(process.env.TRANSFER_ACCOUNT_HOLDER||'').trim(),numeroCuenta=process.env.TRANSFER_ACCOUNT_NUMBER||'',tipo=process.env.TRANSFER_ACCOUNT_TYPE||'';
@@ -101,4 +102,4 @@ async function confirm(transactionId,clientTransactionId) {
  } catch {await db.pago.updateMany({where:{id:pago.id,estado:'revision',revisionMotivo:'confirmacion_en_curso'},data:{revisionMotivo:'confirmacion_incierta',urlPago:null}});}
  return provider.storefront(pago.pedidoId);
 }
-module.exports={find,start,confirm,practice};
+module.exports={validPractice,practiceAvailable,transferConfiguration,find,start,confirm,practice};

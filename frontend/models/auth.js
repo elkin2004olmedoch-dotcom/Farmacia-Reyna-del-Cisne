@@ -12,8 +12,9 @@ export const auth={
     if(legacy){await request('/auth/web/exchange',{method:'POST',headers:{Authorization:'Bearer '+legacy},body:{}});sessionStorage.removeItem('farmacia-mvc-token');}
     const user=await request('/auth/me');if(generation===saved)current=user;return current;
   },
-  async login(values){return this.save(await request('/auth/login',{method:'POST',body:values}));},
+  async login(values){const result=await request('/auth/login',{method:'POST',body:values});return result.mfaRequired?result:this.save(result);},
   async register(values){const result=await request('/auth/register',{method:'POST',body:values});return result.requiresEmailVerification?result:this.save(result);},
+  async mfaLogin(challenge,code){return this.save(await request('/auth/mfa/login',{method:'POST',body:{challenge,code}}));},
   verifyEmail:token=>request('/auth/verify-email',{method:'POST',body:{token}}),
   resendVerification:email=>request('/auth/resend-verification',{method:'POST',body:{email}}),
   async updateProfile(values){const id=current?.id,saved=generation;const user=await request('/auth/me',{method:'PUT',body:values});if(!current||current.id!==id||generation!==saved)throw new Error('Tu sesión cambió. Inicia sesión nuevamente.');current=user;events.dispatchEvent(new Event('session:changed'));return current;},

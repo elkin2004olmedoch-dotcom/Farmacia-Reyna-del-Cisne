@@ -120,6 +120,16 @@ async function restoreBackup({from,targetDatabase=databaseFile(),backupRoot=BACK
     try{
       const verification=await stagedClient.$queryRawUnsafe("SELECT name FROM sqlite_master WHERE type='table' AND name='EmailVerification'");
       if(verification.length)await stagedClient.$executeRawUnsafe('DELETE FROM "EmailVerification"');
+      const tables=await stagedClient.$queryRawUnsafe("SELECT name FROM sqlite_master WHERE type='table'");
+      const has=name=>tables.some(row=>row.name===name);
+      const userColumns=await stagedClient.$queryRawUnsafe('PRAGMA table_info("Usuario")');
+      if(!userColumns.some(column=>column.name==='tokenEpoch'))throw new Error('Actualiza el esquema del respaldo en una copia aislada antes de restaurar.');
+      // A version from an old snapshot can match a token issued after that snapshot.
+      await stagedClient.$executeRawUnsafe('UPDATE "Usuario" SET "tokenVersion"="tokenVersion"+1,"tokenEpoch"=?',randomUUID());
+      if(has('PasswordReset'))await stagedClient.$executeRawUnsafe('DELETE FROM "PasswordReset"');
+      for(const table of ['SesionWeb','SesionMovil'])if(has(table))await stagedClient.$executeRawUnsafe(`UPDATE "${table}" SET "revokedAt"=CURRENT_TIMESTAMP`);
+      if(has('AdminMfa'))await stagedClient.$executeRawUnsafe('UPDATE "AdminMfa" SET "challengeHash"=NULL,"challengeUntil"=NULL,"recoveryHashes"=\'[]\',"lastCounter"=?,"setupExpiresAt"=CURRENT_TIMESTAMP',Math.floor(Date.now()/30000));
+      if(has('Entrega'))await stagedClient.$executeRawUnsafe('UPDATE "Entrega" SET "latitud"=NULL,"longitud"=NULL,"precision"=NULL,"registradaAt"=NULL,"recibidaAt"=NULL,"sesionSeguimientoId"=NULL,"gpsVersion"="gpsVersion"+1');
     }finally{await stagedClient.$disconnect();}
     // Uploaded paths are immutable UUIDs; publish their verified bytes before the DB.
     for(const file of checked.manifest.archivos.filter(item=>item.referencia)){

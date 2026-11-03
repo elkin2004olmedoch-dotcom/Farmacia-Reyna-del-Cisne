@@ -90,8 +90,9 @@ export function createAdminCommandExecutor({model=administration,deliveryModel=d
         proposal=command;
         const details=command.changes||command.values||{estado:command.estado,pedidoId:command.pedidoId,repartidorId:command.repartidorId};
         const labels={precio:'Precio (USD)',stock:'Stock',tarifaCentavos:'Tarifa de envío (centavos)',descuentoPorcentaje:'Descuento (%)',titulo:'Título',descripcion:'Descripción',fin:'Válida hasta (Ecuador)',estado:'Nuevo estado'};
+        const before=command.product?`Precio actual: USD ${Number(command.product.precio).toFixed(2)} · Stock actual: ${command.product.stock}\n`:command.zone?`Tarifa actual: ${command.zone.tarifaCentavos==null?'Pendiente':'USD '+(command.zone.tarifaCentavos/100).toFixed(2)}\n`:'';
         const changes=Object.entries(details).filter(([key,value])=>value!==undefined&&value!==null&&!['productoId','orden','vistaPrevia','imagen','alt'].includes(key)).map(([key,value])=>`${labels[key]||key}: ${key==='fin'?ecuadorCommandDay(value):value}`).join('\n');
-        return {type:'confirmation',text:`Revisa la orden: ${command.product?.nombre||command.id||command.type}\n${changes}\n¿Confirmas guardar este cambio?`,actions:[{label:'Sí, confirmar',command:'confirmar'},{label:'No, cancelar',command:'cancelar'}]};
+        return {type:'confirmation',text:`Revisa la orden: ${command.product?.nombre||command.id||command.type}\n${before}${changes}\n¿Confirmas guardar este cambio?`,actions:[{label:'Sí, confirmar',command:'confirmar'},{label:'No, cancelar',command:'cancelar'}]};
       }
       }
       if(command.type==='help')return reply(Object.values(instructions).join('\n\n'));
@@ -147,6 +148,13 @@ export function adminCompanionController({refresh=()=>{},navigate,openEditor}={}
   template.innerHTML=`<aside class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">ASISTENTE LOCAL DE LA FARMACIA</span><h2 id="title">Farmi te ayuda a gestionar</h2><p>Catálogo, pedidos y entregas</p></div><button class="close" id="close" type="button" aria-label="Cerrar asistente">×</button></header><div class="messages" id="messages" role="log" aria-label="Asistente de administración" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Ayuda rápida de administración"></nav><form id="form"><label for="input" class="sr-only">Escribe una orden para el panel</label><input id="input" maxlength="3000" autocomplete="off" placeholder="Ej. actualiza precio de…" required><button type="submit" aria-label="Enviar orden">↑</button></form><p class="local-note">No uso servicios externos · los cambios se guardan con tu sesión de administrador</p></section><button class="launcher" id="launcher" type="button" aria-label="Abrir asistente administrativo" aria-expanded="false" aria-controls="panel"><img src="${new URL('art/farmi-base.png',ASSETS).href}" alt=""><span><span class="online" aria-hidden="true"></span> Ayuda administrativa</span><span aria-hidden="true">↗</span></button></aside>`;
   root.append(style,conversationStyle,template.content.cloneNode(true));document.body.append(host);
   const find=selector=>root.querySelector(selector);
+  const motionButton=document.createElement('button');motionButton.type='button';motionButton.id='motion-toggle';motionButton.className='motion-toggle';find('#launcher').after(motionButton);
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
+  const savedMotion=()=>{try{return localStorage.getItem('farmacia-motion');}catch{return null;}};
+  let motionPaused=savedMotion()==='paused'||savedMotion()===null&&reducedMotion.matches;
+  function applyMotion(){host.dataset.motion=motionPaused?'paused':'active';motionButton.textContent=motionPaused?'▶':'Ⅱ';motionButton.setAttribute('aria-label',motionPaused?'Activar movimiento de Farmi':'Pausar movimiento de Farmi');motionButton.setAttribute('aria-pressed',String(motionPaused));motionButton.title=motionPaused?'Movimiento pausado; pulsa para activarlo.':'Pausar movimiento';}
+  motionButton.addEventListener('click',()=>{motionPaused=!motionPaused;try{localStorage.setItem('farmacia-motion',motionPaused?'paused':'active');}catch{}applyMotion();});
+  reducedMotion.addEventListener('change',()=>{if(savedMotion()===null){motionPaused=reducedMotion.matches;applyMotion();}});applyMotion();
   function append(text,type='bot'){
     const item=document.createElement('div');item.className=`message ${type}`;
     const paragraph=document.createElement('p');paragraph.textContent=text;item.append(paragraph);

@@ -4,7 +4,7 @@ const confirmation=text=>({text,actions:[{label:'Sí, confirmar',command:'confir
 export function createCustomerCommandExecutor({catalog,cart,allowed=()=>true,navigate=()=>{}}){
   let proposal=null,busy=false;
   const signature=()=>JSON.stringify(Object.entries(cart.read()).sort(([a],[b])=>a.localeCompare(b)));
-  const review=(action,product,quantity)=>{proposal={action,product,quantity,signature:signature()};return confirmation(action==='add'?`Agregar ${quantity} × ${product.nombre} a $${Number(product.precio).toFixed(2)} por unidad. ¿Confirmas?`:action==='remove'?`Quitar ${product.nombre} del carrito. ¿Confirmas?`:action==='clear'?'Vaciar todos los productos del carrito. ¿Confirmas?':'Abrir el checkout para revisar tu compra. El pedido se confirma allí. ¿Continuamos?');};
+  const review=(action,product,quantity)=>{proposal={action,product,quantity,signature:signature()};return confirmation(action==='add'?`Agregar ${quantity} × ${product.nombre} a $${Number(product.precio).toFixed(2)} por unidad. Subtotal de esta selección: ${(Number(product.precio)*quantity).toFixed(2)}; el envío se revisa en la compra. ¿Confirmas?`:action==='remove'?`Quitar ${product.nombre} del carrito. ¿Confirmas?`:action==='clear'?'Vaciar todos los productos del carrito. ¿Confirmas?':'Abrir el checkout para revisar tu compra. El pedido se confirma allí. ¿Continuamos?');};
   return async text=>{
     if(busy)return {text:'Espera a que termine la solicitud anterior.'};busy=true;
     try{
