@@ -1,10 +1,10 @@
 const {test,expect}=require('@playwright/test'),AxeBuilder=require('@axe-core/playwright').default;
 test.use({serviceWorkers:'block'});
-async function setup(page,{destination=true,routeError=false}={}){
+async function setup(page,{destination=true,routeError=false,denied=false}={}){
  const user={id:'courier-map',nombre:'Repartidor Ruta',email:'ruta@example.ec',telefono:'0991234567',role:'repartidor',activo:true};
  const item={id:'delivery-map',pedidoId:'order-map',estado:'asignada',estadoPedido:'preparado',version:1,gpsVersion:0,repartidorId:user.id,destino:{nombre:'Cliente Ruta',direccion:'Calle principal 123',ciudad:'Puerto Quito',provincia:'Pichincha',telefono:'0991234567',latitud:destination?.125:null,longitud:destination?-79.25:null}},routes=[],states=[];
  await page.clock.install();
- await page.addInitScript(()=>{sessionStorage.setItem('farmacia-mvc-token','synthetic-map-session');window.gpsFixture={callback:null,cleared:0};Object.defineProperty(navigator,'geolocation',{value:{watchPosition(callback){window.gpsFixture.callback=callback;return 1;},clearWatch(){window.gpsFixture.cleared++;}}});});
+ await page.addInitScript(({denied})=>{sessionStorage.setItem('farmacia-mvc-token','synthetic-map-session');window.gpsFixture={callback:null,cleared:0,denied};Object.defineProperty(navigator,'geolocation',{value:{getCurrentPosition(success,error){if(window.gpsFixture.denied)error({code:1});else success({coords:{latitude:.12,longitude:-79.24},timestamp:Date.now()});},watchPosition(callback){window.gpsFixture.callback=callback;return 1;},clearWatch(){window.gpsFixture.cleared++;}}});},{denied});
  await page.route('https://tile.openstreetmap.org/**',route=>route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==','base64')}));
  await page.route('**/api/auth/me',route=>route.fulfill({json:{ok:true,data:user}}));
  await page.route('**/api/entregas?*',route=>route.fulfill({json:{ok:true,data:{items:[structuredClone(item)],total:1,page:1,pageSize:20}}}));
@@ -13,7 +13,7 @@ async function setup(page,{destination=true,routeError=false}={}){
  await page.route('**/api/entregas/delivery-map/ruta',route=>{
   const body=route.request().postDataJSON();routes.push(body);
   if(routeError)return route.fulfill({status:503,json:{ok:false,error:{code:'ROUTE_UNAVAILABLE',message:'No se pudo calcular una ruta por las calles.'}}});
-  return route.fulfill({json:{ok:true,data:{geometry:{type:'LineString',coordinates:[[body.longitud,body.latitud],[-79.26,.128],[body.longitudDestino??-79.25,body.latitudDestino??.125]]},distance:1800,duration:300}}});
+  return route.fulfill({json:{ok:true,data:{destino:{latitud:.125,longitud:-79.25,fuente:destination?'cliente':'direccion'},geometry:{type:'LineString',coordinates:[[body.longitud,body.latitud],[-79.26,.128],[-79.25,.125]]},distance:1800,duration:300}}});
  });
  await page.goto('/entregas.html');await expect(page.getByRole('button',{name:'Iniciar recorrido',exact:true})).toBeVisible();return {routes,states};
 }
@@ -36,10 +36,14 @@ test('repartidor inicia, ve ruta trazada, actualiza su posición y cierra la ent
  await page.getByRole('button',{name:'Pedido entregado',exact:true}).click();await expect(page.locator('#confirm-dialog')).toBeVisible();await page.locator('#confirm-dialog [value=confirm]').click();
  await expect(page.locator('#courier-route-panel')).toBeHidden();await expect(page.locator('.courier-route-map')).toHaveCount(0);await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);expect(states.map(value=>value.estado)).toEqual(['en_camino','en_destino','entregada']);
 });
-test('sin punto GPS permite confirmar el destino con teclado y no dibuja una ruta si falla el proveedor',async({page})=>{
- const {routes}=await setup(page,{destination:false,routeError:true});await page.getByRole('button',{name:'Iniciar recorrido',exact:true}).click();await capture(page);
- await page.getByLabel('Latitud del destino',{exact:true}).fill('0.125');await page.getByLabel('Longitud del destino',{exact:true}).fill('-79.25');
- await page.getByRole('button',{name:'Confirmar destino de navegación'}).focus();await page.keyboard.press('Enter');
- await expect(page.locator('.courier-route-status')).toContainText('No se pudo calcular');expect(routes[0]).toEqual({latitud:.12,longitud:-79.24,latitudDestino:.125,longitudDestino:-79.25});
+test('abrir ruta obtiene mi ubicación y resuelve la dirección sin campos ni cambios de estado',async({page})=>{
+ const {routes,states}=await setup(page,{destination:false});await page.getByRole('button',{name:'Ver ruta en la app'}).click();
+ await expect(page.locator('.courier-route-status')).toContainText('Ruta actualizada');expect(routes[0]).toEqual({latitud:.12,longitud:-79.24});expect(states).toEqual([]);
+ await expect(page.locator('.courier-route input')).toHaveCount(0);await expect(page.getByText('Latitud del destino')).toHaveCount(0);
+});
+test('GPS denegado permite reintentar y un error del proveedor no dibuja ruta inventada',async({page})=>{
+ const {routes}=await setup(page,{destination:false,routeError:true,denied:true});await page.getByRole('button',{name:'Ver ruta en la app'}).click();
+ await expect(page.locator('.courier-route-status')).toContainText('Permite la ubicación');expect(routes).toEqual([]);await page.evaluate(()=>window.gpsFixture.denied=false);
+ await page.getByRole('button',{name:'Usar mi ubicación',exact:true}).click();await expect(page.locator('.courier-route-status')).toContainText('No se pudo calcular');expect(routes[0]).toEqual({latitud:.12,longitud:-79.24});
  await expect(page.locator('.leaflet-overlay-pane path[stroke="#b51c36"]')).toHaveCount(0);
 });

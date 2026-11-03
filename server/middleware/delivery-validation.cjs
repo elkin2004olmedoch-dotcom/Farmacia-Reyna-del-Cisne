@@ -17,7 +17,7 @@ const assign=[only(['pedidoId','repartidorId','esperadoVersion']),id('pedidoId')
 const state=[only(['estado','esperadoVersion']),body('estado').isIn(['en_camino','en_destino','entregada','cancelada']),integer('esperadoVersion'),V.validated];
 const location=[only(['latitud','longitud','precision','registradaAt','esperadoGpsVersion']),finite('latitud',-90,90),finite('longitud',-180,180),finite('precision',0,10000),body('registradaAt').isString().bail().isISO8601({strict:true,strictSeparator:true}).bail().matches(/(?:Z|[+-]\d{2}:\d{2})$/),integer('esperadoGpsVersion',0),V.validated];
 const list=[query('estado').optional().isIn(['asignada','en_camino','en_destino','entregada','cancelada']),...V.pagination];
-const route=[only(['latitud','longitud','latitudDestino','longitudDestino']),finite('latitud',-90,90),finite('longitud',-180,180),finite('latitudDestino',-90,90).optional(),finite('longitudDestino',-180,180).optional(),body('latitudDestino').custom((value,{req})=>(value===undefined)===(req.body.longitudDestino===undefined)),V.validated];
+const route=[only(['latitud','longitud']),finite('latitud',-90,90),finite('longitud',-180,180),V.validated];
 function validateBuyerDelivery(value){
  const original=['name','email','phone','documentType','document','delivery','province','city','address','postalCode'];
  if(Object.entries(value).some(([key,v])=>original.includes(key)&&typeof v!=='string'))return false;

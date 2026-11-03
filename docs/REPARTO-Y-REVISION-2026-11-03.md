@@ -54,3 +54,9 @@ Se mantiene Render Free por elección del propietario. Puede haber suspensión p
 - Sin cambios de esquemas/migraciones ni versiones de dependencias npm. Leaflet 1.9.4 es la biblioteca adicional necesaria para el mapa; su licencia se distribuye con la web y el APK.
 
 Referencias de implementación: [asignación](../server/models/entregas.cjs#L51), [proveedor de ruta](../server/models/rutas.cjs#L9), [autorización de la ruta](../server/routes/entregas.cjs#L20), [retirada de posición local](../mobile/src/tracker.js#L22). La evidencia de despliegue y los archivos locales de prueba se conservan en el informe privado de la entrega.
+
+### Actualización de ruta automática (0.3.0)
+
+Al abrir Ver ruta en la app se solicita la ubicación actual, también para consultar un pedido que todavía no ha salido. No se muestran campos de latitud/longitud ni se requiere confirmar un punto manual. Cuando falta el GPS de destino, el backend busca la dirección guardada con Nominatim: sólo acepta resultados específicos que coinciden con la calle o lugar y el cantón en Ecuador. Una calle se indica como aproximada; no se sustituye una dirección desconocida por el centro de la ciudad. Si el permiso se deniega se permite reintentar desde Usar mi ubicación; si no hay resultado o es ambiguo, la farmacia debe precisar la dirección. La captura continua del reparto comienza con Iniciar recorrido y conserva los controles existentes.
+
+La búsqueda usa únicamente la dirección, provincia y cantón, sin nombre, teléfono, correo o productos. Caché de proceso y deduplicación, máximo una búsqueda cada 1,1 segundos y hasta cinco búsquedas pendientes. GEOCODING_ORIGIN permite cambiar el servicio compatible desde el backend sin actualizar la app. No hay autocompletado ni búsqueda periódica cuando la dirección no se encontró. El permiso de ubicación del sistema sigue siendo necesario.

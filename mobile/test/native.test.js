@@ -39,3 +39,14 @@ test('Android exige permiso visible de notificación; iOS no solicita permiso in
 test('secretos aleatorios usan getRandomValues y se puede abrir configuración nativa',async()=>{
   const options=dependencies(),runtime=await createNativeRuntime(options);assert.deepEqual(runtime.randomBytes(32),new Uint8Array(32).fill(7));assert.throws(()=>runtime.randomBytes(0));await runtime.openSettings();assert(options.calls.some(call=>call[0]==='settings'));
 });
+
+test('vista previa obtiene GPS nativo y retira su observador incluso si el permiso se deniega',async()=>{
+ for(const denied of [false,true]){
+  const options=dependencies('android'),removed=[];
+  options.gps.addWatcher=async(values,callback)=>{assert.equal(values.requestPermissions,true);callback(denied?null:{latitude:.12,longitude:-79.24,time:Date.now()},denied?{code:'NOT_AUTHORIZED'}:undefined);return 'preview';};
+  options.gps.removeWatcher=async({id})=>removed.push(id);
+  const runtime=await createNativeRuntime(options);
+  if(denied)await assert.rejects(()=>runtime.locate(),error=>error.code==='NOT_AUTHORIZED');else assert.equal((await runtime.locate()).latitud,.12);
+  assert.deepEqual(removed,['preview']);
+ }
+});

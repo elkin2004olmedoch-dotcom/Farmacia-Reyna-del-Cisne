@@ -34,7 +34,7 @@ test('ruta autoriza propietario y rol antes de contactar proveedor, rechaza camp
  await api.post(route).set('Authorization','Bearer '+token(second)).send(body).expect(404);
  await api.post(route).set('Authorization','Bearer '+token(courier)).send({...body,url:'https://127.0.0.1'}).expect(422);
  await api.post(route).set('Authorization','Bearer '+token(courier)).send({latitud:'0.12',longitud:-79.24}).expect(422);
- const missing=await api.post(route).set('Authorization','Bearer '+token(courier)).send(body).expect(409);assert.equal(missing.body.error.code,'DESTINATION_REQUIRED');
+ const geocoder=require('../../server/models/geocoding.cjs'),saved=geocoder.resolve;geocoder.resolve=async()=>{throw new (require('../../server/middleware/errors.cjs').AppError)(409,'ADDRESS_NOT_FOUND','Dirección no encontrada.');};try{const missing=await api.post(route).set('Authorization','Bearer '+token(courier)).send(body).expect(409);assert.equal(missing.body.error.code,'ADDRESS_NOT_FOUND');}finally{geocoder.resolve=saved;}
 });
 test('proveedor de rutas: GeoJSON real, límites, sin credenciales, sin líneas inventadas y sin respuestas tardías a entregas cerradas',async()=>{
  const {createRouting}=require('../../server/models/rutas.cjs');let calls=0,closed=false,now=0;

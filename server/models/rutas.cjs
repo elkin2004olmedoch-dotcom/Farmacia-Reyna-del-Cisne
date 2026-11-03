@@ -3,17 +3,18 @@ const {AppError}=require('../middleware/errors.cjs');
 const fail=(code,message,status=409)=>{throw new AppError(status,code,message);};
 const point=(lat,lon)=>typeof lat==='number' && typeof lon==='number' && Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat)<=90 && Math.abs(lon)<=180;
 const meters=(a,b)=>{const rad=Math.PI/180,dlat=(b[1]-a[1])*rad,dlon=(b[0]-a[0])*rad,s=Math.sin(dlat/2)**2+Math.cos(a[1]*rad)*Math.cos(b[1]*rad)*Math.sin(dlon/2)**2;return 12742000*Math.asin(Math.min(1,Math.sqrt(s)));};
-function createRouting({find=(...args)=>require('./entregas.cjs').find(...args),fetch=globalThis.fetch,now=Date.now}={}){
+function createRouting({find=(...args)=>require('./entregas.cjs').find(...args),resolve=value=>require('./geocoding.cjs').resolve(value),fetch=globalThis.fetch,now=Date.now}={}){
  const cache=new Map();let availableAt=0;
  const open=item=>{if(!['asignada','en_camino','en_destino'].includes(item.estado)||!item.destino)fail('DELIVERY_CLOSED','Esta entrega ya no admite navegación.');return item;};
  return {async calculate(id,user,input){
   const item=open(await find(id,user));
   for(const [key,value]of cache)if(value.expires<=now())cache.delete(key);
   const destination=item.destino;
-  const stored=point(destination.latitud,destination.longitud);
-  if(stored && (input.latitudDestino!==undefined || input.longitudDestino!==undefined))fail('DESTINATION_ALREADY_DEFINED','Usa el destino autorizado del pedido.');
-  const end=stored?[destination.longitud,destination.latitud]:[input.longitudDestino,input.latitudDestino],start=[input.longitud,input.latitud];
-  if(!point(end[1],end[0]))fail('DESTINATION_REQUIRED','Ubica y confirma el destino en el mapa para calcular la ruta.');
+  if(input.latitudDestino!==undefined || input.longitudDestino!==undefined)fail('DESTINATION_ALREADY_DEFINED','La ruta utiliza la dirección del pedido.');
+  const target=point(destination.latitud,destination.longitud)?{latitud:destination.latitud,longitud:destination.longitud,fuente:'cliente'}:await resolve(destination);
+  open(await find(id,user));
+  const end=[target.longitud,target.latitud],start=[input.longitud,input.latitud];
+  if(!point(end[1],end[0]))fail('ADDRESS_NOT_FOUND','No se pudo encontrar el destino del pedido.');
   if(!point(start[1],start[0]) || meters(start,end)>100000)fail('ROUTE_OUTSIDE_AREA','No se puede calcular un recorrido local entre esos puntos.');
   const key=id+':'+[...start,...end].map(value=>value.toFixed(5)).join(',');
   const saved=cache.get(key);if(saved)return saved.data;
@@ -34,8 +35,8 @@ function createRouting({find=(...args)=>require('./entregas.cjs').find(...args),
   }catch{fail('ROUTE_UNAVAILABLE','No se pudo calcular una ruta por las calles. Comprueba la conexión y vuelve a intentarlo.',503);}
   // Never keep a transaction open during a provider request; authorize again after it.
   const latest=open(await find(id,user));
-  if(latest.destino.latitud!==destination.latitud || latest.destino.longitud!==destination.longitud)fail('DESTINATION_CHANGED','El destino cambió. Actualiza la entrega.');
-  const result={geometry:route.geometry,distance:route.distance,duration:route.duration,calculatedAt:new Date(now()).toISOString(),provider:'OSRM · FOSSGIS',attribution:'© OpenStreetMap contributors'};
+  if(['latitud','longitud','direccion','ciudad','provincia'].some(key=>latest.destino[key]!==destination[key]))fail('DESTINATION_CHANGED','El destino cambió. Actualiza la entrega.');
+  const result={geometry:route.geometry,destino:target,distance:route.distance,duration:route.duration,calculatedAt:new Date(now()).toISOString(),provider:'OSRM · FOSSGIS',attribution:'© OpenStreetMap contributors'};
   if(cache.size>=100)cache.delete(cache.keys().next().value);cache.set(key,{data:result,expires:now()+30000});return result;
  }};
 }
