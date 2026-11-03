@@ -6,7 +6,7 @@ const prescriptionNote=product=>`<p class="prescription-note">${escape(restricti
 const categoryLabel=category=>({bienestar:'Bienestar',cuidado:'Cuidado personal',bebe:'Mamá y bebé'}[category] || 'Productos');
 export function productCard(product) {
   const id=escape(product.id),url='producto.html?id='+encodeURIComponent(product.id),review=requiresProfessionalReview(product);
-  const metadata=[['Presentación',product.presentacion],['Laboratorio',product.laboratorio]].filter(([,value])=>value);
+  const metadata=[['Presentación',product.presentacion],['Laboratorio o marca',product.laboratorio]].filter(([,value])=>value);
   return `<article class="featured-card pharmacy-product-card" aria-labelledby="name-${id}">
     <a class="featured-image" href="${url}"><img data-product-image src="${escape(productImageUrl(product.imagen))}" alt="${escape(product.alt || product.nombre)}" width="320" height="320" loading="lazy">${product.stock===0?'<span class="product-sold-out">Agotado</span>':''}${promotionRibbon(product.descuentoPorcentaje)}</a>
     <div class="product-card-copy"><small>${escape(categoryLabel(product.categoria))}</small><h3 id="name-${id}"><a href="${url}">${escape(product.nombre)}</a></h3>
@@ -25,7 +25,7 @@ export function catalogView(products,target) {
 }
 export function productView(product) {
   const review=requiresProfessionalReview(product);
-  const fields=[['Laboratorio','laboratorio'],['Principio activo','principioActivo'],['Concentración','concentracion'],['Presentación','presentacion'],['Registro sanitario','registroSanitario']].filter(([,key])=>product[key]);
+  const fields=[['Laboratorio o marca','laboratorio'],['Principio activo','principioActivo'],['Concentración','concentracion'],['Presentación','presentacion'],['Registro sanitario','registroSanitario']].filter(([,key])=>product[key]);
   const ficha=fields.length?`<section class="pharmaceutical-sheet" aria-labelledby="pharmaceutical-title"><h2 id="pharmaceutical-title">Información del producto</h2><dl>${fields.map(([label,key])=>`<div><dt>${label}</dt><dd>${escape(product[key])}</dd></div>`).join('')}</dl></section>`:'';
   document.getElementById('product-detail').innerHTML=`<section class="product-detail-grid" aria-labelledby="product-title">
     <div class="product-detail-media"><button type="button" id="zoom-product" class="product-main-image" aria-label="Ampliar imagen de ${escape(product.nombre)}"><img data-product-image src="${escape(productImageUrl(product.imagen))}" alt="${escape(product.alt || product.nombre)}" width="600" height="600" fetchpriority="high"><span>Ampliar imagen ↗</span></button><a class="text-link product-back-link" href="catalogo.html">← Seguir explorando el catálogo</a></div>

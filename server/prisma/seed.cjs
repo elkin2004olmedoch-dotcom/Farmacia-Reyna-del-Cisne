@@ -21,7 +21,7 @@ async function seed() {
       // Adopt their current state instead of recreating a campaign the admin deleted.
       const legacyCatalog=await tx.producto.count({where:{id:{in:products.map(product=>product.id)}}});
       if(legacyCatalog===0) {
-        for(const product of products)await tx.producto.upsert({where:{id:product.id},update:{},create:{id:product.id,nombre:product.name,precio:product.price,stock:20,categoria:product.category,descripcion:product.description,imagen:product.image,alt:product.alt}});
+        for(const product of products)await tx.producto.upsert({where:{id:product.id},update:{},create:{id:product.id,nombre:product.name,precio:product.price,stock:20,categoria:product.category,descripcion:product.description,imagen:product.image,alt:product.alt,laboratorio:product.laboratorio || null,presentacion:product.presentacion || null,tipoProducto:product.tipoProducto || 'cuidado'}});
         for(const promo of promos)await tx.promocion.upsert({where:{id:promo.id},update:{},create:{id:promo.id,titulo:promo.title,descripcion:promo.description,etiqueta:promo.label,productoId:promo.productId,activa:promo.active,vistaPrevia:promo.demo,orden:promo.order}});
       }
       await tx.semilla.create({data:{id:'catalogo-inicial-v1'}});

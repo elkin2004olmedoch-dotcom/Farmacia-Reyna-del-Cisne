@@ -25,10 +25,10 @@ function productValues(product,changes){
 }
 
 const instructions={
-  product:'Actualiza el precio de "Vitaminas diarias" a 13,50 y el stock a 24. Modifica producto "Vitaminas diarias": descripcion="Descripción real". Desactiva producto "Vitaminas diarias".',
-  promotion:'Publica promoción de 20 % para "Vitaminas diarias" hasta 2026-12-31 titulada "Fin de año". La fecha usa hora de Ecuador.',
+  product:'Actualiza el precio de "Ensure Advance vainilla 850 g" a 13,50 y el stock a 24. Modifica producto "Ensure Advance vainilla 850 g": descripcion="Descripción real". Desactiva producto "Ensure Advance vainilla 850 g".',
+  promotion:'Publica promoción de 20 % para "Ensure Advance vainilla 850 g" hasta 2026-12-31 titulada "Fin de año". La fecha usa hora de Ecuador.',
   records:'Altas: crea producto: nombre="Gel"; precio=2; stock=20; categoria=cuidado; tipoProducto=cuidado; descripcion="Gel de manos"; imagen="assets/images/gel.webp"; alt="Frasco de gel"; ivaCategoria=general. La imagen debe existir. Si falta información abro el formulario. Para medicamentos exige PVP, laboratorio, presentación, registro y clasificación sanitaria reales.',
-  inventory:'Crea proveedor: nombre="Distribuidora"; ruc="RUC real"; email="ventas@example.com"; telefono="0991234567"; direccion="Calle Central s/n"; activo=true. Registra lote: producto="Vitaminas diarias"; numero="L-01"; vencimiento=2027-12-31; cantidad=20; costoUnitario=1,25. Ajusta inventario: producto="Vitaminas diarias"; tipo=salida; cantidad=2; motivo="Rotura de envase". Opcionales: proveedorId en lote, loteId en ajuste.',
+  inventory:'Crea proveedor: nombre="Distribuidora"; ruc="RUC real"; email="ventas@example.com"; telefono="0991234567"; direccion="Calle Central s/n"; activo=true. Registra lote: producto="Ensure Advance vainilla 850 g"; numero="L-01"; vencimiento=2027-12-31; cantidad=20; costoUnitario=1,25. Ajusta inventario: producto="Ensure Advance vainilla 850 g"; tipo=salida; cantidad=2; motivo="Rotura de envase". Opcionales: proveedorId en lote, loteId en ajuste.',
   navigation:'Abre proveedores. Abre formulario de producto. Cambia pedido "ID" a preparado. Abre entregas para zonas y repartidores. Asigna pedido "ID" a repartidor "ID". Cambia entrega "ID" a en_destino. Crea zona: nombre="Puerto Quito"; provincia="Pichincha"; canton="Puerto Quito"; tarifaCentavos=250; ivaCategoria=general; activa=true. Modifica zona "ID": tarifaCentavos=300. Usa identificadores reales del panel.',
 };
 

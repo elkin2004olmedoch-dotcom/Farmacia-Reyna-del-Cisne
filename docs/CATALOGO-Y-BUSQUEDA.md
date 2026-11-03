@@ -13,6 +13,18 @@ La tienda conserva sus colores vino, rojo y crema, logos y mascota Goti. Esta en
 
 Si falta una foto, se muestra «Imagen no disponible». No se inventan envases, laboratorios, registros, opiniones ni indicaciones médicas. La ficha informa que la tarifa se confirma con la dirección; el checkout mantiene el cálculo vigente del negocio.
 
+## Referencias comerciales y procedencia
+
+El catálogo inicial contiene 18 referencias comerciales con empresa o marca y presentación. El titular autorizó elegir referencias reales para sustituir las fichas genéricas; las cuatro ilustraciones de medicamentos sin identificar se sustituyeron por productos de cuidado e insumos, sin inventar registros sanitarios, concentraciones ni PVP impreso. Se mantienen los identificadores de los registros y los pedidos históricos conservan sus datos originales.
+
+El campo «Laboratorio o marca» identifica al fabricante, titular de marca o empresa responsable según la evidencia disponible; no afirma que todas las empresas sean laboratorios farmacéuticos ni identifica una planta industrial no comprobada. [Fuentes por producto](../data/fuentes-productos.json) registra las páginas oficiales, corroboraciones, el papel de cada empresa y la procedencia de las fotografías. Ejemplos: Ensure Advance vainilla de 850 g (Abbott), Eucerin Photoaging Control de 50 ml (Beiersdorf), Corega Tabs de 30 tabletas (Haleon) y el set Pigeon Health Care Set, sin atribuirle un número de piezas no verificado. Las fotos de envases pueden corresponder a una edición regional indicada en el manifiesto.
+
+Los nombres y presentaciones seleccionados no acreditan existencias físicas ni sustituyen la comprobación del envase y lote que haga la farmacia. Los precios y cantidades configurados por el negocio se conservan; no se usan precios de otras tiendas como tarifa comercial. El botiquín PolinPlast es solamente la caja organizadora; Marimer corresponde a un spray para higiene nasal, no a una solución intravenosa.
+
+La carga inicial toma los metadatos de `data/productos.json` únicamente cuando crea el catálogo en una base vacía. Reejecutar el seed no sobreescribe productos existentes. Para el catálogo publicado se usa la API administrativa con respaldo previo y control de versión (`esperadoUpdatedAt`), preservando precio base, stock, descuentos, IVA y restricciones. No se requieren cambios de esquema ni migraciones nuevas. La copia histórica `data/productos-local.js` se regenera con `node scripts/build-data.cjs`.
+
+`catalog-metadata.test.cjs` comprueba datos, recursos, carga inicial, facetas y conservación de ediciones en SQLite temporal. `catalog-metadata.spec.cjs` verifica filtros combinados, ficha, teclado, accesibilidad y que las fotos entren completas en las tarjetas a 320, 375, 768 y 1440 píxeles.
+
 Los errores de carga permiten reintentar. Las respuestas antiguas se cancelan y no sustituyen una búsqueda nueva. Volver a una página restaurada recupera la carga pendiente; los paginadores conservan el foco del teclado.
 
 ## API y responsabilidades
