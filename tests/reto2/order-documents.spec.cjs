@@ -2,6 +2,14 @@ const {test,expect}=require('@playwright/test');
 const AxeBuilder=require('@axe-core/playwright').default;
 const {randomUUID}=require('node:crypto');
 
+test('envío del comprobante informa desactivación, aceptación y fallo sin perder el pedido',async({page,request})=>{
+ const data=await fixture(request);await openOrders(page,data.user);await page.locator('[data-order-receipt="'+data.order.id+'"]').click();
+ const button=page.locator('[data-receipt-email]'),status=page.locator('[data-receipt-email-status]');
+ await button.focus();await page.keyboard.press('Enter');await expect(status).toContainText('todavía no está habilitado');await expect(button).toBeEnabled();
+ await page.route('**/api/pedidos/'+data.order.id+'/correo',route=>route.fulfill({contentType:'application/json',body:JSON.stringify({ok:true,data:{status:'accepted'}})}));await button.click();await expect(status).toContainText('proveedor aceptó');
+ await page.unroute('**/api/pedidos/'+data.order.id+'/correo');await page.route('**/api/pedidos/'+data.order.id+'/correo',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({ok:false,error:{message:'Servicio temporalmente no disponible.'}})}));await button.click();await expect(status).toContainText('Servicio temporalmente');await expect(button).toBeEnabled();await expect(page.locator('.order-receipt-sheet')).toContainText(data.product.nombre);
+});
+
 async function fixture(request){
   const login=await request.post('/api/auth/login',{data:{email:'admin-browser@example.ec',password:'AdminBrowser2026!'}});expect(login.status()).toBe(200);
   const headers={Authorization:'Bearer '+(await login.json()).data.token},tag=randomUUID().slice(0,8);

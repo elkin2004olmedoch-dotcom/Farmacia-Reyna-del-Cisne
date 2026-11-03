@@ -1,6 +1,7 @@
 import {request} from './api.js';
 const KEY='farmacia-mvc-confirmacion';
 export const orders={
+  email:id=>request(`/pedidos/${encodeURIComponent(id)}/correo`,{method:'POST',body:{}}),
   mine:page=>request(`/pedidos/mis-pedidos?page=${page||1}&pageSize=20`),
   all:page=>request(`/pedidos?page=${page||1}&pageSize=20`),
   async create(carrito,comprador){
