@@ -26,6 +26,72 @@ async function accessibleAt320(page){
   expect(audit.violations.map(issue=>({id:issue.id,targets:issue.nodes.map(node=>node.target)}))).toEqual([]);
 }
 
+test('un pedido pendiente a domicilio permite confirmar y asignar sin adelantar su salida',async({page,request},testInfo)=>{
+  const data=await basicFixture(request);
+  const zone=await api(request,'/admin/zonas-entrega',{token:data.admin.token,method:'post',status:201,data:{nombre:'Zona pendiente '+data.suffix,provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:200,ivaCategoria:'general',fundamentoIva:null,activa:true}});
+  const courier=await api(request,'/admin/repartidores',{token:data.admin.token,method:'post',status:201,data:{nombre:'Repartidor Pendiente',email:'pendiente-'+data.suffix+'@example.ec',telefono:'0979275988',password:'RepartidorPrueba2026!'}});
+  const order=await newOrder(request,data,zone,{prepare:false});
+  await signedIn(page,data.admin.token,'/entregas.html');
+  await expect(page.locator('#delivery-order-select option[value="'+order.id+'"]')).toHaveCount(1);
+  await page.locator('#delivery-order-select').selectOption(order.id);await page.locator('#delivery-courier-select').selectOption(courier.id);
+  const submit=page.locator('#delivery-assignment-form [type=submit]');
+  await page.locator('#delivery-assignment').screenshot({path:'.superpowers/sdd/2026-11-03-asignacion/asignacion-'+testInfo.project.name+'.png'});
+  await expect(submit).toHaveText('Confirmar y asignar entrega');await submit.click();
+  await expect(page.locator('#confirm-dialog')).toBeVisible();await page.locator('#confirm-dialog [value=cancel]').click();
+  let saved=await api(request,'/pedidos/mis-pedidos',{token:data.customer.token});
+  expect(saved.items.find(item=>item.id===order.id).estado).toBe('pendiente');
+  expect((await api(request,'/entregas',{token:data.admin.token})).items.some(item=>item.pedidoId===order.id)).toBe(false);
+  await submit.focus();await page.keyboard.press('Enter');await page.locator('#confirm-dialog [value=confirm]').click();
+  const card=page.locator('[data-delivery]').filter({hasText:order.id.slice(0,8)});
+  await expect(card).toContainText('Confirmado');await expect(card.getByRole('button',{name:'Marcar salida'})).toBeDisabled();
+  saved=await api(request,'/pedidos/mis-pedidos',{token:data.customer.token});
+  const confirmed=saved.items.find(item=>item.id===order.id);expect(confirmed.estado).toBe('confirmado');expect(confirmed.total).toBe(order.total);expect(confirmed.costoEnvioCentavos).toBe(order.costoEnvioCentavos);
+  const assigned=(await api(request,'/entregas',{token:data.admin.token})).items.find(item=>item.pedidoId===order.id);expect(assigned.repartidorId).toBe(courier.id);
+  const courierSession=await api(request,'/auth/login',{method:'post',data:{email:'pendiente-'+data.suffix+'@example.ec',password:'RepartidorPrueba2026!'}});
+  await signedIn(page,courierSession.token,'/entregas.html');await expect(page.locator('[data-delivery="'+assigned.id+'"]')).toContainText(order.id.slice(0,8));
+  await expect(page.getByRole('link',{name:'Navegar con Google Maps'})).toHaveAttribute('href',/google\.com\/maps\/dir/);
+  await expect(page.getByRole('button',{name:'Marcar salida'})).toBeDisabled();
+  await accessibleAt320(page);
+});
+
+test('pedidos de administración enlaza la asignación del pedido seleccionado aunque esté en otra página',async({page,request})=>{
+  const data=await basicFixture(request);
+  const zone=await api(request,'/admin/zonas-entrega',{token:data.admin.token,method:'post',status:201,data:{nombre:'Zona enlace '+data.suffix,provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:150,ivaCategoria:'general',fundamentoIva:null,activa:true}});
+  const order=await newOrder(request,data,zone,{prepare:false});
+  // Put the target outside the first assignment page without creating business records.
+  await page.route('**/api/admin/tablas?tabla=pedidos*',async route=>{
+    const url=new URL(route.request().url()),current=Number(url.searchParams.get('page')||1);
+    const filler={...order,id:'retired-fixture',estado:'entregado'};
+    await route.fulfill({json:{ok:true,data:{items:current===1?[filler]:[order],total:21,page:current,pageSize:20}}});
+  });
+  await signedIn(page,data.admin.token,'/admin.html?tabla=pedidos');
+  await page.locator('#admin-next').click();
+  const link=page.getByRole('link',{name:'Asignar repartidor',exact:true});await expect(link).toHaveAttribute('href','entregas.html?pedido='+order.id);
+  await link.click();await expect(page.locator('#delivery-order-select')).toHaveValue(order.id);
+  await expect(page.locator('#delivery-orders-info')).toContainText('Página 2');
+  await expect(page.locator('#delivery-assignment-form [type=submit]')).toHaveText('Confirmar y asignar entrega');
+  await page.evaluate(()=>sessionStorage.removeItem('farmacia-mvc-token'));await page.reload();
+  await expect(page).toHaveURL(/cuenta\.html\?next=/);
+  await page.locator('#login-email').fill('admin-browser@example.ec');await page.locator('#login-password').fill('AdminBrowser2026!');await page.locator('#login-form [type=submit]').click();
+  await expect(page.locator('#delivery-order-select')).toHaveValue(order.id);
+  await accessibleAt320(page);
+});
+
+test('actualizar conserva el pedido de una reasignación fuera de la página del selector',async({page,request})=>{
+  const data=await basicFixture(request);
+  const zone=await api(request,'/admin/zonas-entrega',{token:data.admin.token,method:'post',status:201,data:{nombre:'Zona reasignación '+data.suffix,provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:150,ivaCategoria:'general',fundamentoIva:null,activa:true}});
+  const order=await newOrder(request,data,zone);
+  const courier=await api(request,'/admin/repartidores',{token:data.admin.token,method:'post',status:201,data:{nombre:'Repartidor Reasignación',email:'reasignar-'+data.suffix+'@example.ec',telefono:'0979275988',password:'RepartidorPrueba2026!'}});
+  const delivery=await api(request,'/entregas/asignar',{token:data.admin.token,method:'post',data:{pedidoId:order.id,repartidorId:courier.id}});
+  let name='Otro pedido';
+  await page.route('**/api/admin/tablas?tabla=pedidos*',route=>route.fulfill({json:{ok:true,data:{items:[{...order,id:'pickup-fixture',entrega:'pickup',nombre:name}],total:1,page:1,pageSize:20}}}));
+  await signedIn(page,data.admin.token,'/entregas.html');
+  await page.locator('[data-delivery="'+delivery.id+'"] [data-delivery-reassign]').click();
+  await expect(page.locator('#delivery-order-select')).toHaveValue(order.id);
+  name='Datos actualizados';await page.locator('#deliveries-refresh').click();
+  await expect(page.locator('#delivery-order-select')).toHaveValue(order.id);await expect(page.locator('#delivery-courier-select')).toHaveValue(courier.id);
+});
+
 test('actualizar entregas incorpora pedidos confirmados y repartidores nuevos sin perder selecciones ni borradores',async({page,request})=>{
   const data=await basicFixture(request),zoneInput={nombre:'Zona inicial '+data.suffix,provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:225,ivaCategoria:'general',fundamentoIva:null,activa:true};
   const zone=await api(request,'/admin/zonas-entrega',{token:data.admin.token,method:'post',status:201,data:zoneInput});
@@ -46,6 +112,7 @@ test('actualizar entregas incorpora pedidos confirmados y repartidores nuevos si
     const addedZone=await api(request,'/admin/zonas-entrega',{token:data.admin.token,method:'post',status:201,data:{...zoneInput,nombre:'Zona nueva '+data.suffix}});
     const addedCourier=await api(request,'/admin/repartidores',{token:data.admin.token,method:'post',status:201,data:{...courierInput,nombre:'Repartidor Nuevo',email:'nuevo-'+data.suffix+'@example.ec'}});
     for(const estado of ['confirmado','preparado'])pendingOrder=await api(request,'/pedidos/'+pendingOrder.id+'/estado',{token:data.admin.token,method:'put',data:{estado,esperadoUpdatedAt:pendingOrder.updatedAt}});
+    await expect(page.locator('#delivery-order-select option[value="'+pendingOrder.id+'"]')).toContainText('Preparado',{timeout:10000});
     await page.locator('#deliveries-refresh').focus();await page.keyboard.press('Enter');
     await expect(page.locator('#delivery-order-select option[value="'+pendingOrder.id+'"]')).toHaveCount(1);
     await expect(page.locator('#delivery-courier-select option[value="'+addedCourier.id+'"]').first()).toHaveCount(1);
@@ -94,6 +161,8 @@ test('administración configura reparto, cliente consulta mapa voluntario y repa
       Object.defineProperty(navigator,'geolocation',{configurable:true,value:{watchPosition(callback){window.testGps.callback=callback;return 7;},clearWatch(){window.testGps.cleared++;}}});
     });
     await signedIn(courierPage,courierAuth.token,'/cuenta.html');
+    // Mi cuenta conserva el perfil editable del personal; Mis entregas abre su bandeja.
+    await courierPage.getByRole('link',{name:'Mis entregas',exact:true}).first().click();
     await expect(courierPage).toHaveURL(/\/entregas\.html$/);await expect(courierPage.locator('#delivery-admin')).toBeHidden();
     const card=courierPage.locator('[data-delivery]').filter({hasText:order.id.slice(0,8)});await expect(card).toBeVisible();await expect(card.locator('a[href^="tel:"]')).toHaveCount(0);await expect(card.locator('a[href^="https://www.google.com/maps/dir/"]')).toHaveAttribute('href',/destination=0.125%2C-79.25/);
     expect(await courierPage.evaluate(()=>window.testGps.callback)).toBeNull();
