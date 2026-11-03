@@ -44,7 +44,7 @@ async function start(){
   await buildPages({output,apiOrigin,allowLocal:true});
   const rules=headerRules(path.join(output,'_headers'));
   const settings={...require('../../server/config.cjs')(),testAuthLimit:200,testApiLimit:2000};
-  apiServer=require('../../server/app.cjs')(settings).listen(3302,'127.0.0.1');
+  require('./geocoder-fixture.cjs')();apiServer=require('../../server/app.cjs')(settings).listen(3302,'127.0.0.1');
   const app=express();app.disable('x-powered-by');
   const {createProxy}=await import(require('node:url').pathToFileURL(path.join(output,'_worker.js')).href);
   const proxy=createProxy();

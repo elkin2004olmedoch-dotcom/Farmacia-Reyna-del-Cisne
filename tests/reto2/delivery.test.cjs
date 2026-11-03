@@ -36,7 +36,7 @@ test('tarifa administrable: control de rol, campos, versión, historial e IVA le
  const changed=await api.put('/api/admin/zonas-entrega/'+z.id).set('Authorization',auth(admin)).send({...zoneInput,esperadoVersion:z.version}).expect(200);
  assert.equal(changed.body.data.version,2);
  await api.put('/api/admin/zonas-entrega/'+z.id).set('Authorization',auth(admin)).send({...zoneInput,esperadoVersion:z.version}).expect(409);
- const history=(await api.get('/api/admin/zonas-entrega').set('Authorization',auth(admin)).expect(200)).body.data[0].tarifas;
+ const history=(await api.get('/api/admin/zonas-entrega').set('Authorization',auth(admin)).expect(200)).body.data.find(zone=>zone.id===z.id).tarifas;
  assert.equal(history.length,2);assert.equal(history[0].actorId,admin.id);assert.equal(history[1].tarifaCentavos,null);
  const pub=await api.get('/api/zonas-entrega').expect(200);assert.equal(pub.headers['cache-control'],'no-store');assert.equal(pub.body.data[0].tarifas,undefined);
 });

@@ -144,7 +144,7 @@ export async function deliveriesController(){
     }
     if(admin && button.hasAttribute('data-zone-edit')){
       const zone=zones.find(entry=>entry.id===button.dataset.zoneEdit);if(!zone)return;resetZone();
-      for(const key of ['id','nombre','provincia','canton','ivaCategoria','fundamentoIva'])zoneForm.elements.namedItem(key).value=zone[key] ?? '';
+      for(const key of ['id','nombre','alcance','provincia','canton','ivaCategoria','fundamentoIva'])zoneForm.elements.namedItem(key).value=zone[key] ?? '';
       zoneForm.elements.esperadoVersion.value=zone.version;zoneForm.elements.tarifa.value=zone.tarifaCentavos===null?'':(zone.tarifaCentavos/100).toFixed(2);zoneForm.elements.activa.checked=zone.activa;byId('delivery-zone-editor').open=true;byId('delivery-zone-name').focus();return;
     }
     if(admin && button.hasAttribute('data-courier-toggle')){const person=couriers.find(entry=>entry.id===button.dataset.courierToggle);if(person)await action(button,async()=>{await deliveries.setCourierActive(person.id,!person.activo);await metadata();},'Disponibilidad del repartidor actualizada.');}
@@ -160,7 +160,7 @@ export async function deliveriesController(){
       if(cents!==null && (!Number.isSafeInteger(cents) || Math.abs(Number(values.tarifa)*100-cents)>0.000001))issues.tarifa='Usa una tarifa con un máximo de dos decimales.';
       if(values.ivaCategoria==='cero' && values.fundamentoIva.trim().length<8)issues.fundamentoIva='Registra al menos ocho caracteres de fundamento legal para IVA 0 %.';
       if(!formErrors(zoneForm,issues))return;
-      const payload={nombre:values.nombre.trim(),provincia:values.provincia.trim(),canton:values.canton.trim(),tarifaCentavos:cents,ivaCategoria:values.ivaCategoria,fundamentoIva:values.fundamentoIva.trim() || null,activa:zoneForm.elements.activa.checked};if(values.id)payload.esperadoVersion=Number(values.esperadoVersion);
+      const payload={nombre:values.nombre.trim(),alcance:values.alcance,provincia:values.provincia.trim(),canton:values.canton.trim(),tarifaCentavos:cents,ivaCategoria:values.ivaCategoria,fundamentoIva:values.fundamentoIva.trim() || null,activa:zoneForm.elements.activa.checked};if(values.id)payload.esperadoVersion=Number(values.esperadoVersion);
       void action(zoneForm.querySelector('[type=submit]'),async()=>{await deliveries.saveZone(payload,values.id);if(live){resetZone();await metadata();}},'Zona y tarifa guardadas. Los pedidos anteriores conservan su tarifa.');
     });
     courierForm.addEventListener('submit',event=>{event.preventDefault();if(working || !formValid(courierForm))return;const values=Object.fromEntries(new FormData(courierForm));void action(courierForm.querySelector('[type=submit]'),async()=>{await deliveries.createCourier(values);if(live){courierForm.reset();await metadata();}},'Repartidor creado.');});
@@ -189,7 +189,7 @@ export async function deliveriesController(){
     try{
       const draft=stored && JSON.parse(stored);
       if(draft && Number.isFinite(draft.createdAt) && Date.now()-draft.createdAt>=0 && Date.now()-draft.createdAt<60000 && draft.values && !Array.isArray(draft.values)){
-        for(const key of ['nombre','provincia','canton','ivaCategoria','fundamentoIva'])if(typeof draft.values[key]==='string')zoneForm.elements.namedItem(key).value=draft.values[key];
+        for(const key of ['nombre','alcance','provincia','canton','ivaCategoria','fundamentoIva'])if(typeof draft.values[key]==='string')zoneForm.elements.namedItem(key).value=draft.values[key];
         if(Number.isSafeInteger(draft.values.tarifaCentavos) && draft.values.tarifaCentavos>=0)zoneForm.elements.tarifa.value=(draft.values.tarifaCentavos/100).toFixed(2);
         if(typeof draft.values.activa==='boolean')zoneForm.elements.activa.checked=draft.values.activa;
       }

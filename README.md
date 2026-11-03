@@ -1,6 +1,8 @@
 # Farmacia Reina del Cisne
 
-Tienda y gestión farmacéutica para Puerto Quito, con catálogo, carrito, pedidos, administración y reparto. Conserva la identidad crema/vino, el logo y las mascotas.
+Tienda y gestión farmacéutica con sede en Puerto Quito y cobertura configurable en Ecuador: catálogo, carrito, pedidos, administración y reparto. Conserva la identidad crema/vino, el logo y las mascotas.
+
+La cobertura nacional comienza con envío gratuito; Puerto Quito conserva su tarifa local. Si no se localiza el destino, el checkout selecciona retiro y exige confirmar nuevamente. La ventana de tarjetas valida datos sintéticos sin efectuar cobros. [Pagos y cobertura nacional](docs/PAGOS-Y-COBERTURA-NACIONAL.md).
 
 ## Abrir la aplicación
 

@@ -39,6 +39,11 @@ test('concurrencia no duplica la práctica y respeta pedidos cerrados o pagos ex
  const closed=await order();await fixture.db.pedido.update({where:{id:closed.id},data:{estado:'cancelado'}});await post(closed.id,{metodo:'transfer'}).expect(409);
  const real=await order();await fixture.db.pago.create({data:{pedidoId:real.id,entorno:'production',totalCentavos:1150,sinIvaCentavos:0,baseIvaCentavos:1000,ivaCentavos:150}});await post(real.id,{metodo:'transfer'}).expect(409);assert.equal(await fixture.db.pagoPractica.count({where:{pedidoId:real.id}}),0);
 });
+test('un reintento con otro método no sustituye el registro anterior',async()=>{
+ process.env.PAYMENT_PRACTICE_ENABLED='true';const pedido=await order();await post(pedido.id,{metodo:'card',marca:'visa'}).expect(200);
+ const conflict=await post(pedido.id,{metodo:'transfer'}).expect(409);assert.equal(conflict.body.error.code,'PAYMENT_METHOD_CONFLICT');
+ assert.equal((await fixture.db.pagoPractica.findUnique({where:{pedidoId:pedido.id}})).metodo,'card');
+});
 test('las restricciones de la tabla de práctica rechazan datos inconsistentes',async()=>{
  const pedido=await order();for(const data of [{metodo:'transfer',marca:'visa',totalCentavos:1150},{metodo:'card',marca:null,totalCentavos:1150},{metodo:'transfer',marca:null,totalCentavos:-1}])await assert.rejects(fixture.db.pagoPractica.create({data:{pedidoId:pedido.id,...data}}));
  if(fixture.provider==='postgresql'){const rows=await fixture.db.$queryRawUnsafe('SELECT relrowsecurity FROM pg_class WHERE oid=\'public."PagoPractica"\'::regclass');assert.equal(rows[0].relrowsecurity,true);}

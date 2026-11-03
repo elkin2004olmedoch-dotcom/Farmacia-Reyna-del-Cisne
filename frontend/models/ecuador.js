@@ -99,18 +99,24 @@
     }, 0);
     return sum % 10 === 0;
   }
-  function validateCard(values, now = new Date()) {
+  function validateCard(values, now = new Date(), identify = cardBrand) {
     const errors = {};
     if (!validName(values.holder)) errors.holder = 'Escribe el nombre del titular como aparece en la tarjeta.';
-    if (!cardBrand(values.cardNumber) || !luhn(values.cardNumber)) errors.cardNumber = 'Usa una Visa o Mastercard de 16 dígitos con verificador Luhn correcto.';
+    const brand=identify(values.cardNumber);
+    if (!brand || !luhn(values.cardNumber)) errors.cardNumber = 'Revisa el número: debe corresponder a una marca admitida y tener un verificador correcto.';
     const match = clean(values.expiry).match(/^(0[1-9]|1[0-2])\s*\/\s*(\d{2}|\d{4})$/);
     const year = match ? Number(match[2]) + (match[2].length === 2 ? 2000 : 0) : 0;
     const month = match ? Number(match[1]) : 0;
     if (!match || year < now.getFullYear() || year === now.getFullYear() && month < now.getMonth() + 1 || year > now.getFullYear() + 20) errors.expiry = 'Usa MM/AA con un mes válido y una fecha vigente.';
-    if (!/^\d{3}$/.test(clean(values.cvv))) errors.cvv = 'El CVV de Visa o Mastercard tiene 3 números.';
+    const length=brand==='amex'?4:3;
+    if (!new RegExp('^\\d{'+length+'}$').test(clean(values.cvv))) errors.cvv = `El código de seguridad debe tener ${length} números.`;
     return errors;
   }
-  const api = { patterns, provinces, validName, validEmail, normalizePhone, validCedula, validRuc, validate, validateBuyer, validateRegistration, validateCheckout, cardBrand, luhn, validateCard };
+  const place=value=>clean(value).normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().replace(/\s+/g,' ');
+  function matchesDeliveryZone(zone,buyer){return Boolean(zone&&zone.activa!==false&&(zone.alcance==='nacional'?provinces.includes(buyer.province)&&validName(buyer.city):place(zone.provincia)===place(buyer.province)&&place(zone.canton)===place(buyer.city)));}
+  // Coarse input bounds for continental Ecuador and Galápagos; this is not a border survey.
+  function ecuadorPoint(lat,lon){return typeof lat==='number'&&typeof lon==='number'&&Number.isFinite(lat)&&Number.isFinite(lon)&&((lat>=-5.1&&lat<=1.7&&lon>=-81.1&&lon<=-75.1)||(lat>=-1.7&&lat<=1.7&&lon>=-92.3&&lon<=-89.1));}
+  const api = { patterns, provinces, validName, validEmail, normalizePhone, validCedula, validRuc, validate, validateBuyer, validateRegistration, validateCheckout, cardBrand, luhn, validateCard, matchesDeliveryZone, ecuadorPoint };
   (global.Farmacia ||= {}).validation = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(globalThis);

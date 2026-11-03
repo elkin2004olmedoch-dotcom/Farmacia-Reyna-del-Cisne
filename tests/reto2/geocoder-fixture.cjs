@@ -1,0 +1,2 @@
+// Synthetic provider used only by disposable test servers; production never loads this file.
+module.exports=function install(){const {AppError}=require('../../server/middleware/errors.cjs');require('../../server/models/geocoding.cjs').resolve=async target=>{if(String(target.direccion).startsWith('Sin ubicación'))throw new AppError(409,'ADDRESS_NOT_FOUND','Destino sintético no localizado.');return {latitud:.125,longitud:-79.25,fuente:'direccion',precisionDestino:'calle'};};};

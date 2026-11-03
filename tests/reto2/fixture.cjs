@@ -13,6 +13,7 @@ process.env.ADMIN_EMAIL='admin-test@example.ec';
 process.env.ADMIN_PASSWORD='AdminPrueba2026!';
 execFileSync(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],{stdio:'pipe',env:process.env});
 execFileSync(process.execPath,['server/prisma/seed.cjs'],{stdio:'pipe',env:process.env});
+require('./geocoder-fixture.cjs')();
 const app=require('../../server/app.cjs')();
 const db=require('../../server/models/db.cjs');
 const supertest=require('supertest');

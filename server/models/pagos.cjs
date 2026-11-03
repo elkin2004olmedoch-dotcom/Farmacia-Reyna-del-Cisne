@@ -11,6 +11,9 @@ function transferConfiguration(){
  return banco.length>1&&banco.length<=80&&titular.length>1&&titular.length<=100&&/^\d{6,20}$/.test(numeroCuenta)&&['ahorros','corriente'].includes(tipo)?{disponible:true,banco,titular,numeroCuenta,tipo}:{disponible:false};
 }
 async function owned(client,id,user) {
+ const current=await client.usuario.findUnique({where:{id:user.id},select:{activo:true,role:true,tokenVersion:true}});
+ if(!current?.activo||!['user','admin'].includes(current.role)||current.role!==user.role||current.tokenVersion!==user.tokenVersion)throw new AppError(401,'INVALID_TOKEN','Tu sesión ya no es válida.');
+ if(user.webSession&&!await require('./sesiones-web.cjs').checkTx(client,user.webSession,user.id,user.tokenVersion))throw new AppError(401,'INVALID_TOKEN','Tu sesión web ya no es válida.');
  const pedido=await client.pedido.findFirst({where:{id,...(user.role==='admin'?{}:{userId:user.id})},select});
  if(!pedido)throw new AppError(404,'NOT_FOUND','No se encontró el pedido.');return pedido;
 }
@@ -72,7 +75,7 @@ async function practice(id,user,input){
   const pedido=await owned(tx,id,user);
   if(pedido.pago)throw new AppError(409,'PAYMENT_EXISTS','Hay una solicitud de pago real. Consulta su estado antes de continuar.');
   if(['cancelado','entregado'].includes(pedido.estado))throw new AppError(409,'PAYMENT_ORDER_CLOSED','Este pedido está cerrado.');
-  if(pedido.pagoPractica)return;
+  if(pedido.pagoPractica){if(pedido.pagoPractica.metodo!==input.metodo||pedido.pagoPractica.marca!==(input.marca||null))throw new AppError(409,'PAYMENT_METHOD_CONFLICT','El pedido ya registra otro método de práctica. Actualiza su estado.');return;}
   const totalCentavos=cents(pedido.total);if(totalCentavos<1)throw new AppError(409,'PAYMENT_SNAPSHOT_INVALID','Revisa el importe del pedido.');
   const updatedAt=new Date(Math.max(Date.now(),pedido.updatedAt.getTime()+1));
   const locked=await tx.pedido.updateMany({where:{id,estado:pedido.estado,updatedAt:pedido.updatedAt},data:{updatedAt}});if(locked.count!==1)throw new AppError(409,'ORDER_CHANGED','El pedido cambió. Actualiza sus datos.');

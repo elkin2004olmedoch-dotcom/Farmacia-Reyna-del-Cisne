@@ -7,7 +7,7 @@ const ACTIVE=['asignada','en_camino','en_destino'];
 const {GPS_CLEAR,transaction}=sessions;
 const {sesionSeguimientoId:_owner,...POSITION_CLEAR}=GPS_CLEAR;
 const driverSelect={id:true,nombre:true,email:true,telefono:true,activo:true};
-const orderSelect={id:true,userId:true,estado:true,entrega:true,nombre:true,telefono:true,provincia:true,ciudad:true,direccion:true,latitudEntrega:true,longitudEntrega:true,updatedAt:true};
+const orderSelect={id:true,userId:true,estado:true,entrega:true,nombre:true,telefono:true,provincia:true,ciudad:true,direccion:true,latitudEntrega:true,longitudEntrega:true,updatedAt:true,zonaEntrega:{select:{alcance:true}}};
 const deliveryInclude={pedido:{select:orderSelect}};
 const normalize=value=>String(value||'').normalize('NFD').replace(/\p{M}/gu,'').trim().replace(/\s+/g,' ').toLowerCase();
 const fail=(code,message,status=409)=>{throw new AppError(status,code,message);};
@@ -16,20 +16,21 @@ async function actor(tx,user,allowed) {
  const current=await tx.usuario.findUnique({where:{id:user.id},select:{id:true,role:true,activo:true,tokenVersion:true}});
  if(!current?.activo || current.tokenVersion!==user.tokenVersion)fail('INVALID_TOKEN','Tu sesión ya no es válida.',401);
  if(!allowed.includes(current.role))fail('FORBIDDEN','No tienes permiso para esta acción.',403);
+ if(user.webSession&&!await require('./sesiones-web.cjs').checkTx(tx,user.webSession,user.id,user.tokenVersion))fail('INVALID_TOKEN','Tu sesión web ya no es válida.',401);
  if(user.mobileSession&&!await sessions.checkTx(tx,user.mobileSession,user.id,user.tokenVersion))fail('INVALID_TOKEN','Tu sesión móvil ya no es válida.',401);
  return current;
 }
-async function shippingSnapshot(tx,buyer,tax,now) {
+async function shippingSnapshot(tx,buyer,tax,now,destination=null) {
  if(buyer.delivery!=='delivery')return {costoEnvioCentavos:0};
  const zone=typeof buyer.zonaEntregaId==='string'?await tx.zonaEntrega.findUnique({where:{id:buyer.zonaEntregaId}}):null;
- if(!zone?.activa || normalize(zone.provincia)!==normalize(buyer.province) || normalize(zone.canton)!==normalize(buyer.city))fail('DELIVERY_OUTSIDE_COVERAGE','Selecciona una zona activa que corresponda a la provincia y cantón de tu dirección.');
+ if(!require('../../frontend/models/ecuador.js').matchesDeliveryZone(zone,buyer))fail('DELIVERY_OUTSIDE_COVERAGE','Selecciona una cobertura activa que corresponda a tu dirección en Ecuador.');
  if(buyer.esperadoTarifaVersion!==zone.version)fail('DELIVERY_RATE_CHANGED','La tarifa de entrega cambió. Revisa el importe actualizado antes de confirmar nuevamente.');
  if(zone.tarifaCentavos===null)fail('DELIVERY_RATE_PENDING','La tarifa de entrega aún no está configurada. Coordina con la farmacia o elige retiro.');
  const fiscal=inclusiveTax(zone.tarifaCentavos,zone.ivaCategoria==='cero'?0:tax.tarifaGeneral);
- return {zonaEntregaId:zone.id,costoEnvioCentavos:zone.tarifaCentavos,envioIvaPorcentaje:fiscal.ivaPorcentaje,envioBaseImponible:fiscal.baseImponible,envioIvaMonto:fiscal.ivaMonto,...(buyer.consienteUbicacion===true&&buyer.latitudEntrega!=null?{latitudEntrega:buyer.latitudEntrega,longitudEntrega:buyer.longitudEntrega,ubicacionEntregaAceptadaAt:now}:{})};
+ return {zonaEntregaId:zone.id,costoEnvioCentavos:zone.tarifaCentavos,envioIvaPorcentaje:fiscal.ivaPorcentaje,envioBaseImponible:fiscal.baseImponible,envioIvaMonto:fiscal.ivaMonto,...(destination?{latitudEntrega:destination.latitud,longitudEntrega:destination.longitud,ubicacionEntregaAceptadaAt:now}:buyer.consienteUbicacion===true&&buyer.latitudEntrega!=null?{latitudEntrega:buyer.latitudEntrega,longitudEntrega:buyer.longitudEntrega,ubicacionEntregaAceptadaAt:now}:{})};
 }
 async function zones(admin=false) {
- return db.zonaEntrega.findMany({where:admin?{}:{activa:true},orderBy:{nombre:'asc'},...(admin?{include:{tarifas:{orderBy:{version:'desc'}}}}:{select:{id:true,nombre:true,provincia:true,canton:true,tarifaCentavos:true,ivaCategoria:true,version:true,activa:true}})});
+ return db.zonaEntrega.findMany({where:admin?{}:{activa:true},orderBy:{nombre:'asc'},...(admin?{include:{tarifas:{orderBy:{version:'desc'}}}}:{select:{id:true,nombre:true,provincia:true,canton:true,alcance:true,tarifaCentavos:true,ivaCategoria:true,version:true,activa:true}})});
 }
 async function saveZone(id,input,user) {
  return transaction(async tx=>{
@@ -38,12 +39,14 @@ async function saveZone(id,input,user) {
   let zone;
   if(id){
    const old=await tx.zonaEntrega.findUnique({where:{id}});if(!old)notFound();
+   data.alcance ??= old.alcance;
    if(old.version!==esperadoVersion)fail('ZONE_CHANGED','La zona cambió; actualiza sus datos.');
+   if(data.alcance!==old.alcance&&await tx.pedido.count({where:{zonaEntregaId:id}}))fail('ZONE_SCOPE_IN_USE','Esta cobertura tiene pedidos registrados. Crea otra zona para cambiar su alcance.');
    const changed=await tx.zonaEntrega.updateMany({where:{id,version:esperadoVersion},data:{...data,version:{increment:1}}});
    if(changed.count!==1)fail('ZONE_CHANGED','La zona cambió; actualiza sus datos.');
    zone=await tx.zonaEntrega.findUnique({where:{id}});
   }else zone=await tx.zonaEntrega.create({data});
-  await tx.zonaEntregaTarifa.create({data:{zonaEntregaId:zone.id,version:zone.version,tarifaCentavos:zone.tarifaCentavos,ivaCategoria:zone.ivaCategoria,fundamentoIva:zone.fundamentoIva,actorId:user.id}});
+  await tx.zonaEntregaTarifa.create({data:{zonaEntregaId:zone.id,version:zone.version,alcance:zone.alcance,tarifaCentavos:zone.tarifaCentavos,ivaCategoria:zone.ivaCategoria,fundamentoIva:zone.fundamentoIva,actorId:user.id}});
   return zone;
  });
 }
@@ -79,7 +82,7 @@ function location(delivery,now=new Date()) {
 }
 function dto(e) {
  const p=e.pedido,active=ACTIVE.includes(e.estado);
- return {id:e.id,pedidoId:e.pedidoId,repartidorId:e.repartidorId,estado:e.estado,version:e.version,gpsVersion:e.gpsVersion,asignadaAt:e.asignadaAt,salidaAt:e.salidaAt,llegadaAt:e.llegadaAt,finalizadaAt:e.finalizadaAt,estadoPedido:p.estado,ubicacion:location(e),origenSeguimiento:e.sesionSeguimientoId?'app':location(e)?'web':null,destino:active?{nombre:p.nombre,telefono:p.telefono,provincia:p.provincia,ciudad:p.ciudad,direccion:p.direccion,latitud:p.latitudEntrega,longitud:p.longitudEntrega}:null};
+ return {id:e.id,pedidoId:e.pedidoId,repartidorId:e.repartidorId,estado:e.estado,version:e.version,gpsVersion:e.gpsVersion,asignadaAt:e.asignadaAt,salidaAt:e.salidaAt,llegadaAt:e.llegadaAt,finalizadaAt:e.finalizadaAt,estadoPedido:p.estado,ubicacion:location(e),origenSeguimiento:e.sesionSeguimientoId?'app':location(e)?'web':null,destino:active?{alcance:p.zonaEntrega?.alcance || 'local',nombre:p.nombre,telefono:p.telefono,provincia:p.provincia,ciudad:p.ciudad,direccion:p.direccion,latitud:p.latitudEntrega,longitud:p.longitudEntrega}:null};
 }
 async function owned(tx,id,user){
  const current=await actor(tx,user,['admin','repartidor']);

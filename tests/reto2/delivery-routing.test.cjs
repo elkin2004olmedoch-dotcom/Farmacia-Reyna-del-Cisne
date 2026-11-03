@@ -28,6 +28,8 @@ test('domicilio se asigna al único repartidor activo sin confirmar ni preparar 
 });
 test('ruta autoriza propietario y rol antes de contactar proveedor, rechaza campos extra',async()=>{
  const {pedido}=await make();const delivery=await db.entrega.create({data:{pedidoId:pedido.id,repartidorId:courier.id}});
+ // Legacy orders may predate destination resolution at checkout.
+ await db.pedido.update({where:{id:pedido.id},data:{latitudEntrega:null,longitudEntrega:null,ubicacionEntregaAceptadaAt:null}});
  const route='/api/entregas/'+delivery.id+'/ruta',body={latitud:0.12,longitud:-79.24};
  await api.post(route).send(body).expect(401);
  await api.post(route).set('Authorization','Bearer '+token(user)).send(body).expect(403);

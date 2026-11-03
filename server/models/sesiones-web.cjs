@@ -37,11 +37,12 @@ async function create(user){
  });
  return {row,refreshToken:row.id+'.'+secret};
 }
-async function authenticate(id,usuarioId,version){
+async function checkTx(client,id,usuarioId,version){
  if(typeof id!=='string')return null;
- const row=await db.sesionWeb.findUnique({where:{id},include:withUser});
+ const row=await client.sesionWeb.findUnique({where:{id},include:withUser});
  return active(row)&&row.usuarioId===usuarioId&&row.tokenVersion===version?row:null;
 }
+const authenticate=(id,usuarioId,version)=>checkTx(db,id,usuarioId,version);
 async function renew(value,config){
  const match=typeof value==='string'&&/^([a-f0-9-]{36})\.([A-Za-z0-9_-]{43})$/.exec(value);
  if(!match)return null;
@@ -60,4 +61,4 @@ async function renew(value,config){
   return null;
  });
 }
-module.exports={names,options,cookie,requireWeb,clear,write,create,authenticate,renew};
+module.exports={names,options,cookie,requireWeb,clear,write,create,authenticate,checkTx,renew};
