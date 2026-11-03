@@ -13,6 +13,8 @@
     if([16,19].includes(length)&&(/^(6011|65|64[4-9])/.test(number)||bin>=622126&&bin<=622925))return 'discover';
     return null;
   }
-  const api={brands,detectBrand};(global.Farmacia ||= {}).cards=api;
+  function formatNumber(value){const digits=String(value||'').replace(/\D/g,'').slice(0,19),groups=/^3[47]/.test(digits)?[4,6,5]:/^3(?:0[0-5]|[689])/.test(digits)?[4,6,4,2]:[4,4,4,4,3];let start=0;return groups.map(size=>{const part=digits.slice(start,start+size);start+=size;return part;}).filter(Boolean).join(' ');}
+  function formatExpiry(value){const digits=String(value||'').replace(/\D/g,'').slice(0,4);return digits.length>2?digits.slice(0,2)+'/'+digits.slice(2):digits;}
+  const api={brands,detectBrand,formatNumber,formatExpiry};(global.Farmacia ||= {}).cards=api;
   if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(globalThis);

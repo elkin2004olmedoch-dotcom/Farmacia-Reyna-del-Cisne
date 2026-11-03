@@ -302,6 +302,7 @@ model FacturaPedido {
   @@index([createdAt])
 }
 model ZonaEntrega {
+  alcance String @default("local")
   id String @id @default(uuid())
   nombre String
   provincia String
@@ -319,6 +320,7 @@ model ZonaEntrega {
 }
 
 model ZonaEntregaTarifa {
+  alcance String @default("local")
   id String @id @default(uuid())
   zonaEntregaId String
   zona ZonaEntrega @relation(fields:[zonaEntregaId],references:[id],onDelete:Restrict)

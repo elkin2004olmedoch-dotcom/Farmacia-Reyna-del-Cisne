@@ -1,5 +1,6 @@
 import {payments,payphoneUrl} from '../models/payments.js';
-import {paymentSummary,practiceCardView} from '../views/payments.js';
+import {paymentSummary} from '../views/payments.js';
+import {paymentCardController} from './payment-card.js';
 import '../models/card-policy.js';
 import {money,busy} from '../views/common.js';
 import {requireUser} from './layout.js';
@@ -12,6 +13,7 @@ export async function paymentsController(){
   const transferPanel=document.getElementById('payment-transfer-panel'),copy=document.getElementById('payment-transfer-copy'),copyStatus=document.getElementById('payment-transfer-copy-status');
   const practiceCard=document.getElementById('payment-practice-card'),practiceFields=document.getElementById('payment-practice-fields'),practiceResult=document.getElementById('payment-practice-result'),cards=globalThis.Farmacia.cards;
   let order={id:null,totalCentavos:0,detalles:[]},config={payphone:{disponible:false,entorno:null}},payment=null,pending=false,loadingActive=false,active=true;
+  let cardWidget=null;
   const card=form.querySelector('[value=card]'),transfer=form.querySelector('[value=transfer]');
   function fail(error){document.getElementById('payment-error-message').textContent=error.message;errorPanel.hidden=false;}
   function apply(data){order=data.pedido;payment=data.pago;config=data;paymentSummary(order);}
@@ -48,10 +50,10 @@ export async function paymentsController(){
       document.getElementById('payment-method-note').textContent=method==='manual'?'Habla con nuestro equipo para acordar el pago.':'El botón completa el recorrido de práctica sin mover dinero.';
       document.getElementById('payment-transfer-intro').textContent='Completa el recorrido con el botón Pagar. No realices una transferencia bancaria para esta práctica.';
       if(method!=='manual')button.textContent='Pagar';
-      if(!practiceFields.childElementCount){practiceFields.innerHTML=practiceCardView();practiceFields.querySelector('input').addEventListener('input',event=>{const brand=cards.detectBrand(event.target.value);document.getElementById('payment-practice-brand').textContent=brand?cards.brands[brand]:'Marca por identificar';});}
-    }else practiceFields.replaceChildren();
+      if(!cardWidget)cardWidget=paymentCardController(practiceFields);
+    }else{cardWidget?.destroy();cardWidget=null;practiceFields.replaceChildren();}
     practiceCard.hidden=!practice||method!=='card'||card.disabled;
-    const number=document.getElementById('payment-practice-number');if(number){number.disabled=pending||practiceCard.hidden;if(practiceCard.hidden){number.value='';document.getElementById('payment-practice-brand').textContent='Marca por identificar';}}
+    cardWidget?.setDisabled(pending||practiceCard.hidden);if(practiceCard.hidden)cardWidget?.clear();
   }
   if(id && (!/^[a-zA-Z0-9_-]{1,100}$/.test(id) || params.getAll('pedido').length!==1)){
     methods.disabled=true;button.disabled=true;document.getElementById('payment-summary').textContent='El enlace del pedido no es válido.';fail(new Error('Abre el pago desde Mis pedidos.'));document.getElementById('payment-retry').hidden=true;return;
@@ -68,7 +70,7 @@ export async function paymentsController(){
       document.getElementById('payment-reference').textContent='';document.getElementById('payment-persisted-state').textContent='';
       for(const field of ['payment-transfer-amount','payment-transfer-reference','payment-transfer-copy-status','payment-bank-name','payment-bank-type','payment-bank-number','payment-bank-holder'])document.getElementById(field).textContent='';
       document.getElementById('payment-bank-details').hidden=true;
-      practiceFields.replaceChildren();practiceResult.hidden=true;document.getElementById('payment-practice-summary').textContent='';
+      cardWidget?.destroy();cardWidget=null;practiceFields.replaceChildren();practiceResult.hidden=true;document.getElementById('payment-practice-summary').textContent='';
       location.replace('cuenta.html?next='+encodeURIComponent(`pagos.html?pedido=${id}`));
     }
     events.addEventListener('session:expired',expire);events.addEventListener('session:changed',()=>{if(!auth.user)expire();});
@@ -93,9 +95,9 @@ export async function paymentsController(){
     errorPanel.hidden=true;
     if(method==='manual'){contact(`Hola, quiero coordinar el pago del pedido ${id}.`);return;}
     if(config.practica?.disponible){
-      const number=document.getElementById('payment-practice-number'),marca=method==='card'?cards.detectBrand(number?.value):null;
-      if(method==='card'&&!marca){fail(new Error('Escribe un número inventado con longitud y marca reconocidas.'));number?.focus();return;}
-      if(number)number.value='';pending=true;busy(button,true);render();
+      const marca=method==='card'?cardWidget?.brand:null;
+      if(method==='card'&&!marca){cardWidget?.open();return;}
+      cardWidget?.clear();pending=true;busy(button,true);render();
       try{const data=await payments.practice(id,{metodo:method,...(marca?{marca}:{})});if(!active)return;apply(data);render();practiceResult.focus();}
       catch(error){if(active)fail(error);}
       finally{pending=false;if(active){busy(button,false);render();}}return;

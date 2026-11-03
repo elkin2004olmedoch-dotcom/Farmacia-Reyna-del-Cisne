@@ -10,6 +10,7 @@ process.env.UPLOAD_DIR=path.join(directory,'uploads');
 process.env.JWT_SECRET=randomBytes(48).toString('hex');process.env.ADMIN_EMAIL='admin-browser@example.ec';process.env.ADMIN_PASSWORD='AdminBrowser2026!';
 for(const args of [['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],['server/prisma/seed.cjs']])execFileSync(process.execPath,args,{env:process.env,stdio:'pipe'});
 const settings={...require('../../server/config.cjs')(),testAuthLimit:200,testApiLimit:2000};
+require('./geocoder-fixture.cjs')();
 const server=require('../../server/app.cjs')(settings).listen(3300,'127.0.0.1');
 for(const signal of ['SIGTERM','SIGINT'])process.on(signal,()=>server.close(async()=>{
   await require('../../server/models/db.cjs').$disconnect();

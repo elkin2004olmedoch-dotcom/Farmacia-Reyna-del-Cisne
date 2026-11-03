@@ -117,6 +117,14 @@ test('el destino recién migrado admite sus tres defaults técnicos y conserva t
  assert.equal(target.state.zonaEntregaTarifa[1].actorId,'cliente-original');assert.equal(target.state.zonaEntregaTarifa[1].createdAt.toISOString(),'2024-02-03T04:05:06.789Z');
  assert.equal(JSON.stringify(snapshot),before);
 });
+test('el nuevo default nacional se acepta intacto y se rechaza si tiene cambios comerciales',async()=>{
+ const initial=technicalDefaults(),at=new Date('2026-11-03T10:00:00Z');
+ initial.zonaEntrega.push({...initial.zonaEntrega[0],id:'ecuador-nacional',nombre:'Envíos a todo Ecuador',provincia:'Ecuador',canton:'Todo el país',alcance:'nacional',tarifaCentavos:0,createdAt:at,updatedAt:at});
+ initial.zonaEntregaTarifa.push({...initial.zonaEntregaTarifa[0],id:'ecuador-nacional-inicial',zonaEntregaId:'ecuador-nacional',alcance:'nacional',tarifaCentavos:0,createdAt:at});
+ const target=targetClient({initial});await migrate({source:sourceClient(fixture()),target,apply:true});assert.equal(target.state.zonaEntrega.length,1);
+ initial.zonaEntrega[1]={...initial.zonaEntrega[1],tarifaCentavos:100};
+ await assert.rejects(migrate({source:sourceClient(fixture()),target:targetClient({initial}),apply:true}),error=>error.code==='TARGET_NOT_EMPTY');
+});
 test('zonas o tarifas técnicas editadas, incompletas o adicionales bloquean el destino sin alterar sus datos',async()=>{
  const edits=[
   s=>{s.zonaEntrega[0].nombre='Cobertura propia';},s=>{s.zonaEntrega[0].provincia='Otra provincia';},s=>{s.zonaEntrega[0].canton='Otro cantón';},

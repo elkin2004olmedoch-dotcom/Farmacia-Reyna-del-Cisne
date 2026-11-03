@@ -29,7 +29,7 @@ function createFixture(){
     const seedCode=`require(${JSON.stringify(require.resolve('dotenv'))}).config=()=>({parsed:{}});require(${JSON.stringify(path.join(root,'server/prisma/seed.cjs'))});`;
     execFileSync(process.execPath,['-e',seedCode],{cwd:checkedDirectory(),env:isolated,stdio:'pipe',windowsHide:true});
     Object.assign(process.env,isolated);require('dotenv').config=()=>({parsed:{}});
-    db=require('../../server/models/db.cjs');const config=require('../../server/config.cjs')();
+    require('./geocoder-fixture.cjs')();db=require('../../server/models/db.cjs');const config=require('../../server/config.cjs')();
     const mail=require('../../server/models/email-delivery.cjs'),createApp=require('../../server/app.cjs'),supertest=require('supertest');
     const enabled=mail.configuration({NODE_ENV:'test',EMAIL_VERIFICATION_ENABLED:'true',EMAIL_PUBLIC_ORIGIN:'http://localhost:3300',EMAIL_FROM:'confirmar@example.ec',RESEND_API_KEY:'re_synthetic_email_api_not_real'},{origins:config.origins});
     function api(verification=true){return supertest(createApp({...config,testAuthLimit:1000,testApiLimit:10000,emailVerification:verification?enabled:config.emailVerification}));}

@@ -9,6 +9,7 @@ module.exports=config=>{
  const noStore=(req,res,next)=>{res.set('Cache-Control','no-store');next();};
  const empty=(req,res,next)=>{if(req.body!==undefined&&(!req.body||Array.isArray(req.body)||typeof req.body!=='object'||Object.keys(req.body).length))throw new AppError(422,'UNEXPECTED_FIELDS','La solicitud contiene campos no permitidos.');next();};
  router.get('/zonas-entrega',noStore,C.zones);
+ router.post('/entregas/verificar-destino',noStore,auth,roles('user','admin'),require('express-rate-limit').rateLimit({windowMs:60000,limit:10,keyGenerator:req=>req.user.id,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'DESTINATION_RATE_LIMIT','Espera un minuto antes de volver a ubicar el destino.'))}),...D.destination,C.destination);
  router.get('/admin/zonas-entrega',noStore,auth,admin,C.adminZones);
  router.post('/admin/zonas-entrega',noStore,auth,admin,...D.zone,C.createZone);
  router.put('/admin/zonas-entrega/:id',noStore,auth,admin,V.id,...D.zoneUpdate,C.updateZone);

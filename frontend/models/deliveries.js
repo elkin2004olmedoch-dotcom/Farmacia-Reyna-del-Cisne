@@ -3,6 +3,7 @@ export const ZONE_FORM_DRAFT='farmacia-mvc-zona-formulario';
 
 export const deliveries={
   zones:()=>request('/zonas-entrega'),
+  verifyDestination:body=>request('/entregas/verificar-destino',{method:'POST',body}),
   adminZones:()=>request('/admin/zonas-entrega'),
   saveZone:(values,id)=>request('/admin/zonas-entrega'+(id?'/'+encodeURIComponent(id):''),{method:id?'PUT':'POST',body:values}),
   couriers:()=>request('/admin/repartidores'),

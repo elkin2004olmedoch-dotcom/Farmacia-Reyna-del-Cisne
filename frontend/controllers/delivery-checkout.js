@@ -1,5 +1,7 @@
 import {deliveries,deliveryQuote} from '../models/deliveries.js';
 import {money} from '../views/common.js';
+import '../models/ecuador.js';
+const {matchesDeliveryZone}=globalThis.Farmacia.validation;
 const normalized=value=>String(value || '').normalize('NFD').replace(/\p{M}/gu,'').trim().replace(/\s+/g,' ').toLocaleLowerCase('es');
 
 export function deliveryCheckout(form,onChange){
@@ -7,8 +9,9 @@ export function deliveryCheckout(form,onChange){
   let zones=[],position=null,failed=false,loading=false,locationRequest=0;
   const zone=()=>zones.find(item=>item.id===select.value);
   const mode=()=>form.elements.delivery.value;
-  function match(){const selected=zone();return selected && normalized(form.elements.province.value)===normalized(selected.provincia) && normalized(form.elements.city.value)===normalized(selected.canton);}
-  function syncAddress(){const selected=zone();if(selected){const province=[...form.elements.province.options].find(option=>normalized(option.value)===normalized(selected.provincia));form.elements.province.value=province?.value || '';form.elements.city.value=selected.canton.trim().replace(/\s+/g,' ');}onChange();}
+  function match(){return matchesDeliveryZone(zone(),{province:form.elements.province.value,city:form.elements.city.value});}
+  function syncAddress(){const selected=zone();if(selected&&selected.alcance!=='nacional'){const province=[...form.elements.province.options].find(option=>normalized(option.value)===normalized(selected.provincia));form.elements.province.value=province?.value || '';form.elements.city.value=selected.canton.trim().replace(/\s+/g,' ');}onChange();}
+  function pickup(){position=null;locationRequest++;form.querySelector('[name=delivery][value=pickup]').checked=true;form.querySelector('[name=delivery][value=pickup]').dispatchEvent(new Event('change',{bubbles:true}));byId('checkout-remove-location').hidden=true;byId('checkout-location-status').textContent='Se seleccionó retiro en farmacia.';onChange();}
   async function reload(){
     if(loading)return;loading=true;const previous=select.value;
     try{
@@ -34,13 +37,15 @@ export function deliveryCheckout(form,onChange){
       const {latitude,longitude}=value.coords;
       if(!Number.isFinite(latitude)||!Number.isFinite(longitude)){status.textContent='No se recibió una ubicación válida. Usa tu dirección escrita.';return;}
       position={latitudEntrega:Number(latitude.toFixed(5)),longitudEntrega:Number(longitude.toFixed(5)),consienteUbicacion:true};
-      status.textContent=`Punto añadido (precisión aproximada: ${Math.round(value.coords.accuracy)} m). Comprueba que tu dirección escrita corresponde a este destino en Puerto Quito.`;byId('checkout-remove-location').hidden=false;
+      status.textContent=`Punto añadido (precisión aproximada: ${Math.round(value.coords.accuracy)} m). Comprueba que corresponde a tu dirección en Ecuador.`;byId('checkout-remove-location').hidden=false;
     },()=>{button.disabled=false;if(id===locationRequest)status.textContent='No se obtuvo permiso o señal de ubicación. Puedes continuar con tu dirección escrita.';},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
   });
   return {
     ready:reload(),reload,
+    pickup,
+    verify:values=>deliveries.verifyDestination(Object.fromEntries(['province','city','address','zonaEntregaId','latitudEntrega','longitudEntrega','consienteUbicacion'].filter(key=>values[key]!==undefined).map(key=>[key,values[key]]))),
     values(){return mode()==='delivery'?{zonaEntregaId:zone()?.id,esperadoTarifaVersion:zone()?.version,...(position || {})}:{};},
-    issues(){return mode()!=='delivery'?{}:!match()?{city:'La cobertura seleccionada corresponde a Puerto Quito. Revisa provincia y cantón.'}:deliveryQuote(0,'delivery',zone()).enabled?{}:{zonaEntregaId:failed?'No pudimos consultar la cobertura. Reintenta o elige retiro en farmacia.':'La tarifa de esta zona todavía no está definida. Elige retiro o consulta con la farmacia.'};},
+    issues(){return mode()!=='delivery'?{}:!match()?{city:'Revisa provincia y cantón: deben corresponder a la cobertura seleccionada.'}:deliveryQuote(0,'delivery',zone()).enabled?{}:{zonaEntregaId:failed?'No pudimos consultar la cobertura. Reintenta o elige retiro en farmacia.':'La tarifa de esta zona todavía no está definida. Puedes elegir retiro.'};},
     enabled(){return mode()!=='delivery' || Boolean(match() && deliveryQuote(0,'delivery',zone()).enabled);},
     render(productCents){
       const quote=deliveryQuote(productCents,mode(),zone());

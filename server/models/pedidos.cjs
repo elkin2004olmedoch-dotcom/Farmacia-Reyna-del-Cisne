@@ -8,22 +8,31 @@ const inventory=require('./inventario.cjs');
 const {requiresProfessionalReview,restrictionReason}=require('../../frontend/models/pharmacy-policy.js');
 const include={detalles:{include:{lotes:true}},historial:{orderBy:[{createdAt:'asc'},{id:'asc'}]}};
 const transitions={pendiente:['confirmado','cancelado'],confirmado:['preparado','cancelado'],preparado:['entregado','cancelado'],entregado:[],cancelado:[]};
-async function create(userId,{carrito,comprador,claveSolicitud}) {
+async function create(userId,{carrito,comprador,claveSolicitud},{actor}={}) {
   const sorted=[...carrito].sort((a,b)=>a.productoId.localeCompare(b.productoId));
   const fingerprint=createHash('sha256').update(JSON.stringify({carrito:sorted,comprador:Object.fromEntries(Object.entries(comprador).sort())})).digest('hex');
   function same(existing) {
     if(existing.fingerprint!==fingerprint)throw new AppError(409,'IDEMPOTENCY_CONFLICT','Esta confirmación ya se usó para otro pedido.');
     return {pedido:existing,replayed:true};
   }
+  let destination=null;
+  if(comprador.delivery==='delivery'){
+    const prior=await db.pedido.findUnique({where:{userId_requestKey:{userId,requestKey:claveSolicitud}},include});if(prior)return same(prior);
+    destination=await require('./geocoding.cjs').prepare(comprador);
+    if(!destination)throw new AppError(409,'DELIVERY_PICKUP_REQUIRED','No pudimos localizar el destino. Seleccionamos retiro en farmacia; revisa el total y confirma nuevamente.');
+  }
   for(let attempt=0;attempt<3;attempt++) {
     try {
       return await db.$transaction(async tx=> {
+        const current=await tx.usuario.findUnique({where:{id:userId},select:{activo:true,role:true,tokenVersion:true}});
+        if(!current?.activo||!['user','admin'].includes(current.role)||actor&&actor.tokenVersion!==current.tokenVersion)throw new AppError(401,'INVALID_TOKEN','Tu sesión ya no es válida.');
+        if(actor?.webSession&&!await require('./sesiones-web.cjs').checkTx(tx,actor.webSession,userId,actor.tokenVersion))throw new AppError(401,'INVALID_TOKEN','Tu sesión web ya no es válida.');
         const prior=await tx.pedido.findUnique({where:{userId_requestKey:{userId,requestKey:claveSolicitud}},include});
         if(prior)return same(prior);
         const now=new Date();
         const products=await tx.producto.findMany({where:{id:{in:sorted.map(item=>item.productoId)},activo:true},include:{lotes:true,promociones:{where:discountWhere(now)}}});
         const tax=await fiscal.current(tx,now);
-        const shipping=await require('./entregas.cjs').shippingSnapshot(tx,comprador,tax,now);
+        const shipping=await require('./entregas.cjs').shippingSnapshot(tx,comprador,tax,now,destination);
         let cents=0,baseCents=0,ivaCents=0;const details=[];
         for(const item of sorted) {
           const product=products.find(product=>product.id===item.productoId);

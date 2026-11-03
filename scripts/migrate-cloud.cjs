@@ -10,6 +10,10 @@ const INITIAL_DEFAULTS=Object.freeze({
   zonaEntrega:{id:'puerto-quito',nombre:'Todo Puerto Quito',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,activa:true,version:1},
   zonaEntregaTarifa:{id:'puerto-quito-inicial',zonaEntregaId:'puerto-quito',version:1,tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,actorId:null}
 });
+const NATIONAL_DEFAULTS=Object.freeze({
+  zonaEntrega:{...INITIAL_DEFAULTS.zonaEntrega,id:'ecuador-nacional',nombre:'Envíos a todo Ecuador',provincia:'Ecuador',canton:'Todo el país',alcance:'nacional',tarifaCentavos:0},
+  zonaEntregaTarifa:{...INITIAL_DEFAULTS.zonaEntregaTarifa,id:'ecuador-nacional-inicial',zonaEntregaId:'ecuador-nacional',alcance:'nacional',tarifaCentavos:0}
+});
 const UPLOAD_PATTERN=/^assets\/uploads\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.webp$/;
 const STATIC_IMAGE_PATTERN=/^assets\/images\/[a-z0-9-]+\.(?:jpg|png|webp|svg)$/;
 const MAX_BYTES=2*1024*1024;
@@ -128,17 +132,20 @@ function sameTimestamp(first,second){
 }
 async function assertEmpty(tx,counts){
   const reject=()=>fail('TARGET_NOT_EMPTY','La base PostgreSQL debe estar vacía, incluida Semilla. Sólo se admiten los defaults técnicos intactos de IVA y Puerto Quito creados por migración; ningún dato propio se sobrescribe.');
-  if(MODELS.some(model=>counts[model]!==0 && (!INITIAL_DEFAULTS[model] || counts[model]!==1)) || counts.zonaEntrega!==counts.zonaEntregaTarifa)reject();
+  if(MODELS.some(model=>counts[model]!==0 && (!INITIAL_DEFAULTS[model] || counts[model]>(NATIONAL_DEFAULTS[model]?2:1))) || counts.zonaEntrega!==counts.zonaEntregaTarifa)reject();
   const defaults={};
   for(const [model,expected] of Object.entries(INITIAL_DEFAULTS)){
     if(!counts[model])continue;
-    const rows=await tx[model].findMany(),row=rows[0];
-    if(rows.length!==1 || !Object.keys(expected).every(key=>key==='inicioVigencia'?sameTimestamp(row[key],expected[key]):row[key]===expected[key]))reject();
-    if(model!=='zonaEntregaTarifa' && !sameTimestamp(row.createdAt,row.updatedAt))reject();
-    defaults[model]=row;
+    const rows=await tx[model].findMany();
+    for(const row of rows){
+      const match=row.id===expected.id?expected:NATIONAL_DEFAULTS[model];
+      if(!match || !Object.keys(match).every(key=>key==='inicioVigencia'?sameTimestamp(row[key],match[key]):row[key]===match[key]) || row.alcance!==undefined&&row.alcance!==(match.alcance||'local'))reject();
+      if(model!=='zonaEntregaTarifa' && !sameTimestamp(row.createdAt,row.updatedAt))reject();
+    }
+    defaults[model]=rows;
   }
   // Both delivery defaults are inserted by migration 007 in one PG transaction.
-  if(defaults.zonaEntrega && !sameTimestamp(defaults.zonaEntrega.createdAt,defaults.zonaEntregaTarifa.createdAt))reject();
+  if(defaults.zonaEntrega && defaults.zonaEntrega.some(zone=>!sameTimestamp(zone.createdAt,defaults.zonaEntregaTarifa.find(row=>row.zonaEntregaId===zone.id)?.createdAt)))reject();
 }
 async function migrate({source,target,apply=false,frontendRoot,storage,inspectImages=inspectUploadFiles}){
   const snapshot=await readSnapshot(source);
@@ -161,9 +168,11 @@ async function migrate({source,target,apply=false,frontendRoot,storage,inspectIm
       // Recheck inside the write transaction to reject concurrent seeds/imports.
       const counts=await targetCounts(tx);await assertEmpty(tx,counts);
       if(counts.configuracionFiscal===1 && snapshot.configuracionFiscal.length)await tx.configuracionFiscal.deleteMany({where:{id:INITIAL_FISCAL.id}});
-      if(counts.zonaEntrega===1 && snapshot.zonaEntrega.length){
-        await tx.zonaEntregaTarifa.deleteMany({where:{id:INITIAL_DEFAULTS.zonaEntregaTarifa.id}});
-        await tx.zonaEntrega.deleteMany({where:{id:INITIAL_DEFAULTS.zonaEntrega.id}});
+      if(counts.zonaEntrega && snapshot.zonaEntrega.length){
+        for(const defaults of [INITIAL_DEFAULTS,NATIONAL_DEFAULTS]){
+          await tx.zonaEntregaTarifa.deleteMany({where:{id:defaults.zonaEntregaTarifa.id}});
+          await tx.zonaEntrega.deleteMany({where:{id:defaults.zonaEntrega.id}});
+        }
       }
       for(const model of MODELS){
         if(privateActions.has(model))continue;
