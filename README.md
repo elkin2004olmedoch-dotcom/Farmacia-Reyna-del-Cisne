@@ -1,6 +1,6 @@
 # Farmacia Reina del Cisne
 
-Tienda y gestión farmacéutica con sede en Puerto Quito y cobertura configurable en Ecuador: catálogo, carrito, pedidos, administración y reparto. Conserva la identidad crema/vino, el logo y las mascotas.
+Tienda y gestión farmacéutica con sede en Puerto Quito y cobertura configurable en Ecuador: catálogo, carrito, pedidos, administración y reparto. Conserva la identidad crema/vino, el logo y una mascota animada compartida por clientes y administración.
 
 La cobertura nacional comienza con envío gratuito; Puerto Quito conserva su tarifa local. Si no se localiza el destino, el checkout selecciona retiro y exige confirmar nuevamente. La ventana de tarjetas valida datos sintéticos sin efectuar cobros. [Pagos y cobertura nacional](docs/PAGOS-Y-COBERTURA-NACIONAL.md).
 
@@ -98,7 +98,7 @@ La app nativa de reparto para iPhone requiere firma de Apple y pruebas físicas.
 
 CORS admite orígenes exactos, sin comodín en producción. Los formularios tienen labels, foco visible y mensajes accesibles; el catálogo, carrito y modales se operan con teclado. Las pruebas de navegador verifican accesibilidad, adaptación móvil y manejo de red/401/403/500. Los permisos no dependen de ocultar botones en la interfaz.
 
-## API REST mínima del Reto 2
+## API REST
 
 Las rutas tienen prefijo /api. Las operaciones privadas reciben Authorization: Bearer <JWT>. Salvo el 204 sin contenido, las respuestas usan {ok:true,data:...}; los errores usan {ok:false,error:{code,message,details}}. Las colecciones paginadas devuelven items, total, page y pageSize.
 
@@ -149,17 +149,19 @@ La suite también confirma el pedido de un user en BD, sus detalles, el descuent
 
 Para repetir las 26 comprobaciones de API mínimas, después de instalar dependencias y generar Prisma en la extracción nueva: node --test tests/reto2/api.test.cjs. El fixture crea una base temporal separada y no usa pedidos comerciales. La última ejecución local aprobó 26/26, sin omisiones.
 
-## Entrega académica
+## Presentación integrada de los retos 1 y 2
 
-La entrega se nombra Reto2_Apellido_Nombre.zip e incluye fuente versionada, frontend/backend MVC, esquemas, migraciones, seed, pruebas, .env.example y este README. En un checkout Git limpio puede generarse sin historial ni archivos privados con:
+Se revisa un solo proyecto, un repositorio y la misma farmacia publicada. No se entregan ZIP separados por reto. La aplicación MVC conserva y amplía el catálogo, carrito, identidad, accesibilidad y navegación del trabajo inicial, incorporando API, persistencia relacional, autenticación y permisos.
 
-```sh
-git archive --format=zip --prefix=Farmacia-Reyna-del-Cisne/ --output=entrega/Reto2_Apellido_Nombre.zip HEAD
-```
+| Contenido | Dónde comprobarlo en el mismo proyecto |
+| --- | --- |
+| Reto 1: HTML, CSS, JavaScript, adaptación y teclado | Tienda publicada, catálogo, ficha y carrito; pruebas de tests/ |
+| Reto 2: MVC, Fetch, CRUD, JWT, roles y Prisma | frontend/, server/ y tests/reto2/; administración y compra conectadas a la misma API |
+| Identidad y asistentes | Mismo componente animado y atlas para clientes y administración; órdenes de cada rol con confirmación |
 
-Crea antes la carpeta entrega si no existe. El archivo se obtiene del commit indicado: confirma tus cambios antes de generarlo. Los node_modules, .env, bases, certificados y respaldos privados no pertenecen a Git ni a la entrega. El código móvil se incluye como ampliación opcional; pagos reales, GPS continuo, firma iPhone y el framework del Reto 3 no son requisitos obligatorios del Reto 2.
+Ejecuta npm test para verificar juntos los dos grupos de pruebas con bases temporales; npm run test:browser y la configuración mascot-browser comprueban los recorridos y Chrome/Brave. Los nombres históricos de carpetas y las auditorías se conservan para trazabilidad. El HTML antiguo de raíz documenta la evolución; la aplicación publicada y servida por Express es frontend/.
 
-En Windows, también puede prepararse el proyecto desde una extracción sin Git: `powershell -ExecutionPolicy Bypass -File scripts/crear-reto2.ps1 -Nombre Reto2_Olmedo_Elkin.zip`. Este empaquetador incluye el código móvil opcional para conservar las comprobaciones de distribución, excluyendo sus compilaciones, cachés, configuración local y claves de firma. Excluye también `.env.*` privados, respaldos, certificados, resultados de pruebas y carpetas de auditorías privadas; conserva `.env.example` y la documentación pública de seguridad. No elimina las auditorías originales ni sigue junctions o enlaces a archivos externos. Publica el ZIP sólo cuando termina su creación.
+La evaluación se hace sobre el código y el sitio completos. Los secretos, bases comerciales, certificados y respaldos privados permanecen fuera del repositorio. El Reto 3 espera el framework asignado; no se cambia la tecnología actual.
 
 ## Evidencias
 

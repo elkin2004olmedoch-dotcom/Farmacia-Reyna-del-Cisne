@@ -51,7 +51,7 @@ test('una junction en un antecesor no permite reemplazar archivos fuera de la sa
 test('artefacto conserva los módulos del asistente administrativo y la ayuda contextual',()=>{
   const output=path.join(directory,'modules');
   buildPages({output,apiOrigin:'https://api.example.test'});
-  for(const file of ['controllers/admin-companion.js','controllers/admin-command.mjs','controllers/mascota-scope.mjs','assets/mascotas/admin-companion.css','assets/mascotas/widget-responsive.css'])assert.ok(fs.existsSync(path.join(output,file)),file);
+  for(const file of ['controllers/admin-companion.js','controllers/admin-command.mjs','controllers/mascota-scope.mjs','assets/mascotas/widget.css','assets/mascotas/widget-responsive.css'])assert.ok(fs.existsSync(path.join(output,file)),file);
   for(const directory of ['controllers','models','views'])for(const file of fs.readdirSync(path.join(output,directory))){
     if(!/\.m?js$/.test(file))continue;
     const filename=path.join(output,directory,file),source=fs.readFileSync(filename,'utf8');

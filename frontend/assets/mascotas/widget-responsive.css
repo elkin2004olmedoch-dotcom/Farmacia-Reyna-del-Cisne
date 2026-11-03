@@ -1,12 +1,11 @@
 /* Mobile viewport, notch and touch refinements for the floating store helper. */
 :host{right:max(12px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px))}
-.avatar,.launcher,.close,.preferences button,.shortcuts button,form button{touch-action:manipulation}
+.avatar,.launcher,.close,.shortcuts button,form button{touch-action:manipulation}
 
 @media(max-width:600px){
   .panel{max-height:calc(100dvh - 158px - env(safe-area-inset-top,0px));width:min(360px,calc(100vw - 24px))}
   .messages{min-height:72px;max-height:min(220px,34dvh)}
   .preferences{gap:6px;padding-inline:12px}
-  .preferences button{font-size:10px}
   .shortcuts{padding-inline:12px}
   .shortcuts button{flex:1 1 auto;min-height:36px}
   form{margin-inline:12px}

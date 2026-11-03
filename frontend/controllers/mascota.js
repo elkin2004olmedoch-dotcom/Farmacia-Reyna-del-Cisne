@@ -6,7 +6,7 @@ import {catalog} from '../models/catalog.js';
 import {cart} from '../models/cart.js';
 const PEOPLE={farmi:'Farmi',boti:'Boti',goti:'Goti'};
 const STORED_CHARACTER='farmacia-companion';
-const STORED_MOTION='farmacia-motion';
+
 const CONTROL_ACTIONS=new Map([['#show-register','#register-nombre'],['#checkout-next','#delivery-form input:not([type=hidden])']]);
 /** Fixed navigation controls only: never submit a purchase or change cart contents. */
 export function activateMascotaAction(href,doc=document){
@@ -24,16 +24,17 @@ function cartCount(){try{const mvc=JSON.parse(localStorage.getItem('farmacia-mvc
 function pageContext(){const path=location.pathname.split('/').pop()||'index.html',page=document.body.dataset.page,section=location.hash.slice(1),map={'index.html':page==='home'?'home':'home','catalogo.html':'catalog','producto.html':'product','comparar.html':'compare','checkout.html':'checkout','cuenta.html':'account','pedidos.html':'orders','ayuda.html':'help','pagos.html':'payments'};if(path==='index.html'&&['servicios','promos','ubicacion','contacto','featured-title'].includes(section))return section==='promos'?'promotions':section==='ubicacion'||section==='contacto'?'contact':'home';return map[path]||({'home':'home','catalog':'catalog','product':'product','compare':'compare','checkout':'checkout','account':'account','orders':'orders','help':'help','payments':'payments'}[page]||'home');}
 
 /** A small, local store-navigation helper. Messages never leave this module. */
-export async function mascotaController(){
-  if(document.querySelector('farmacia-mascota'))return;
+export async function mascotaController({administration=false,command,questions,greeting,onMount}={}){
+  const tag=administration?'farmacia-admin-companion':'farmacia-mascota';
+  if(document.querySelector(tag))return;
   const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('widget.css',ASSETS).href;
   const responsiveStyle=document.createElement('link');responsiveStyle.rel='stylesheet';responsiveStyle.href=new URL('widget-responsive.css',ASSETS).href;
   const conversationStyle=document.createElement('link');conversationStyle.rel='stylesheet';conversationStyle.href=new URL('conversation.css',ASSETS).href;
-  const host=document.createElement('farmacia-mascota');
+  const host=document.createElement(tag);
   const root=host.attachShadow({mode:'open'});
   root.append(style,responsiveStyle,conversationStyle);
   const template=document.createElement('template');
-  template.innerHTML=`<div class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">TU COMPAÑERO DE FARMACIA</span><h2 id="title">Goti te acompaña</h2><p>Ayuda para navegar y preparar tu compra</p></div><button class="close" id="close" aria-label="Cerrar ayuda" type="button">×</button></header><div class="preferences"><label>Compañero<select id="character"><option value="farmi">Farmi</option><option value="boti">Boti</option><option value="goti">Goti</option></select></label><button id="motion" type="button" aria-pressed="false">Pausar movimiento</button></div><div class="messages" id="messages" role="log" aria-label="Ayuda de la farmacia" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Preguntas rápidas de esta sección"></nav><form id="form"><label for="input" class="sr-only">¿Qué necesitas?</label><input id="input" maxlength="180" autocomplete="off" placeholder="¿Qué necesitas?" required><button type="submit" aria-label="Enviar consulta">↑</button></form><p class="local-note">Guía local de la tienda · tus mensajes no se envían</p></section><div class="bubble" id="bubble" role="status" hidden></div><button class="avatar" id="avatar" type="button" aria-label="Haz saltar a Goti"><canvas id="canvas" width="192" height="208" aria-hidden="true"></canvas></button><button class="launcher" id="launcher" type="button" aria-expanded="false" aria-controls="panel"><span class="online" aria-hidden="true"></span><span id="launcher-label">¿Te ayudo?</span><span aria-hidden="true">↗</span></button></div>`;
+  template.innerHTML=`<div class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">${administration?"ASISTENTE LOCAL DE LA FARMACIA":"TU COMPAÑERO DE FARMACIA"}</span><h2 id="title">Goti te acompaña</h2><p>${administration?"Catálogo, pedidos y entregas":"Ayuda para navegar y preparar tu compra"}</p></div><button class="close" id="close" aria-label="Cerrar ayuda" type="button">×</button></header><div class="preferences"><label>Compañero<select id="character"><option value="farmi">Farmi</option><option value="boti">Boti</option><option value="goti">Goti</option></select></label></div><div class="messages" id="messages" role="log" aria-label="${administration?"Asistente de administración":"Ayuda de la farmacia"}" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Preguntas rápidas de esta sección"></nav><form id="form"><label for="input" class="sr-only">¿Qué necesitas?</label><input id="input" maxlength="${administration?3000:180}" autocomplete="off" placeholder="${administration?"Ej. actualiza precio de…":"¿Qué necesitas?"}" required><button type="submit" aria-label="Enviar consulta">↑</button></form><p class="local-note">${administration?"Los cambios usan tu sesión y requieren confirmación":"Guía local de la tienda · tus mensajes no se envían"}</p></section><div class="bubble" id="bubble" role="status" hidden></div><button class="avatar" id="avatar" type="button" aria-label="Haz saltar a Goti"><canvas id="canvas" width="192" height="208" aria-hidden="true"></canvas></button><button class="launcher" id="launcher" type="button" aria-label="${administration?"Abrir asistente administrativo":"Abrir ayuda de la farmacia"}" aria-expanded="false" aria-controls="panel"><span class="online" aria-hidden="true"></span><span id="launcher-label">${administration?"Ayuda administrativa":"¿Te ayudo?"}</span><span aria-hidden="true">↗</span></button></div>`;
   root.append(template.content.cloneNode(true));document.body.append(host);
   const find=selector=>root.querySelector(selector);
   const canvas=find('#canvas');let context;try{context=canvas.getContext('2d');}catch{context=null;}
@@ -42,12 +43,11 @@ export async function mascotaController(){
   fallback.id='sprite-fallback';fallback.setAttribute('viewBox','0 0 192 208');fallback.setAttribute('aria-hidden','true');fallback.setAttribute('hidden','');
   for(const [name,value]of Object.entries({x:8,y:17.333,width:176,height:190.667,overflow:'hidden'}))crop.setAttribute(name,value);
   crop.append(portrait);fallback.append(crop);find('#avatar').append(fallback);
-  const motionControls=document.createElement('div'),motionToggle=document.createElement('button'),motionStatus=document.createElement('small');
-  motionControls.className='motion-controls';motionToggle.type='button';motionToggle.id='motion-toggle';motionToggle.className='motion-toggle';motionStatus.id='motion-status';motionStatus.setAttribute('role','status');motionControls.append(motionToggle,motionStatus);find('#launcher').after(motionControls);
   const images=new Map();
   let selected=stored(STORED_CHARACTER)||'goti';if(!PEOPLE[selected])selected='goti';
   const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
-  let paused=stored(STORED_MOTION)==='paused'||(stored(STORED_MOTION)===null && reducedMotion.matches);
+  try{localStorage.removeItem('farmacia-motion');}catch{}
+  host.dataset.motion='active';
   let manifest=null,state='idle',frame=0,elapsed=0,remaining=Infinity,lastTime=0,offset=0,fallbackAfter=0;
   let replyTimer=null,bubbleTimer=null,refreshTimer=null,requestVersion=0;
   let lastCartCount=cartCount();
@@ -68,8 +68,10 @@ export async function mascotaController(){
   let currentSignature=pageContext();
   function productName(){return document.querySelector('#product-detail h1')?.textContent.trim()||document.querySelector('h1')?.textContent.trim()||'este producto';}
   function knownProductNames(){return [...document.querySelectorAll('#catalog-grid h3, #featured-products h3, #product-detail h1, #checkout-items h2')].map(node=>node.textContent.trim()).filter(Boolean);}
-  function contextSignature(){const context=pageContext();return context==='product'?`${context}:${productName()}`:context;}
+  function contextSignature(){if(administration)return new URLSearchParams(location.search).get('tabla')||'dashboard';const context=pageContext();return context==='product'?`${context}:${productName()}`:context;}
   function refreshQuickQuestions(){
+    currentSignature=contextSignature();
+    if(administration){const nav=find('#shortcuts');nav.replaceChildren();for(const option of questions?.()||[]){const button=document.createElement('button');button.type='button';button.textContent=option.label;button.addEventListener('click',()=>option.reply?append(option.reply):send(option.text));nav.append(button);}return;}
     currentContext=pageContext();
     currentSignature=contextSignature();
     const options=[...(quickQuestions[currentContext]||quickQuestions.home)];
@@ -90,6 +92,7 @@ export async function mascotaController(){
   function character(){return manifest?.characters.find(item=>item.id===selected);}
   function clip(){return character()?.states?.[state];}
   function setState(next,options={}){
+    if(reducedMotion.matches&&/^(jumping|running)/.test(next))next='waving';
     const nextClip=character()?.states?.[next];if(!nextClip)return false;
     state=next;frame=0;elapsed=0;
     remaining=options.loop||next==='idle'?Infinity:nextClip.durations.reduce((sum,value)=>sum+value,0)*(options.loops||2);
@@ -98,20 +101,12 @@ export async function mascotaController(){
   }
   function setCharacter(id){
     if(!PEOPLE[id])return false;selected=id;remember(STORED_CHARACTER,id);
-    find('#character').value=id;find('#title').textContent=`${PEOPLE[id]} te acompaña`;
+    find('#character').value=id;find('#title').textContent=administration?'Farmi te ayuda a gestionar':`${PEOPLE[id]} te acompaña`;
     find('#avatar').setAttribute('aria-label',`Haz saltar a ${PEOPLE[id]}`);
     fallbackAfter=performance.now()+3000;state='idle';frame=0;elapsed=0;remaining=Infinity;
     setState('waving',{loops:1});
     host.dispatchEvent(new CustomEvent('mascota:character',{detail:{id,name:PEOPLE[id]},bubbles:true}));
     return true;
-  }
-  function setPaused(value,{rememberChoice=true}={}){
-    paused=Boolean(value);if(rememberChoice)remember(STORED_MOTION,paused?'paused':'active');
-    find('#motion').textContent=paused?'Activar movimiento':'Pausar movimiento';
-    find('#motion').setAttribute('aria-pressed',String(paused));
-    motionToggle.textContent=paused?'▶':'Ⅱ';motionToggle.setAttribute('aria-label',paused?'Activar movimiento de la mascota':'Pausar movimiento de la mascota');motionToggle.setAttribute('aria-pressed',String(paused));
-    motionStatus.textContent=paused?(stored(STORED_MOTION)===null&&reducedMotion.matches?'Movimiento pausado por tu preferencia de movimiento reducido.':'Movimiento pausado. Puedes activarlo aquí.'):'Movimiento activo';motionStatus.hidden=!paused;
-    lastTime=0;
   }
   function sayBubble(text){
     clearTimeout(bubbleTimer);find('#bubble').textContent=text;find('#bubble').hidden=false;
@@ -120,7 +115,7 @@ export async function mascotaController(){
   function open(value){
     refreshQuickQuestions();
     find('#panel').hidden=!value;find('#launcher').setAttribute('aria-expanded',String(value));
-    find('#launcher-label').textContent=value?'Cerrar ayuda':'¿Te ayudo?';
+    find('#launcher-label').textContent=value?'Cerrar ayuda':administration?'Ayuda administrativa':'¿Te ayudo?';
     if(value){find('#bubble').hidden=true;setState('waving',{loops:1});find('#input').focus();}
     else find('#launcher').focus();
   }
@@ -161,11 +156,11 @@ export async function mascotaController(){
     const query=text.replace(/^(hola[, ]*)?(quiero |necesito |puedes |por favor )*(buscar |busca |encontrar |un producto[: ]*|producto[: ]*)/i,'').trim().slice(0,100)||text.slice(0,100);
     return{state:'waiting',text:`Puedes buscar «${query}» en el catálogo. Allí verás las presentaciones y los precios publicados. Confirma con la farmacia cualquier duda de disponibilidad o receta.`,actions:[{label:`Buscar ${query}`,href:`catalogo.html?q=${encodeURIComponent(query)}`},whatsapp]};
   }
-  const executeCustomer=createCustomerCommandExecutor({catalog,cart,allowed:product=>!globalThis.Farmacia.pharmacyPolicy.requiresProfessionalReview(product),navigate:href=>{location.href=href;}});
+  const executeCustomer=administration?command:createCustomerCommandExecutor({catalog,cart,allowed:product=>!globalThis.Farmacia.pharmacyPolicy.requiresProfessionalReview(product),navigate:href=>{location.href=href;}});
   let commandBusy=false;
   async function send(text,display){
     if(commandBusy)return;
-    const message=String(text||'').trim().slice(0,180);if(!message)return;
+    const message=String(text||'').trim().slice(0,administration?3000:180);if(!message)return;
     disableCompanionControls(root);
     clearTimeout(replyTimer);requestVersion+=1;const version=requestVersion;
     root.querySelectorAll('.message.thinking').forEach(node=>node.remove());
@@ -173,13 +168,14 @@ export async function mascotaController(){
     const pending=append(`${PEOPLE[selected]} está pensando…`,'thinking');
     setState('running',{loop:true});
     commandBusy=true;
+    if(administration){find('#input').disabled=true;find('#form [type=submit]').disabled=true;}
     try{
-      const medical=classifyMascotaQuestion(message,knownProductNames())==='medical';
+      const medical=!administration&&classifyMascotaQuestion(message,knownProductNames())==='medical';
       if(medical)await executeCustomer('cancelar');
       const result=medical?null:await executeCustomer(message);
       if(result){pending.remove();companionControls(append(result.text),result,send);setState('review');return;}
-    }catch(error){pending.remove();append(error.message||'No se pudo completar la consulta. Inténtalo nuevamente.');setState('waiting');return;}
-    finally{commandBusy=false;}
+    }catch(error){pending.remove();append(administration?'No pude guardar el cambio: '+error.message:error.message||'No se pudo completar la consulta. Inténtalo nuevamente.');setState('waiting');return;}
+    finally{commandBusy=false;if(administration){find('#input').disabled=false;find('#form [type=submit]').disabled=false;if(!find('#panel').hidden)find('#input').focus();}}
     replyTimer=setTimeout(()=>{
       if(version!==requestVersion)return;pending.remove();const response=answer(message);append(response.text,'bot',response.actions);
       if(!setState(response.state))setState('idle');
@@ -195,9 +191,10 @@ export async function mascotaController(){
     }catch(_){/* Store navigation remains usable if sprite resources are unavailable. */}
   }
   function tick(time){
+    if(!host.isConnected)return;
     const delta=lastTime?Math.min(time-lastTime,80):0;lastTime=time;
     const current=clip();
-    if(!paused && !document.hidden && current){
+    if(!document.hidden && current){
       elapsed+=delta;while(elapsed>=current.durations[frame]){elapsed-=current.durations[frame];frame=(frame+1)%current.frames.length;}
       if(Number.isFinite(remaining)){remaining-=delta;if(remaining<=0){offset=0;setState('idle');}}
     }
@@ -215,15 +212,13 @@ export async function mascotaController(){
   root.addEventListener('keydown',event=>{if(event.key==='Escape'&&!find('#panel').hidden){event.preventDefault();open(false);}});
   find('#avatar').addEventListener('click',()=>{setState('jumping',{loops:1});sayBubble('¡Aquí estoy! Pulsa «¿Te ayudo?» para conversar.');});
   find('#avatar').addEventListener('pointerenter',()=>{if(state==='idle')setState('waving',{loops:1});});
-  find('#avatar').addEventListener('pointermove',event=>{if(paused || state==='jumping')return;const box=canvas.getBoundingClientRect();offset=Math.max(-8,Math.min(8,(event.clientX-box.left-box.width/2)/4));if(Math.abs(offset)>5 && state==='idle')setState(offset>0?'running-right':'running-left',{loops:1});});
+  find('#avatar').addEventListener('pointermove',event=>{if(state==='jumping')return;const box=canvas.getBoundingClientRect();offset=Math.max(-8,Math.min(8,(event.clientX-box.left-box.width/2)/4));if(Math.abs(offset)>5 && state==='idle')setState(offset>0?'running-right':'running-left',{loops:1});});
   find('#avatar').addEventListener('pointerleave',()=>{offset=0;});
   find('#character').addEventListener('change',event=>setCharacter(event.target.value));
-  find('#motion').addEventListener('click',()=>setPaused(!paused));
-  motionToggle.addEventListener('click',()=>setPaused(!paused));
-  reducedMotion.addEventListener('change',()=>{if(stored(STORED_MOTION)===null)setPaused(reducedMotion.matches,{rememberChoice:false});});
   document.addEventListener('visibilitychange',()=>{lastTime=0;});
   find('#form').addEventListener('submit',event=>{event.preventDefault();send(find('#input').value);});
   refreshQuickQuestions();
+  if(administration)document.getElementById('admin-table-choice')?.addEventListener('change',refreshQuickQuestions);
   const questionObserver=new MutationObserver(()=>{const next=contextSignature();if(next!==currentSignature||find('#shortcuts').children.length===0)refreshQuickQuestions();});
   questionObserver.observe(document.body,{subtree:true,childList:true,characterData:true});
   window.addEventListener('hashchange',refreshQuickQuestions);
@@ -233,9 +228,12 @@ export async function mascotaController(){
     else if(count!==lastCartCount)setState('review',{loops:1});
     lastCartCount=count;
   });
-  setCharacter(selected);setPaused(paused,{rememberChoice:false});
-  append(`¡Hola! Soy ${PEOPLE[selected]}. Te ayudo a encontrar productos y a preparar tu compra. Elige una opción o escribe el nombre de un producto.`, 'bot',[{label:'Explorar catálogo',href:'catalogo.html'}]);
-  await loadManifest();refreshTimer=manifest?.complete?null:setInterval(loadManifest,15000);
+  setCharacter(selected);
+  append(greeting||`¡Hola! Soy ${PEOPLE[selected]}. Te ayudo a encontrar productos y a preparar tu compra. Elige una opción o escribe el nombre de un producto.`, 'bot',administration?[]:[{label:'Explorar catálogo',href:'catalogo.html'}]);
+  function remove(){clearTimeout(replyTimer);clearTimeout(bubbleTimer);clearInterval(refreshTimer);questionObserver.disconnect();window.removeEventListener('hashchange',refreshQuickQuestions);document.getElementById('admin-table-choice')?.removeEventListener('change',refreshQuickQuestions);host.remove();if(globalThis.FarmaciaMascota?.open===open)delete globalThis.FarmaciaMascota;}
+  onMount?.(remove);
+  await loadManifest();if(!host.isConnected)return null;refreshTimer=manifest?.complete?null:setInterval(loadManifest,15000);
   requestAnimationFrame(tick);
-  globalThis.FarmaciaMascota=Object.freeze({setCharacter,setState,setPaused,open,sendMessage:send,getStatus:()=>({character:selected,state,frame,paused,open:!find('#panel').hidden,availableStates:Object.keys(character()?.states||{})})});
+  globalThis.FarmaciaMascota=Object.freeze({setCharacter,setState,open,sendMessage:send,getStatus:()=>({character:selected,state,frame,paused:false,open:!find('#panel').hidden,availableStates:Object.keys(character()?.states||{})})});
+  return Object.freeze({send,open,remove});
 }
