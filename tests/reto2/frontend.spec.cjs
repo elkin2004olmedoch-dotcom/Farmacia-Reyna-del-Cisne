@@ -66,7 +66,8 @@ test('administrador crea, edita y elimina; consulta todas las tablas y publica p
   await page.locator('#admin-table-choice').selectOption('productos');row=await findAdminRow(page,name);await row.locator('[data-delete]').click();await page.locator('#confirm-dialog [value=confirm]').click();await expect(row).toContainText('No');
   await page.goto('/catalogo.html');await expect(page.locator('.shop-cart')).toBeHidden();await expect(page.locator('[data-add]').first()).toBeHidden();await page.locator('#catalog-search').fill('solar');await expect(page.locator('[data-add]').first()).toBeHidden();
   await page.goto('/producto.html?id=solar');await expect(page.locator('#detail-add-form')).toBeHidden();
-  for(const file of ['cuenta.html','checkout.html']){await page.goto('/'+file);await expect(page).toHaveURL(/admin.html$/);await expect(page.locator('.admin-metric')).toHaveCount(8);}
+  await page.goto('/cuenta.html');await expect(page.locator('#profile-form')).toBeVisible();
+  await page.goto('/checkout.html');await expect(page).toHaveURL(/admin.html$/);await expect(page.locator('.admin-metric')).toHaveCount(8);
   await page.goto('/pedidos.html');await expect(page).toHaveURL(/admin.html\?tabla=pedidos$/);await expect(page.locator('#admin-section-title')).toHaveText('Pedidos de clientes');await expect(page.locator('#admin-create')).toBeHidden();
   await page.locator('#logout').click();await expect(page).toHaveURL(/cuenta.html$/);await expect(page.locator('#login-form')).toBeVisible();expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();
   await page.goto('/admin.html');await expect(page).toHaveURL(/cuenta.html\?next=admin.html$/);await expect(page.locator('#page-status')).toContainText('administrador');

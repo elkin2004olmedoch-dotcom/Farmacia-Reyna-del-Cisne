@@ -10,6 +10,7 @@ export function layoutController() {
   update();for(const name of ['cart:changed','session:changed'])events.addEventListener(name,update);
   events.addEventListener('session:expired',()=>{
     auth.clear();
+    if(document.body.dataset.page==='account'){document.getElementById('account-area').replaceChildren();sessionStorage.setItem('farmacia-mvc-login-message','Tu sesión venció. Inicia sesión nuevamente para editar tu perfil.');location.replace('cuenta.html');return;}
     if(document.body.dataset.page==='admin'){
       const area=document.getElementById('admin-area');area.hidden=true;area.replaceChildren();
       document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());closeMenu();

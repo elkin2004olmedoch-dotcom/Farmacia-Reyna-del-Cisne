@@ -27,6 +27,7 @@ module.exports=config=> {
   },mobileController.renew);
   router.post('/auth/mobile/logout',auth,mobile,mobileController.logout);
   router.get('/auth/me',auth,authController.me);
+  router.put('/auth/me',auth,...V.profile,authController.updateProfile);
   router.post('/auth/logout',auth,authController.logout);
   router.get('/productos',...V.catalog,products.list);
   router.get('/productos/:id',V.id,V.validated,products.find);

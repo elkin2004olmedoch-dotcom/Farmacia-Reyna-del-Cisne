@@ -26,6 +26,7 @@ export function createCustomerCommandExecutor({catalog,cart,allowed=()=>true,nav
         return {text:'Carrito actualizado.'};
       }
       proposal=null;
+      if(/^(?:(?:ver|abrir|abre|actualizar|actualiza|editar|edita)\s+)?(?:mi\s+)?perfil$/.test(value))return {text:'En tu perfil puedes actualizar tu nombre y teléfono.',actions:[{label:'Abrir mi perfil',href:'cuenta.html'}]};
       if(/^(?:vaciar|vacia|limpiar|limpia)(?: el| mi)? carrito$/.test(value))return review('clear');
       if(/^(?:comprar|finalizar compra|ir a pagar|confirmar pedido)$/.test(value))return review('checkout');
       const choice=value.match(/^seleccionar (agregar|quitar) ([a-z0-9-]{1,80})(?: (\d{1,2}))?$/);

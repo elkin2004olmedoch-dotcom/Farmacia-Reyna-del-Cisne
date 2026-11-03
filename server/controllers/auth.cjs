@@ -29,6 +29,7 @@ module.exports = config=> {
       res.json({ok:true,data:session(user)});
     },
     me(req,res) { res.json({ok:true,data:users.publicUser(req.user)}); },
+    async updateProfile(req,res){res.json({ok:true,data:await users.updateProfile(req.user.id,req.input)});},
     async logout(req,res) { await users.revoke(req.user.id);res.status(204).end(); },
     async verifyEmail(req,res){
       const result=await verification.consume(req.input.token);
