@@ -8,21 +8,26 @@ export async function paymentsController(){
   const params=new URLSearchParams(location.search),id=params.get('pedido');
   const form=document.getElementById('payment-form'),methods=document.getElementById('payment-methods'),button=document.getElementById('payment-submit');
   const errorPanel=document.getElementById('payment-error'),loading=document.getElementById('payment-loading');
+  const transferPanel=document.getElementById('payment-transfer-panel'),copy=document.getElementById('payment-transfer-copy'),copyStatus=document.getElementById('payment-transfer-copy-status');
   let order={id:null,totalCentavos:0,detalles:[]},config={payphone:{disponible:false,entorno:null}},payment=null,pending=false,loadingActive=false,active=true;
-  const card=form.querySelector('[value=card]'),manual=form.querySelector('[value=manual]');
+  const card=form.querySelector('[value=card]'),transfer=form.querySelector('[value=transfer]');
   function fail(error){document.getElementById('payment-error-message').textContent=error.message;errorPanel.hidden=false;}
+  function contact(text){const url=new URL('https://api.whatsapp.com/send');url.searchParams.set('phone','593979275988');url.searchParams.set('text',text);window.open(url.href,'_blank','noopener,noreferrer');}
   function render(){
     if(!active)return;
     const real=Boolean(id),method=form.elements.method.value;
     const locked=payment && ['creando','aprobado','cancelado','revision'].includes(payment.estado);
     const mismatch=payment && config.payphone.entorno && payment.entorno!==config.payphone.entorno;
-    card.closest('label').hidden=!config.payphone.disponible;
-    card.disabled=!real || !config.payphone.disponible || !order.id || ['cancelado','entregado'].includes(order.estado) || Boolean(locked || mismatch);
-    document.getElementById('payment-card-note').textContent=mismatch?'El entorno de este intento cambió. Consulta su revisión con la farmacia.':!config.payphone.disponible?'Pago con la farmacia':!real?'PayPhone · requiere un pedido registrado':(payment?.entorno || config.payphone.entorno)==='sandbox'?'PayPhone · entorno de pruebas, sin cobros reales':'Procesado en la página oficial de PayPhone';
-    document.getElementById('payment-method-note').textContent=method==='card'?'Continuarás en pay.payphonetodoesposible.com. Al terminar, volverás a la farmacia.':'Habla con nuestro equipo para acordar el pago. Un mensaje no acredita un pago.';
-    button.textContent=method==='card'?`Continuar en PayPhone · ${money(order.totalCentavos)} →`:'Consultar con la farmacia ↗';
-    button.disabled=pending || real && !order.id || method==='card' && card.disabled;
-    document.getElementById('payment-mode').textContent=!real?'Mis compras':(payment?.entorno || config.payphone.entorno)==='sandbox'?'PayPhone · entorno de pruebas':'Pago de tu pedido';
+    const fallbackBlocked=!config.payphone.disponible && Boolean(payment),closed=['cancelado','entregado'].includes(order.estado);
+    card.disabled=!real || !order.id || closed || Boolean(locked || mismatch || fallbackBlocked);
+    transfer.disabled=!real || !order.id || closed || Boolean(payment);
+    transferPanel.hidden=method!=='transfer' || transfer.disabled;copy.disabled=pending || loadingActive || transfer.disabled;
+    document.getElementById('payment-transfer-note').textContent=payment?'Consulta la solicitud existente con la farmacia antes de elegir otra forma de pago.':'Solicita los datos bancarios y usa la referencia de tu pedido.';
+    document.getElementById('payment-card-note').textContent=mismatch?'El entorno de este intento cambió. Consulta su revisión con la farmacia.':fallbackBlocked?'Ya existe una solicitud de pago. Consulta su estado con la farmacia antes de solicitar otro enlace.':!config.payphone.disponible?'Solicita un enlace seguro a la farmacia. No ingreses datos de tarjeta aquí.':!real?'PayPhone · requiere un pedido registrado':(payment?.entorno || config.payphone.entorno)==='sandbox'?'PayPhone · entorno de pruebas, sin cobros reales':'Procesado en la página oficial de PayPhone';
+    document.getElementById('payment-method-note').textContent=method==='card'?(fallbackBlocked?'Ya existe una solicitud de pago. Revisa su estado o contacta con la farmacia.':config.payphone.disponible?'Continuarás en pay.payphonetodoesposible.com. Al terminar, volverás a la farmacia.':'Se abrirá WhatsApp para solicitar un enlace seguro. La solicitud no realiza un cobro; la verificación del pago queda pendiente.'):method==='transfer'?'Solicita por WhatsApp los datos bancarios para este pedido. Copiar la referencia o enviar un mensaje no confirma una transferencia.':'Habla con nuestro equipo para acordar el pago. Un mensaje no acredita un pago.';
+    button.textContent=method==='card'?(config.payphone.disponible?`Continuar en PayPhone · ${money(order.totalCentavos)} →`:'Solicitar enlace seguro ↗'):method==='transfer'?'Solicitar datos bancarios ↗':'Consultar con la farmacia ↗';
+    button.disabled=pending || real && !order.id || (method==='card'?card.disabled:method==='transfer'?transfer.disabled:method!=='manual');
+    document.getElementById('payment-mode').textContent=!real?'Mis compras':'Pago de tu pedido';
     document.getElementById('payment-refresh').hidden=!real;
     document.getElementById('payment-refresh').disabled=loadingActive || pending;
     if(!payment){const state=document.getElementById('payment-persisted-state');state.textContent='Pago por coordinar con la farmacia.';state.hidden=false;}
@@ -33,13 +38,15 @@ export async function paymentsController(){
   }
   if(id){
     if(!requireUser(`pagos.html?pedido=${id}`))return;
-    manual.checked=true;
+    const requested=params.getAll('metodo').length===1 && ['card','transfer','manual'].includes(params.get('metodo'))?params.get('metodo'):'manual';
+    form.querySelector(`[value="${requested}"]`).checked=true;
     document.getElementById('payment-back').href='pedidos.html';document.getElementById('payment-back').textContent='Volver a mis pedidos →';
     order={id:null,totalCentavos:0,detalles:[]};document.getElementById('payment-summary').textContent='Consultando el importe guardado de tu pedido…';
     function expire(){
       if(!active)return;active=false;order=null;payment=null;methods.disabled=true;button.disabled=true;form.hidden=true;
       document.getElementById('payment-summary').textContent='Inicia sesión para consultar este pedido.';
       document.getElementById('payment-reference').textContent='';document.getElementById('payment-persisted-state').textContent='';
+      for(const field of ['payment-transfer-amount','payment-transfer-reference','payment-transfer-copy-status'])document.getElementById(field).textContent='';
       location.replace('cuenta.html?next='+encodeURIComponent(`pagos.html?pedido=${id}`));
     }
     events.addEventListener('session:expired',expire);events.addEventListener('session:changed',()=>{if(!auth.user)expire();});
@@ -50,12 +57,21 @@ export async function paymentsController(){
     catch(error){fail(error);if(error.status===401)requireUser(`pagos.html?pedido=${id}`);}
     finally{pending=false;loadingActive=false;loading.hidden=true;if(active){methods.disabled=Boolean(id && !order.id);render();}}
   }
-  form.addEventListener('change',render);
+  form.addEventListener('change',()=>{copyStatus.textContent='';render();});
+  copy.addEventListener('click',async()=>{
+    if(!active || pending || !order.id || transfer.disabled || form.elements.method.value!=='transfer')return;
+    busy(copy,true);
+    try{await navigator.clipboard.writeText(`Pedido: ${order.id}\nImporte: ${money(order.totalCentavos)}`);if(active)copyStatus.textContent='Importe y referencia copiados.';}
+    catch{if(active)copyStatus.textContent='No se pudo copiar. Puedes seleccionar el importe y la referencia que aparecen arriba.';}
+    finally{if(active)busy(copy,false);}
+  });
   form.addEventListener('submit',async event=>{
     event.preventDefault();const method=form.elements.method.value;
-    if(!active || pending || id && (!order.id) || method==='card' && card.disabled)return;
+    if(!active || pending || id && (!order.id) || !['card','transfer','manual'].includes(method) || method==='card' && card.disabled || method==='transfer' && transfer.disabled)return;
     errorPanel.hidden=true;
-    if(method==='manual'){const url=new URL('https://api.whatsapp.com/send');url.searchParams.set('phone','593979275988');url.searchParams.set('text',id?`Hola, quiero coordinar el pago del pedido ${id}.`:'Hola, quiero consultar las formas de pago de la farmacia.');window.open(url.href,'_blank','noopener,noreferrer');return;}
+    if(method==='manual'){contact(`Hola, quiero coordinar el pago del pedido ${id}.`);return;}
+    if(method==='transfer'){contact(`Hola, solicito los datos bancarios para transferir ${money(order.totalCentavos)} por el pedido ${id}. Quedo pendiente de la verificación del pago.`);return;}
+    if(!config.payphone.disponible){contact(`Hola, solicito un enlace seguro para pagar ${money(order.totalCentavos)} por el pedido ${id}. Quedo pendiente de la verificación del pago.`);return;}
     pending=true;busy(button,true);
     try{const result=await payments.prepare(id);if(!active)return;payment=result.pago;config=result;if(payment?.estado==='pendiente' && payment.urlPago){location.assign(payphoneUrl(payment.urlPago));return;}render();}
     catch(error){fail(error);if(error.status===401)requireUser(`pagos.html?pedido=${id}`);}

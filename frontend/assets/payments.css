@@ -5,3 +5,30 @@
 .payment-demo-panel{margin-top:22px;border:1px solid var(--line);border-radius:12px;padding:20px}.payment-demo-card{display:grid;gap:14px;margin:0 0 20px;padding:23px;border-radius:11px;background:var(--footer-bg);color:var(--surface)}.payment-demo-card>span{font-size:12px;color:var(--footer-muted)}.payment-demo-card strong{font-size:19px;font-weight:500;letter-spacing:.06em}.payment-demo-card small{font-size:10px;color:var(--footer-muted)}.payment-demo-panel label{display:block;font-size:13px;font-weight:700;margin:0 0 9px}.payment-demo-panel select{width:100%;min-height:46px;background:var(--surface);border:1px solid #978d7f;border-radius:7px;padding:10px;font:inherit;font-size:16px;color:var(--ink)}.payment-demo-panel>p:last-child,.payment-method-note{font-size:12px;color:var(--muted);line-height:1.8}.payment-method-note{margin:20px 0 14px;min-height:22px}.payment-submit{width:100%;min-height:52px}.payment-wallet-note{display:flex;gap:17px;align-items:flex-start;padding:22px 0;border-block:1px solid var(--line);margin-top:28px}.payment-wallet-name{white-space:nowrap;font-size:17px;font-weight:700;letter-spacing:-.05em;padding-top:2px}.payment-wallet-note p,.payment-help p{font-size:12px;line-height:1.8;color:var(--muted);margin:0}.payment-help{font-size:13px;margin-top:22px}.payment-help summary{font-weight:700;cursor:pointer;padding:8px 0}.payment-help p{margin:12px 0}.payment-notice{border:1px solid #d8c8ad;border-radius:10px;padding:18px;font-size:13px;line-height:1.8;background:var(--soft);overflow-wrap:anywhere}.payment-notice.is-error{border-color:var(--brand-red);background:#fff0ea;color:var(--brand-dark);margin-bottom:25px}.payment-result{padding:35px 20px;text-align:center;border:1px solid #dfc9b0;background:var(--soft);border-radius:14px}.payment-result>span{display:grid;place-items:center;width:56px;height:56px;margin:0 auto 20px;border-radius:50%;color:var(--brand-dark);background:var(--brand-soft);font-size:28px}.payment-result h2{font-size:26px}.payment-result p{font-size:14px;line-height:1.8}.payment-result button{margin-top:15px}
 @media(max-width:760px){.payment-grid{grid-template-columns:minmax(0,1fr);gap:30px}.payment-heading{flex-direction:column;margin-bottom:25px;gap:19px}.payment-breadcrumb{margin-bottom:25px;gap:8px;font-size:12px}.payment-summary{padding:23px}.payment-options legend{font-size:22px}.payment-method{padding:18px 13px;gap:11px}.payment-method-icon svg{width:23px;height:23px}.payment-demo-card{padding:19px}.payment-heading h1{font-size:43px}.payment-grid{margin-bottom:120px}}
 @media(prefers-reduced-motion:reduce){.payment-method{transition:none}}
+
+.payment-grid{grid-template-columns:minmax(280px,.8fr) minmax(360px,1.2fr);gap:40px;max-width:1120px}
+.payment-summary{border-radius:10px;background:#f6eee1}
+.payment-summary h2{font-family:var(--serif);font-weight:500}
+.payment-method-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.payment-method{flex-direction:column;align-items:flex-start;gap:16px;min-height:205px;padding:20px 15px;border-radius:8px;background:#fffdf8}
+.payment-method input{position:absolute;top:18px;right:13px;margin:0}
+.payment-method-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;color:var(--brand-dark);background:var(--soft)}
+.payment-method-icon svg{width:25px;height:25px}
+.payment-method-copy strong{font-size:14px;line-height:1.5}
+.payment-method-copy>span{font-size:11px;line-height:1.75}
+.payment-transfer-panel{margin-top:24px;padding:23px;border:1px solid #d9c8b1;border-radius:8px;background:#f7f0e4}
+.payment-transfer-panel h3{margin:0 0 10px;font-family:var(--serif);font-size:23px;font-weight:500;letter-spacing:-.025em}
+.payment-transfer-panel>p{font-size:12px;line-height:1.8;color:var(--muted)}
+.payment-transfer-details{margin:20px 0;border-block:1px solid #e0d3c0}
+.payment-transfer-details>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:14px;padding:14px 0;font-size:13px;line-height:1.7}
+.payment-transfer-details>div+div{border-top:1px solid #e0d3c0}
+.payment-transfer-details dt{color:var(--muted)}
+.payment-transfer-details dd{margin:0;font-weight:600;text-align:right;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.payment-transfer-details #payment-transfer-reference{font-size:12px}
+.payment-transfer-panel .button{min-height:44px;padding:11px 15px;border-radius:4px;font-size:12px}
+.payment-transfer-panel .payment-copy-status{margin:0;color:var(--brand-dark);font-size:12px;line-height:1.7}
+.payment-transfer-panel .payment-copy-status:not(:empty){margin-top:14px}
+.payment-submit{border-radius:5px;font-size:14px}
+@media(max-width:900px){.payment-grid{gap:26px}.payment-method-grid{gap:9px}.payment-method{padding:19px 12px}}
+@media(max-width:760px){.payment-grid{grid-template-columns:minmax(0,1fr);gap:28px}.payment-method{min-height:185px}.payment-transfer-panel{padding:20px}}
+@media(max-width:600px){.payment-method-grid{grid-template-columns:minmax(0,1fr);gap:12px}.payment-method{flex-direction:row;gap:14px;min-height:114px;padding:19px 42px 19px 17px}.payment-method-icon{width:40px;height:40px;flex-shrink:0}.payment-method-copy strong{font-size:14px}.payment-method-copy>span{font-size:12px}.payment-transfer-details>div{grid-template-columns:minmax(0,1fr);gap:5px}.payment-transfer-details dd{text-align:left}.payment-transfer-panel .button{width:100%}}

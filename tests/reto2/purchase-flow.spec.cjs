@@ -20,7 +20,7 @@ test('compra con tarifa real, confirmación y seguimiento conservan importes y e
     await page.goto('/checkout.html');await expect(page.locator('.checkout-cart-item')).toHaveCount(1);await expect(page.locator('#checkout-next')).toBeEnabled();
     await page.locator('#checkout-next').click();await expect(page.locator('#delivery-form')).toBeVisible();await expect(page.locator('#purchase-cart-panel')).toBeHidden();await expect(page.locator('#delivery-form #purchase-summary')).toBeVisible();
     await expect(page.locator('#checkout-name')).toBeFocused();await expect(page.locator('#checkout-review-items')).toContainText(product.nombre);
-    await page.locator('[name=delivery][value=delivery]').check();await page.locator('#checkout-zone').selectOption(zone.id);await page.locator('#checkout-document').fill('0102030400');await page.locator('#checkout-address').fill('Calle de prueba 123 frente al parque');await page.locator('#checkout-terms').check();
+    await page.locator('[name=delivery][value=delivery]').check();await page.locator('#checkout-zone').selectOption(zone.id);await page.locator('#checkout-document').fill('0102030400');await page.locator('#checkout-address').fill('Calle de prueba 123 frente al parque');await page.locator('#checkout-terms').check();await page.locator('[name=paymentPreference][value=transfer]').check();
     await expect(page.locator('#checkout-grand-total')).toHaveText('Por confirmar');await expect(page.locator('#delivery-form [type=submit]')).toBeDisabled();
     const priced=await request.put('/api/admin/zonas-entrega/'+zone.id,{headers:staff,data:{...zoneInput,tarifaCentavos:250,esperadoVersion:zone.version}});expect(priced.status()).toBe(200);zone=(await priced.json()).data;
     await page.locator('#checkout-refresh-zone').click();await expect(page.locator('#checkout-grand-total')).toContainText('14,00');await expect(page.locator('#delivery-form [type=submit]')).toBeEnabled();
@@ -30,6 +30,8 @@ test('compra con tarifa real, confirmación y seguimiento conservan importes y e
     await page.screenshot({path:testInfo.outputPath('finalizar-compra.png'),fullPage:true,animations:'disabled'});
     const pending=page.waitForResponse(response=>response.request().method()==='POST' && new URL(response.url()).pathname==='/api/pedidos');await page.locator('#delivery-form [type=submit]').click();const placed=await pending;expect(placed.status()).toBe(201);let order=(await placed.json()).data;
     expect(Number(order.total)).toBe(14);expect(order.costoEnvioCentavos).toBe(250);expect(order.estado).toBe('pendiente');
+    expect(placed.request().postDataJSON().comprador.paymentPreference).toBeUndefined();
+    await expect(page.getByRole('link',{name:'Elegir forma de pago →'})).toHaveAttribute('href',`pagos.html?pedido=${order.id}&metodo=transfer`);
     await expect(page.locator('#order-confirmation')).toBeVisible();await expect(page.locator('#order-confirmation')).toContainText('¡Gracias por tu compra!');await expect(page.locator('#order-confirmation')).toContainText('Por coordinar');await expect(page.locator('#order-confirmation .purchase-order-line img')).toHaveCount(1);
     expect(await page.locator('#order-confirmation .purchase-order-line img').evaluate(img=>img.complete && img.naturalWidth>0)).toBe(true);expect(await page.evaluate(()=>window.purchaseGpsCalls)).toBe(0);await expect(page.locator('iframe')).toHaveCount(0);
     await page.screenshot({path:testInfo.outputPath('pedido-registrado.png'),fullPage:true,animations:'disabled'});

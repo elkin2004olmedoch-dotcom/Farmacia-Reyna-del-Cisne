@@ -11,10 +11,14 @@ import {events} from '../models/events.js';
 import {watchUpdates,preserveFocus} from './updates.js';
 import {connectCustomerInvoices} from './billing.js';
 import {deliveryCheckout} from './delivery-checkout.js';
+import {connectOrderReceipts} from './receipts.js';
+import {connectOrderMaps} from './order-map.js';
 import '../models/pharmacy-policy.js';
 const {requiresProfessionalReview}=globalThis.Farmacia.pharmacyPolicy;
 export async function checkoutController() {
   connectCustomerInvoices(document.getElementById('order-confirmation'));
+  const updateReceipts=connectOrderReceipts(document.getElementById('order-confirmation'));
+  const updateMaps=connectOrderMaps(document.getElementById('order-confirmation'));
   let products=await catalog.all();const form=document.getElementById('delivery-form');const next=document.getElementById('checkout-next');
   const target=document.getElementById('checkout-items');
   const content=document.getElementById('checkout-content'),cartPanel=document.getElementById('purchase-cart-panel'),summary=document.getElementById('purchase-summary');
@@ -48,13 +52,13 @@ export async function checkoutController() {
   target.addEventListener('click',async event=>{const button=event.target.closest('button');if(!button)return;try{if(button.dataset.cartRemove){if(await confirmAction('¿Quitar este producto del carrito?')){cart.remove(button.dataset.cartRemove);render();next.focus();message('Producto eliminado del carrito.');}}else{const id=button.dataset.cartPlus || button.dataset.cartMinus;await change(id,cart.read()[id]+(button.dataset.cartPlus?1:-1));document.getElementById('qty-'+id)?.focus();}}catch(error){message(error.message,true);}});
   target.addEventListener('change',async event=>{if(event.target.dataset.cartQuantity){const id=event.target.dataset.cartQuantity;try{await change(id,Number(event.target.value));}catch(error){render();message(error.message,true);}document.getElementById('qty-'+id)?.focus();}});
   form.addEventListener('submit',async event=>{
-    event.preventDefault();if(!requireUser())return;const values=Object.fromEntries(new FormData(form));const accepted=values.terms;delete values.terms;delete values.zonaEntregaId;Object.assign(values,shipping.values());
+    event.preventDefault();if(!requireUser())return;const values=Object.fromEntries(new FormData(form));const accepted=values.terms;const method=['card','transfer','manual'].includes(values.paymentPreference)?values.paymentPreference:'manual';delete values.paymentPreference;delete values.terms;delete values.zonaEntregaId;Object.assign(values,shipping.values());
     const issues={...globalThis.Farmacia.validation.validateCheckout(values),...shipping.issues()};if(!accepted)issues.terms='Acepta las condiciones del pedido.';
     if(!formErrors(form,issues)){message('Revisa los campos del pedido.',true);return;}
     if(!cart.payload().length){message('Tu carrito está vacío.',true);return;}
     if(!validCart()){message('Revisa el carrito: hay productos retirados, con receta obligatoria o cantidades superiores al stock disponible.',true);render();return;}
     const button=form.querySelector('[type=submit]');busy(button,true);
-    try{const order=await orders.create(cart.payload(),values);const images=new Map(products.map(product=>[product.id,product.imagen]));cart.clear();form.reset();shipping.reset();confirmationView({...order,detalles:order.detalles.map(line=>({...line,imagen:images.get(line.productoId)}))});message('Pedido registrado en la farmacia.');}
+    try{const order=await orders.create(cart.payload(),values);const images=new Map(products.map(product=>[product.id,product.imagen]));const confirmed={...order,metodoPreferido:method,detalles:order.detalles.map(line=>({...line,imagen:images.get(line.productoId)}))};cart.clear();form.reset();shipping.reset();confirmationView(confirmed);updateReceipts([confirmed]);updateMaps([confirmed]);message('Pedido registrado en la farmacia.');}
     catch(error){message(error.message,true,true);if(error.status===401)requireUser();if(error.status===409){try{products=await catalog.all();await shipping.reload();render();}catch(refreshError){message(`${error.message} ${refreshError.message}`,true,true);}}}finally{busy(button,false);if(!document.getElementById('checkout-content').hidden)render();}
   });
   events.addEventListener('cart:changed',()=>{if(!document.getElementById('checkout-content').hidden)render();});
@@ -64,11 +68,13 @@ export async function checkoutController() {
 export async function ordersController() {
   connectCustomerInvoices(document.getElementById('orders-list'));
   if(!requireUser('pedidos.html'))return;let page=1,requestId=0,snapshot='',navigating=false;
-  async function render(requestedPage=page){const id=++requestId;const result=await orders.mine(requestedPage);if(id!==requestId || !auth.user || document.querySelector('#orders-list [aria-busy="true"]'))return;const loaded=JSON.stringify(result);if(loaded!==snapshot){preserveFocus(document.getElementById('orders-list'),()=>ordersView(result));snapshot=loaded;}page=requestedPage;document.getElementById('orders-page-info').textContent=`Página ${requestedPage} · ${result.total} pedidos`;document.getElementById('orders-prev').disabled=requestedPage<=1;document.getElementById('orders-next').disabled=requestedPage*result.pageSize>=result.total;}
+  const updateReceipts=connectOrderReceipts(document.getElementById('orders-list'));
+  const updateMaps=connectOrderMaps(document.getElementById('orders-list'));
+  async function render(requestedPage=page){const id=++requestId;const result=await orders.mine(requestedPage);if(id!==requestId || !auth.user || document.querySelector('#orders-list .order-invoice [aria-busy="true"]'))return;const loaded=JSON.stringify(result);if(loaded!==snapshot){updateReceipts(result.items);updateMaps(result.items);preserveFocus(document.getElementById('orders-list'),()=>ordersView(result));snapshot=loaded;}page=requestedPage;document.getElementById('orders-page-info').textContent=`Página ${requestedPage} · ${result.total} pedidos`;document.getElementById('orders-prev').disabled=requestedPage<=1;document.getElementById('orders-next').disabled=requestedPage*result.pageSize>=result.total;}
   for(const [id,offset] of [['orders-prev',-1],['orders-next',1]])document.getElementById(id).addEventListener('click',async()=>{
     if(navigating)return;navigating=true;
     try{await render(page+offset);}catch(error){message(error.message,true);}finally{navigating=false;}
   });
-  const refresh=watchUpdates(render,{canRefresh:()=>Boolean(auth.user) && !navigating && !document.querySelector('#orders-list [aria-busy="true"]'),intervalMs:5000});
+  const refresh=watchUpdates(render,{canRefresh:()=>Boolean(auth.user) && !navigating && !document.querySelector('#orders-list .order-invoice [aria-busy="true"]'),intervalMs:5000});
   await refresh();if(auth.user && !snapshot)document.getElementById('orders-list').textContent='No se pudieron cargar los pedidos. Volveremos a intentar.';
 }

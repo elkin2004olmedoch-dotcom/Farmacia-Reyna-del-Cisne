@@ -1,0 +1,86 @@
+.order-receipt-dialog { width:min(940px,calc(100% - 32px)); max-width:940px; max-height:calc(100dvh - 32px); margin:auto; padding:0; overflow:auto; overscroll-behavior:contain; border:1px solid #d8cebf; border-radius:14px; color:#302e2b; background:#f5f0e7; box-shadow:0 20px 80px #241a1940; }
+.order-receipt-dialog::backdrop { background:#261c1b80; }
+.receipt-dialog-toolbar { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:20px 24px; border-bottom:1px solid #ded4c5; }
+.receipt-dialog-toolbar h2 { margin:0 0 6px; font:700 17px/1.4 var(--sans,Arial,sans-serif); }
+.receipt-dialog-toolbar p { max-width:440px; margin:0; color:#625c54; font-size:12px; line-height:1.6; }
+.receipt-dialog-actions { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.receipt-dialog-actions .button { min-height:44px; padding:10px 14px; font-size:12px; }
+.order-receipt-sheet { margin:24px; padding:32px; border:1px solid #e4dcd0; color:#302e2b; background:#fff; font-family:Arial,sans-serif; font-size:12px; line-height:1.6; }
+.receipt-header { display:flex; justify-content:space-between; align-items:flex-start; gap:28px; padding-bottom:22px; border-bottom:3px solid #8c1b32; }
+.receipt-brand { flex-shrink:0; }
+.receipt-brand img { display:block; width:175px; height:65px; object-fit:contain; }
+.receipt-brand p { margin:9px 0 0; color:#655c55; font-size:11px; }
+.receipt-identification { min-width:0; text-align:right; }
+.receipt-kicker { margin:0 0 7px; color:#8c1b32; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+.receipt-identification h2 { margin:0 0 10px; font:700 16px/1.5 Arial,sans-serif; overflow-wrap:anywhere; }
+.receipt-identification p:last-child { margin:0; font-size:11px; }
+.receipt-identification span { color:#655c55; }
+.receipt-order-state { display:flex; justify-content:space-between; gap:18px; padding:12px 0; border-bottom:1px solid #e4dcd0; font-size:11px; }
+.receipt-order-state strong { color:#69172b; }
+.receipt-buyer { padding:20px 0; }
+.receipt-buyer h3 { margin:0 0 12px; font:700 13px/1.5 Arial,sans-serif; }
+.receipt-buyer dl { display:grid; grid-template-columns:1fr 1fr; gap:7px 24px; margin:0; }
+.receipt-buyer dl>div { min-width:0; }
+.receipt-buyer dt { display:inline; margin-right:5px; color:#655c55; }
+.receipt-buyer dt::after { content:':'; }
+.receipt-buyer dd { display:inline; margin:0; overflow-wrap:anywhere; }
+.receipt-lines { width:100%; border-collapse:collapse; table-layout:fixed; font-size:11px; }
+.receipt-lines caption { padding:0 0 10px; text-align:left; color:#655c55; font-size:11px; }
+.receipt-col-sku { width:19%; }
+.receipt-col-quantity { width:7%; }
+.receipt-col-product { width:40%; }
+.receipt-col-price { width:17%; }
+.receipt-lines th { padding:10px 8px; border-block:1px solid #d8cabb; color:#5a1a2a; background:#f6efe6; font-weight:700; text-align:left; }
+.receipt-lines td { padding:11px 8px; border-bottom:1px solid #e4dcd0; vertical-align:top; overflow-wrap:anywhere; }
+.receipt-lines .receipt-money { text-align:right; font-variant-numeric:tabular-nums; }
+.receipt-lines .receipt-quantity { text-align:center; }
+.receipt-sku { color:#655c55; font-size:9px; }
+.receipt-bottom { display:grid; grid-template-columns:minmax(0,1fr) 260px; align-items:start; gap:34px; padding-top:20px; }
+.receipt-payment-note { margin:0; color:#655c55; font-size:10px; }
+.receipt-totals { margin:0; }
+.receipt-totals>div { display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding:6px 0; font-size:11px; }
+.receipt-totals dd { margin:0; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.receipt-totals .receipt-total { margin-top:9px; padding-top:14px; border-top:2px solid #8c1b32; color:#69172b; font-size:15px; font-weight:700; }
+.receipt-legal { margin-top:28px; padding-top:16px; border-top:1px solid #d8cabb; color:#655c55; font-size:10px; line-height:1.7; }
+.order-receipt-print-root { display:none; }
+@media(max-width:700px) {
+  .receipt-dialog-toolbar { align-items:flex-start; flex-direction:column; padding:16px; }
+  .receipt-dialog-actions { width:100%; flex-wrap:wrap; }
+  .receipt-dialog-actions .button { flex:1 1 auto; }
+  .order-receipt-sheet { margin:12px; padding:18px 14px; }
+  .receipt-header { gap:16px; flex-direction:column; }
+  .receipt-identification { text-align:left; }
+  .receipt-buyer dl,.receipt-bottom { grid-template-columns:1fr; gap:10px; }
+  .receipt-bottom { gap:20px; }
+  .receipt-lines { font-size:10px; }
+  .receipt-lines :is(th,td) { padding:8px 4px; }
+  .receipt-sku { font-size:8px; }
+  .receipt-col-sku { width:15%; }
+  .receipt-col-quantity { width:9%; }
+  .receipt-col-product { width:36%; }
+  .receipt-col-price { width:20%; }
+}
+@media print {
+  @page { size:A4 portrait; margin:14mm; }
+  html:has(body.order-receipt-print),body.order-receipt-print { display:block !important; width:auto !important; height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; overflow:visible !important; background:#fff !important; }
+  body.order-receipt-print>* { display:none !important; }
+  body.order-receipt-print>.order-receipt-print-root { display:block !important; position:static !important; width:auto !important; height:auto !important; overflow:visible !important; }
+  .order-receipt-print-root .order-receipt-sheet { display:block; width:auto; max-width:none; margin:0; padding:0; border:0; font-size:10pt; line-height:1.5; }
+  .order-receipt-print-root .receipt-header { display:flex; flex-direction:row; gap:24px; }
+  .order-receipt-print-root .receipt-identification { text-align:right; }
+  .order-receipt-print-root .receipt-buyer dl { display:grid; grid-template-columns:1fr 1fr; gap:5px 20px; }
+  .order-receipt-print-root .receipt-bottom { display:grid; grid-template-columns:minmax(0,1fr) 65mm; gap:24px; }
+  .order-receipt-print-root .receipt-lines { font-size:8pt; }
+  .order-receipt-print-root .receipt-lines thead { display:table-header-group; }
+  .order-receipt-print-root .receipt-lines tr { break-inside:avoid; page-break-inside:avoid; }
+  .order-receipt-print-root :is(.receipt-header,.receipt-order-state,.receipt-buyer,.receipt-bottom,.receipt-legal) { break-inside:avoid; page-break-inside:avoid; }
+  .order-receipt-print-root :is(h2,h3,caption) { break-after:avoid; }
+  .order-receipt-print-root .receipt-lines :is(th,td) { padding:6px; }
+  .order-receipt-print-root .receipt-bottom { break-after:avoid; }
+  .order-receipt-print-root .receipt-col-sku { width:19%; }
+  .order-receipt-print-root .receipt-col-quantity { width:7%; }
+  .order-receipt-print-root .receipt-col-product { width:40%; }
+  .order-receipt-print-root .receipt-col-price { width:17%; }
+  .order-receipt-print-root .receipt-legal { margin-top:18px; padding-top:12px; break-before:avoid; font-size:8pt; }
+  body.order-receipt-print dialog::backdrop { display:none !important; background:transparent !important; }
+}
