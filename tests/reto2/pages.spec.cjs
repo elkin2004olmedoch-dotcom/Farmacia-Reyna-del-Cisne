@@ -42,6 +42,16 @@ test('artefacto estático separado conserva rutas, CSP, catálogo real y CORS ex
   expect(requests.length).toBeGreaterThan(0);expect(requests.every(url=>new URL(url).origin===API)).toBe(true);
 });
 
+test('el enlace de correo entre orígenes oculta el token y sólo lo envía por POST al confirmar',async({page})=>{
+  const token='A'.repeat(43),sent=[],leaks=[];
+  page.on('request',request=>{const url=new URL(request.url());if(url.search.includes(token)||url.hash.includes(token)||(request.headers().referer || '').includes(token))leaks.push(url.pathname);if(url.pathname==='/api/auth/verify-email')sent.push(request);});
+  const response=await page.goto('/confirmar-correo#token='+token);expect(response.status()).toBe(200);
+  await expect(page).toHaveURL(STATIC+'/confirmar-correo');await expect(page.locator('#verification-submit')).toBeEnabled();expect(sent).toEqual([]);
+  const confirmed=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/auth/verify-email');await page.locator('#verification-submit').click();const rejected=await confirmed;
+  expect(rejected.status()).toBe(422);expect(rejected.headers()['access-control-allow-origin']).toBe(STATIC);expect(sent).toHaveLength(1);expect(sent[0].method()).toBe('POST');expect(sent[0].postDataJSON()).toEqual({token});
+  await expect(page.locator('#email-pending-panel')).toBeVisible();expect(leaks).toEqual([]);expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();
+});
+
 test('cliente inicia sesión entre orígenes y conserva carrito/formulario ante un POST fallido sin duplicarlo',async({page,api})=>{
   const user=await customer(api);
   await page.goto('/producto.html?id=solar');await page.locator('#detail-add-form [type=submit]').click();await expect(page.locator('#cart-drawer')).toBeVisible();await page.locator('#cart-drawer [data-cart-close]').first().click();await expect(page.locator('#cart-drawer')).toBeHidden();await expect(page.locator('[data-shop-count]')).toHaveText('1');

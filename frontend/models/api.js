@@ -1,7 +1,7 @@
 import {events,dataChanged} from './events.js';
 import {apiUrl} from '../config.js';
 export class ApiError extends Error {
-  constructor(message,status=0,details=[]) {super(message);Object.assign(this,{status,details});}
+  constructor(message,status=0,details=[],code) {super(message);Object.assign(this,{status,details});if(typeof code==='string')this.code=code;}
 }
 // The timeout covers reading the response too. Only public, idempotent catalog GETs retry.
 export async function apiFetch(path,{method='GET',headers={},body,signal,keepalive=false,timeoutMs=method==='GET'?10000:60000}={},consume){
@@ -39,7 +39,7 @@ export async function request(path,{method='GET',body,signal,keepalive=false}={}
       sessionStorage.removeItem('farmacia-mvc-token');
       events.dispatchEvent(new Event('session:expired'));
     }
-    throw new ApiError(payload.error?.message || 'No pudimos completar la solicitud.',response.status,payload.error?.details || []);
+    throw new ApiError(payload.error?.message || 'No pudimos completar la solicitud.',response.status,payload.error?.details || [],payload.error?.code);
   }
   if(method!=='GET' && !path.startsWith('/auth/'))dataChanged();
   return payload.data;

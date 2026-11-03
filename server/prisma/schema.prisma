@@ -52,7 +52,10 @@ model Usuario {
   role         String   @default("user")
   tokenVersion Int      @default(0)
   activo       Boolean  @default(true)
+  emailVerifiedAt DateTime?
+  emailVerificationRequired Boolean @default(false)
   createdAt    DateTime @default(now())
+  emailVerification EmailVerification?
   pedidos      Pedido[]
   cambiosPedidos PedidoEstado[]
   entregas Entrega[]
@@ -60,6 +63,15 @@ model Usuario {
   cambiosTarifa ZonaEntregaTarifa[]
   configuracionesFiscales ConfiguracionFiscal[]
   movimientos MovimientoInventario[]
+}
+
+model EmailVerification {
+  usuarioId String @id
+  usuario Usuario @relation(fields:[usuarioId],references:[id],onDelete:Restrict,onUpdate:Cascade)
+  email String
+  tokenHash String @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model Pedido {

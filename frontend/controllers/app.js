@@ -16,7 +16,8 @@ const controllers={
   'admin-install':()=>adminInstallController(),
   deliveries:()=>import('./deliveries.js').then(module=>module.deliveriesController()),
   tracking:()=>import('./deliveries.js').then(module=>module.trackingController()),
-  payments:()=>import('./payments.js').then(module=>module.paymentsController())
+  payments:()=>import('./payments.js').then(module=>module.paymentsController()),
+  'email-verification':()=>import('./email-verification.js').then(module=>module.emailVerificationController())
 };
 async function renderPage(page){
   try{
@@ -29,15 +30,15 @@ async function renderPage(page){
 async function initialize() {
   const page=document.body.dataset.page;
   let updateSession;
-  if(page==='home'){
-    document.body.dataset.sessionPending='';updateSession=layoutController();contactController();void renderPage(page);
+  if(['home','email-verification'].includes(page)){
+    document.body.dataset.sessionPending='';updateSession=layoutController();if(page==='home')contactController();void renderPage(page);
   }
   try{await auth.restore();delete document.body.dataset.sessionPending;}catch(error){if(error.status===401){auth.clear();delete document.body.dataset.sessionPending;}else message(error.message,true);}
   if(auth.isAdmin && ['account','checkout','orders'].includes(page)){location.replace(page==='orders'?'admin.html?tabla=pedidos':'admin.html');return;}
   if(auth.isCourier && ['account','checkout','orders','admin','admin-install','payments'].includes(page)){location.replace('entregas.html');return;}
   if(updateSession)updateSession();else{layoutController();contactController();}
   if(!['admin','deliveries','tracking'].includes(page) && !auth.isStaff && !document.body.hasAttribute('data-session-pending'))import('./mascota.js').then(({mascotaController})=>mascotaController()).catch(()=>{});
-  if(page!=='home')await renderPage(page);
+  if(!['home','email-verification'].includes(page))await renderPage(page);
 }
 installController();
 initialize();

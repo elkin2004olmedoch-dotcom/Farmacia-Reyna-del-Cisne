@@ -10,11 +10,13 @@ const reference='assets/uploads/12345678-1234-4123-8123-123456789abc.webp';
 const anotherReference='assets/uploads/12345678-1234-4123-8123-123456789abd.webp';
 const privateHash='$2b$12$contraseña-hash-privado-no-publicable';
 const privateEmail='cliente-privado@example.ec';
+const privateVerificationHash='c'.repeat(64);
 function fixture(uploaded=false){
   const createdAt=new Date('2024-01-02T03:04:05.123Z');
   const updatedAt=new Date('2024-02-03T04:05:06.789Z');
   return {
-    usuario:[{id:'cliente-original',nombre:'Cliente privado',email:privateEmail,telefono:'0979275988',passwordHash:privateHash,role:'user',tokenVersion:7,activo:false,createdAt},{id:'repartidor-original',nombre:'Repartidor privado',email:'repartidor@example.ec',telefono:'0979275988',passwordHash:privateHash,role:'repartidor',tokenVersion:1,activo:true,createdAt}],
+    usuario:[{id:'cliente-original',nombre:'Cliente privado',email:privateEmail,telefono:'0979275988',passwordHash:privateHash,role:'user',tokenVersion:7,activo:false,emailVerifiedAt:null,emailVerificationRequired:true,createdAt},{id:'repartidor-original',nombre:'Repartidor privado',email:'repartidor@example.ec',telefono:'0979275988',passwordHash:privateHash,role:'repartidor',tokenVersion:1,activo:true,emailVerifiedAt:updatedAt,emailVerificationRequired:false,createdAt}],
+    emailVerification:[{usuarioId:'cliente-original',email:privateEmail,tokenHash:privateVerificationHash,createdAt,expiresAt:updatedAt}],
     sesionMovil:[{id:'sesion-movil-original',usuarioId:'repartidor-original',tokenVersion:1,secretHash:'a'.repeat(64),previousSecretHash:null,expiresAt:new Date('2030-01-01T00:00:00Z'),revokedAt:createdAt,createdAt,updatedAt}],
     producto:[{id:'producto-original',nombre:'Alcohol',precio:new Prisma.Decimal('12.34567'),stock:9,categoria:'Salud',descripcion:'Descripción',imagen:uploaded?reference:'assets/images/producto-alcohol-antiseptico.svg',alt:'Alcohol',activo:true,createdAt,updatedAt}],
     pedido:[{id:'pedido-original',userId:'cliente-original',total:new Prisma.Decimal('27.19134'),subtotalProductos:new Prisma.Decimal('24.69134'),costoEnvioCentavos:250,envioIvaPorcentaje:15,envioBaseImponible:new Prisma.Decimal('2.17'),envioIvaMonto:new Prisma.Decimal('0.33'),zonaEntregaId:'puerto-quito',latitudEntrega:null,longitudEntrega:null,ubicacionEntregaAceptadaAt:null,estado:'entregado',entrega:'delivery',nombre:'Nombre privado',email:privateEmail,telefono:'0979275988',documento:'••••••0400',provincia:'Pichincha',ciudad:'Puerto Quito',direccion:'Domicilio privado',codigoPostal:'170101',requestKey:'solicitud-original',fingerprint:'huella-privada',createdAt,updatedAt}],
@@ -46,7 +48,7 @@ function technicalDefaults(){
 }
 function sourceClient(snapshot){
   let transactions=0;const reads=[];
-  const tx=Object.fromEntries(MODELS.map(model=>[model,{findMany:async()=>{reads.push(model);return snapshot[model];}}]));
+  const tx=Object.fromEntries(MODELS.map(model=>[model,{findMany:async options=>{reads.push(model);if(model==='emailVerification'){assert.deepEqual(options,{select:{usuarioId:true}});return snapshot[model].map(({usuarioId})=>({usuarioId}));}return snapshot[model];}}]));
   return {$transaction:async fn=>{transactions++;return fn(tx);},$disconnect:async()=>{},get transactions(){return transactions;},reads};
 }
 function targetClient({initial={},failOn,beforeTransaction}={}){
@@ -79,7 +81,15 @@ const emptyCounts=()=>Object.fromEntries(MODELS.map(model=>[model,0]));
 test('el importador cubre todos los modelos Prisma y no omite futuras entidades de farmacia',async()=>{
  const schema=await fs.readFile(path.resolve(__dirname,'../../server/prisma/schema.prisma'),'utf8');
  const names=[...schema.matchAll(/^model (\w+) \{/gm)].map(match=>match[1][0].toLowerCase()+match[1].slice(1));
- assert.deepEqual([...MODELS].sort(),names.sort());assert.equal(MODELS.length,20);
+ assert.deepEqual([...MODELS].sort(),names.sort());assert.equal(MODELS.length,21);
+});
+
+test('verificaciones se cuentan sin transferir hashes y los usuarios conservan el bloqueo o su fecha verificada',async()=>{
+ const snapshot=fixture(),target=targetClient();const result=await migrate({source:sourceClient(snapshot),target,apply:true});
+ assert.deepEqual(target.state.emailVerification,[]);assert.equal(result.origen.emailVerification,1);assert.equal(result.destino.emailVerification,0);assert.equal(result.verificacionesCorreoDescartadas,1);
+ assert.equal(target.state.usuario[0].emailVerificationRequired,true);assert.equal(target.state.usuario[0].emailVerifiedAt,null);assert.equal(target.state.usuario[1].emailVerificationRequired,false);assert.equal(target.state.usuario[1].emailVerifiedAt.toISOString(),snapshot.usuario[1].emailVerifiedAt.toISOString());
+ assert.deepEqual(snapshot.emailVerification[0].tokenHash,privateVerificationHash);assert.ok(!JSON.stringify(result).includes(privateVerificationHash));assert.ok(!JSON.stringify(result).includes(privateEmail));
+ const broken=fixture();broken.emailVerification[0].usuarioId='usuario-inexistente';await assert.rejects(migrate({source:sourceClient(broken),target:targetClient(),apply:true}),error=>error.code==='SOURCE_RELATIONS');
 });
 
 test('se trasladan sesiones antes de sus entregas y se rechazan referencias incompletas',async()=>{
@@ -165,11 +175,11 @@ test('la simulación consulta un snapshot único y muestra solo cantidades sin e
   assert.equal(target.transactions,1);assert.deepEqual(target.writes,[]);assert.deepEqual(result.destino,emptyCounts());assert.equal(inspected,0);assert.equal(cloudCalls,0);
   const printed=JSON.stringify(result);for(const privateValue of [privateHash,privateEmail,'cliente-original','Domicilio privado','huella-privada'])assert.ok(!printed.includes(privateValue));
 });
-test('la transferencia conserva IDs, hashes, roles, fechas, decimales, inventario, facturación y pagos de las diecinueve entidades',async()=>{
+test('la transferencia conserva datos de negocio y usuarios e invalida enlaces transitorios de correo',async()=>{
   const snapshot=fixture(),source=sourceClient(snapshot),target=targetClient();
   const result=await migrate({source,target,apply:true});
-  assert.equal(result.modo,'aplicar');assert.deepEqual(target.writes,MODELS);assert.equal(target.transactions,2);
-  for(const model of MODELS)assert.deepEqual(target.state[model],snapshot[model]);
+  assert.equal(result.modo,'aplicar');assert.deepEqual(target.writes,MODELS.filter(model=>model!=='emailVerification'));assert.equal(target.transactions,2);
+  for(const model of MODELS)assert.deepEqual(target.state[model],model==='emailVerification'?[]:snapshot[model]);
   assert.equal(target.state.usuario[0].passwordHash,privateHash);assert.equal(target.state.usuario[0].tokenVersion,7);
   assert.strictEqual(target.state.producto[0].precio,snapshot.producto[0].precio);assert.equal(target.state.producto[0].precio.toString(),'12.34567');
   assert.strictEqual(target.state.pedido[0].createdAt,snapshot.pedido[0].createdAt);assert.equal(target.state.pedido[0].updatedAt.toISOString(),'2024-02-03T04:05:06.789Z');

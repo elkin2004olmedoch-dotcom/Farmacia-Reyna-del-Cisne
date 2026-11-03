@@ -36,6 +36,8 @@ El HTML de frontend/ se genera desde scripts/build-frontend.cjs y scripts/templa
 - **Ver comprobante**, disponible en la confirmación y en **Mis pedidos**, abre el resumen imprimible. **Guardar PDF / imprimir** permite elegir **Guardar como PDF** en el navegador. Es un comprobante del pedido sin validez tributaria: no acredita un pago ni sustituye la factura SRI.
 - La confirmación y **Mis pedidos** incluyen una vista de mapa voluntaria. **Ver mapa** utiliza un destino autorizado por el comprador o la ubicación reciente compartida por el repartidor, cuando existen. El seguimiento habitual sigue disponible; los pedidos cerrados no muestran ubicaciones.
 
+La confirmación de correo conserva el backend JWT existente: enlace de un solo uso, caducidad y reenvío, con bloqueo de las cuentas nuevas que lo requieran. Está desactivada hasta configurar el remitente y el proveedor; no se enviaron correos reales. Las cuentas anteriores conservan su acceso sin marcarse como verificadas. La [guía de correo y dominio](docs/CORREO-Y-DOMINIO.md) explica la activación, las migraciones aditivas y los pasos para conectar un `.com` propio.
+
 ## Desarrollo y pruebas
 
 Requiere Node.js 22.13 o posterior compatible y las versiones fijadas en package-lock.json. Para probar una extracción NUEVA del proyecto, sin .env ni base existente:

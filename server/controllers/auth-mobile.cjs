@@ -13,6 +13,7 @@ module.exports=config=>{
   async login(req,res){
    const user=await users.findByEmail(req.input.email),valid=await bcrypt.compare(req.input.password,user?.passwordHash||dummyHash);
    if(!user||!valid||!user.activo||user.role!=='repartidor')throw new AppError(401,'INVALID_CREDENTIALS','Correo o contraseña incorrectos.');
+   if(require('../models/email-verification.cjs').requiresVerification(user))throw new AppError(403,'EMAIL_NOT_VERIFIED','Confirma tu correo antes de iniciar sesión.');
    res.json({ok:true,data:response(await sessions.create(user))});
   },
   async renew(req,res){res.json({ok:true,data:response(await sessions.renew(req.body))});},
