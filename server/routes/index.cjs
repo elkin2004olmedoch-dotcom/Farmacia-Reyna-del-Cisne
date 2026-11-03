@@ -45,6 +45,8 @@ module.exports=config=> {
   router.put('/auth/me',auth,...V.profile,authController.updateProfile);
   router.post('/auth/logout',auth,authController.logout);
   router.get('/productos',...V.catalog,products.list);
+  router.get('/productos/sugerencias',...V.suggestions,products.suggestions);
+  router.get('/productos/filtros',products.filters);
   router.get('/productos/:id',V.id,V.validated,products.find);
   router.post('/productos',auth,admin,...V.product,V.validated,products.create);
   router.put('/productos/:id',auth,admin,V.id,...V.productUpdate,V.validated,products.update);

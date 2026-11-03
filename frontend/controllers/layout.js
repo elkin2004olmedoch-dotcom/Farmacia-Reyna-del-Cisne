@@ -5,7 +5,10 @@ import {sessionView} from '../views/layout.js';
 import {message,busy} from '../views/common.js';
 import {cartDrawerController} from './cart-drawer.js';
 import {pharmacy} from '../models/pharmacy.js';
+import {predictiveSearch} from './predictive-search.js';
 export function layoutController() {
+  predictiveSearch(document.getElementById('global-search'));
+  document.addEventListener('error',event=>{const image=event.target;if(image instanceof HTMLImageElement && image.hasAttribute('data-product-image') && !image.src.endsWith('/producto-sin-imagen.svg'))image.src='assets/images/producto-sin-imagen.svg';},true);
   const updateCustomerTools=cartDrawerController();
   const locationDetails=document.getElementById('ubicacion'),locationMap=locationDetails?.querySelector?.('iframe[data-pharmacy-map]');
   if(locationMap){

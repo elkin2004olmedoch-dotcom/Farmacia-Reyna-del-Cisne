@@ -33,6 +33,8 @@ El HTML de frontend/ se genera desde scripts/build-frontend.cjs y scripts/templa
 
 La ubicación pública y el enlace de retiro usan el mismo marcador de Consulab compartido por el titular, definido en `frontend/models/pharmacy.js`. Abrir **Visítanos** carga el mapa; cerrar la sección lo descarga. Se mantienen los colores vino, rojo y crema. [Revisión y preparación del Reto 2](docs/REVISION-RETO-2-2026-11-03.md).
 
+El catálogo consulta páginas de 24 productos y conserva búsqueda, filtros y orden en la URL. La cabecera y el catálogo ofrecen sugerencias con imagen y precio, selección por teclado y coincidencias aproximadas identificadas. Las fichas reúnen compra, disponibilidad, retiro/envío y los datos técnicos registrados. [Catálogo y búsqueda](docs/CATALOGO-Y-BUSQUEDA.md).
+
 ## Compra, pago y seguimiento
 
 - Con pagos de prueba habilitados, el checkout revisa tarjeta o transferencia y total antes de guardar; pedido y pago se registran juntos. Cancelar conserva el carrito. El comprobante se solicita por correo después de confirmar. [Compra, seguridad y privacidad](docs/COMPRA-SEGURIDAD-Y-PRIVACIDAD.md).

@@ -17,7 +17,7 @@ test('cabecera permite buscar con teclado y navegar por categorías, cobertura y
   if(testInfo.project.name==='movil'){
     await expect(page.locator('#header-search')).toBeHidden();await page.locator('#search-toggle').focus();await page.keyboard.press('Enter');await expect(page.locator('#search-toggle')).toHaveAttribute('aria-expanded','true');await expect(page.locator('#global-search')).toBeFocused();
   }
-  const search=page.getByRole('search').getByRole('searchbox');
+  const search=page.getByRole('search').getByRole('combobox');
   await search.fill(product.nombre);await search.focus();await page.keyboard.press('Enter');
   await expect(page).toHaveURL(new RegExp('catalogo.html\\?q='));
   await expect(page.locator('#catalog-search')).toHaveValue(product.nombre);

@@ -24,7 +24,14 @@ const resendVerification=[only(['email']),body('email').isString().bail().trim()
 const resetPassword=[only(['token','password']),body('token').isString().bail().matches(/^[A-Za-z0-9_-]{43}$/),password,validated];
 const profile=[only(['nombre','telefono']),body('nombre').isString().bail().customSanitizer(plain).custom(ec.validName).withMessage('Usa un nombre de 2 a 80 caracteres con letras y espacios.'),body('telefono').isString().bail().custom(ec.normalizePhone).withMessage('Escribe un teléfono ecuatoriano válido.').customSanitizer(ec.normalizePhone),validated];
 const pagination=[query('page').optional().isInt({min:1,max:100000}).toInt(),query('pageSize').optional().isInt({min:1,max:100}).toInt(),validated,(req,res,next)=>{req.input={page:1,pageSize:50,...req.input};next();}];
-const catalog=[query('q').optional().isString().bail().customSanitizer(plain).isLength({max:100}),query('categoria').optional().isIn(['bienestar','cuidado','bebe']),...pagination];
+const catalogScalars=(req,res,next)=>{
+  const fields=['q','categoria','laboratorio','presentacion','sort','page','pageSize'];
+  if(Object.entries(req.query).some(([key,value])=>fields.includes(key.split('[')[0]) && (key.includes('[') || typeof value!=='string')))throw new AppError(422,'VALIDATION_ERROR','Usa un único valor de texto por filtro.');
+  next();
+};
+const catalogFilters=[query('categoria').optional().isString().bail().isIn(['bienestar','cuidado','bebe']),...['laboratorio','presentacion'].map(field=>query(field).optional().isString().bail().customSanitizer(plain).isLength({max:120}))];
+const catalog=[catalogScalars,query('q').optional().isString().bail().customSanitizer(plain).isLength({max:100}),...catalogFilters,query('sort').optional().isString().bail().isIn(['recommended','low','high']),...pagination];
+const suggestions=[catalogScalars,query('q').isString().bail().customSanitizer(plain).isLength({min:2,max:100}),...catalogFilters,validated];
 const pharmacyFields=['descuentoPorcentaje','ivaCategoria','fundamentoIva','tipoProducto','codigoInterno','codigoBarras','laboratorio','principioActivo','concentracion','presentacion','registroSanitario','requiereReceta','controlado','biologico','cadenaFrio','stockMinimo','pvpMaximo'];
 const productFields=['nombre','precio','stock','categoria','descripcion','imagen','alt',...pharmacyFields];
 function nullableText(field,max,min=1){return body(field).optional().custom(value=>value===null || typeof value==='string').bail().customSanitizer(plain).custom(value=>value===null || value.length>=min && value.length<=max);}
@@ -56,4 +63,4 @@ const lot=[only(['productoId','numero','vencimiento','cantidad','costoUnitario',
 const adjustment=[only(['productoId','loteId','tipo','cantidad','motivo']),identifier('productoId'),body('loteId').optional().custom(v=>v===null || typeof v==='string' && /^[a-z0-9][a-z0-9-]{0,79}$/.test(v)),body('tipo').isIn(['entrada','salida']),quantity,text('motivo',8,300)];
 const inventoryPagination=[query('productoId').optional().isString().matches(/^[a-z0-9][a-z0-9-]{0,79}$/),...pagination];
 const fiscal=[only(['tarifaGeneral','inicioVigencia','referenciaNormativa']),body('tarifaGeneral').isInt().bail().custom(v=>typeof v==='number' && [13,14,15].includes(v)),timestamp('inicioVigencia'),body('inicioVigencia').custom(v=>Date.parse(v)>=Date.parse('2024-04-01T05:00:00Z') && Date.parse(v)<=Date.now()+10*366*86400000).withMessage('Usa una vigencia desde abril de 2024 y dentro de los próximos diez años.'),text('referenciaNormativa',8,300)];
-module.exports={register,login,resetPassword,verifyEmail,resendVerification,profile,id,pagination,catalog,product,productUpdate,productFields,order,orderStatus,promotion,supplier,lot,adjustment,inventoryPagination,fiscal,validated,plain,validGtin};
+module.exports={register,login,resetPassword,verifyEmail,resendVerification,profile,id,pagination,catalog,suggestions,product,productUpdate,productFields,order,orderStatus,promotion,supplier,lot,adjustment,inventoryPagination,fiscal,validated,plain,validGtin};

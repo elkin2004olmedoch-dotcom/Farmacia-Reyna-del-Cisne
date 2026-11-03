@@ -6,7 +6,7 @@ const {pathToFileURL}=require('node:url');
 const root=path.resolve(__dirname,'../..');
 const upload='assets/uploads/00000000-0000-4000-8000-000000000000.webp';
 const remote='https://api.example.test/'+upload;
-const configStub='export const publicImageUrl=value=>globalThis.staticUrlResolver(value);';
+const configStub='export const publicImageUrl=value=>globalThis.staticUrlResolver(value);export const productImageUrl=publicImageUrl;';
 
 // Evaluate the real module; replace only its browser/config dependencies.
 async function load(relative,stubs={}){
@@ -50,7 +50,7 @@ test('la vista previa administrativa resuelve uploads y conserva vacío oculto',
 
 test('ampliar una imagen usa el mismo origen remoto sin alterar el producto',async()=>{
   const item=product(),listeners={},image={},quantity={value:'1'};
-  const target={addEventListener:(name,callback)=>listeners[name]=callback};
+  const target={addEventListener:(name,callback)=>listeners[name]=callback,querySelector:()=>({src:remote})};
   const dialog={querySelector:()=>image,showModal(){this.open=true;}};
   const restore=globals({staticUrlResolver:value=>{assert.equal(value,upload);return remote;},staticUrlProduct:item,location:{search:'?id='+item.id},document:{getElementById:id=>({'product-detail':target,'detail-quantity':quantity,'image-dialog':dialog})[id]}});
   try{
@@ -74,6 +74,7 @@ test('navegación marca la página actual con URL .html, limpia y raíz',async()
   const restore=globals({location:{pathname:'/'},document:{body:{dataset:{page:'home'}},getElementById:id=>id==='admin-nav-overlay'?null:element,querySelectorAll:selector=>selector==='.shop-nav a'?links:[],addEventListener(){}}});
   try{
     const {layoutController}=await load('frontend/controllers/layout.js',{
+      './predictive-search.js':'export const predictiveSearch=()=>{};',
       '../models/auth.js':'export const auth={user:null};',
       '../models/cart.js':'export const cart={read:()=>({})};',
       './cart-drawer.js':'export const cartDrawerController=()=>()=>{};',
