@@ -99,6 +99,18 @@ No se retira el origen actual de Pages durante esta preparación.
 
 Las comprobaciones locales y la consulta de documentación no acreditan entrega de correo, dominio adquirido, DNS propagado ni certificado emitido. Registrar o verificar un dominio tampoco activa PayPhone, SRI u otros servicios comerciales.
 
+## Comprobantes y facturas por correo
+
+La misma configuración Resend habilita los documentos transaccionales. Tras guardar un pedido nuevo, el servidor solicita el envío de su comprobante al **correo verificado de la cuenta**, nunca al destinatario que se escriba en el pedido. Los pedidos repetidos con la misma clave no disparan otro envío automático. El comprobante reutiliza la vista de la web, incluye los importes y la tarifa de envío guardados y se adjunta como HTML imprimible; se puede abrir e imprimir como PDF. Conserva la indicación de que no tiene validez tributaria ni acredita un pago.
+
+Cuando el flujo SRI existente devuelve una factura `AUTORIZADA`, se solicita además el envío de su XML y su representación imprimible HTML al propietario verificado. Se conserva el ambiente de pruebas o producción de los documentos. Esta función no crea una factura por sí sola, no activa SRI ni cambia el estado de pago.
+
+En **Mis pedidos → Ver comprobante → Enviar a mi correo** se puede volver a solicitar el documento; si ya hay una factura autorizada, se envía esa factura. `POST /api/pedidos/:id/correo` requiere autenticación y propiedad del pedido, no permite sustituir el destinatario y limita las solicitudes a cinco por hora por IP. Los correos no verificados no reciben documentos. Las cuentas anteriores necesitarán completar una verificación antes de usar esta función cuando se active el envío.
+
+La respuesta distingue `disabled`, `verification_required`, `accepted` y `unavailable`. `accepted` significa aceptación del proveedor, no entrega en bandeja. Los fallos no revierten el pedido o la factura; se pueden reintentar con el botón. No existe una cola persistente ni reintento automático tras un reinicio. Se usa una clave de idempotencia por contenido y destinatario; Resend deduplica durante 24 horas. Fuera de esa ventana, una nueva solicitud puede reenviar el mismo documento. [Idempotencia de Resend](https://resend.com/docs/dashboard/emails/idempotency-keys), [formatos de adjuntos admitidos](https://resend.com/docs/knowledge-base/what-attachment-types-are-not-supported).
+
+Las confirmaciones y los documentos comparten las cuotas del plan. El plan Free permite empezar sin una suscripción de correo, dentro de sus límites. El dominio `.com` requiere registro y renovación; no se ha comprobado una promoción o beneficio particular para esta farmacia. Mantener Pages no exige comprar un dominio. [Registro de dominios en Cloudflare](https://domains.cloudflare.com/), [cuotas Resend](https://resend.com/docs/knowledge-base/account-quotas-and-limits).
+
 ## Migración y restauración
 
 Aplica las migraciones aditivas y genera el cliente Prisma 6 antes de arrancar el backend nuevo. El despliegue existente en Render ejecuta esa preparación; mantén `SKIP_INITIAL_SEED=true` para conservar los datos. En SQLite local, trabaja sobre una copia respaldada y revisa el destino antes de ejecutar `db:migrate`. No ejecutes el setup de una instalación nueva sobre una base comercial.
