@@ -15,17 +15,21 @@ export async function paymentsController(){
   function contact(text){const url=new URL('https://api.whatsapp.com/send');url.searchParams.set('phone','593979275988');url.searchParams.set('text',text);window.open(url.href,'_blank','noopener,noreferrer');}
   function render(){
     if(!active)return;
-    const real=Boolean(id),method=form.elements.method.value;
+    const real=Boolean(id),method=form.elements.method.value,bank=config.transferencia,bankAvailable=bank?.disponible===true;
     const locked=payment && ['creando','aprobado','cancelado','revision'].includes(payment.estado);
     const mismatch=payment && config.payphone.entorno && payment.entorno!==config.payphone.entorno;
     const fallbackBlocked=!config.payphone.disponible && Boolean(payment),closed=['cancelado','entregado'].includes(order.estado);
     card.disabled=!real || !order.id || closed || Boolean(locked || mismatch || fallbackBlocked);
     transfer.disabled=!real || !order.id || closed || Boolean(payment);
     transferPanel.hidden=method!=='transfer' || transfer.disabled;copy.disabled=pending || loadingActive || transfer.disabled;
-    document.getElementById('payment-transfer-note').textContent=payment?'Consulta la solicitud existente con la farmacia antes de elegir otra forma de pago.':'Solicita los datos bancarios y usa la referencia de tu pedido.';
+    document.getElementById('payment-bank-details').hidden=!bankAvailable;
+    for(const [field,value]of Object.entries({name:bank?.banco,type:bank?.tipo==='ahorros'?'Ahorros':bank?.tipo==='corriente'?'Corriente':'',number:bank?.numeroCuenta,holder:bank?.titular}))document.getElementById('payment-bank-'+field).textContent=bankAvailable?value:'';
+    document.getElementById('payment-transfer-intro').textContent=bankAvailable?'Transfiere el importe exacto a esta cuenta e incluye la referencia de tu pedido. Envía el comprobante a la farmacia para que revise la recepción.':'Solicita los datos bancarios a la farmacia y confirma con su equipo cómo realizar el pago.';
+    copy.textContent=bankAvailable?'Copiar datos de transferencia':'Copiar importe y referencia';
+    document.getElementById('payment-transfer-note').textContent=payment?'Consulta la solicitud existente con la farmacia antes de elegir otra forma de pago.':bankAvailable?`${bank.banco} · Cuenta de ${bank.tipo}`:'Solicita los datos bancarios y usa la referencia de tu pedido.';
     document.getElementById('payment-card-note').textContent=mismatch?'El entorno de este intento cambió. Consulta su revisión con la farmacia.':fallbackBlocked?'Ya existe una solicitud de pago. Consulta su estado con la farmacia antes de solicitar otro enlace.':!config.payphone.disponible?'Solicita un enlace seguro a la farmacia. No ingreses datos de tarjeta aquí.':!real?'PayPhone · requiere un pedido registrado':(payment?.entorno || config.payphone.entorno)==='sandbox'?'PayPhone · entorno de pruebas, sin cobros reales':'Procesado en la página oficial de PayPhone';
-    document.getElementById('payment-method-note').textContent=method==='card'?(fallbackBlocked?'Ya existe una solicitud de pago. Revisa su estado o contacta con la farmacia.':config.payphone.disponible?'Continuarás en pay.payphonetodoesposible.com. Al terminar, volverás a la farmacia.':'Se abrirá WhatsApp para solicitar un enlace seguro. La solicitud no realiza un cobro; la verificación del pago queda pendiente.'):method==='transfer'?'Solicita por WhatsApp los datos bancarios para este pedido. Copiar la referencia o enviar un mensaje no confirma una transferencia.':'Habla con nuestro equipo para acordar el pago. Un mensaje no acredita un pago.';
-    button.textContent=method==='card'?(config.payphone.disponible?`Continuar en PayPhone · ${money(order.totalCentavos)} →`:'Solicitar enlace seguro ↗'):method==='transfer'?'Solicitar datos bancarios ↗':'Consultar con la farmacia ↗';
+    document.getElementById('payment-method-note').textContent=method==='card'?(fallbackBlocked?'Ya existe una solicitud de pago. Revisa su estado o contacta con la farmacia.':config.payphone.disponible?'Ingresarás y validarás tu tarjeta en la página oficial de PayPhone. Al terminar, volverás a la farmacia.':'Se abrirá WhatsApp para solicitar un enlace seguro. La solicitud no realiza un cobro; la verificación del pago queda pendiente.'):method==='transfer'?(bankAvailable?'La transferencia queda pendiente hasta que la farmacia compruebe su recepción. Copiar los datos o enviar el comprobante no confirma el pago.':'Solicita por WhatsApp los datos bancarios para este pedido. Copiar la referencia o enviar un mensaje no confirma una transferencia.'):'Habla con nuestro equipo para acordar el pago. Un mensaje no acredita un pago.';
+    button.textContent=method==='card'?(config.payphone.disponible?`Pagar con tarjeta en PayPhone · ${money(order.totalCentavos)} →`:'Solicitar enlace seguro ↗'):method==='transfer'?(bankAvailable?'Enviar comprobante a la farmacia ↗':'Solicitar datos bancarios ↗'):'Consultar con la farmacia ↗';
     button.disabled=pending || real && !order.id || (method==='card'?card.disabled:method==='transfer'?transfer.disabled:method!=='manual');
     document.getElementById('payment-mode').textContent=!real?'Mis compras':'Pago de tu pedido';
     document.getElementById('payment-refresh').hidden=!real;
@@ -46,7 +50,8 @@ export async function paymentsController(){
       if(!active)return;active=false;order=null;payment=null;methods.disabled=true;button.disabled=true;form.hidden=true;
       document.getElementById('payment-summary').textContent='Inicia sesión para consultar este pedido.';
       document.getElementById('payment-reference').textContent='';document.getElementById('payment-persisted-state').textContent='';
-      for(const field of ['payment-transfer-amount','payment-transfer-reference','payment-transfer-copy-status'])document.getElementById(field).textContent='';
+      for(const field of ['payment-transfer-amount','payment-transfer-reference','payment-transfer-copy-status','payment-bank-name','payment-bank-type','payment-bank-number','payment-bank-holder'])document.getElementById(field).textContent='';
+      document.getElementById('payment-bank-details').hidden=true;
       location.replace('cuenta.html?next='+encodeURIComponent(`pagos.html?pedido=${id}`));
     }
     events.addEventListener('session:expired',expire);events.addEventListener('session:changed',()=>{if(!auth.user)expire();});
@@ -61,7 +66,7 @@ export async function paymentsController(){
   copy.addEventListener('click',async()=>{
     if(!active || pending || !order.id || transfer.disabled || form.elements.method.value!=='transfer')return;
     busy(copy,true);
-    try{await navigator.clipboard.writeText(`Pedido: ${order.id}\nImporte: ${money(order.totalCentavos)}`);if(active)copyStatus.textContent='Importe y referencia copiados.';}
+    try{const bank=config.transferencia;const details=bank?.disponible?`Banco: ${bank.banco}\nTipo: ${bank.tipo}\nCuenta: ${bank.numeroCuenta}\nTitular: ${bank.titular}\n`:'';await navigator.clipboard.writeText(details+`Pedido: ${order.id}\nImporte: ${money(order.totalCentavos)}`);if(active)copyStatus.textContent=details?'Datos de transferencia copiados.':'Importe y referencia copiados.';}
     catch{if(active)copyStatus.textContent='No se pudo copiar. Puedes seleccionar el importe y la referencia que aparecen arriba.';}
     finally{if(active)busy(copy,false);}
   });
@@ -70,7 +75,7 @@ export async function paymentsController(){
     if(!active || pending || id && (!order.id) || !['card','transfer','manual'].includes(method) || method==='card' && card.disabled || method==='transfer' && transfer.disabled)return;
     errorPanel.hidden=true;
     if(method==='manual'){contact(`Hola, quiero coordinar el pago del pedido ${id}.`);return;}
-    if(method==='transfer'){contact(`Hola, solicito los datos bancarios para transferir ${money(order.totalCentavos)} por el pedido ${id}. Quedo pendiente de la verificación del pago.`);return;}
+    if(method==='transfer'){contact(config.transferencia?.disponible?`Hola, quiero enviar el comprobante de transferencia de ${money(order.totalCentavos)} por el pedido ${id}. Quedo pendiente de la verificación del pago.`:`Hola, solicito los datos bancarios para transferir ${money(order.totalCentavos)} por el pedido ${id}. Quedo pendiente de la verificación del pago.`);return;}
     if(!config.payphone.disponible){contact(`Hola, solicito un enlace seguro para pagar ${money(order.totalCentavos)} por el pedido ${id}. Quedo pendiente de la verificación del pago.`);return;}
     pending=true;busy(button,true);
     try{const result=await payments.prepare(id);if(!active)return;payment=result.pago;config=result;if(payment?.estado==='pendiente' && payment.urlPago){location.assign(payphoneUrl(payment.urlPago));return;}render();}

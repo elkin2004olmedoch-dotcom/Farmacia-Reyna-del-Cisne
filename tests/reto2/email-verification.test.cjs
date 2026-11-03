@@ -83,12 +83,12 @@ test('emisión guarda sólo hash, caduca en una hora y entrega fuera de la trans
 test('cooldown atómico y rotación rechazan el enlace anterior al cumplirse sesenta segundos',async()=>{
   const f=fixture();const results=await Promise.all([f.model.issue(f.user,settings()),f.model.issue(f.user,settings())]);assert.deepEqual(results.map(r=>r.status).sort(),['cooldown','sent']);assert.equal(f.messages.length,1);
   const old=f.messages[0].token;f.advance(59999);assert.equal((await f.model.issue(f.user,settings())).status,'cooldown');f.advance(1);assert.equal((await f.model.issue(f.user,settings())).status,'sent');
-  const fresh=f.messages[1].token;assert.notEqual(fresh,old);await assert.rejects(f.model.consume(old),invalid);assert.deepEqual(await f.model.consume(fresh),{verified:true});
+  const fresh=f.messages[1].token;assert.notEqual(fresh,old);await assert.rejects(f.model.consume(old),invalid);assert.deepEqual(await f.model.consume(fresh),{verified:true,usuarioId:baseUser().id});
 });
 
 test('consumo único atómico incrementa tokenVersion y no inicia sesión',async()=>{
   const f=fixture();await f.model.issue(f.user,settings());const token=f.messages[0].token;
-  const results=await Promise.allSettled([f.model.consume(token),f.model.consume(token)]);assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.deepEqual(results.find(r=>r.status==='fulfilled').value,{verified:true});assert.ok(invalid(results.find(r=>r.status==='rejected').reason));
+  const results=await Promise.allSettled([f.model.consume(token),f.model.consume(token)]);assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.deepEqual(results.find(r=>r.status==='fulfilled').value,{verified:true,usuarioId:baseUser().id});assert.ok(invalid(results.find(r=>r.status==='rejected').reason));
   const user=f.db.users.get(f.user.id);assert.ok(user.emailVerifiedAt instanceof Date);assert.equal(user.tokenVersion,4);assert.equal(f.db.rows.size,0);await assert.rejects(f.model.consume(token),invalid);
 });
 
@@ -102,7 +102,7 @@ test('token vencido, correo cambiado o usuario desactivado no confirma la cuenta
 test('fallo de actualización revierte la eliminación del token y mantiene error público genérico',async()=>{
   const f=fixture();await f.model.issue(f.user,settings());const update=f.db.usuario.updateMany;f.db.usuario.updateMany=async()=>{throw new Error('sensitive database content');};
   await assert.rejects(f.model.consume(f.messages[0].token),error=>error.status===503 && error.code==='EMAIL_VERIFICATION_UNAVAILABLE' && !error.message.includes('sensitive'));assert.equal(f.db.rows.size,1);assert.equal(f.db.users.get(f.user.id).emailVerifiedAt,null);
-  f.db.usuario.updateMany=update;assert.deepEqual(await f.model.consume(f.messages[0].token),{verified:true});
+  f.db.usuario.updateMany=update;assert.deepEqual(await f.model.consume(f.messages[0].token),{verified:true,usuarioId:baseUser().id});
 });
 
 test('fallo tardío de entrega elimina sólo su hash y conserva una emisión más nueva',async()=>{
@@ -111,13 +111,13 @@ test('fallo tardío de entrega elimina sólo su hash y conserva una emisión má
   const model=createEmailVerification({db,now:()=>new Date(clock),emit:code=>metrics.push(code),deliver:async message=>{messages.push(message);if(messages.length===1){started();await deliveryFailed;}}});
   const pending=model.issue(baseUser(),settings());await firstStarted;clock+=60000;assert.equal((await model.issue(baseUser(),settings())).status,'sent');
   rejectFirst(new Error('upstream '+messages[0].token+' '+baseUser().email));assert.equal((await pending).status,'unavailable');assert.equal(db.rows.get(baseUser().id).tokenHash,digest(messages[1].token));
-  await assert.rejects(model.consume(messages[0].token),invalid);assert.deepEqual(await model.consume(messages[1].token),{verified:true});assert.ok(metrics.every(value=>!value.includes('@') && !messages.some(message=>value.includes(message.token))));
+  await assert.rejects(model.consume(messages[0].token),invalid);assert.deepEqual(await model.consume(messages[1].token),{verified:true,usuarioId:baseUser().id});assert.ok(metrics.every(value=>!value.includes('@') && !messages.some(message=>value.includes(message.token))));
 });
 
 test('desactivar envíos no desactiva requisitos pendientes ni impide consumir el enlace existente',async()=>{
   const f=fixture();assert.equal(requiresVerification(f.user),true);assert.equal(requiresVerification({...f.user,emailVerificationRequired:false}),false);assert.equal(requiresVerification({...f.user,emailVerifiedAt:new Date()}),false);
   assert.deepEqual(await f.model.issue(f.user,{emailVerification:{enabled:false}}),{status:'disabled'});assert.equal(f.messages.length,0);assert.equal(f.db.rows.size,0);
-  await f.model.issue(f.user,settings());assert.deepEqual(await f.model.consume(f.messages[0].token),{verified:true});assert.equal(requiresVerification(f.db.users.get(f.user.id)),false);
+  await f.model.issue(f.user,settings());assert.deepEqual(await f.model.consume(f.messages[0].token),{verified:true,usuarioId:baseUser().id});assert.equal(requiresVerification(f.db.users.get(f.user.id)),false);
   assert.deepEqual(await f.model.issue(f.user,settings()),{status:'not-required'});
 });
 

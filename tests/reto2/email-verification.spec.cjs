@@ -3,6 +3,18 @@ const AxeBuilder=require('@axe-core/playwright').default;
 const token='A'.repeat(43);
 const verifyPath='/api/auth/verify-email',resendPath='/api/auth/resend-verification';
 
+test('confirmar una cuenta de cliente abre el catálogo con sesión, sin JWT ni nonce en la URL',async({page})=>{
+  const user={id:'cliente-confirmado',nombre:'Cliente Confirmado',email:'confirmado@example.ec',telefono:'0991234567',role:'user',activo:true,emailVerifiedAt:'2026-11-02T12:00:00Z'};
+  const session='synthetic-confirmed-session',requests=[];page.on('request',request=>requests.push(request.url()));
+  await page.route('**/api/auth/me',route=>route.fulfill({json:{ok:true,data:user}}));
+  await page.route('**'+verifyPath,route=>route.fulfill({json:{ok:true,data:{verified:true,token:session,usuario:user}}}));
+  await page.goto('/confirmar-correo#token='+token);await page.locator('#verification-submit').click();
+  await expect(page).toHaveURL(/\/catalogo\.html$/);
+  await expect.poll(()=>page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBe(session);
+  await expect.poll(()=>page.evaluate(async()=>{const {auth}=await import('/models/auth.js');return auth.user?.id;})).toBe(user.id);
+  expect(requests.every(url=>!url.includes(token)&&!url.includes(session))).toBe(true);
+});
+
 test.describe('registro con confirmación obligatoria',()=>{
   test.use({serviceWorkers:'block'});
   test('explica la indisponibilidad del envío sin crear una sesión',async({page})=>{
@@ -64,7 +76,7 @@ for(const navigation of ['fragmento','historial'])test('un nuevo enlace por '+na
   await page.route('**'+verifyPath,async route=>{
     const body=route.request().postDataJSON();submitted.push(body);
     if(body.token===token)await gate;
-    await route.fulfill({json:{ok:true,data:{verified:true}}});
+    await route.fulfill({json:{ok:true,data:body.token===token?{verified:true,token:'obsolete-session',usuario:{id:'obsolete-user',role:'user'}}:{verified:true}}});
   });
   await page.goto('/confirmar-correo#token='+token);await page.locator('#verification-submit').click();
   await expect.poll(()=>submitted.length).toBe(1);await expect(page.locator('#verification-submit')).toBeDisabled();
@@ -79,7 +91,7 @@ for(const navigation of ['fragmento','historial'])test('un nuevo enlace por '+na
     const finished=page.waitForEvent('requestfinished',{predicate:request=>new URL(request.url()).pathname===verifyPath && request.postDataJSON()?.token===token});
     release();await finished;await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
     await expect(page.locator('#verification-status')).toContainText('El correo se confirma sólo cuando pulses el botón.');
-    await expect(page.locator('#verification-submit')).toHaveText('Confirmar mi correo');await expect(page.locator('#verification-submit')).toBeEnabled();
+    await expect(page.locator('#verification-submit')).toHaveText('Confirmar y entrar');await expect(page.locator('#verification-submit')).toBeEnabled();
     expect(submitted).toEqual([{token}]);
     await page.locator('#verification-submit').click();await expect(page.locator('#verification-status')).toHaveText('Correo confirmado. Ya puedes iniciar sesión');
     await expect(page.locator('#verification-submit')).toHaveText('Correo confirmado');expect(submitted).toEqual([{token},{token:nextToken}]);

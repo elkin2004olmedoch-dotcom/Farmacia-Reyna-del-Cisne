@@ -85,6 +85,8 @@ https://farmacia-reyna-del-cisne-pruebas.pages.dev/confirmar-correo#token=TOKEN_
 
 `TOKEN_OPACO` es un marcador documental. El enlace no lleva un JWT de sesión. La página lee el fragmento y confirma mediante un POST a la API; visitar la ruta por GET no confirma una cuenta. El token no se debe registrar ni publicar. Su comprobación y consumo corresponden al servidor.
 
+Tras **Confirmar y entrar**, el POST consume el enlace y entrega una sesión web únicamente para un cliente activo y verificado. La pantalla guarda esa sesión mediante el mecanismo JWT existente y redirige al catálogo. Una respuesta tardía de un enlace anterior no sustituye la sesión. El JWT no se coloca en URL, historial ni correo; las respuestas de la API usan `Cache-Control: no-store`. Confirmar un correo de administrador o repartidor no inicia sesión automáticamente para esos roles.
+
 | Endpoint de la API | Cuerpo y función |
 | --- | --- |
 | `POST /api/auth/verify-email` | `{token}`: valida caducidad y uso único y confirma el correo. |

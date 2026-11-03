@@ -49,6 +49,26 @@ async function assertUnpaidOrder(request,data){
   expect(dto.pedido.totalCentavos).toBe(2550);expect(dto.pedido.estado).toBe('pendiente');expect(dto.pago).toBeNull();
   expect((await (await request.get('/api/productos/'+data.product.id)).json()).data.stock).toBe(5);
 }
+
+test.describe('transferencia configurada',()=>{
+  test.use({serviceWorkers:'block'});
+  test('muestra banco, cuenta y titular, copia los datos y conserva el pago pendiente',async({page,request},testInfo)=>{
+    const data=await orderFixture(request);
+    try{
+      await useSession(page,data.user);await contactSpy(page,true);const writes=observeBusinessWrites(page);
+      await page.route('**/api/pedidos/'+data.order.id+'/pago',async route=>{const response=await route.fetch(),body=await response.json();await route.fulfill({response,json:{...body,data:{...body.data,transferencia:{disponible:true,banco:'Banco Ejemplo',tipo:'ahorros',numeroCuenta:'0123456789',titular:'Titular Sintético'}}}});});
+      await page.goto('/pagos.html?pedido='+data.order.id+'&metodo=transfer');
+      await expect(page.locator('#payment-bank-details')).toBeVisible();await expect(page.locator('#payment-bank-name')).toHaveText('Banco Ejemplo');await expect(page.locator('#payment-bank-type')).toHaveText('Ahorros');await expect(page.locator('#payment-bank-number')).toHaveText('0123456789');await expect(page.locator('#payment-bank-holder')).toHaveText('Titular Sintético');
+      await page.locator('#payment-transfer-copy').focus();await page.keyboard.press('Enter');await expect(page.locator('#payment-transfer-copy-status')).toHaveText('Datos de transferencia copiados.');
+      const copied=await page.evaluate(()=>window.paymentTest.copied);expect(copied).toHaveLength(1);for(const value of ['Banco Ejemplo','ahorros','0123456789','Titular Sintético',data.order.id])expect(copied[0]).toContain(value);
+      await expect(page.locator('#payment-submit')).toHaveText('Enviar comprobante a la farmacia ↗');await page.locator('#payment-submit').click();await expect.poll(()=>page.evaluate(()=>window.paymentTest.opened.length)).toBe(1);expect(new URL(await page.evaluate(()=>window.paymentTest.opened[0])).searchParams.get('text')).toContain('comprobante de transferencia');
+      await assertUnpaidOrder(request,data);expect(writes).toEqual([]);await assertNoCardFields(page);
+      for(const width of [320,375,768,1440]){await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);}
+      const violations=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze()).violations;expect(violations.map(issue=>issue.id)).toEqual([]);
+      await page.setViewportSize(testInfo.project.use.viewport);await page.screenshot({path:testInfo.outputPath('transferencia.png'),fullPage:true});
+    }finally{await data.cleanup();}
+  });
+});
 async function capture(page,testInfo,name){
   await expect.poll(()=>page.locator('farmacia-mascota #canvas').evaluate(canvas=>{
     const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;

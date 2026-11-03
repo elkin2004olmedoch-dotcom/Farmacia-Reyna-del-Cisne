@@ -32,12 +32,14 @@ El HTML de frontend/ se genera desde scripts/build-frontend.cjs y scripts/templa
 ## Compra, pago y seguimiento
 
 - En el carrito puedes elegir tarjeta, transferencia o pago con la farmacia. Es una preferencia para continuar después de registrar el pedido; no se guarda como un pago ni cambia su estado.
-- La pantalla de pago muestra el importe guardado del pedido. Tarjeta permite solicitar un enlace seguro por WhatsApp cuando PayPhone no está habilitado; transferencia copia sólo el importe y la referencia para pedir los datos bancarios a la farmacia. Las solicitudes quedan pendientes de verificación.
+- La pantalla de pago muestra el importe guardado del pedido. Tarjeta permite solicitar un enlace seguro por WhatsApp cuando PayPhone no está habilitado. Transferencia muestra banco, tipo, cuenta y titular configurados por el negocio y permite copiarlos junto al importe y referencia; el envío del comprobante queda pendiente de verificación.
 - **Ver comprobante**, disponible en la confirmación y en **Mis pedidos**, abre el resumen imprimible. **Guardar PDF / imprimir** permite elegir **Guardar como PDF** en el navegador. Es un comprobante del pedido sin validez tributaria: no acredita un pago ni sustituye la factura SRI.
 - Con el correo habilitado, los pedidos nuevos solicitan automáticamente el envío del comprobante al correo verificado de la cuenta. **Enviar a mi correo** permite reintentarlo; si existe una factura autorizada, envía su XML y representación imprimible. Los envíos siguen desactivados hasta configurar el proveedor y el remitente. La aceptación del proveedor no garantiza recepción en bandeja.
 - La confirmación y **Mis pedidos** incluyen una vista de mapa voluntaria. **Ver mapa** utiliza un destino autorizado por el comprador o la ubicación reciente compartida por el repartidor, cuando existen. El seguimiento habitual sigue disponible; los pedidos cerrados no muestran ubicaciones.
 
 La confirmación de correo conserva el backend JWT: enlace de un solo uso, caducidad de una hora y reenvío. En producción se exige confirmar el correo; si el envío está desactivado, el registro se pausa sin crear cuentas ni entregar JWT. Se eligió Brevo gratuito por API HTTPS; Resend sigue siendo compatible. El envío real requiere completar la cuenta, el remitente y las credenciales privadas. La [guía de correo y dominio](docs/CORREO-Y-DOMINIO.md) explica la activación y los pasos separados para un `.com` propio. Los correos usan la identidad de la farmacia e incluyen verificación, comprobante, factura autorizada y aviso de entrega.
+
+Al pulsar **Confirmar y entrar**, el cliente recibe su sesión web y vuelve al catálogo. El JWT se entrega por el POST de confirmación y se conserva en la sesión del navegador, nunca en el enlace. El token de correo se consume una sola vez e invalida las sesiones anteriores; confirmar un correo del personal no entrega una sesión administrativa. El formulario de tarjeta pertenece a PayPhone: aceptar tarjetas reales exige activar la cuenta comercial y guardar tarjetas para compras futuras requiere además autorización de tokenización del proveedor.
 
 ## Mascotas y confirmaciones
 

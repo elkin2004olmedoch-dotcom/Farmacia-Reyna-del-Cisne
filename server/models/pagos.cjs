@@ -5,6 +5,10 @@ const {AppError}=require('../middleware/errors.cjs');
 const provider=require('./payphone.cjs');
 const select={id:true,userId:true,estado:true,total:true,subtotalProductos:true,costoEnvioCentavos:true,ivaMonto:true,envioIvaPorcentaje:true,envioBaseImponible:true,envioIvaMonto:true,createdAt:true,updatedAt:true,pago:true,detalles:{select:{nombreProducto:true,cantidad:true,precioUnitario:true,totalLinea:true,ivaPorcentaje:true,baseImponible:true,ivaMonto:true}}};
 function cents(value) {const decimal=new Prisma.Decimal(value).mul(100);if(!decimal.isInteger() || decimal.lt(0) || decimal.gt(2147483647))throw new AppError(409,'PAYMENT_SNAPSHOT_INVALID','El importe histórico necesita revisión de la farmacia.');return decimal.toNumber();}
+function transferConfiguration(){
+ const banco=(process.env.TRANSFER_BANK_NAME||'').trim(),titular=(process.env.TRANSFER_ACCOUNT_HOLDER||'').trim(),numeroCuenta=process.env.TRANSFER_ACCOUNT_NUMBER||'',tipo=process.env.TRANSFER_ACCOUNT_TYPE||'';
+ return banco.length>1&&banco.length<=80&&titular.length>1&&titular.length<=100&&/^\d{6,20}$/.test(numeroCuenta)&&['ahorros','corriente'].includes(tipo)?{disponible:true,banco,titular,numeroCuenta,tipo}:{disponible:false};
+}
 async function owned(client,id,user) {
  const pedido=await client.pedido.findFirst({where:{id,...(user.role==='admin'?{}:{userId:user.id})},select});
  if(!pedido)throw new AppError(404,'NOT_FOUND','No se encontró el pedido.');return pedido;
@@ -13,7 +17,7 @@ function dto(pedido) {
  const pago=pedido.pago,config=provider.configuration();
  return {pedido:{id:pedido.id,estado:pedido.estado,createdAt:pedido.createdAt,total:pedido.total,totalCentavos:Math.round(Number(pedido.total)*100),subtotalCentavos:Math.round(Number(pedido.subtotalProductos ?? pedido.total)*100),costoEnvioCentavos:pedido.costoEnvioCentavos,ivaCentavos:pedido.ivaMonto===null?null:Math.round(Number(pedido.ivaMonto)*100),moneda:'USD',detalles:pedido.detalles.map(line=>({nombreProducto:line.nombreProducto,cantidad:line.cantidad,totalCentavos:Math.round(Number(line.totalLinea ?? new Prisma.Decimal(line.precioUnitario).mul(line.cantidad))*100)}))},pago:pago?{estado:pago.estado,proveedor:pago.proveedor,entorno:pago.entorno,moneda:pago.moneda,totalCentavos:pago.totalCentavos,createdAt:pago.createdAt,updatedAt:pago.updatedAt,urlPago:config.available && config.environment===pago.entorno && pago.estado==='pendiente' && pago.urlPago?provider.hostedUrl(pago.urlPago,pago.paymentId):null}:null,...provider.publicConfiguration()};
 }
-async function find(id,user) {return dto(await owned(db,id,user));}
+async function find(id,user) {return {...dto(await owned(db,id,user)),transferencia:transferConfiguration()};}
 function snapshot(pedido) {
  let sinIvaCentavos=0,baseIvaCentavos=0,ivaCentavos=0;
  const lines=[...pedido.detalles];
