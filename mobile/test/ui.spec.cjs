@@ -52,7 +52,7 @@ async function mount(page, {restored = true, role = 'repartidor', conflict = fal
       async logout() { fixture.calls.push('logout'); fixture.authenticated = false; if (options.localLogoutFailure) throw Object.assign(new Error('fixture storage'),{code:'LOCAL_LOGOUT_FAILED'}); if (options.logoutFailure) throw new Error('fixture offline'); },
       async request(route, options = {}) {
         fixture.calls.push({route, ...options});
-        if(route.endsWith('/ruta'))return {geometry:{type:'LineString',coordinates:[[-79.24,.12],[-79.245,.123],[-79.25,.125]]},distance:1800,duration:300};
+        if(route.endsWith('/ruta'))return {destino:{latitud:.125,longitud:-79.25,fuente:'direccion'},geometry:{type:'LineString',coordinates:[[-79.24,.12],[-79.245,.123],[-79.25,.125]]},distance:1800,duration:300};
         if (route.endsWith('/estado')) {
           if (fixture.conflict) { fixture.conflict = false; delivery.version = 6; delivery.estado = 'en_destino'; throw Object.assign(new Error('version'), {status: 409}); }
           if (options.data.esperadoVersion !== delivery.version) throw new Error('Wrong state version');
@@ -74,7 +74,7 @@ async function mount(page, {restored = true, role = 'repartidor', conflict = fal
       async stop() { fixture.calls.push('stop'); this.state = {...this.state, activeId: null, phase: 'idle'}; fixture.ui?.updateTracking(this.state); if (options.stopFailure) throw new Error('fixture release offline'); },
       async reconcile() { fixture.calls.push('reconcile'); if (['entregada', 'cancelada'].includes(delivery.estado)) await this.stop(); return structuredClone(delivery); }
     };
-    const runtime = {async ensureNotifications() { fixture.calls.push('notifications'); if (options.notificationDenied) throw Object.assign(new Error('fixture notification'), {code: 'NOTIFICATIONS_DENIED'}); }, async openSettings() { fixture.calls.push('settings'); }};
+    const runtime = {async locate(){fixture.calls.push('locate');return {latitud:.12,longitud:-79.24,registradaAt:new Date().toISOString()};},async ensureNotifications() { fixture.calls.push('notifications'); if (options.notificationDenied) throw Object.assign(new Error('fixture notification'), {code: 'NOTIFICATIONS_DENIED'}); }, async openSettings() { fixture.calls.push('settings'); }};
     fixture.ui = await mountApp({root: document.getElementById('app'), session, tracker, runtime});
     window.uiFixture = fixture;
   }, {restored, role, conflict, loginFailure, notificationDenied, logoutFailure, localLogoutFailure, stopFailure, pageFailure,pinned});
@@ -88,13 +88,11 @@ test('la app instalada inicia GPS y muestra una ruta dentro del contenedor local
   await page.getByRole('button',{name:'Cerrar sesión'}).click();await expect(page.locator('.courier-route-map')).toHaveCount(0);
 });
 
-test('actualizar la bandeja conserva el teclado y el destino de navegación que se está editando',async({page})=>{
-  await mount(page);await page.getByRole('button',{name:'Iniciar recorrido',exact:true}).click();
-  const input=page.getByLabel('Latitud del destino',{exact:true});await input.fill('0.125');await input.focus();
-  const before=await page.evaluate(()=>window.uiFixture.calls.filter(call=>call==='reconcile').length);
-  await page.evaluate(()=>window.dispatchEvent(new Event('online')));
-  await expect.poll(()=>page.evaluate(()=>window.uiFixture.calls.filter(call=>call==='reconcile').length)).toBeGreaterThan(before);
-  await expect(input).toBeFocused();await expect(input).toHaveValue('0.125');
+test('abrir el mapa obtiene la ubicación automáticamente sin pedir coordenadas',async({page})=>{
+  await mount(page);await page.getByRole('button',{name:'Ver ruta en la app'}).click();
+  await expect(page.locator('.courier-route-status')).toContainText('Ruta actualizada');await expect(page.locator('.courier-route input')).toHaveCount(0);
+  expect(await page.evaluate(()=>window.uiFixture.calls.includes('locate'))).toBe(true);
+  expect(await page.evaluate(()=>window.uiFixture.calls.some(call=>call?.route?.endsWith('/estado')))).toBe(false);
 });
 
 test('courier can use keyboard, advance versioned states, share GPS and stop before logout', async ({page}) => {

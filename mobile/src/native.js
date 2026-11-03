@@ -23,7 +23,7 @@ export async function createNativeRuntime({platform=Capacitor.getPlatform(),http
     if(token!==undefined&&(typeof token!=='string'||!/^[-A-Za-z0-9_.]+$/.test(token)))throw failure('INVALID_TOKEN','La sesión guardada no es válida. Inicia sesión nuevamente.');
     let response;
     try{
-      response=await http.request({url:API_ORIGIN+'/api'+path,method,headers:{Accept:'application/json',...(data===undefined?{}:{'Content-Type':'application/json'}),...(token?{Authorization:'Bearer '+token}:{})},...(data===undefined?{}:{data}),responseType:'json',connectTimeout:15000,readTimeout:20000,disableRedirects:true});
+      response=await http.request({url:API_ORIGIN+'/api'+path,method,headers:{Accept:'application/json',...(data===undefined?{}:{'Content-Type':'application/json'}),...(token?{Authorization:'Bearer '+token}:{})},...(data===undefined?{}:{data}),responseType:'json',connectTimeout:15000,readTimeout:60000,disableRedirects:true});
     }catch{throw failure('NETWORK_ERROR','No se pudo conectar con la farmacia. Se reintentará al recuperar la conexión.');}
     let body=response.data;
     if(response.status===204)return {status:204,body:null};
@@ -42,5 +42,11 @@ export async function createNativeRuntime({platform=Capacitor.getPlatform(),http
     if(!Number.isInteger(length)||length<1||length>128||typeof random?.getRandomValues!=='function')throw failure('RANDOM_UNAVAILABLE','El dispositivo no permite crear una sesión segura.');
     return random.getRandomValues(new Uint8Array(length));
   }
-  return {transport,storage,randomBytes,gps,ensureNotifications,openSettings:()=>gps.openSettings()};
+  function locate(){return new Promise((resolve,reject)=>{
+    let id,done=false,buffered;
+    const finish=(point,error)=>{if(done)return;done=true;clearTimeout(timer);Promise.resolve(id===undefined?undefined:gps.removeWatcher({id})).then(()=>{if(error)reject(error);else if(point&&[point.latitude,point.longitude,point.time].every(Number.isFinite))resolve({latitud:point.latitude,longitud:point.longitude,registradaAt:new Date(point.time).toISOString()});else reject(failure('GPS_UNAVAILABLE','No se recibió una ubicación válida.'));},reject).catch(reject);};
+    const timer=setTimeout(()=>finish(null,failure('GPS_TIMEOUT','No se recibió la ubicación del dispositivo.')),25000);
+    Promise.resolve().then(()=>gps.addWatcher({requestPermissions:true,stale:false,distanceFilter:0},(point,error)=>{if(id===undefined)buffered=[point,error];else finish(point,error);})).then(value=>{id=value;if(done)void gps.removeWatcher({id}).catch(()=>{});else if(buffered)finish(...buffered);},error=>finish(null,error));
+  });}
+  return {transport,storage,randomBytes,gps,locate,ensureNotifications,openSettings:()=>gps.openSettings()};
 }

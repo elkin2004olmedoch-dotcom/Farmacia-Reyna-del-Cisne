@@ -35,7 +35,7 @@ export async function mountApp({root, session, tracker, runtime}) {
     closeRoute();if(!item?.destino)return;
     const generation=routeGeneration;routeId=item.id;elements.routePanel.hidden=false;
     elements.routeTitle.textContent='Tu recorrido · pedido '+String(item.pedidoId).slice(0,8);
-    const map=await createRouteMap(elements.route,{destination:item.destino,requestRoute:input=>session.request('/entregas/'+encodeURIComponent(item.id)+'/ruta',{method:'POST',data:input}),assetBase:new URL('./assets/leaflet/',document.baseURI)});
+    const map=await createRouteMap(elements.route,{destination:item.destino,locate:()=>tracking.activeId===item.id&&tracking.position?tracking.position:runtime.locate(),requestRoute:input=>session.request('/entregas/'+encodeURIComponent(item.id)+'/ruta',{method:'POST',data:input}),assetBase:new URL('./assets/leaflet/',document.baseURI)});
     if(disposed || !user || generation!==routeGeneration){map.dispose();return;}routeMap=map;
     if(tracking.activeId===item.id && tracking.position)map.update(tracking.position);else if(item.ubicacion)map.update(item.ubicacion);
     elements.routeTitle.focus();

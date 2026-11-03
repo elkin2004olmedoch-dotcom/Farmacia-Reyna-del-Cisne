@@ -8,7 +8,7 @@ Tienda y gestión farmacéutica para Puerto Quito, con catálogo, carrito, pedid
 - [Administración instalable en Windows](https://farmacia-reyna-del-cisne-pruebas.pages.dev/instalar-admin): Edge/Chrome normal y cuenta de administrador.
 - [Entregas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/entregas): requiere cuenta de administrador o repartidor.
 - [Pago de pedidos](https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos): abre un pedido desde **Mis pedidos** para consultar su importe y coordinar el pago con la farmacia.
-- [Reparto Android de pruebas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/reparto-0.2.0.apk).
+- [Reparto Android de pruebas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/reparto-0.3.0.apk).
 
 Los accesos privados se entregan fuera del repositorio. [Instalación de las apps](docs/APPS-E-INSTALACION.md).
 
@@ -158,3 +158,9 @@ Crea antes la carpeta entrega si no existe. El archivo se obtiene del commit ind
 El repartidor dispone de **Ver ruta en la app**, **Iniciar recorrido**, **Llegué al destino**, llamada y **Pedido entregado**, con confirmación del cierre. El inicio solicita GPS; la app instalada conserva el seguimiento nativo con los permisos del teléfono. El mapa y la línea se muestran dentro de la app y la web; no abren Google Maps para navegar. Sin un punto del cliente se confirma un destino de navegación, sólo en memoria. Un único repartidor activo recibe automáticamente los pedidos a domicilio nuevos y los antiguos al confirmarlos/prepararlos. Con cero o varios activos se conserva la asignación administrativa. Asignar no confirma el pedido, no prueba su pago y no autoriza salir antes de prepararlo.
 
 [Implementación, revisión de seguridad y comparación con PLIEGO](docs/REPARTO-Y-REVISION-2026-11-03.md).
+
+### Actualización de ruta automática (0.3.0)
+
+Al abrir Ver ruta en la app se solicita la ubicación actual, también para consultar un pedido que todavía no ha salido. No se muestran campos de latitud/longitud ni se requiere confirmar un punto manual. Cuando falta el GPS de destino, el backend busca la dirección guardada con Nominatim: sólo acepta resultados específicos que coinciden con la calle o lugar y el cantón en Ecuador. Una calle se indica como aproximada; no se sustituye una dirección desconocida por el centro de la ciudad. Si el permiso se deniega se permite reintentar desde Usar mi ubicación; si no hay resultado o es ambiguo, la farmacia debe precisar la dirección. La captura continua del reparto comienza con Iniciar recorrido y conserva los controles existentes.
+
+La búsqueda usa únicamente la dirección, provincia y cantón, sin nombre, teléfono, correo o productos. Caché de proceso y deduplicación, máximo una búsqueda cada 1,1 segundos y hasta cinco búsquedas pendientes. GEOCODING_ORIGIN permite cambiar el servicio compatible desde el backend sin actualizar la app. No hay autocompletado ni búsqueda periódica cuando la dirección no se encontró. El permiso de ubicación del sistema sigue siendo necesario.
