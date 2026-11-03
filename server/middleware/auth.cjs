@@ -16,7 +16,7 @@ function authenticate(config) {
       req.mobileSession=session.id;user={...session.usuario,mobileSession:session.id};
     }else user=typeof payload.sub==='string' ? await users.findById(payload.sub) : null;
     if (!user || !user.activo || payload.version!==user.tokenVersion) throw new AppError(401,'INVALID_TOKEN','Tu sesión ya no es válida.');
-    if(require('../models/email-verification.cjs').requiresVerification(user))throw new AppError(403,'EMAIL_NOT_VERIFIED','Confirma tu correo antes de continuar.');
+    if(require('../models/email-verification.cjs').requiresVerification(user,config.requireVerifiedRegistration&&user.role==='user'))throw new AppError(403,'EMAIL_NOT_VERIFIED','Confirma tu correo antes de continuar.');
     req.user=user;next();
   };
 }

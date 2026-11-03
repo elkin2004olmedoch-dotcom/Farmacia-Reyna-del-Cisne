@@ -3,6 +3,20 @@ const AxeBuilder=require('@axe-core/playwright').default;
 const token='A'.repeat(43);
 const verifyPath='/api/auth/verify-email',resendPath='/api/auth/resend-verification';
 
+test.describe('registro con confirmación obligatoria',()=>{
+  test.use({serviceWorkers:'block'});
+  test('explica la indisponibilidad del envío sin crear una sesión',async({page})=>{
+    let requests=0;
+    await page.route('**/api/auth/register',route=>{requests++;return route.fulfill({status:503,json:{ok:false,error:{code:'EMAIL_UNAVAILABLE',message:'Servicio no disponible.'}}});});
+    await page.goto('/cuenta.html');await page.locator('#show-register').click();
+    for(const [name,value]of Object.entries({nombre:'Cliente Correo',email:'cliente@example.com',telefono:'0979275988',cedula:'0102030400',password:'ClienteCorreo2026!',confirm:'ClienteCorreo2026!'}))await page.locator('#register-form [name="'+name+'"]').fill(value);
+    await page.locator('#register-terms').check();await page.locator('#register-form [type=submit]').click();
+    await expect(page.locator('#page-status')).toContainText('Para crear tu cuenta necesitas confirmar el correo.');
+    expect(requests).toBe(1);expect(await page.evaluate(()=>sessionStorage.getItem('farmacia-mvc-token'))).toBeNull();
+    await expect(page.locator('#register-panel')).toBeVisible();await expect(page.locator('#register-form [type=submit]')).toBeEnabled();
+  });
+});
+
 async function assertTokenPrivate(page,secrets=[token]){
   const content=await page.content(),storage=await page.evaluate(()=>JSON.stringify({local:{...localStorage},session:{...sessionStorage}}));
   for(const secret of secrets){expect(page.url()).not.toContain(secret);expect(content).not.toContain(secret);expect(storage).not.toContain(secret);}
