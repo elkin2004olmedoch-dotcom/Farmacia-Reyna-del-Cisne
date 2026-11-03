@@ -48,6 +48,14 @@ async function saveZone(id,input,user) {
  });
 }
 const drivers=()=>db.usuario.findMany({where:{role:'repartidor'},select:driverSelect,orderBy:{nombre:'asc'}});
+async function autoAssign(tx,order){
+ if(order.entrega!=='delivery' || !['pendiente','confirmado','preparado'].includes(order.estado))return;
+ const candidates=await tx.usuario.findMany({where:{role:'repartidor',activo:true},select:{id:true},take:2});
+ if(candidates.length!==1)return;
+ const existing=await tx.entrega.findUnique({where:{pedidoId:order.id},select:{id:true,repartidorId:true,estado:true}});
+ if(!existing)await tx.entrega.create({data:{pedidoId:order.id,repartidorId:candidates[0].id}});
+ else if(existing.estado==='asignada' && !existing.repartidorId)await tx.entrega.update({where:{id:existing.id},data:{repartidorId:candidates[0].id,version:{increment:1},asignadaAt:new Date(),...GPS_CLEAR}});
+}
 async function createDriver(input,user){
  const {password,...data}=input,passwordHash=await bcrypt.hash(password,12);
  return transaction(async tx=>{await actor(tx,user,['admin']);return tx.usuario.create({data:{...data,passwordHash,role:'repartidor'},select:driverSelect});});
@@ -181,4 +189,4 @@ async function tracking(id,user){
  return {pedidoId:p.id,estadoPedido:p.estado,entrega:e?{id:e.id,estado:e.estado,version:e.version,asignadaAt:e.asignadaAt,salidaAt:e.salidaAt,llegadaAt:e.llegadaAt,finalizadaAt:e.finalizadaAt,ubicacion:location(e)}:null};
 }
 const purgeExpiredLocations=(now=new Date())=>db.entrega.updateMany({where:{recibidaAt:{lt:new Date(now.getTime()-15*60000)}},data:POSITION_CLEAR});
-module.exports={shippingSnapshot,zones,saveZone,drivers,createDriver,setDriverActive,list,find,claimTracking,releaseTracking,assign,changeState,setLocation,clearLocation,tracking,purgeExpiredLocations};
+module.exports={shippingSnapshot,zones,saveZone,drivers,autoAssign,createDriver,setDriverActive,list,find,claimTracking,releaseTracking,assign,changeState,setLocation,clearLocation,tracking,purgeExpiredLocations};

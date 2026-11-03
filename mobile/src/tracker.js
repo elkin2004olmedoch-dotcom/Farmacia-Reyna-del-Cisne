@@ -6,7 +6,7 @@ export function createTracker({ session, gps, clock = { now: Date.now, setTimeou
   let delivery = null, watcher = null, latest = null, timer = null, freshnessTimer = null, flight = null, stopping = null;
   let running = false, starting = false, pendingRelease = false, nextAttempt = 0, putNotBefore = 0, failures = 0;
   let startSettled = null, cancelStart = false;
-  let snapshot = { activeId: null, phase: 'idle', lastCapturedAt: null, lastSentAt: null, precision: null, message: 'Ubicación detenida.' };
+  let snapshot = { activeId: null, phase: 'idle', lastCapturedAt: null, lastSentAt: null, precision: null, position:null, message: 'Ubicación detenida.' };
   const path = suffix => `/entregas/${encodeURIComponent(delivery.id)}${suffix}`;
   const emit = (phase, message, changes = {}) => {
     snapshot = { ...snapshot, ...changes, phase, message };
@@ -19,6 +19,7 @@ export function createTracker({ session, gps, clock = { now: Date.now, setTimeou
     if (stopping) return stopping;
     running = false;
     latest = null;
+    emit(phase,message,{position:null});
     cancelTimer();
     if (freshnessTimer !== null) clock.clearTimeout(freshnessTimer);
     freshnessTimer = null;
@@ -135,7 +136,7 @@ export function createTracker({ session, gps, clock = { now: Date.now, setTimeou
       freshnessTimer = null;
       if (running) emit('stale', 'Sin actualización GPS reciente. La última posición está vencida.');
     }, MAX_AGE - (clock.now() - point.time) + 1);
-    emit(snapshot.phase === 'offline' ? 'offline' : 'sharing', snapshot.phase === 'offline' ? 'Sin conexión. Capturando la muestra GPS más reciente.' : 'Capturando ubicación.', { lastCapturedAt: point.time, precision: point.accuracy });
+    emit(snapshot.phase === 'offline' ? 'offline' : 'sharing', snapshot.phase === 'offline' ? 'Sin conexión. Capturando la muestra GPS más reciente.' : 'Capturando ubicación.', { lastCapturedAt: point.time, precision: point.accuracy,position:{latitud:point.latitude,longitud:point.longitude,registradaAt:new Date(point.time).toISOString()} });
     schedule();
   }
 

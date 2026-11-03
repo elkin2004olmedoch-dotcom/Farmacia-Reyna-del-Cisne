@@ -36,7 +36,7 @@ cd android
 ./gradlew --no-daemon assembleDebug lintDebug
 ```
 
-El APK de pruebas queda en `android/app/build/outputs/apk/debug/app-debug.apk`. Su firma de depuración sirve para evaluación, no para publicar en Google Play. La app solicita notificaciones y ubicación; el servicio mantiene un aviso visible durante la entrega. Abrir Maps no debe detener el observador. La optimización de batería del fabricante puede interferir y se comprueba en cada teléfono.
+El APK de pruebas queda en `android/app/build/outputs/apk/debug/app-debug.apk`. Su firma de depuración sirve para evaluación, no para publicar en Google Play. La app solicita notificaciones y ubicación; el servicio mantiene un aviso visible durante la entrega. Bloquear la pantalla no debe detener el observador mientras el sistema y los permisos lo permitan. La optimización de batería del fabricante puede interferir y se comprueba en cada teléfono.
 
 ### iPhone
 
@@ -53,10 +53,10 @@ El proyecto utiliza Swift Package Manager. `Info.plist` declara las explicacione
 ## Recorrido del repartidor
 
 1. Iniciar sesión con una cuenta activa de repartidor. Cliente y administrador no acceden a esta app.
-2. Recibir el pedido asignado y preparado por administración. Marcar salida.
-3. Pulsar **Compartir ubicación**, aceptar los permisos y comprobar el estado de envío. La captura no se inicia a escondidas al instalar o abrir la app.
-4. Usar **Navegar con Google Maps**. El cliente consulta su seguimiento en la tienda.
-5. Marcar llegada: aparece el enlace de llamada al teléfono del pedido. Marcar entregada retira coordenadas y destino del reparto.
+2. Recibir el pedido: cuando existe un único repartidor activo, se asigna automáticamente al crearlo o confirmarlo/prepararlo. La farmacia debe prepararlo antes de la salida.
+3. Pulsar **Iniciar recorrido**, aceptar los permisos y comprobar el estado de envío. La captura no se inicia a escondidas al instalar o abrir la app.
+4. Consultar el mapa y su línea de ruta dentro de la app. La posición se mueve con las capturas GPS y la ruta se recalcula como máximo cada treinta segundos mientras el mapa está visible. Si falta un punto de destino, ubicarlo con un toque o coordenadas y confirmar su uso para navegación. El cliente consulta su seguimiento en la tienda.
+5. Pulsar **Llegué al destino**: aparece la llamada al destinatario. **Pedido entregado** pide confirmación y retira coordenadas, destino y mapa del reparto.
 6. Puede detenerse la ubicación explícitamente. Al salir se detiene el proveedor y se revoca la sesión. Sin conexión se conserva cifrada una revocación pendiente y no se restaura el perfil previo; se reintenta antes del próximo inicio de sesión.
 
 ## Comportamiento y límites
@@ -83,3 +83,9 @@ Con cuentas y pedidos sintéticos separados, comprobar en **un Android y un iPho
 - Finalizar/cancelar desde administración y comprobar que desaparecen coordenadas/destino y se detiene el envío al reconciliar.
 
 No usar pedidos comerciales, emitir facturas ni realizar cobros durante esas pruebas. Los APK de depuración y los builds de simulador son herramientas de verificación, no una aprobación de producción.
+
+## Mapa y ruta de la versión 0.2.0
+
+Leaflet 1.9.4 se empaqueta localmente con su licencia BSD; no se ejecutan scripts de terceros desde CDN. Mosaicos HTTPS de OpenStreetMap y rutas OSRM/FOSSGIS con atribución visible. La API propia autoriza la entrega antes y después del cálculo, valida geometría, limita tamaño/tiempo y frecuencia y no reenvía JWT, nombre, teléfono ni productos al proveedor. Si no hay una ruta por calles, muestra el error y permite reintentar. Los puntos manuales de navegación sólo viven en memoria; no se registran como consentimiento del comprador ni sustituyen su dirección. No incluye voz ni navegación certificada.
+
+El backend actual permanece en Render Free y el proveedor público de mapas no tiene SLA. No se afirma disponibilidad 24/7. Un teléfono apagado, sin batería, sin GPS/permisos o con la app detenida a la fuerza no puede garantizar nuevas ubicaciones. iPhone sigue pendiente de firma/distribución y pruebas físicas.

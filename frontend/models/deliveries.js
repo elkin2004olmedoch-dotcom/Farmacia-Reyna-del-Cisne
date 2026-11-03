@@ -10,6 +10,7 @@ export const deliveries={
   setCourierActive:(id,activo)=>request('/admin/repartidores/'+encodeURIComponent(id),{method:'PUT',body:{activo}}),
   list:(page=1,estado='')=>request(`/entregas?page=${page}&pageSize=20${estado?'&estado='+encodeURIComponent(estado):''}`),
   assign:values=>request('/entregas/asignar',{method:'POST',body:values}),
+  route:(id,values)=>request('/entregas/'+encodeURIComponent(id)+'/ruta',{method:'POST',body:values}),
   changeState:(id,estado,esperadoVersion)=>request('/entregas/'+encodeURIComponent(id)+'/estado',{method:'PUT',body:{estado,esperadoVersion}}),
   shareLocation:(id,values)=>request('/entregas/'+encodeURIComponent(id)+'/ubicacion',{method:'PUT',body:values}),
   stopSharing:(id,{keepalive=false}={})=>request('/entregas/'+encodeURIComponent(id)+'/ubicacion',{method:'DELETE',keepalive}),

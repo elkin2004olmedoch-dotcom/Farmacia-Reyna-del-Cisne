@@ -17,6 +17,7 @@ module.exports=config=>{
  router.put('/admin/repartidores/:id',noStore,auth,admin,V.id,...D.driverActive,C.driverActive);
  router.get('/entregas',noStore,auth,operator,...D.list,C.list);
  router.get('/entregas/:id',noStore,auth,operator,V.id,V.validated,C.find);
+ router.post('/entregas/:id/ruta',noStore,auth,operator,V.id,...D.route,C.route);
  router.post('/entregas/:id/seguimiento-movil',noStore,auth,roles('repartidor'),mobile,V.id,empty,V.validated,C.claimTracking);
  router.delete('/entregas/:id/seguimiento-movil',noStore,auth,roles('repartidor'),mobile,V.id,empty,V.validated,C.releaseTracking);
  router.post('/entregas/asignar',noStore,auth,admin,...D.assign,C.assign);

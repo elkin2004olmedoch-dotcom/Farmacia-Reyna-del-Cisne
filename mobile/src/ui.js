@@ -1,6 +1,7 @@
+import {createRouteMap} from '../../frontend/controllers/route-map.js';
 const deliveryLabels = {asignada: 'Asignada', en_camino: 'En camino', en_destino: 'En destino', entregada: 'Entregada', cancelada: 'Cancelada'};
 const nextStates = {asignada: 'en_camino', en_camino: 'en_destino', en_destino: 'entregada'};
-const actionLabels = {en_camino: 'Marcar salida', en_destino: 'Marcar llegada', entregada: 'Marcar entregada'};
+const actionLabels = {en_camino: 'Iniciar recorrido', en_destino: 'Llegué al destino', entregada: 'Pedido entregado'};
 const trackingLabels = {idle: 'Ubicación detenida', starting: 'Preparando ubicación…', sharing: 'Compartiendo ubicación', offline: 'Sin conexión', stale: 'Sin ubicación reciente', 'permission-denied': 'Permiso de ubicación retirado', closed: 'Seguimiento finalizado', error: 'Ubicación interrumpida', reconnecting: 'Recuperando conexión…'};
 const inRoute = delivery => ['en_camino', 'en_destino'].includes(delivery?.estado);
 const isOpen = delivery => ['asignada', 'en_camino', 'en_destino'].includes(delivery?.estado);
@@ -17,17 +18,6 @@ function button(text, action, secondary = false) {
   element.dataset.action = action;
   return element;
 }
-function directionsUrl(destination) {
-  if (!destination) return null;
-  const {latitud, longitud} = destination;
-  let value;
-  if (typeof latitud === 'number' && typeof longitud === 'number' && Number.isFinite(latitud) && Number.isFinite(longitud) && Math.abs(latitud) <= 90 && Math.abs(longitud) <= 180) value = `${latitud},${longitud}`;
-  else if ([destination.direccion, destination.ciudad, destination.provincia].every(part => typeof part === 'string' && part.trim() && part.length <= 300 && !/[<>\x00-\x1f]/.test(part))) value = `${destination.direccion}, ${destination.ciudad}, ${destination.provincia}, Ecuador`;
-  else return null;
-  const url = new URL('https://www.google.com/maps/dir/');
-  url.searchParams.set('api', '1'); url.searchParams.set('destination', value); url.searchParams.set('travelmode', 'driving');
-  return url.href;
-}
 function elapsed(value) {
   const date = typeof value === 'number' ? value : Date.parse(value);
   if (!Number.isFinite(date)) return null;
@@ -39,6 +29,17 @@ export async function mountApp({root, session, tracker, runtime}) {
   let user = null, page = 1, filter = '', result = {items: [], total: 0, page: 1, pageSize: 20};
   let busy = false, disposed = false, pendingRefresh = false, notificationDenied = false, loadedFilter = '', tracking = {...tracker.state};
   const elements = {};
+  let routeMap=null,routeId=null,routeGeneration=0;
+  function closeRoute(){routeGeneration++;routeMap?.dispose();routeMap=null;routeId=null;if(elements.routePanel)elements.routePanel.hidden=true;}
+  async function openRoute(item){
+    closeRoute();if(!item?.destino)return;
+    const generation=routeGeneration;routeId=item.id;elements.routePanel.hidden=false;
+    elements.routeTitle.textContent='Tu recorrido · pedido '+String(item.pedidoId).slice(0,8);
+    const map=await createRouteMap(elements.route,{destination:item.destino,requestRoute:input=>session.request('/entregas/'+encodeURIComponent(item.id)+'/ruta',{method:'POST',data:input}),assetBase:new URL('./assets/leaflet/',document.baseURI)});
+    if(disposed || !user || generation!==routeGeneration){map.dispose();return;}routeMap=map;
+    if(tracking.activeId===item.id && tracking.position)map.update(tracking.position);else if(item.ubicacion)map.update(item.ubicacion);
+    elements.routeTitle.focus();
+  }
 
   function message(text = '', error = false) {
     elements.message.textContent = text;
@@ -64,6 +65,7 @@ export async function mountApp({root, session, tracker, runtime}) {
     elements.main.append(elements.network);
   }
   function renderLogin(text = '') {
+    closeRoute();
     user = null; result.items = []; tracking = {...tracker.state};
     renderShell();
     const intro = node('section', 'intro');
@@ -88,23 +90,27 @@ export async function mountApp({root, session, tracker, runtime}) {
     const intro = node('section', 'intro');
     intro.append(node('p', 'eyebrow', 'Bandeja de reparto'), node('h1', '', 'Tus entregas'), node('p', 'muted', user.nombre || 'Repartidor'));
     const toolbar = node('div', 'toolbar'); toolbar.append(button('Actualizar entregas', 'refresh', true), button('Cerrar sesión', 'logout', true));
+    elements.routePanel=node('section','panel');elements.routePanel.hidden=true;
+    elements.routeTitle=node('h2','','Tu recorrido');elements.routeTitle.tabIndex=-1;
+    elements.route=node('div');elements.routePanel.append(elements.routeTitle,button('Cerrar mapa','close-map',true),elements.route);
     const gps = node('section', 'panel tracking-panel'); gps.setAttribute('aria-labelledby', 'tracking-heading');
     const heading = node('h2', 'eyebrow', 'Ubicación del reparto'); heading.id = 'tracking-heading';
     elements.trackingTitle = node('p', 'tracking-title'); elements.trackingTitle.setAttribute('role', 'status');
     elements.trackingMessage = node('p', 'help'); elements.trackingMeta = node('p', 'tracking-meta muted');
     elements.settings = button('Abrir permisos del teléfono', 'settings', true);
-    gps.append(heading, elements.trackingTitle, elements.trackingMessage, node('p', 'help', 'Al compartir ubicación, la app puede continuar al abrir Maps o bloquear la pantalla, si el sistema lo permite. Puedes detenerla aquí.'), elements.trackingMeta, elements.settings);
+    gps.append(heading, elements.trackingTitle, elements.trackingMessage, node('p', 'help', 'Iniciar recorrido solicita compartir ubicación durante la entrega, también con pantalla bloqueada si el teléfono lo permite. Puedes detenerla aquí.'), elements.trackingMeta, elements.settings);
     const field = node('div', 'field'), label = node('label', '', 'Estado de la entrega'); label.htmlFor = 'delivery-filter';
     elements.filter = node('select'); elements.filter.id = 'delivery-filter'; elements.filter.name = 'estado';
     for (const [value, text] of [['', 'Todas las entregas'], ...Object.entries(deliveryLabels)]) { const option = node('option', '', text); option.value = value; elements.filter.append(option); }
     elements.filter.value = filter; field.append(label, elements.filter);
     elements.list = node('ul', 'deliveries'); elements.list.setAttribute('aria-label', 'Entregas asignadas');
     elements.pager = node('nav', 'pager'); elements.pager.setAttribute('aria-label', 'Páginas de entregas');
-    elements.main.append(intro, toolbar, elements.network, elements.message, gps, field, elements.list, elements.pager, node('p', 'help privacy-note', 'El GPS depende de los permisos, la señal, la batería y las restricciones del teléfono. No se calcula una hora de llegada.'));
+    elements.main.append(intro, toolbar, elements.network, elements.message, elements.routePanel, gps, field, elements.list, elements.pager, node('p', 'help privacy-note', 'El GPS depende de los permisos, la señal, la batería y las restricciones del teléfono. No se calcula una hora de llegada.'));
     renderList(); updateTracking(tracking);
   }
   function renderList() {
     if (!elements.list || !user) return;
+    if(routeId && !result.items.some(item=>item.id===routeId && isOpen(item)))closeRoute();
     const focusedId = document.activeElement?.id;
     const cards = result.items.map(item => {
       const li = node('li'), card = node('article', 'panel delivery-card' + (isOpen(item) ? '' : ' is-closed'));
@@ -116,8 +122,7 @@ export async function mountApp({root, session, tracker, runtime}) {
       if (destination) {
         const address = node('div', 'destination');
         address.append(node('strong', '', destination.nombre), node('p', 'address', destination.direccion), node('p', 'help', [destination.ciudad, destination.provincia].filter(Boolean).join(', '))); card.append(address);
-        const links = node('div', 'card-links'), url = directionsUrl(destination);
-        if (url) { const maps = node('a', 'button', 'Navegar con Google Maps ↗'); maps.href = url; maps.target = '_blank'; maps.rel = 'noopener noreferrer'; links.append(maps, node('p', 'help', 'Al abrir la navegación compartes el destino con Google Maps.')); }
+        const links = node('div', 'card-links'),mapButton=button('Ver ruta en la app','map',true);mapButton.dataset.id=item.id;links.append(mapButton);
         const phone = String(destination.telefono || '').replace(/[^+\d]/g, '');
         if (item.estado === 'en_destino' && /^\+?\d{7,15}$/.test(phone)) { const call = node('a', 'button', 'Llamar al destinatario'); call.href = 'tel:' + phone; links.append(call); }
         card.append(links);
@@ -125,7 +130,7 @@ export async function mountApp({root, session, tracker, runtime}) {
       const actions = node('div', 'card-actions'), next = nextStates[item.estado];
       if (next) {
         const change = button(actionLabels[next], 'state'); change.dataset.id = item.id; change.dataset.state = next; change.id = 'state-' + item.id;
-        change.dataset.unavailable = String(next === 'en_camino' && item.estadoPedido !== 'preparado'); change.disabled = change.dataset.unavailable === 'true'; actions.append(change);
+        change.dataset.unavailable = String(next === 'en_camino' && (item.estadoPedido !== 'preparado' || Boolean(tracking.activeId && tracking.activeId!==item.id))); change.disabled = change.dataset.unavailable === 'true'; actions.append(change);
         if (change.disabled) card.append(node('p', 'help', 'La farmacia debe preparar el pedido antes de tu salida.'));
       }
       if (inRoute(item)) { const gps = button(tracking.activeId === item.id ? 'Detener ubicación' : 'Compartir ubicación', 'gps', true); gps.dataset.id = item.id; gps.id = 'gps-' + item.id; actions.append(gps); }
@@ -145,6 +150,8 @@ export async function mountApp({root, session, tracker, runtime}) {
   function updateTracking(status) {
     if (disposed) return;
     tracking = {...status};
+    if(routeId===status.activeId)routeMap?.update(status.position||null);
+    else if(!status.activeId)routeMap?.update(null);
     if (!user || !elements.trackingTitle) return;
     elements.trackingTitle.textContent = trackingLabels[status.phase] || 'Estado de ubicación por verificar';
     elements.trackingMessage.textContent = status.message || (status.activeId ? 'Solo se comparte la posición durante tu entrega activa.' : 'Pulsa Compartir ubicación en una entrega en camino. Se solicitarán permisos y se mostrará el aviso del teléfono.');
@@ -228,9 +235,14 @@ export async function mountApp({root, session, tracker, runtime}) {
         document.getElementById('login-email')?.focus(); return;
       }
       if (action === 'settings') return runtime.openSettings();
+      if (action === 'map' && item) return openRoute(item);
+      if (action === 'close-map') return closeRoute();
       if (action === 'previous' || action === 'next') page += action === 'next' ? 1 : -1;
       if (action === 'state' && item) {
-        await session.request('/entregas/' + encodeURIComponent(item.id) + '/estado', {method: 'PUT', data: {estado: control.dataset.state, esperadoVersion: item.version}});
+        if(control.dataset.state==='entregada' && !window.confirm('¿Confirmas que entregaste el pedido al destinatario? El seguimiento finalizará.'))return;
+        if(control.dataset.state==='en_camino')await runtime.ensureNotifications();
+        const saved=await session.request('/entregas/' + encodeURIComponent(item.id) + '/estado', {method: 'PUT', data: {estado: control.dataset.state, esperadoVersion: item.version}});
+        if(control.dataset.state==='en_camino'){await openRoute(saved);await tracker.start(saved);}
         if (control.dataset.state === 'entregada' && tracker.state.activeId === item.id) await tracker.stop();
       }
       if (action === 'gps' && item) {
@@ -259,9 +271,10 @@ export async function mountApp({root, session, tracker, runtime}) {
   root.addEventListener('click', click); root.addEventListener('submit', submit); root.addEventListener('change', change);
   window.addEventListener('focus', recover); window.addEventListener('online', recover); window.addEventListener('offline', recover);
   document.addEventListener('visibilitychange', recover);
-  const ageTimer = window.setInterval(() => updateTracking(tracking), 15000);
+  const ageTimer = window.setInterval(() => {updateTracking(tracking);recover();}, 15000);
   await perform(async () => { await acceptUser(await session.restore()); });
   return {updateTracking, dispose() {
+    closeRoute();
     disposed = true; window.clearInterval(ageTimer);
     root.removeEventListener('click', click); root.removeEventListener('submit', submit); root.removeEventListener('change', change);
     window.removeEventListener('focus', recover); window.removeEventListener('online', recover); window.removeEventListener('offline', recover);

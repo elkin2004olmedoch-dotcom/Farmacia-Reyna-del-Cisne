@@ -43,6 +43,7 @@ async function create(userId,{carrito,comprador,claveSolicitud}) {
         baseCents+=Math.round(Number(shipping.envioBaseImponible||0)*100);ivaCents+=Math.round(Number(shipping.envioIvaMonto||0)*100);
         const pedido=await tx.pedido.create({data:{userId,subtotalProductos,...shipping,total:new Prisma.Decimal(cents).div(100),baseImponible:new Prisma.Decimal(baseCents).div(100),ivaMonto:new Prisma.Decimal(ivaCents).div(100),requestKey:claveSolicitud,fingerprint,createdAt:now,updatedAt:now,entrega:comprador.delivery,nombre:comprador.name,email:comprador.email.toLowerCase(),telefono:require('../../frontend/models/ecuador.js').normalizePhone(comprador.phone),documento:'••••••'+comprador.document.slice(-4),provincia:comprador.delivery==='delivery'?comprador.province:null,ciudad:comprador.delivery==='delivery'?comprador.city:null,direccion:comprador.delivery==='delivery'?comprador.address:null,codigoPostal:comprador.delivery==='delivery'?comprador.postalCode || null:null,detalles:{create:details},historial:{create:{estado:'pendiente',actorId:userId,createdAt:now}}},include});
         await inventory.saleMovements(tx,pedido.detalles,pedido.id,userId);
+        await require('./entregas.cjs').autoAssign(tx,pedido);
         return {pedido,replayed:false};
       },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable,maxWait:10000,timeout:15000});
     } catch(error) {
@@ -92,6 +93,7 @@ async function updateStatusTx(tx,id,{estado,esperadoUpdatedAt},actorId) {
   if(delivery && ['cancelado','entregado'].includes(estado))await tx.entrega.update({where:{id:delivery.id},data:{estado:estado==='cancelado'?'cancelada':'entregada',finalizadaAt:changedAt,version:{increment:1},...require('./sesiones-moviles.cjs').GPS_CLEAR}});
   if(estado==='cancelado')await inventory.restore(tx,current.detalles,id,actorId);
   await tx.pedidoEstado.create({data:{pedidoId:id,anterior:current.estado,estado,actorId,createdAt:changedAt}});
+  if(['confirmado','preparado'].includes(estado))await require('./entregas.cjs').autoAssign(tx,{...current,estado});
   return {pedido:await tx.pedido.findUnique({where:{id},include}),replayed:false};
 }
 async function assertOrderLotsCurrent(tx,pedidoId) {

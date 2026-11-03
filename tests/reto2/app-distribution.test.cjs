@@ -9,13 +9,13 @@ test('Pages distribuye instalación y APK verificado sin depender de GitHub púb
  const output=path.join(temporary,'public');
  buildPages({output,apiOrigin:'https://api.example.test'});
  for(const file of ['store.webmanifest','admin.webmanifest','app-worker.js','offline.html','instalar-admin.html','assets/install.css','assets/app-icons/icon-192.png','assets/app-icons/icon-512.png','assets/app-icons/icon-180.png','descargas/SHA256SUMS.txt'])assert.ok(fs.existsSync(path.join(output,file)),file);
- const apk=fs.readFileSync(path.join(output,'descargas/reparto-0.1.0.apk'));
- assert.equal(apk.length,5622178);
- assert.equal(createHash('sha256').update(apk).digest('hex'),'537d0b0ab5f3e5f365e5df05f4b4333f9115e6a409885cde39c2a7e488180cbd');
- assert.match(fs.readFileSync(path.join(output,'descargas/SHA256SUMS.txt'),'utf8'),/537d0b0ab5f3e5f365e5df05f4b4333f9115e6a409885cde39c2a7e488180cbd  Reina-del-Cisne-Reparto-pruebas\.apk/);
+ const apk=fs.readFileSync(path.join(output,'descargas/reparto-0.2.0.apk'));
+ assert.equal(apk.length,5275003);
+ assert.equal(createHash('sha256').update(apk).digest('hex'),'9de7983591f3a7c8d3817270a80945d7b3ad9ed5bfe479671270c8c72e8a3d18');
+ assert.match(fs.readFileSync(path.join(output,'descargas/SHA256SUMS.txt'),'utf8'),/9de7983591f3a7c8d3817270a80945d7b3ad9ed5bfe479671270c8c72e8a3d18  Reina-del-Cisne-Reparto-pruebas\.apk/);
  const home=fs.readFileSync(path.join(output,'index.html'),'utf8');
  assert.match(home,/data-app-open/);assert.match(home,/id="app-install-dialog"/);assert.match(home,/store\.webmanifest/);
- assert.match(home,/href="descargas\/reparto-0\.1\.0\.apk"/);assert.ok(!home.includes('releases/download'));
+ assert.match(home,/href="descargas\/reparto-0\.2\.0\.apk"/);assert.ok(!home.includes('releases/download'));
  const admin=fs.readFileSync(path.join(output,'instalar-admin.html'),'utf8');
  assert.match(admin,/data-page="admin-install"/);assert.match(admin,/admin\.webmanifest/);assert.match(admin,/id="admin-install-action"[^>]*disabled/);
  const headers=fs.readFileSync(path.join(output,'_headers'),'utf8');
