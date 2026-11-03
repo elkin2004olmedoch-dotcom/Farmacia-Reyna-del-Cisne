@@ -34,3 +34,7 @@ test('cliente exige otra confirmación si cambia el precio y rechaza restriccion
 test('cliente invalida propuestas al cambiar carrito y confirma vaciado y checkout por separado',async()=>{
  const {run,cart,routes}=await customer();await run('seleccionar agregar gel-prueba 1');cart.add(product,1);assert.match((await run('confirmar')).text,/carrito cambió/);await run('vaciar carrito');assert.ok(cart.read()[product.id]);await run('cancelar');assert.ok(cart.read()[product.id]);await run('vaciar carrito');await run('confirmar');assert.deepEqual(cart.read(),{});await run('comprar');assert.equal(routes.length,0);await run('confirmar');assert.deepEqual(routes,['checkout.html']);
 });
+test('perfil abre la cuenta y descarta propuestas de ambos asistentes sin guardar',async()=>{
+ const run=await admin({model:{products:async()=>[product],saveProduct:()=>assert.fail('No debe guardar')}});await run('actualiza precio de "Gel suave" a 7');assert.equal((await run('perfil')).actions[0].href,'cuenta.html');assert.match((await run('confirmar')).text,/No hay cambios/);
+ const client=await customer();await client.run('seleccionar agregar gel-prueba 1');assert.equal((await client.run('mi perfil')).actions[0].href,'cuenta.html');await client.run('confirmar');assert.equal(client.added.length,0);
+});

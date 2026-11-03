@@ -12,7 +12,7 @@ export function companionControls(item,result,send){
     form.append(label,control);
   }
   const actions=result.actions||[{label:'Revisar antes de confirmar',submit:true}];
-  for(const action of actions){const button=document.createElement('button');button.type=action.submit?'submit':'button';button.textContent=action.label;
+  for(const action of actions){if(action.href==='cuenta.html'){const link=document.createElement('a');link.href=action.href;link.textContent=action.label;form.append(link);continue;}const button=document.createElement('button');button.type=action.submit?'submit':'button';button.textContent=action.label;
     if(!action.submit)button.addEventListener('click',()=>{if(!button.disabled)void send(action.command,action.label);});form.append(button);}
   form.addEventListener('submit',event=>{event.preventDefault();if(form.reportValidity())void send(result.submit(Object.fromEntries(new FormData(form))),'Revisar los datos seleccionados');});item.append(form);item.parentElement.scrollTop=item.parentElement.scrollHeight;
 }

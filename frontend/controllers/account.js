@@ -7,7 +7,24 @@ const V=globalThis.Farmacia.validation;
 export function accountController() {
   const next=new URLSearchParams(location.search).get('next');
   const destination=['checkout.html','pedidos.html','admin.html','instalar-admin.html','entregas.html','pagos.html'].includes(next) || /^(seguimiento|pagos)\.html\?pedido=[a-zA-Z0-9_-]{1,100}$/.test(next)?next:null;
-  if(auth.user){accountView(auth.user);return;}
+  if(auth.user){
+    accountView(auth.user);
+    const form=document.getElementById('profile-form'),status=document.getElementById('profile-status'),cancel=document.getElementById('profile-cancel');let saving=false;
+    function restore(){form.elements.nombre.value=auth.user.nombre;form.elements.telefono.value=auth.user.telefono;formErrors(form,{});}
+    cancel.addEventListener('click',()=>{if(saving)return;restore();status.textContent='Cambios descartados.';form.elements.nombre.focus();});
+    form.addEventListener('submit',async event=>{
+      event.preventDefault();if(saving)return;
+      const values={nombre:form.elements.nombre.value.trim(),telefono:form.elements.telefono.value.trim()},issues={};
+      if(!V.validName(values.nombre))issues.nombre='Usa letras y espacios en tu nombre completo (2 a 80 caracteres).';
+      if(!V.normalizePhone(values.telefono))issues.telefono='Escribe un teléfono ecuatoriano válido.';
+      if(!formErrors(form,issues)){status.textContent='Revisa los campos indicados.';return;}
+      const controls=[...form.querySelectorAll('input,button')];saving=true;for(const control of controls)control.disabled=true;status.textContent='Guardando tu perfil…';
+      try{const user=await auth.updateProfile(values);restore();document.getElementById('profile-greeting').textContent=`Hola, ${user.nombre}.`;status.textContent='Perfil actualizado.';}
+      catch(error){const fields=Object.fromEntries((error.details||[]).map(issue=>[issue.field,issue.message]));for(const control of controls)control.disabled=false;formErrors(form,fields);status.textContent=error.message||'No se pudo actualizar el perfil. Inténtalo nuevamente.';}
+      finally{saving=false;for(const control of controls)control.disabled=false;}
+    });
+    return;
+  }
   const note=sessionStorage.getItem('farmacia-mvc-login-message');if(note){message(note,false);sessionStorage.removeItem('farmacia-mvc-login-message');}
   const login=document.getElementById('login-panel');const register=document.getElementById('register-panel');
   const pending=document.getElementById('email-pending-panel');

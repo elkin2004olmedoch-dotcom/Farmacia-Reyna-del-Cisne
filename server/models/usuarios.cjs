@@ -4,6 +4,7 @@ module.exports = {
   findByEmail:email=>db.usuario.findUnique({where:{email}}),
   findById:id=>db.usuario.findUnique({where:{id}}),
   create:data=>db.usuario.create({data,select:publicFields}),
+  updateProfile:(id,{nombre,telefono})=>db.usuario.update({where:{id,activo:true},data:{nombre,telefono},select:publicFields}),
   revoke:id=>require('./sesiones-moviles.cjs').transaction(async tx=>{
     const user=await tx.usuario.update({where:{id},data:{tokenVersion:{increment:1}}});
     await require('./sesiones-moviles.cjs').revokeTx(tx,{usuarioId:id});return user;

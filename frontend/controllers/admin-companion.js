@@ -51,6 +51,7 @@ export function createAdminCommandExecutor({model=administration,deliveryModel=d
         command=proposal;proposal=null;if(!command)return reply('No hay cambios pendientes de confirmar. Escribe una orden nueva.');
       }else{
       proposal=null;
+      if(/^(?:(?:ver|abrir|abre|actualizar|actualiza|editar|edita)\s+)?(?:mi\s+)?perfil$/.test(normalized))return {text:'En tu perfil puedes actualizar tu nombre y teléfono.',actions:[{label:'Abrir mi perfil',href:'cuenta.html'}]};
       const recordChoice=normalized.match(/^seleccionar (pedido|zona) ([a-z0-9-]{1,80})$/);
       if(confirm && recordChoice){
         const [,entity,id]=recordChoice;

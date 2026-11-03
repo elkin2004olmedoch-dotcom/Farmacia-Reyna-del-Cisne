@@ -41,6 +41,8 @@ La confirmación de correo conserva el backend JWT existente: enlace de un solo 
 
 ## Mascotas y confirmaciones
 
+**Perfil:** clientes, administradores y repartidores pueden editar únicamente su nombre y teléfono desde **Mi cuenta**, el enlace **Perfil** del personal o escribiendo **perfil** en la mascota. Guardar actualiza los datos de la cuenta; cancelar recupera los últimos datos guardados. El correo se muestra para consulta. El formulario no cambia contraseñas, roles ni verificación, y no modifica los datos ya guardados en pedidos anteriores. `PUT /api/auth/me` usa exclusivamente la identidad de la sesión y rechaza campos adicionales.
+
 En administración, escribe **actualizar** para elegir productos, promociones, pedidos o zonas. **Actualizar productos** lista el catálogo activo y permite seleccionar precio y stock; **poner en promoción** pide producto, porcentaje y fecha final en Ecuador. Pedidos y zonas muestran sus registros y datos editables. Proveedores y lotes abren sus formularios específicos. Las órdenes completas que guardan cambios muestran un resumen y requieren **Sí, confirmar**; **No, cancelar** descarta la propuesta. Una orden nueva invalida la anterior. El backend conserva permisos, restricciones sanitarias y controles de versión.
 
 En la tienda, escribe **buscar productos** o **buscar Gel** para elegir producto y cantidad. La mascota pide confirmar antes de agregar, quitar o vaciar el carrito, vuelve a consultar precio y disponibilidad y solicita otra confirmación si cambia el precio. **Comprar** abre el checkout después de confirmar; no crea pedidos ni procesa pagos desde el chat. Las consultas médicas mantienen la derivación al farmacéutico.
