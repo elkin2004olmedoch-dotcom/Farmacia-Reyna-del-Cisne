@@ -2,6 +2,9 @@ const {test,expect}=require('@playwright/test');
 const AxeBuilder=require('@axe-core/playwright').default;
 const {randomUUID}=require('node:crypto');
 const money=value=>new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(value);
+async function closeCartDrawer(page){
+  const drawer=page.locator('#cart-drawer');await expect(drawer).toBeVisible();await drawer.locator('[data-cart-close]').first().focus();await page.keyboard.press('Enter');await expect(drawer).toBeHidden();
+}
 async function accessible(page,label){const violations=(await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze()).violations;expect(violations.map(issue=>({id:issue.id,targets:issue.nodes.map(node=>node.target)})),label).toEqual([]);}
 async function layouts(page,label){
   for(const width of [320,768,1920]){
@@ -52,7 +55,7 @@ test('detalle, imagen ampliada, cantidades y bloqueo de receta funcionan con tec
     await page.goto('/producto.html?id='+data.general.id);await expect(page.locator('#detail-add-form')).toBeVisible();await expect(page.locator('.tax-note')).toContainText(String(data.general.ivaPorcentaje));await expect(page.locator('.promotion-ribbon')).toContainText('10%');
     const zoom=page.locator('#zoom-product');await zoom.focus();await page.keyboard.press('Enter');await expect(page.locator('#image-dialog')).toBeVisible();await expect(page.locator('#image-dialog img')).toHaveAttribute('alt',data.general.alt);await page.keyboard.press('Escape');await expect(page.locator('#image-dialog')).toBeHidden();await expect(zoom).toBeFocused();
     await page.locator('[data-quantity="1"]').focus();await page.keyboard.press('Space');await expect(page.locator('#detail-quantity')).toHaveValue('2');await page.locator('[data-quantity="-1"]').focus();await page.keyboard.press('Enter');await expect(page.locator('#detail-quantity')).toHaveValue('1');
-    const submit=page.locator('#detail-add-form [type=submit]');await submit.focus();await page.keyboard.press('Enter');await expect(page.locator('[data-shop-count]')).toHaveText('1');await expect(page.locator('#detail-add-form [type=submit]')).toBeFocused();
+    const submit=page.locator('#detail-add-form [type=submit]');await submit.focus();await page.keyboard.press('Enter');await closeCartDrawer(page);await expect(page.locator('[data-shop-count]')).toHaveText('1');await expect(page.locator('#detail-add-form [type=submit]')).toBeFocused();
     await accessible(page,'Detalle con descuento e IVA');await layouts(page,'Detalle');await page.setViewportSize({width:testInfo.project.name==='movil'?375:1920,height:1000});await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:'docs/pruebas/reto2/capturas/cliente-detalle-accesible-'+testInfo.project.name+'.png',fullPage:true});
     await page.goto('/producto.html?id='+data.rx.id);await expect(page.locator('#product-detail')).toContainText(/receta/i);const enabledAdd=page.locator('#detail-add-form [type=submit]:enabled');await expect(enabledAdd).toHaveCount(0);const contact=page.getByRole('link',{name:'Coordinar con la farmacia'});await expect(contact).toBeVisible();
     await expect(page.locator('[data-shop-count]')).toHaveText('1');await accessible(page,'Detalle de producto con receta obligatoria');await layouts(page,'Detalle de receta');await contact.focus();await page.keyboard.press('Enter');await expect(page).toHaveURL(/index.html#contacto$/);await expect(page.locator('#contacto')).toBeVisible();
@@ -68,7 +71,7 @@ test('carrito, validación ecuatoriana y pedido conservan el desglose de IVA y e
   const createdZone=await page.request.post('/api/admin/zonas-entrega',{headers:data.headers,data:zoneInput});expect(createdZone.status()).toBe(201);const zone=(await createdZone.json()).data;
   try{
     await customerLogin(page,testInfo);await page.goto('/catalogo.html?q='+encodeURIComponent(data.tag));await expect(page.locator('#catalog-grid article')).toHaveCount(3);
-    for(const product of [data.general,data.zero]){const add=page.locator('[data-add="'+product.id+'"]');await add.focus();await page.keyboard.press('Enter');await expect(add).toBeEnabled();await expect(add).toBeFocused();}
+    for(const product of [data.general,data.zero]){const add=page.locator('[data-add="'+product.id+'"]');await add.focus();await page.keyboard.press('Enter');await closeCartDrawer(page);await expect(add).toBeEnabled();await expect(add).toBeFocused();}
     await expect(page.locator('[data-shop-count]')).toHaveText('2');await page.goto('/checkout.html');await expect(page.locator('.checkout-cart-item')).toHaveCount(2);
     const regularCents=Math.round(Number(data.general.precio)*100),zeroCents=Math.round(Number(data.zero.precio)*100);const initialTotal=(regularCents+zeroCents)/100;
     await expect(page.locator('#checkout-summary')).toContainText('Base imponible');await expect(page.locator('#checkout-summary')).toContainText('IVA');await expect(page.locator('#checkout-summary .summary-total')).toContainText(money(initialTotal));

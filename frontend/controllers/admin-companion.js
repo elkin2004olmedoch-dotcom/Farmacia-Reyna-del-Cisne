@@ -3,7 +3,6 @@ import {administration} from '../models/admin.js';
 import {events} from '../models/events.js';
 import {interpretAdminCommand,ecuadorCommandDay} from './admin-command.mjs';
 import {deliveries} from '../models/deliveries.js';
-import {isClassroom} from '../models/runtime.js';
 
 const ASSETS=new URL('../assets/mascotas/',import.meta.url);
 
@@ -30,12 +29,6 @@ const instructions={
   inventory:'Crea proveedor: nombre="Distribuidora"; ruc="RUC real"; email="ventas@example.com"; telefono="0991234567"; direccion="Calle Central s/n"; activo=true. Registra lote: producto="Vitaminas diarias"; numero="L-01"; vencimiento=2027-12-31; cantidad=20; costoUnitario=1,25. Ajusta inventario: producto="Vitaminas diarias"; tipo=salida; cantidad=2; motivo="Rotura de envase". Opcionales: proveedorId en lote, loteId en ajuste.',
   navigation:'Abre proveedores. Abre formulario de producto. Cambia pedido "ID" a preparado. Abre entregas para zonas y repartidores. Asigna pedido "ID" a repartidor "ID". Cambia entrega "ID" a en_destino. Crea zona: nombre="Puerto Quito"; provincia="Pichincha"; canton="Puerto Quito"; tarifaCentavos=250; ivaCategoria=general; activa=true. Modifica zona "ID": tarifaCentavos=300. Usa identificadores reales del panel.',
 };
-const classroomInstructions={
-  product:'Actualiza el precio de "Vitamina C" a 3,50. Modifica producto "Vitamina C": stock=24.',
-  promotion:'Publica una promoción de 10% para "Vitamina C" hasta 2030-12-31 titulada "Cuidado de ejemplo".',
-  navigation:'Abre productos. Abre promociones. Abre pedidos. Abre entregas. Modifica zona "clase-puerto-quito": tarifaCentavos=250.',
-};
-const helpInstructions=isClassroom?classroomInstructions:instructions;
 
 /** Executes only parsed operations through the same authenticated models as the forms. */
 export function createAdminCommandExecutor({model=administration,deliveryModel=deliveries,isAdmin=()=>auth.isAdmin,refresh=()=>{},navigate,openEditor}={}){
@@ -51,9 +44,8 @@ export function createAdminCommandExecutor({model=administration,deliveryModel=d
     try{
       let command=interpretAdminCommand(text);
       if(command.type==='needs-products'){const products=await model.products();requireAdmin();command=interpretAdminCommand(text,products);}
-      if(command.type==='help')return reply(Object.values(helpInstructions).join('\n\n'));
+      if(command.type==='help')return reply(Object.values(instructions).join('\n\n'));
       if(['off-topic','needs-details'].includes(command.type))return reply(command.message);
-      if(isClassroom && ((['navigate','open-editor'].includes(command.type) && !['dashboard','productos','promociones','pedidos','entregas'].includes(command.section)) || ['create-supplier','create-lot','create-movement'].includes(command.type)))return reply('Esa sección está oculta en la demo para clase. Puedes gestionar productos, promociones, pedidos, tarifa y entregas.');
       if(command.type==='navigate'){if(!navigate)throw new Error('La navegación del panel no está disponible.');await navigate(command.section);return reply('Sección abierta.');}
       if(command.type==='open-editor'){if(!openEditor)throw new Error('El formulario del panel no está disponible.');await openEditor(command.section,command.values,command.record);return reply(command.message||'Formulario abierto. Completa los datos reales y guarda el registro.');}
       requireAdmin();let message='Registro guardado en la farmacia.';
@@ -115,9 +107,8 @@ export function adminCompanionController({refresh=()=>{},navigate,openEditor}={}
     const options=section==='productos'?[['Cambiar precio o stock','product'],['Aplicar descuento directo','product']]:section==='promociones'?[['Publicar promoción','promotion'],['Cambiar un producto','product']]:[['Actualizar un producto','product'],['Publicar una promoción','promotion'],['Proveedores y lotes','inventory'],['Secciones y entregas','navigation'],['Crear registros','records']];
     quick.replaceChildren();
     for(const [label,key] of options){
-      if(isClassroom && !Object.hasOwn(classroomInstructions,key))continue;
       const button=document.createElement('button');button.type='button';button.textContent=label;
-      button.addEventListener('click',()=>append(helpInstructions[key]));quick.append(button);
+      button.addEventListener('click',()=>append(instructions[key]));quick.append(button);
     }
   }
   refreshQuickQuestions();
@@ -137,7 +128,7 @@ export function adminCompanionController({refresh=()=>{},navigate,openEditor}={}
   find('#launcher').addEventListener('click',()=>open(find('#panel').hidden));
   find('#close').addEventListener('click',()=>open(false));
   root.addEventListener('keydown',event=>{if(event.key==='Escape'&&!find('#panel').hidden){event.preventDefault();open(false);}});
-  append(isClassroom?'¡Hola! Soy Farmi. En esta demo puedo cambiar productos, publicar promociones y gestionar pedidos, tarifa y entregas ficticias. Escribe ayuda para ver ejemplos.':'¡Hola! Soy Farmi. Puedo gestionar productos, promociones, proveedores, lotes, inventario, pedidos y entregas con los permisos del panel. Proceso tus órdenes aquí mismo; no uso IA externa. Escribe ayuda para ver órdenes y campos requeridos. Si faltan datos reales, te los pediré o abriré su formulario.');
+  append('¡Hola! Soy Farmi. Puedo gestionar productos, promociones, proveedores, lotes, inventario, pedidos y entregas con los permisos del panel. Proceso tus órdenes aquí mismo; no uso IA externa. Escribe ayuda para ver órdenes y campos requeridos. Si faltan datos reales, te los pediré o abriré su formulario.');
   events.addEventListener('session:expired',()=>host.remove(),{once:true});
   return Object.freeze({send:async text=>execute(text),open,remove:()=>host.remove()});
 }

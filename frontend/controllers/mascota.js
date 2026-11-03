@@ -1,6 +1,5 @@
 const ASSETS=new URL('../assets/mascotas/',import.meta.url);
 import {classifyMascotaQuestion} from './mascota-scope.mjs';
-import {isClassroom} from '../models/runtime.js';
 const PEOPLE={farmi:'Farmi',boti:'Boti',goti:'Goti'};
 const STORED_CHARACTER='farmacia-companion';
 const STORED_MOTION='farmacia-motion';
@@ -48,7 +47,7 @@ export async function mascotaController(){
     checkout:[['¿Cómo cambio cantidades?','cantidades'],['¿Cómo completo mi pedido?','pedido'],['Hablar con la farmacia','whatsapp']],
     account:[['¿Cómo creo mi cuenta?','registro'],['¿Para qué necesito una cuenta?','cuenta'],['Comprar sin cuenta','invitado']],
     orders:[['¿Cómo reviso el estado?','estado pedido'],['¿Necesitas ayuda con una entrega?','whatsapp'],['Volver al catálogo','productos']],
-    payments:[['¿Cómo funciona la prueba?','prueba pago'],['Pagar mi pedido','pago'],['Hablar con la farmacia','whatsapp']],
+    payments:[['¿Cómo puedo pagar?','pago'],['Pagar mi pedido','pago'],['Hablar con la farmacia','whatsapp']],
     help:[['¿Cuál es el horario?','horario'],['Contactar por WhatsApp','whatsapp'],['Buscar un producto','productos']],
     contact:[['¿Cuál es el horario?','horario'],['Abrir ubicación','ubicacion'],['Contactar por WhatsApp','whatsapp']],
   };
@@ -110,7 +109,6 @@ export async function mascotaController(){
     else find('#launcher').focus();
   }
   function append(text,type='bot',actions=[]){
-    if(isClassroom)actions=actions.filter(action=>!action.external && !/^(?:https?:|tel:|mailto:)/.test(action.href));
     const message=document.createElement('div');message.className=`message ${type}`;
     const paragraph=document.createElement('p');paragraph.textContent=text;message.append(paragraph);
     if(actions.length){const links=document.createElement('div');links.className='message-links';for(const action of actions){const link=document.createElement('a');link.textContent=action.label;link.href=action.href;if(action.external){link.target='_blank';link.rel='noopener noreferrer';}links.append(link);}message.append(links);}
@@ -142,7 +140,7 @@ export async function mascotaController(){
     if(/horario|abren|cierran|hora/.test(normalized))return{state:'review',text:'La farmacia atiende de lunes a sábado, de 08:00 a 19:00. Puedes confirmar la atención por WhatsApp antes de visitarnos.',actions:[{label:'Ver ubicación',href:'index.html#ubicacion'},whatsapp]};
     if(/whatsapp|telefono|contact|ubicacion|direccion/.test(normalized))return{state:'waving',text:'Puedes escribir a la farmacia al +593 97 927 5988. Allí te ayudarán a confirmar disponibilidad, pago y entrega.',actions:[whatsapp,{label:'Ver ubicación',href:'index.html#ubicacion'}]};
     if(/mis pedidos|estado.{0,15}pedido|seguir.{0,15}pedido/.test(normalized))return{state:'review',text:'En Mis pedidos puedes revisar tus compras y seguir su estado. Inicia sesión con la cuenta con la que confirmaste el pedido.',actions:[{label:'Ver mis pedidos',href:'pedidos.html'},{label:'Ir a mi cuenta',href:'cuenta.html'}]};
-    if(/pagos?|pagar|tarjeta|payphone|apple pay|prueba pago/.test(normalized))return{state:'review',text:'En Pagos puedes probar una demostración sin cobros. Para un pedido registrado, abre su opción de pago desde Mis pedidos. PayPhone estará disponible cuando la farmacia active su cuenta; Apple Pay requiere habilitación de una pasarela compatible. Nunca compartas los datos de tu tarjeta por chat.',actions:[{label:'Explorar pagos de prueba',href:'pagos.html'},{label:'Pagar mi pedido',href:'pedidos.html'},whatsapp]};
+    if(/pagos?|pagar|tarjeta|payphone|apple pay|prueba pago/.test(normalized))return{state:'review',text:'Desde Mis pedidos puedes consultar el importe de tu compra y coordinar el pago con la farmacia. El pedido y su pago tienen estados separados. Nunca compartas los datos completos de tu tarjeta por chat.',actions:[{label:'Pagar mi pedido',href:'pedidos.html'},whatsapp]};
     if(/carrito|pedido|pagar|pago|entrega|comprar/.test(normalized))return{state:'review',text:'Añade los productos al carrito, revisa las cantidades e inicia sesión para confirmar tu pedido. El pago y la entrega se coordinan directamente con la farmacia.',actions:[{label:'Revisar mi carrito',href:'checkout.html'},{label:'Ver mis pedidos',href:'pedidos.html'},whatsapp]};
     const query=text.replace(/^(hola[, ]*)?(quiero |necesito |puedes |por favor )*(buscar |busca |encontrar |un producto[: ]*|producto[: ]*)/i,'').trim().slice(0,100)||text.slice(0,100);
     return{state:'waiting',text:`Puedes buscar «${query}» en el catálogo. Allí verás las presentaciones y los precios publicados. Confirma con la farmacia cualquier duda de disponibilidad o receta.`,actions:[{label:`Buscar ${query}`,href:`catalogo.html?q=${encodeURIComponent(query)}`},whatsapp]};

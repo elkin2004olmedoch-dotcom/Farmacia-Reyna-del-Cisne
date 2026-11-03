@@ -44,38 +44,28 @@ async function capture(page,testInfo,name){
   await page.screenshot({path:'docs/pruebas/pagos-2026-10-29/'+name+'-'+testInfo.project.name+'.png',fullPage:true});
 }
 
-test('la demostración de pagos abre sin sesión y conserva un importe ficticio claro',async({page},testInfo)=>{
+test('sin pedido, pagos orienta a Mis pedidos sin inventar importes ni iniciar operaciones',async({page},testInfo)=>{
+  const writes=observeBusinessWrites(page),reads=[];
+  page.on('request',request=>{if(/^\/api\/(?:pagos|pedidos)(?:\/|$)/.test(new URL(request.url()).pathname))reads.push(request.method()+' '+new URL(request.url()).pathname);});
   await page.goto('/pagos.html');
   await expect(page.locator('body')).toHaveAttribute('data-page','payments');
-  await expect(page.getByRole('heading',{level:1})).toHaveText(/Un pago claro\.\s*A tu manera\./);
-  await expect(page.locator('main')).toContainText(/demostraci[oó]n/i);
-  await expect(page.locator('main')).toContainText(/18[,.]50/);
-  await expect(page.locator('#payment-submit')).toBeEnabled();
+  await expect(page.getByRole('heading',{level:1})).toHaveText('Elige cómo pagar.');
+  await expect(page.getByRole('link',{name:'Ver mis pedidos →',exact:true})).toHaveAttribute('href','pedidos.html');
+  await expect(page.locator('#payment-summary')).toContainText('Elige un pedido para consultar su importe');
+  await expect(page.locator('#payment-mode')).toHaveText('Mis compras');
+  await expect(page.locator('#payment-total,#payment-demo-result,#payment-result,#payment-reset,#payment-demo-panel')).toHaveCount(0);
+  await expect(page.locator('main')).not.toContainText(/18[,.]50|demostraci[oó]n|fictici[oa]|prueba de pago/i);
+  await expect(page.locator('#payment-form')).toBeHidden();
+  await expect(page.locator('#payment-submit')).toBeDisabled();
+  await expect(page.locator('input[name="method"][value="card"]')).toBeDisabled();
+  await expect(page.locator('label.payment-method').filter({has:page.locator('input[value="card"]')})).toBeHidden();
   await assertNoCardFields(page);
   const config=await page.request.get('/api/pagos/configuracion');
   expect(config.status()).toBe(200);
   expect((await config.json()).data.payphone.disponible).toBe(false);
-  await capture(page,testInfo,'demostracion');
+  await capture(page,testInfo,'sin-pedido');
+  expect(reads).toEqual([]);expect(writes).toEqual([]);
 });
-
-for(const [outcome,heading]of [['aprobado',/aprobad/i],['rechazado',/rechazad/i],['cancelado',/cancelad/i]]){
-  test('la demostración '+outcome+' anuncia el resultado y permite volver a intentar sin escribir en el negocio',async({page},testInfo)=>{
-    const writes=observeBusinessWrites(page);
-    await page.goto('/pagos.html');
-    await page.locator('#payment-demo-result').selectOption(outcome);
-    await page.locator('#payment-submit').focus();await page.keyboard.press('Enter');
-    const result=page.locator('#payment-result');
-    await expect(result).toBeVisible();await expect(result).toHaveAttribute('role','status');
-    await expect(result.getByRole('heading')).toContainText(heading);
-    await expect(result.getByRole('heading')).toBeFocused();
-    await expect(result).toContainText(/demostraci[oó]n|simulad|prueba/i);
-    expect(writes).toEqual([]);
-    if(outcome==='aprobado')await capture(page,testInfo,'aprobacion-demostracion');
-    await page.locator('#payment-reset').focus();await page.keyboard.press('Enter');
-    await expect(result).toBeHidden();await expect(page.locator('#payment-submit')).toBeEnabled();
-    expect(writes).toEqual([]);await assertNoCardFields(page);
-  });
-}
 
 test('la página mantiene teclado, contraste, mascota animada y ancho móvil sin el control flotante de WhatsApp',async({page})=>{
   const errors=[],viewport=page.viewportSize();page.on('pageerror',error=>errors.push(error.message));
@@ -94,8 +84,9 @@ test('la página mantiene teclado, contraste, mascota animada y ancho móvil sin
   })).toBe(true);
   await page.locator('farmacia-mascota #input').fill('¿Cómo puedo pagar?');
   await page.locator('farmacia-mascota #input').press('Enter');
-  await expect(page.locator('farmacia-mascota #messages .message.bot').last()).toContainText('En Pagos puedes probar una demostración sin cobros.');
-  await expect(page.locator('farmacia-mascota #messages .message.bot').last().getByRole('link',{name:'Explorar pagos de prueba'})).toHaveAttribute('href','pagos.html');
+  await expect(page.locator('farmacia-mascota #messages .message.bot').last()).toContainText('Desde Mis pedidos puedes consultar el importe');
+  await expect(page.locator('farmacia-mascota #messages .message.bot').last().getByRole('link',{name:'Pagar mi pedido'})).toHaveAttribute('href','pedidos.html');
+  await expect(page.locator('farmacia-mascota #messages .message.bot').last()).not.toContainText(/demostraci[oó]n|pagos de prueba/i);
   await page.locator('farmacia-mascota #close').click();await expect(launcher).toBeFocused();
   for(const width of [320,375,768,1440]){
     await page.setViewportSize({width,height:1000});
@@ -107,7 +98,7 @@ test('la página mantiene teclado, contraste, mascota animada y ancho móvil sin
   expect(errors).toEqual([]);
 });
 
-test('un pedido real muestra el total del servidor y mantiene PayPhone pendiente sin alterar pedido ni stock',async({page,request},testInfo)=>{
+test('un pedido real muestra el total del servidor y permite coordinar el pago sin alterar pedido ni stock',async({page,request},testInfo)=>{
   const data=await orderFixture(request);
   try{
     await useSession(page,data.user);const writes=observeBusinessWrites(page);
@@ -115,13 +106,14 @@ test('un pedido real muestra el total del servidor y mantiene PayPhone pendiente
     await expect(page.locator('#payment-total')).toContainText(/25[,.]50/);
     await expect(page.locator('main')).toContainText(data.product.nombre);
     await expect(page.locator('input[name="method"][value="card"]')).toBeDisabled();
-    await expect(page.locator('main')).toContainText(/pendiente de activaci[oó]n/i);
+    await expect(page.locator('label.payment-method').filter({has:page.locator('input[value="card"]')})).toBeHidden();
+    await expect(page.locator('#payment-persisted-state')).toHaveText('Pago por coordinar con la farmacia.');
     await expect(page.locator('input[name="method"][value="manual"]')).toBeChecked();
     await expect(page.locator('#payment-submit')).toBeEnabled();
     await expect(page.locator('#payment-submit')).toContainText(/farmacia/i);
     await assertNoCardFields(page);
-    const demo=page.getByRole('link',{name:/demostraci[oó]n/i});
-    await expect(demo).toHaveAttribute('href',/^(?:\.\/)?pagos\.html$/);
+    await expect(page.locator('main').getByRole('link',{name:/demostraci[oó]n|pagos de prueba/i})).toHaveCount(0);
+    await expect(page.locator('#payment-demo-result,#payment-result,#payment-reset')).toHaveCount(0);
     const payment=await request.get('/api/pedidos/'+data.order.id+'/pago',{headers:{Authorization:'Bearer '+data.user.token}});
     expect(payment.status()).toBe(200);
     const dto=(await payment.json()).data;
@@ -206,18 +198,21 @@ test('la interfaz rechaza un destino PayPhone con dominio engañoso antes de sal
 });
 
 test('regresión: una sesión pendiente mantiene bloqueado el formulario hasta que el controlador pueda atenderlo',async({page,request})=>{
-  const user=await customer(request);await useSession(page,user);
+  const data=await orderFixture(request);await useSession(page,data.user);
   let release;const gate=new Promise(resolve=>release=resolve);
   await page.route('**/api/auth/me',async route=>{await gate;await route.continue();});
   const restored=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/auth/me',{timeout:10000});
   try{
-    await page.goto('/pagos.html',{waitUntil:'domcontentloaded'});
-    await expect(page.locator('#payment-submit')).toBeDisabled();
-  }finally{release();await restored;}
-  await expect(page.locator('#payment-submit')).toBeEnabled();
-  await page.locator('#payment-submit').focus();await page.keyboard.press('Enter');
-  await expect(page.locator('#payment-result')).toBeVisible();
-  expect(new URL(page.url()).search).toBe('');
+    try{
+      await page.goto('/pagos.html?pedido='+data.order.id,{waitUntil:'domcontentloaded'});
+      await expect(page.locator('#payment-submit')).toBeDisabled();
+    }finally{release();await restored;}
+    await expect(page.locator('#payment-total')).toContainText(/25[,.]50/);
+    await expect(page.locator('#payment-submit')).toBeEnabled();
+    await expect(page.locator('input[name="method"][value="manual"]')).toBeChecked();
+    await expect(page.locator('#payment-persisted-state')).toHaveText('Pago por coordinar con la farmacia.');
+    expect(new URL(page.url()).searchParams.get('pedido')).toBe(data.order.id);
+  }finally{await data.cleanup();}
 });
 
 test('regresión: una sesión que vence retira el resumen privado y conserva el retorno al mismo pago',async({page,request})=>{

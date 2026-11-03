@@ -1,6 +1,5 @@
 import {request} from './api.js';
-import {storageKey} from './runtime.js';
-export const ZONE_FORM_DRAFT=storageKey('farmacia-mvc-zona-formulario');
+export const ZONE_FORM_DRAFT='farmacia-mvc-zona-formulario';
 
 export const deliveries={
   zones:()=>request('/zonas-entrega'),

@@ -74,7 +74,10 @@ test('cada mascota descarga su atlas cuando se selecciona y conserva sus animaci
   await selectedAtlas;
   await page.waitForLoadState('networkidle');
   expect(atlases).toEqual(['goti.png','farmi.png']);
-  expect(portraits).toEqual([]);
+  // La portada usa Boti en la tarjeta de ayuda; los personajes del widget no precargan retratos.
+  expect(portraits.filter(file=>file!=='/assets/mascotas/art/boti-base.png')).toEqual([]);
+  expect(portraits.length).toBeLessThanOrEqual(1);
+  await expect(page.locator('.ref-store-help img')).toHaveAttribute('loading','lazy');
   expect(await page.evaluate(()=>FarmaciaMascota.getStatus().availableStates.length)).toBeGreaterThan(0);
 });
 
@@ -101,12 +104,13 @@ test('un atlas lento permite mostrar la mascota de respaldo y después recuperar
   expect(await page.evaluate(()=>FarmaciaMascota.getStatus().availableStates.length)).toBe(9);
 });
 
-test('la fachada utiliza WebP con las dimensiones originales',async({page})=>{
+test('la imagen principal reserva espacio y prioriza su carga',async({page})=>{
   await page.goto('/');
-  const image=page.locator('.business-photo img');
-  await expect(image).toHaveAttribute('src','assets/images/farmacia-fachada-reina.webp');
-  await expect.poll(()=>image.evaluate(img=>img.complete && img.naturalWidth)).toBe(1672);
-  expect(await image.evaluate(img=>img.naturalHeight)).toBe(941);
+  const image=page.locator('.ref-store-category img').first();
+  await expect(image).toHaveAttribute('src','assets/images/farmacia-8.jpg');
+  await expect(image).toHaveAttribute('width','900');await expect(image).toHaveAttribute('height','620');await expect(image).toHaveAttribute('fetchpriority','high');await expect(image).not.toHaveAttribute('loading','lazy');
+  await expect.poll(()=>image.evaluate(img=>img.complete && img.naturalWidth)).toBe(700);
+  expect(await image.evaluate(img=>img.naturalHeight)).toBe(467);
 });
 
 test('la portada muestra productos mientras resuelve una sesión admin y mantiene la compra oculta',async({page},testInfo)=>{

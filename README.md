@@ -4,11 +4,10 @@ Tienda y gestión farmacéutica para Puerto Quito, con catálogo, carrito, pedid
 
 ## Abrir la aplicación
 
-- [Demostración para clase, con tres roles y datos ficticios](https://farmacia-reyna-del-cisne-pruebas.pages.dev/clase). [Guía del recorrido](docs/DEMO-PARA-CLASE.md).
-- [Tienda y botón Obtener app](https://farmacia-reyna-del-cisne-pruebas.pages.dev/).
+- [Tienda](https://farmacia-reyna-del-cisne-pruebas.pages.dev/): catálogo y acceso a **Instalar aplicación** en el pie de página.
 - [Administración instalable en Windows](https://farmacia-reyna-del-cisne-pruebas.pages.dev/instalar-admin): Edge/Chrome normal y cuenta de administrador.
 - [Entregas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/entregas): requiere cuenta de administrador o repartidor.
-- [Pagos de demostración](https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos): sin cobros reales.
+- [Pago de pedidos](https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos): abre un pedido desde **Mis pedidos** para consultar su importe y coordinar el pago con la farmacia.
 - [Reparto Android de pruebas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/reparto-0.1.0.apk).
 
 Los accesos privados se entregan fuera del repositorio. [Instalación de las apps](docs/APPS-E-INSTALACION.md).
@@ -52,7 +51,9 @@ Los workflows de verificación se ejecutan manualmente desde Actions. No hay com
 
 No se incluyen claves, contraseñas de acceso, certificados, respaldos ni capturas con sesiones. .env, .publish/ y las salidas de pruebas están excluidos de Git. La administración exige autorización en la API; instalar una app no concede permisos.
 
-Farmi procesa órdenes locales del panel, sin API de IA. El seguimiento abre Maps mediante enlaces o un mapa voluntario. PayPhone permanece desactivado hasta configurar una cuenta comercial; SRI exige configuración y certificado privados. No se contrataron servicios ni se activaron cobros. [Pagos](docs/PAGOS-Y-PAYPHONE.md), [entregas](docs/ENTREGAS-Y-PRIVACIDAD.md) y [seguridad de publicación](docs/SEGURIDAD_DESPLIEGUE.md).
+Farmi procesa órdenes locales del panel, sin API de IA. El seguimiento abre Maps mediante enlaces o un mapa voluntario. SRI exige configuración y certificado privados. [Entregas](docs/ENTREGAS-Y-PRIVACIDAD.md) y [seguridad de publicación](docs/SEGURIDAD_DESPLIEGUE.md).
+
+El pago se coordina con la farmacia desde el pedido registrado; la pantalla no inventa importes ni resultados de pago. PayPhone permanece desactivado mientras faltan la cuenta comercial y sus credenciales; no se han verificado transacciones reales ni de pruebas contra el proveedor. No se contrataron servicios ni se activaron cobros. [Pagos](docs/PAGOS-Y-PAYPHONE.md).
 
 La app nativa de reparto para iPhone requiere firma de Apple y pruebas físicas. Render Free puede suspenderse por inactividad; no acredita disponibilidad 24/7. El Reto 3 sigue pendiente del framework asignado.
 

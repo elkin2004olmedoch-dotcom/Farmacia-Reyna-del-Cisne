@@ -1,6 +1,5 @@
 import {events} from '../models/events.js';
 import {message} from '../views/common.js';
-import {storageKey} from '../models/runtime.js';
 
 // Consulta la misma API al regresar y mientras la página permanece visible.
 // No reemplaza formularios abiertos ni acumula peticiones simultáneas.
@@ -16,7 +15,7 @@ export function watchUpdates(refresh,{canRefresh=()=>true,intervalMs=30000}={}) 
     finally{running=false;if(pending){pending=false;void update();}}
   }
   const visible=()=>{if(!document.hidden)void update();};
-  const stored=event=>{if(event.key===storageKey('farmacia-mvc-datos-actualizados'))void update();};
+  const stored=event=>{if(event.key==='farmacia-mvc-datos-actualizados')void update();};
   let timer;
   function start(){stopped=false;timer=setInterval(update,intervalMs);window.addEventListener('focus',visible);document.addEventListener('visibilitychange',visible);window.addEventListener('storage',stored);events.addEventListener('data:changed',visible);}
   function stop(){stopped=true;clearInterval(timer);window.removeEventListener('focus',visible);document.removeEventListener('visibilitychange',visible);window.removeEventListener('storage',stored);events.removeEventListener('data:changed',visible);}
