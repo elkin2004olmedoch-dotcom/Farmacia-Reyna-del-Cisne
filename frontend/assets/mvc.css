@@ -243,7 +243,7 @@ body[data-session-pending] [data-customer-only] { display:none !important; }
   .admin-recent-table :is(th,td) { min-width:95px; }
 }
 /* Keep final controls clear of the fixed assistant, including mobile safe areas. */
-.admin-page .admin-main { padding-bottom:calc(160px + env(safe-area-inset-bottom,0px)); }
+.admin-page .admin-main { padding-bottom:calc(200px + env(safe-area-inset-bottom,0px)); }
 @media(max-width:360px) { .shop-actions>a[data-admin-link] { font-size:10px; } .shop-actions>a[data-account-link]::before { content:'♙'; } }
 .promotion-ribbon { display:block; padding:9px 13px; background:#ffdf57; color:#332b08; font-size:12px; font-weight:800; line-height:1.4; letter-spacing:.02em; border-radius:5px; }
 .featured-image .promotion-ribbon { position:absolute; top:auto; bottom:0; left:0; right:0; border-radius:0; background:#ffdf57; color:#332b08; padding:9px 10px; text-align:center; font-size:11px; }

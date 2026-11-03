@@ -3,10 +3,10 @@ import {administration} from '../models/admin.js';
 import {events} from '../models/events.js';
 import {interpretAdminCommand,ecuadorCommandDay} from './admin-command.mjs';
 import {deliveries} from '../models/deliveries.js';
-import {companionControls,disableCompanionControls} from './companion-controls.js';
+import {mascotaController} from './mascota.js';
 import '../models/pharmacy-policy.js';
 
-const ASSETS=new URL('../assets/mascotas/',import.meta.url);
+
 
 function productValues(product,changes){
   return {
@@ -138,58 +138,13 @@ export function createAdminCommandExecutor({model=administration,deliveryModel=d
 }
 
 /** Mascota administrativa determinística: sólo procesa órdenes explícitas del panel. */
-export function adminCompanionController({refresh=()=>{},navigate,openEditor}={}){
+export async function adminCompanionController({refresh=()=>{},navigate,openEditor}={}){
   if(document.body.dataset.page!=='admin'||!auth.isAdmin||document.querySelector('farmacia-admin-companion'))return null;
-  const host=document.createElement('farmacia-admin-companion');
-  const root=host.attachShadow({mode:'open'});
-  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('admin-companion.css',ASSETS).href;
-  const conversationStyle=document.createElement('link');conversationStyle.rel='stylesheet';conversationStyle.href=new URL('conversation.css',ASSETS).href;
-  const template=document.createElement('template');
-  template.innerHTML=`<aside class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">ASISTENTE LOCAL DE LA FARMACIA</span><h2 id="title">Farmi te ayuda a gestionar</h2><p>Catálogo, pedidos y entregas</p></div><button class="close" id="close" type="button" aria-label="Cerrar asistente">×</button></header><div class="messages" id="messages" role="log" aria-label="Asistente de administración" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Ayuda rápida de administración"></nav><form id="form"><label for="input" class="sr-only">Escribe una orden para el panel</label><input id="input" maxlength="3000" autocomplete="off" placeholder="Ej. actualiza precio de…" required><button type="submit" aria-label="Enviar orden">↑</button></form><p class="local-note">No uso servicios externos · los cambios se guardan con tu sesión de administrador</p></section><button class="launcher" id="launcher" type="button" aria-label="Abrir asistente administrativo" aria-expanded="false" aria-controls="panel"><img src="${new URL('art/farmi-base.png',ASSETS).href}" alt=""><span><span class="online" aria-hidden="true"></span> Ayuda administrativa</span><span aria-hidden="true">↗</span></button></aside>`;
-  root.append(style,conversationStyle,template.content.cloneNode(true));document.body.append(host);
-  const find=selector=>root.querySelector(selector);
-  const motionButton=document.createElement('button');motionButton.type='button';motionButton.id='motion-toggle';motionButton.className='motion-toggle';find('#launcher').after(motionButton);
-  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
-  const savedMotion=()=>{try{return localStorage.getItem('farmacia-motion');}catch{return null;}};
-  let motionPaused=savedMotion()==='paused'||savedMotion()===null&&reducedMotion.matches;
-  function applyMotion(){host.dataset.motion=motionPaused?'paused':'active';motionButton.textContent=motionPaused?'▶':'Ⅱ';motionButton.setAttribute('aria-label',motionPaused?'Activar movimiento de Farmi':'Pausar movimiento de Farmi');motionButton.setAttribute('aria-pressed',String(motionPaused));motionButton.title=motionPaused?'Movimiento pausado; pulsa para activarlo.':'Pausar movimiento';}
-  motionButton.addEventListener('click',()=>{motionPaused=!motionPaused;try{localStorage.setItem('farmacia-motion',motionPaused?'paused':'active');}catch{}applyMotion();});
-  reducedMotion.addEventListener('change',()=>{if(savedMotion()===null){motionPaused=reducedMotion.matches;applyMotion();}});applyMotion();
-  function append(text,type='bot'){
-    const item=document.createElement('div');item.className=`message ${type}`;
-    const paragraph=document.createElement('p');paragraph.textContent=text;item.append(paragraph);
-    find('#messages').append(item);find('#messages').scrollTop=find('#messages').scrollHeight;return item;
-  }
-  const quick=find('#shortcuts');
-  function refreshQuickQuestions(){
+  const execute=createAdminCommandExecutor({refresh,navigate,openEditor,confirm:true});
+  const questions=()=>{
     const section=new URLSearchParams(location.search).get('tabla')||'dashboard';
     const options=section==='productos'?[['Cambiar precio o stock','product'],['Aplicar descuento directo','product']]:section==='promociones'?[['Publicar promoción','promotion'],['Cambiar un producto','product']]:[['Actualizar un producto','product'],['Publicar una promoción','promotion'],['Proveedores y lotes','inventory'],['Secciones y entregas','navigation'],['Crear registros','records']];
-    quick.replaceChildren();
-    for(const [label,key] of options){
-      const button=document.createElement('button');button.type='button';button.textContent=label;
-      button.addEventListener('click',()=>key==='product'||key==='promotion'?void send(key==='product'?'actualizar productos':'poner en promocion'):append(instructions[key]));quick.append(button);
-    }
-  }
-  refreshQuickQuestions();
-  document.getElementById('admin-table-choice')?.addEventListener('change',refreshQuickQuestions);
-  const execute=createAdminCommandExecutor({refresh,navigate,openEditor,confirm:true});
-  let pending=false;
-  async function send(text,display){
-    if(pending||!auth.isAdmin)return;
-    const input=find('#input'),submit=find('#form [type=submit]');text=String(text).trim();if(!text)return;
-    disableCompanionControls(root);
-    input.value='';append(display||text,'user');pending=true;input.disabled=true;submit.disabled=true;
-    const thinking=append('Farmi está revisando la orden…','thinking');
-    try{const result=await execute(text);thinking.remove();companionControls(append(result.text),result,send);}
-    catch(error){thinking.remove();append(`No pude guardar el cambio: ${error.message}`,'error');}
-    finally{pending=false;input.disabled=false;submit.disabled=false;if(!find('#panel').hidden)input.focus();}
-  }
-  find('#form').addEventListener('submit',event=>{event.preventDefault();void send(find('#input').value);});
-  function open(value){find('#panel').hidden=!value;find('#launcher').setAttribute('aria-expanded',String(value));if(value)find('#input').focus();else find('#launcher').focus();}
-  find('#launcher').addEventListener('click',()=>open(find('#panel').hidden));
-  find('#close').addEventListener('click',()=>open(false));
-  root.addEventListener('keydown',event=>{if(event.key==='Escape'&&!find('#panel').hidden){event.preventDefault();open(false);}});
-  append('¡Hola! Soy Farmi. Puedo gestionar productos, promociones, proveedores, lotes, inventario, pedidos y entregas con los permisos del panel. Proceso tus órdenes aquí mismo; no uso IA externa. Escribe ayuda para ver órdenes y campos requeridos. Si faltan datos reales, te los pediré o abriré su formulario.');
-  events.addEventListener('session:expired',()=>host.remove(),{once:true});
-  return Object.freeze({send,open,remove:()=>host.remove()});
+    return options.map(([label,key])=>({label,...(key==='product'||key==='promotion'?{text:key==='product'?'actualizar productos':'poner en promocion'}:{reply:instructions[key]})}));
+  };
+  return mascotaController({administration:true,questions,command:text=>{if(!auth.isAdmin)throw new Error('Inicia sesión nuevamente como administrador.');return execute(text);},onMount:remove=>events.addEventListener('session:expired',remove,{once:true}),greeting:'¡Hola! Soy Farmi. Puedo gestionar productos, promociones, proveedores, lotes, inventario, pedidos y entregas con los permisos del panel. Proceso tus órdenes aquí mismo; no uso IA externa. Escribe ayuda para ver órdenes y campos requeridos. Si faltan datos reales, te los pediré o abriré su formulario.'});
 }

@@ -2,7 +2,7 @@
   "name": "farmacia-reina-del-cisne-mvc",
   "version": "2.0.0",
   "private": true,
-  "description": "Reto 2: farmacia con frontend y backend MVC, Prisma y seguridad",
+  "description": "Farmacia integrada: tienda HTML/CSS/JavaScript, MVC, Prisma y seguridad",
   "engines": {
     "node": ">=22.13"
   },
@@ -18,11 +18,10 @@
     "db:studio": "prisma studio --schema server/prisma/schema.prisma",
     "backup": "node scripts/backup.cjs",
     "backup:restore": "node scripts/restore-backup.cjs",
-    "test": "node --test --test-concurrency=1 tests/reto2/*.test.cjs",
+    "test": "node --test --test-concurrency=1 tests/*.test.cjs tests/reto2/*.test.cjs",
     "test:reto1": "node --test tests/*.test.cjs",
     "test:browser": "playwright test --config tests/reto2/playwright.config.cjs",
     "build:frontend": "node scripts/build-frontend.cjs",
-    "package": "powershell -ExecutionPolicy Bypass -File scripts/crear-reto2.ps1",
     "cert:dev": "node scripts/create-dev-cert.cjs",
     "start:https": "node scripts/https-dev.cjs",
     "verify": "node scripts/verify-reto2.cjs",
