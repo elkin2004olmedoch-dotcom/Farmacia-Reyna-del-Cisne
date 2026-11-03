@@ -29,6 +29,13 @@ Tres capas: presentación HTML/CSS/JavaScript, aplicación Node.js/Express y per
 
 El HTML de frontend/ se genera desde scripts/build-frontend.cjs y scripts/templates/. Cloudflare publica únicamente la salida de scripts/build-pages.cjs; Render mantiene la API existente. [Arquitectura comercial](docs/ARQUITECTURA-COMERCIAL.md).
 
+## Compra, pago y seguimiento
+
+- En el carrito puedes elegir tarjeta, transferencia o pago con la farmacia. Es una preferencia para continuar después de registrar el pedido; no se guarda como un pago ni cambia su estado.
+- La pantalla de pago muestra el importe guardado del pedido. Tarjeta permite solicitar un enlace seguro por WhatsApp cuando PayPhone no está habilitado; transferencia copia sólo el importe y la referencia para pedir los datos bancarios a la farmacia. Las solicitudes quedan pendientes de verificación.
+- **Ver comprobante**, disponible en la confirmación y en **Mis pedidos**, abre el resumen imprimible. **Guardar PDF / imprimir** permite elegir **Guardar como PDF** en el navegador. Es un comprobante del pedido sin validez tributaria: no acredita un pago ni sustituye la factura SRI.
+- La confirmación y **Mis pedidos** incluyen una vista de mapa voluntaria. **Ver mapa** utiliza un destino autorizado por el comprador o la ubicación reciente compartida por el repartidor, cuando existen. El seguimiento habitual sigue disponible; los pedidos cerrados no muestran ubicaciones.
+
 ## Desarrollo y pruebas
 
 Requiere Node.js 22.13 o posterior compatible y las versiones fijadas en package-lock.json. Para probar una extracción NUEVA del proyecto, sin .env ni base existente:
@@ -53,7 +60,7 @@ No se incluyen claves, contraseñas de acceso, certificados, respaldos ni captur
 
 Farmi procesa órdenes locales del panel, sin API de IA. El seguimiento abre Maps mediante enlaces o un mapa voluntario. SRI exige configuración y certificado privados. [Entregas](docs/ENTREGAS-Y-PRIVACIDAD.md) y [seguridad de publicación](docs/SEGURIDAD_DESPLIEGUE.md).
 
-El pago se coordina con la farmacia desde el pedido registrado; la pantalla no inventa importes ni resultados de pago. PayPhone permanece desactivado mientras faltan la cuenta comercial y sus credenciales; no se han verificado transacciones reales ni de pruebas contra el proveedor. No se contrataron servicios ni se activaron cobros. [Pagos](docs/PAGOS-Y-PAYPHONE.md).
+El pago se coordina con la farmacia desde el pedido registrado; elegir un método, pedir un enlace o imprimir el comprobante no acredita el pago. PayPhone permanece desactivado mientras faltan la cuenta comercial y sus credenciales; no se han verificado transacciones reales ni de pruebas contra el proveedor. No se contrataron servicios ni se activaron cobros. [Pagos](docs/PAGOS-Y-PAYPHONE.md).
 
 La app nativa de reparto para iPhone requiere firma de Apple y pruebas físicas. Render Free puede suspenderse por inactividad; no acredita disponibilidad 24/7. El Reto 3 sigue pendiente del framework asignado.
 

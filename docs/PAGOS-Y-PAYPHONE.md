@@ -2,17 +2,38 @@
 
 La tienda permite consultar el importe de un pedido registrado y coordinar su pago con la farmacia. El repositorio conserva el código de integración con el formulario alojado de PayPhone. **El propietario confirmó que todavía no tiene cuenta comercial. No se han proporcionado credenciales, conectado una cuenta ni probado pagos contra PayPhone, tampoco en su ambiente de pruebas.** `PAYPHONE_ENABLED=false` conserva el servicio cerrado. La [evidencia histórica de pagos](APPS-INSTALABLES-2026-11-01.md) registra despliegues y comprobaciones de la integración; no acredita una habilitación comercial ni cobros reales verificados.
 
-## Pago del pedido y entornos PayPhone
+## Formas de pago del pedido
 
-| Experiencia | Requisitos y efecto |
+El pedido registrado abre `/pagos.html?pedido=ID`, exige sesión y consulta su importe histórico. La pantalla ofrece tres métodos:
+
+| Método | Comportamiento |
 |---|---|
-| Coordinación con la farmacia | Desde **Mis pedidos**, el cliente abre el pago de su pedido, consulta su importe guardado y contacta a la farmacia para acordar el pago. Abrir el contacto no registra ni acredita un pago. |
+| Tarjeta de crédito o débito | Permanece visible. Si PayPhone está habilitado, continúa hacia el formulario alojado del proveedor con los controles del intento existente. Mientras no lo esté, **Solicitar enlace seguro** prepara un mensaje de WhatsApp con el pedido y su importe; no crea un intento de pago ni recoge datos de tarjeta. |
+| Transferencia bancaria | Muestra el importe guardado y la referencia del pedido. **Copiar importe y referencia** copia únicamente esos dos datos; **Solicitar datos bancarios** prepara la consulta por WhatsApp. La farmacia proporciona los datos de su cuenta. |
+| Pago con la farmacia | Permite contactar al equipo para acordar el pago del pedido. Abrir el contacto no registra ni acredita un pago. |
+
+El cliente revisa y envía el mensaje en WhatsApp por su propia decisión. La solicitud de un enlace o de datos bancarios no realiza cobros ni confirma transferencias; tampoco cambia el estado del pago. Sin un intento registrado, la pantalla muestra **Pago por coordinar con la farmacia**. Si hay un intento previo y PayPhone queda desactivado, la interfaz impide solicitar otro enlace o iniciar una transferencia y conserva la consulta del estado y el contacto con la farmacia.
+
+En el carrito, `paymentPreference` permite elegir tarjeta, transferencia o coordinación manual. El controlador retira ese campo antes de enviar el pedido a la API; no crea una columna ni registra un pago. Tras la confirmación, el enlace de pago conserva la preferencia mediante `metodo=card|transfer|manual`. La pantalla acepta sólo esos valores; un valor desconocido o duplicado vuelve a la coordinación manual.
+
+Abrir `/pagos.html` sin un pedido muestra **Ver mis pedidos** para elegir una compra. No presenta un importe de ejemplo, resultados simulados ni un formulario de tarjeta. El pedido y el pago mantienen estados separados.
+
+### Entornos de PayPhone
+
+| Entorno | Requisitos y efecto |
+|---|---|
 | PayPhone en pruebas | Requiere cuenta, aplicación WEB marcada **PRUEBAS**, token y StoreID de esa aplicación. `PAYPHONE_ENVIRONMENT=sandbox` etiqueta y conserva ese ambiente; la variable no transforma un token de producción en uno de pruebas. Usa el mismo host PayPhone que producción. |
 | PayPhone en producción | Requiere habilitación y credenciales reales del comercio, dominio autorizado y validación previa del flujo completo. Puede cobrar dinero. Solo se activa deliberadamente con `PAYPHONE_ENABLED=true` y `PAYPHONE_ENVIRONMENT=production`. |
 
-El pedido registrado abre `/pagos.html?pedido=ID`, exige sesión y consulta su importe histórico. Mientras PayPhone no esté disponible, la pantalla muestra **Pago por coordinar con la farmacia** y ofrece contactar al equipo; la opción de tarjeta permanece oculta. El cliente revisa y envía el mensaje en WhatsApp por su propia decisión. El estado del pedido y el del pago se mantienen separados.
+La cabecera identifica el pago del pedido. Cuando PayPhone está configurado en sandbox, el método y su estado indican expresamente ese entorno; una aprobación sandbox no acredita dinero recibido.
 
-Abrir `/pagos.html` sin un pedido muestra **Ver mis pedidos** para elegir una compra. No presenta un importe de ejemplo, resultados simulados ni un formulario de tarjeta. La interfaz tampoco anuncia Apple Pay como opción pendiente.
+## Comprobante y mapa del pedido
+
+Desde la confirmación de compra o **Mis pedidos**, **Ver comprobante** abre los datos y los importes guardados del pedido, con sus productos, cantidades, impuestos, envío y total. **Guardar PDF / imprimir** abre la impresión del navegador; para conservar un archivo se elige **Guardar como PDF**. El documento incluye la leyenda **Comprobante de pedido sin validez tributaria. No acredita un pago ni sustituye una factura autorizada por el SRI.** Consultar la factura SRI es una acción independiente, sujeta a la configuración y autorización fiscales existentes. Abrir o imprimir este comprobante no emite una factura ni modifica el pedido o el pago.
+
+La confirmación y las tarjetas de **Mis pedidos** incluyen una vista previa de mapa que se carga sólo al pulsar **Ver mapa**. En una entrega utiliza la ubicación reciente compartida por el repartidor o, si no está disponible, el punto de destino que el comprador autorizó al hacer el pedido. Si no existe ninguno, conserva la dirección escrita y el acceso al seguimiento; no coloca un punto arbitrario. En retiro en farmacia ofrece el enlace para llegar al establecimiento.
+
+Cargar el mapa comparte el punto con OpenStreetMap; abrir Google Maps comparte el destino con ese proveedor. La vista no solicita por sí sola la ubicación del dispositivo. Las posiciones recientes caducan y los pedidos entregados o cancelados no muestran ubicaciones. El seguimiento existente permanece disponible. [Entregas y privacidad](ENTREGAS-Y-PRIVACIDAD.md).
 
 ## Capas y contrato
 

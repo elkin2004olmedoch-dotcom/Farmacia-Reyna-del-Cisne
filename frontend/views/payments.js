@@ -2,4 +2,6 @@ import {escape,money} from './common.js';
 export function paymentSummary(order){
   document.getElementById('payment-reference').textContent=`Pedido ${order.id.slice(0,8)} · USD`;
   document.getElementById('payment-summary').innerHTML=`<ul class="payment-lines">${order.detalles.map(line=>`<li><span>${escape(line.cantidad)} × ${escape(line.nombreProducto)}</span><strong>${money(line.totalCentavos)}</strong></li>`).join('')}</ul><dl class="payment-totals"><div><dt>Productos</dt><dd>${money(order.subtotalCentavos)}</dd></div><div><dt>Envío</dt><dd>${order.costoEnvioCentavos===0?'Sin costo':money(order.costoEnvioCentavos)}</dd></div>${order.ivaCentavos!=null?`<div><dt>IVA incluido</dt><dd>${money(order.ivaCentavos)}</dd></div>`:''}<div class="payment-total"><dt>Total</dt><dd id="payment-total">${money(order.totalCentavos)}</dd></div></dl>`;
+  document.getElementById('payment-transfer-amount').textContent=money(order.totalCentavos);
+  document.getElementById('payment-transfer-reference').textContent=order.id;
 }
