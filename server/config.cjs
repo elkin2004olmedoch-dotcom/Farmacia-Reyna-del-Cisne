@@ -17,6 +17,8 @@ function config() {
   const production = process.env.NODE_ENV === 'production';
   if (production && origins.some(origin=>!origin.startsWith('https://'))) throw new Error('En producción CORS_ORIGIN requiere HTTPS.');
   const emailVerification=emailConfiguration(process.env,{production,origins});
-  return { secret, origins, production, port:Number(process.env.PORT || 3000), host:process.env.HOST || '127.0.0.1', expires:process.env.JWT_EXPIRES_IN || '30m',emailVerification };
+  const requireEmail=process.env.CUSTOMER_REGISTRATION_REQUIRE_EMAIL||(production?'true':'false');
+  if(!['true','false'].includes(requireEmail))throw new Error('CUSTOMER_REGISTRATION_REQUIRE_EMAIL debe ser true o false.');
+  return { secret, origins, production, port:Number(process.env.PORT || 3000), host:process.env.HOST || '127.0.0.1', expires:process.env.JWT_EXPIRES_IN || '30m',emailVerification,requireVerifiedRegistration:requireEmail==='true' };
 }
 module.exports = config;

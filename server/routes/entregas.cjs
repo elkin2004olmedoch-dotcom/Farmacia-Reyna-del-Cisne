@@ -20,7 +20,7 @@ module.exports=config=>{
  router.post('/entregas/:id/seguimiento-movil',noStore,auth,roles('repartidor'),mobile,V.id,empty,V.validated,C.claimTracking);
  router.delete('/entregas/:id/seguimiento-movil',noStore,auth,roles('repartidor'),mobile,V.id,empty,V.validated,C.releaseTracking);
  router.post('/entregas/asignar',noStore,auth,admin,...D.assign,C.assign);
- router.put('/entregas/:id/estado',noStore,auth,operator,V.id,...D.state,C.state);
+ router.put('/entregas/:id/estado',noStore,auth,operator,V.id,...D.state,(req,res)=>C.state(req,res,config));
  router.put('/entregas/:id/ubicacion',noStore,auth,roles('repartidor'),V.id,...D.location,C.location);
  router.delete('/entregas/:id/ubicacion',noStore,auth,roles('repartidor'),V.id,V.validated,C.clearLocation);
  router.get('/pedidos/:id/seguimiento',noStore,auth,roles('user','admin'),V.id,V.validated,C.tracking);

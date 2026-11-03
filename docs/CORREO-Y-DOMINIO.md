@@ -1,6 +1,8 @@
 # Confirmación de correo y dominio propio
 
-Preparación para Farmacia Reina del Cisne. Fuentes oficiales consultadas el **2 de noviembre de 2026**. El propietario todavía no dispone del dominio ni de la cuenta de envío. No se han comprado dominios, creado cuentas, configurado credenciales, cambiado DNS ni enviado mensajes en esta preparación. `EMAIL_VERIFICATION_ENABLED=false` mantiene desactivado el envío y la exigencia de confirmar las nuevas altas hasta completar la configuración.
+Integración de confirmación de correo y documentos de Farmacia Reina del Cisne. El proveedor elegido es **Brevo gratuito**, mediante API HTTPS. Resend se conserva como alternativa. La activación real requiere una cuenta Brevo activa, remitente verificado y credenciales privadas en Render; el código publicado por sí solo no acredita recepción de mensajes.
+
+En producción, `CUSTOMER_REGISTRATION_REQUIRE_EMAIL` es `true` por defecto: si el envío está desactivado, el registro devuelve 503 sin crear una cuenta ni entregar JWT. Con el envío activo, las altas quedan pendientes hasta confirmar el enlace. Los administradores y repartidores existentes conservan sus accesos.
 
 ## Destinos que se conservan
 
@@ -11,6 +13,22 @@ Preparación para Farmacia Reina del Cisne. Fuentes oficiales consultadas el **2
 | Autenticación y datos | JWT, Node.js/Express y Prisma 6 existentes; PostgreSQL publicado y SQLite local |
 
 La confirmación de correo se añade a esta autenticación y conserva los roles, el hash de contraseñas y los controles de autorización del backend. El dominio actual de Pages continúa disponible; un nombre `.com` sólo podrá anunciarse como activo después de adquirirlo, acreditar su control y verificar DNS y HTTPS. Esta guía no modifica alojamiento, planes, pagos ni facturación SRI.
+
+## Activar Brevo gratuito
+
+1. Crear la cuenta Free en [Brevo](https://onboarding.brevo.com/account/register) y completar la verificación y cualquier revisión de cuenta que solicite el proveedor.
+2. En **Settings → Senders, Domains, IPs → Senders**, añadir **Farmacia Reina del Cisne** y verificar la dirección con el código recibido. [Remitentes oficiales](https://help.brevo.com/hc/en-us/articles/208836149-Create-a-new-sender-From-name-and-From-email).
+3. Generar una clave API en el panel privado. Guardar únicamente en Environment del backend existente: `BREVO_API_KEY`, `EMAIL_FROM` (sólo dirección) y `EMAIL_PUBLIC_ORIGIN=https://farmacia-reyna-del-cisne-pruebas.pages.dev`. Seleccionar `EMAIL_PROVIDER=brevo`. No publicar claves ni pegarlas en chats.
+4. Mantener `EMAIL_VERIFICATION_ENABLED=false` hasta completar el remitente y las credenciales. Activar con `true` y desplegar manualmente una vez comprobada la configuración. Conservar `CUSTOMER_REGISTRATION_REQUIRE_EMAIL=true` y `SKIP_INITIAL_SEED=true`.
+5. Probar con una dirección controlada: recibir el mensaje, abrir el enlace, confirmar explícitamente, comprobar que sólo funciona una vez e iniciar sesión. Después comprobar comprobante, factura autorizada y aviso de entrega. Una respuesta aceptada de Brevo no garantiza llegada a bandeja.
+
+El plan Free publica **300 envíos al día**, compartidos por confirmaciones y documentos; no se contrató un plan de pago. [Cuotas Brevo](https://help.brevo.com/hc/en-us/articles/208580669-FAQs-What-are-the-limits-of-the-Free-plan). Brevo puede sustituir el dominio del remitente gratuito por uno compatible con sus requisitos de entrega. El dominio propio sigue siendo una tarea separada. [Requisitos del remitente](https://help.brevo.com/hc/en-us/articles/14925263522578-Comply-with-Gmail-Yahoo-and-Microsoft-s-requirements-for-email-senders).
+
+La integración utiliza `POST https://api.brevo.com/v3/smtp/email`, adjuntos base64 y clave en cabecera privada, sin SDK ni SMTP. Render Free bloquea los puertos SMTP habituales; no se propone Gmail SMTP como solución en ese plan. [API Brevo](https://developers.brevo.com/reference/send-transac-email), [limitaciones Render](https://render.com/docs/free).
+
+Se envía una clave UUID estable por contenido para la deduplicación de Brevo, cuya ventana documentada es **30 minutos**; Resend conserva su ventana de 24 horas. Una solicitud posterior puede reenviar el documento. No existe cola persistente ni garantía de reintento tras reinicio. [Idempotencia Brevo](https://developers.brevo.com/docs/heterogenous-versions-batch-emails). Brevo realiza seguimiento de aperturas y clics por defecto; la anonimización y disponibilidad de controles deben revisarse en la cuenta. No se promete que sus enlaces no sean reescritos. [Seguimiento transaccional](https://help.brevo.com/hc/en-us/articles/11643306229906-Can-I-anonymize-the-tracking-of-opens-and-clicks-for-my-emails).
+
+Las plantillas usan el logo, colores y enlaces de la farmacia. Verificación incluye botón y vencimiento exacto en hora de Ecuador; pedido y entrega muestran productos, imágenes disponibles e importes guardados. La factura autorizada conserva XML y representación imprimible. Las imágenes de productos proceden del catálogo actual; los importes proceden del snapshot del pedido.
 
 ## Elegir y registrar el nombre
 
@@ -23,7 +41,7 @@ Son propuestas, no reservas. No se ha comprobado su disponibilidad, titularidad 
 
 Para el envío se propone un subdominio del nombre adquirido, como `correo.<dominio-elegido>`, y un remitente con nombre reconocible: **Farmacia Reina del Cisne**. Resend recomienda separar el envío transaccional en un subdominio y verificar cada dominio de envío. La dirección exacta se define cuando exista un dominio bajo control del propietario. [Dominios verificados de Resend](https://resend.com/docs/dashboard/domains/introduction).
 
-## Preparar Resend desde cero
+## Alternativa: preparar Resend desde cero
 
 1. El propietario elige una dirección de correo bajo su control para administrar el registrador y la cuenta de Resend. Si todavía no tiene ninguna, debe crearla primero. La cuenta no se abre automáticamente desde este proyecto.
 2. Tras registrar el dominio, añade el subdominio de envío en **Resend → Domains → Add Domain**. Configura la región y copia los registros que muestre **Records** para SPF y DKIM. Sus nombres, tipos y valores deben coincidir con los generados por Resend; los CNAME de correo deben permanecer **DNS only**, sin proxy. Tras la verificación, revisa DMARC y deja desactivado el seguimiento de enlaces para los mensajes de confirmación. [Alta y verificación oficial](https://resend.com/docs/add-a-domain), [configuración de dominios transaccionales](https://resend.com/docs/dashboard/domains/introduction).
@@ -46,13 +64,16 @@ Los nombres aceptados por esta integración son:
 | Variable | Preparación y condición |
 | --- | --- |
 | `EMAIL_VERIFICATION_ENABLED` | Mantener `false` mientras falten cuenta, clave, remitente verificado o validación completa. Cambiar a `true` sólo al activar el flujo preparado. |
+| `CUSTOMER_REGISTRATION_REQUIRE_EMAIL` | `true` en producción: impide crear cuentas o usar clientes sin confirmar, incluso si una copia antigua conserva el indicador opcional. No afecta al personal. |
+| `EMAIL_PROVIDER` | `brevo` para el proveedor elegido; `resend` sólo para la alternativa configurada. |
+| `BREVO_API_KEY` | Clave privada de Brevo, únicamente en Environment del backend. |
 | `EMAIL_PUBLIC_ORIGIN` | Origen HTTPS exacto de la tienda, incluido en la allowlist CORS. Inicialmente puede ser el origen actual de Pages; sin ruta ni fragmento. |
 | `RESEND_API_KEY` | Clave privada de envío de Resend. Se introduce en el servicio Render, no en Git, Pages, capturas, logs ni chats. |
-| `EMAIL_FROM` | Sólo la dirección perteneciente al dominio verificado, sin nombre ni cabeceras. El servidor añade el nombre **Farmacia Reina del Cisne**. No se rellena con una dirección inventada mientras el dominio no exista. |
+| `EMAIL_FROM` | Sólo la dirección verificada por el proveedor, sin nombre ni cabeceras. El servidor añade el nombre **Farmacia Reina del Cisne**. Brevo permite verificar un buzón; Resend exige dominio propio para destinatarios externos. |
 
 El propietario puede configurarlas en **Render → servicio farmacia-reina-del-cisne → Environment**. **Save only** guarda sin aplicar hasta el siguiente despliegue; las opciones de guardar y desplegar sí actualizan el servicio. La activación debe coordinarse con el despliegue manual existente, sin recrear el servicio ni ejecutar un seed. [Variables y secretos en Render](https://render.com/docs/configure-environment-variables).
 
-La integración está publicada mediante la [PR #17](https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/pull/17), con la migración aditiva aplicada en PostgreSQL. Se verificó el respaldo antes del despliegue. El conector de Render ya está conectado; se mantuvo el plan gratuito y se guardaron únicamente `SKIP_INITIAL_SEED=true` y `EMAIL_VERIFICATION_ENABLED=false`, conservando las demás variables. El envío real sigue desactivado porque faltan la cuenta Resend, el dominio de envío y sus credenciales.
+La base de confirmación se publicó mediante la [PR #17](https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/pull/17), con la migración aditiva aplicada en PostgreSQL. Se verificó el respaldo antes de aquel despliegue. Se conserva el servicio Render gratuito y `SKIP_INITIAL_SEED=true`. El envío real debe permanecer desactivado hasta comprobar la cuenta, el remitente y las credenciales del proveedor elegido.
 
 ## Contrato de confirmación
 
@@ -69,7 +90,7 @@ https://farmacia-reyna-del-cisne-pruebas.pages.dev/confirmar-correo#token=TOKEN_
 | `POST /api/auth/verify-email` | `{token}`: valida caducidad y uso único y confirma el correo. |
 | `POST /api/auth/resend-verification` | `{email}`: solicita otro mensaje conforme a los límites del backend. |
 
-Con el flujo habilitado, las nuevas altas quedan pendientes y no reciben un JWT hasta confirmar. El middleware impide usar una cuenta pendiente en operaciones autenticadas. `Usuario.emailVerifiedAt` sigue siendo nullable y `emailVerificationRequired` tiene valor inicial `false` para preservar las cuentas anteriores; conservar su acceso no significa atribuirles una confirmación de correo que nunca realizaron.
+Con el flujo habilitado, las nuevas altas quedan pendientes y no reciben un JWT hasta confirmar. El middleware impide usar una cuenta pendiente en operaciones autenticadas. `Usuario.emailVerifiedAt` sigue siendo nullable y la migración histórica conserva `emailVerificationRequired=false`; la política obligatoria de producción exige igualmente confirmar a todos los clientes sin fecha de verificación. Un reenvío actualiza ese indicador de forma transaccional, sin atribuir una confirmación inexistente. Administradores y repartidores conservan sus accesos.
 
 ## Asociar el `.com` a Cloudflare Pages
 
@@ -90,18 +111,17 @@ No se retira el origen actual de Pages durante esta preparación.
 
 ## Acciones pendientes del propietario
 
-1. Elegir la escritura Reina/Reyna, consultar el registrador y decidir el registro del dominio y su renovación.
-2. Disponer de una dirección de acceso bajo su control y crear su cuenta Resend.
-3. Acreditar acceso al dominio/DNS y a los proyectos existentes de Cloudflare y Render; transcribir los registros que genere Resend y esperar la verificación.
-4. Definir remitente, generar la clave y guardarlos de forma privada en Render con el origen HTTPS exacto.
-5. Autorizar y realizar una prueba de envío a una dirección controlada. Comprobar recepción, caducidad, reutilización, reenvío, límites, cuentas pendientes y acceso de cuentas anteriores, sin usar datos comerciales.
-6. Activar el flujo sólo después de comprobarlo. Mantener `EMAIL_VERIFICATION_ENABLED=false` hasta entonces.
+1. Completar la cuenta Brevo gratuita y verificar el remitente bajo su control.
+2. Guardar la clave y el remitente de forma privada en Render con el origen HTTPS exacto y `EMAIL_PROVIDER=brevo`.
+3. Activar el flujo con las credenciales comprobadas y verificar el envío a una dirección controlada. Comprobar recepción, caducidad, reutilización, reenvío, límites y bloqueo de cuentas pendientes; no usar datos comerciales.
+4. Si falta algún requisito, mantener `EMAIL_VERIFICATION_ENABLED=false` y la obligación de confirmar activa: el registro queda temporalmente indisponible.
+5. Para el `.com`, elegir la escritura Reina/Reyna, decidir su registro y renovación y acreditar acceso DNS. Esta compra es independiente de Brevo y no se ha realizado.
 
 Las comprobaciones locales y la consulta de documentación no acreditan entrega de correo, dominio adquirido, DNS propagado ni certificado emitido. Registrar o verificar un dominio tampoco activa PayPhone, SRI u otros servicios comerciales.
 
 ## Comprobantes y facturas por correo
 
-La misma configuración Resend habilita los documentos transaccionales. Tras guardar un pedido nuevo, el servidor solicita el envío de su comprobante al **correo verificado de la cuenta**, nunca al destinatario que se escriba en el pedido. Los pedidos repetidos con la misma clave no disparan otro envío automático. El comprobante reutiliza la vista de la web, incluye los importes y la tarifa de envío guardados y se adjunta como HTML imprimible; se puede abrir e imprimir como PDF. Conserva la indicación de que no tiene validez tributaria ni acredita un pago.
+La configuración de Brevo o Resend habilita los documentos transaccionales. Tras guardar un pedido nuevo, el servidor solicita el envío de su comprobante al **correo verificado de la cuenta**, nunca al destinatario que se escriba en el pedido. Los pedidos repetidos con la misma clave no disparan otro envío automático. El comprobante reutiliza la vista de la web, incluye los importes y la tarifa de envío guardados y se adjunta como HTML imprimible; se puede abrir e imprimir como PDF. Conserva la indicación de que no tiene validez tributaria ni acredita un pago.
 
 Cuando el flujo SRI existente devuelve una factura `AUTORIZADA`, se solicita además el envío de su XML y su representación imprimible HTML al propietario verificado. Se conserva el ambiente de pruebas o producción de los documentos. Esta función no crea una factura por sí sola, no activa SRI ni cambia el estado de pago.
 

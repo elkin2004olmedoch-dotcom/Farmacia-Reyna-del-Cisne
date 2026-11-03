@@ -10,6 +10,7 @@ module.exports = config=> {
   }
   return {
     async register(req,res) {
+      if(config.requireVerifiedRegistration&&!config.emailVerification?.enabled)throw new AppError(503,'EMAIL_UNAVAILABLE','El registro requiere confirmar tu correo. El servicio de envío se está configurando; inténtalo más tarde.');
       const {nombre,email,telefono,password}=req.input;
       const passwordHash=await bcrypt.hash(password,12);
       const verifying=config.emailVerification?.enabled===true;
@@ -25,7 +26,7 @@ module.exports = config=> {
       const user=await users.findByEmail(req.input.email);
       const valid=await bcrypt.compare(req.input.password,user?.passwordHash || dummyHash);
       if (!user || !valid || !user.activo) throw new AppError(401,'INVALID_CREDENTIALS','Correo o contraseña incorrectos.');
-      if(verification.requiresVerification(user))throw new AppError(403,'EMAIL_NOT_VERIFIED','Confirma tu correo antes de iniciar sesión. Puedes solicitar otro enlace.');
+      if(verification.requiresVerification(user,config.requireVerifiedRegistration&&user.role==='user'))throw new AppError(403,'EMAIL_NOT_VERIFIED','Confirma tu correo antes de iniciar sesión. Puedes solicitar otro enlace.');
       res.json({ok:true,data:session(user)});
     },
     me(req,res) { res.json({ok:true,data:users.publicUser(req.user)}); },
@@ -38,7 +39,7 @@ module.exports = config=> {
     async resendVerification(req,res){
       if(!config.emailVerification?.enabled)throw new AppError(503,'EMAIL_UNAVAILABLE','La confirmación por correo todavía no está habilitada. Contacta con la farmacia.');
       const user=await users.findByEmail(req.input.email);
-      if(user?.activo && verification.requiresVerification(user))await verification.issue(user,config);
+      if(user?.activo && verification.requiresVerification(user,config.requireVerifiedRegistration&&user.role==='user'))await verification.issue(user,config);
       res.status(202).json({ok:true,data:{message:'Si la cuenta existe y está pendiente, revisa tu correo y la carpeta de correo no deseado. Puedes solicitar otro enlace después de un minuto.'}});
     },
   };

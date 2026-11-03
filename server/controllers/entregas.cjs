@@ -13,7 +13,7 @@ module.exports={
  async claimTracking(req,res){send(res,await model.claimTracking(req.input.id,req.user));},
  async releaseTracking(req,res){send(res,await model.releaseTracking(req.input.id,req.user));},
  async assign(req,res){send(res,await model.assign(req.input,req.user));},
- async state(req,res){const {id,...input}=req.input;send(res,await model.changeState(id,input,req.user));},
+ async state(req,res,config){const {id,...input}=req.input;const notify=config?.emailVerification?.enabled&&input.estado==='entregada';const prior=notify?await model.find(id,req.user):null;const result=await model.changeState(id,input,req.user);const email=notify&&prior.estado!=='entregada'?await require('../models/document-email.cjs').createDocumentEmail().delivered(result.pedidoId,config):{status:'not_required'};res.json({ok:true,data:result,email});},
  async location(req,res){const {id,...input}=req.input;send(res,await model.setLocation(id,input,req.user));},
  async clearLocation(req,res){send(res,await model.clearLocation(req.input.id,req.user));},
  async tracking(req,res){send(res,await model.tracking(req.input.id,req.user));},
