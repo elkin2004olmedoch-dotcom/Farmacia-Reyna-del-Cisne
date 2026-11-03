@@ -19,7 +19,7 @@ Productos, inventario, promociones, pedidos, entregas y Farmi utilizan la misma 
 
 ## Reparto independiente
 
-Abre **Instalar aplicación** desde el pie de página de la tienda. En el cuadro de instalación, la sección **Equipo de reparto** enlaza el [APK Android de pruebas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/reparto-0.1.0.apk) y [su suma de verificación](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/SHA256SUMS.txt), alojados en la propia web. El archivo es el mismo firmado y verificado de la candidata 0.1.0; no depende del acceso público a GitHub.
+Abre **Instalar aplicación** desde el pie de página de la tienda. En el cuadro de instalación, la sección **Equipo de reparto** enlaza el [APK Android de pruebas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/reparto-0.2.0.apk) y [su suma de verificación](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/SHA256SUMS.txt), alojados en la propia web. El archivo es el mismo firmado y verificado de la candidata 0.2.0; no depende del acceso público a GitHub.
 
 Requiere una cuenta activa de repartidor. El GPS nativo pertenece a esa app, no a la tienda PWA. La versión nativa de reparto para iPhone continúa pendiente de firma/aprovisionamiento y las pruebas físicas de bloqueo, Maps, batería y red siguen siendo necesarias. Consulta [la guía de reparto](../mobile/README.md).
 

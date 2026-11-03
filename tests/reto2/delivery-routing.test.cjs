@@ -1,0 +1,55 @@
+'use strict';
+const {test,after}=require('node:test'),assert=require('node:assert/strict'),jwt=require('jsonwebtoken'),{randomUUID}=require('node:crypto');
+const fixture=require('./email-api-fixture.cjs').createFixture(),{db,config}=fixture,api=fixture.api(false);
+const orders=require('../../server/models/pedidos.cjs');
+after(()=>fixture.close());
+const token=user=>jwt.sign({version:user.tokenVersion},config.secret,{algorithm:'HS256',subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'});
+let admin,user,product,zone,courier,second;
+const buyer={name:'Cliente Ruta',email:'ruta@example.ec',phone:'0979275988',documentType:'cedula',document:'0102030400',delivery:'delivery',province:'Pichincha',city:'Puerto Quito',address:'Calle principal y parque central',postalCode:''};
+const make=async(patch={})=>orders.create(user.id,{carrito:[{productoId:product.id,cantidad:1}],comprador:{...buyer,zonaEntregaId:zone.id,esperadoTarifaVersion:zone.version,...patch},claveSolicitud:randomUUID()});
+test('domicilio se asigna al único repartidor activo sin confirmar ni preparar automáticamente',async()=>{
+ admin=await db.usuario.findFirst({where:{role:'admin'}});
+ user=await db.usuario.create({data:{nombre:buyer.name,email:buyer.email,telefono:'+593979275988',passwordHash:'fixture'}});
+ product=await db.producto.create({data:{nombre:'Cuidado Ruta',precio:5,stock:20,categoria:'cuidado',descripcion:'Producto sintético de ruta',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase'}});
+ zone=await require('../../server/models/entregas.cjs').saveZone(null,{nombre:'Zona Ruta',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:150,ivaCategoria:'general',fundamentoIva:null,activa:true},admin);
+ const noCourier=await make();assert.equal(await db.entrega.count({where:{pedidoId:noCourier.pedido.id}}),0);
+ courier=await db.usuario.create({data:{nombre:'Repartidor Único',email:'unico@example.ec',telefono:'+593979275988',passwordHash:'fixture',role:'repartidor'}});
+ const {pedido}=await make(),delivery=await db.entrega.findUnique({where:{pedidoId:pedido.id}});assert(delivery);assert.equal(delivery.repartidorId,courier.id);assert.equal(pedido.estado,'pendiente');assert.equal(delivery.estado,'asignada');assert.equal(Number(pedido.total),6.5);
+ await assert.rejects(()=>require('../../server/models/entregas.cjs').changeState(delivery.id,{estado:'en_camino',esperadoVersion:delivery.version},courier),error=>error.code==='ORDER_NOT_READY');
+ const confirmed=await orders.updateStatus(noCourier.pedido.id,{estado:'confirmado',esperadoUpdatedAt:noCourier.pedido.updatedAt.toISOString()},admin.id);
+ assert.equal((await db.entrega.findUnique({where:{pedidoId:confirmed.pedido.id}})).repartidorId,courier.id);
+ second=await db.usuario.create({data:{nombre:'Otro Repartidor',email:'segundo@example.ec',telefono:'+593979275988',passwordHash:'fixture',role:'repartidor'}});
+ const multiple=await make();assert.equal(await db.entrega.count({where:{pedidoId:multiple.pedido.id}}),0);
+ const pickup=await orders.create(user.id,{carrito:[{productoId:product.id,cantidad:1}],comprador:{...buyer,delivery:'pickup',province:'',city:'',address:'',postalCode:''},claveSolicitud:randomUUID()});assert.equal(await db.entrega.count({where:{pedidoId:pickup.pedido.id}}),0);
+ await db.usuario.update({where:{id:second.id},data:{activo:false}});
+ const input={carrito:[{productoId:product.id,cantidad:1}],comprador:{...buyer,zonaEntregaId:zone.id,esperadoTarifaVersion:zone.version},claveSolicitud:randomUUID()};
+ const [first,retry]=await Promise.all([orders.create(user.id,input),orders.create(user.id,input)]);assert.equal(first.pedido.id,retry.pedido.id);assert.equal(await db.entrega.count({where:{pedidoId:first.pedido.id}}),1);
+ await db.usuario.update({where:{id:second.id},data:{activo:true}});
+});
+test('ruta autoriza propietario y rol antes de contactar proveedor, rechaza campos extra',async()=>{
+ const {pedido}=await make();const delivery=await db.entrega.create({data:{pedidoId:pedido.id,repartidorId:courier.id}});
+ const route='/api/entregas/'+delivery.id+'/ruta',body={latitud:0.12,longitud:-79.24};
+ await api.post(route).send(body).expect(401);
+ await api.post(route).set('Authorization','Bearer '+token(user)).send(body).expect(403);
+ await api.post(route).set('Authorization','Bearer '+token(second)).send(body).expect(404);
+ await api.post(route).set('Authorization','Bearer '+token(courier)).send({...body,url:'https://127.0.0.1'}).expect(422);
+ await api.post(route).set('Authorization','Bearer '+token(courier)).send({latitud:'0.12',longitud:-79.24}).expect(422);
+ const missing=await api.post(route).set('Authorization','Bearer '+token(courier)).send(body).expect(409);assert.equal(missing.body.error.code,'DESTINATION_REQUIRED');
+});
+test('proveedor de rutas: GeoJSON real, límites, sin credenciales, sin líneas inventadas y sin respuestas tardías a entregas cerradas',async()=>{
+ const {createRouting}=require('../../server/models/rutas.cjs');let calls=0,closed=false,now=0;
+ const item={id:'synthetic',estado:'en_camino',destino:{latitud:0.125,longitud:-79.25}};
+ const service=createRouting({find:async()=>({...item,...(closed?{estado:'entregada',destino:null}:{})}),now:()=>now,fetch:async(url,options)=>{
+   calls++;assert.equal(new URL(url).hostname,'routing.openstreetmap.de');assert.equal(options.redirect,'error');assert(!options.headers.Authorization);
+   return new Response(JSON.stringify({code:'Ok',routes:[{distance:1800,duration:300,geometry:{type:'LineString',coordinates:[[-79.24,0.12],[-79.245,0.123],[-79.25,0.125]]}}]}));
+ }});
+ const result=await service.calculate('synthetic',{}, {latitud:0.12,longitud:-79.24});assert.equal(result.geometry.coordinates.length,3);assert.equal(result.distance,1800);assert.equal(calls,1);
+ await service.calculate('synthetic',{}, {latitud:0.12,longitud:-79.24});assert.equal(calls,1);
+ await assert.rejects(()=>service.calculate('synthetic',{}, {latitud:.121,longitud:-79.241}),error=>error.code==='ROUTE_RATE_LIMIT');
+ await assert.rejects(()=>service.calculate('synthetic',{}, {latitud:40,longitud:-79.24}),error=>error.code==='ROUTE_OUTSIDE_AREA');
+ await assert.rejects(()=>service.calculate('synthetic',{}, {latitud:.12,longitud:-79.24,latitudDestino:.13,longitudDestino:-79.26}),error=>error.code==='DESTINATION_ALREADY_DEFINED');
+ closed=true;await assert.rejects(()=>service.calculate('synthetic',{}, {latitud:0.12,longitud:-79.24}),error=>error.code==='DELIVERY_CLOSED');assert.equal(calls,1);
+ const bad=createRouting({find:async()=>item,fetch:async()=>new Response(JSON.stringify({code:'NoRoute',routes:[]}))});await assert.rejects(()=>bad.calculate('synthetic',{}, {latitud:0.12,longitud:-79.24}),error=>error.code==='ROUTE_UNAVAILABLE');
+ const late=createRouting({find:async()=>closed?{estado:'entregada',destino:null}:item,fetch:async()=>{closed=true;return new Response(JSON.stringify({code:'Ok',routes:[{distance:100,duration:30,geometry:{type:'LineString',coordinates:[[-79.24,0.12],[-79.25,0.125]]}}]}));}});closed=false;
+ await assert.rejects(()=>late.calculate('synthetic',{}, {latitud:0.12,longitud:-79.24}),error=>error.code==='DELIVERY_CLOSED');
+});

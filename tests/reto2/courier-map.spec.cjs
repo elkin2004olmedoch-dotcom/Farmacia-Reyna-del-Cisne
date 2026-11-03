@@ -1,0 +1,45 @@
+const {test,expect}=require('@playwright/test'),AxeBuilder=require('@axe-core/playwright').default;
+test.use({serviceWorkers:'block'});
+async function setup(page,{destination=true,routeError=false}={}){
+ const user={id:'courier-map',nombre:'Repartidor Ruta',email:'ruta@example.ec',telefono:'0991234567',role:'repartidor',activo:true};
+ const item={id:'delivery-map',pedidoId:'order-map',estado:'asignada',estadoPedido:'preparado',version:1,gpsVersion:0,repartidorId:user.id,destino:{nombre:'Cliente Ruta',direccion:'Calle principal 123',ciudad:'Puerto Quito',provincia:'Pichincha',telefono:'0991234567',latitud:destination?.125:null,longitud:destination?-79.25:null}},routes=[],states=[];
+ await page.clock.install();
+ await page.addInitScript(()=>{sessionStorage.setItem('farmacia-mvc-token','synthetic-map-session');window.gpsFixture={callback:null,cleared:0};Object.defineProperty(navigator,'geolocation',{value:{watchPosition(callback){window.gpsFixture.callback=callback;return 1;},clearWatch(){window.gpsFixture.cleared++;}}});});
+ await page.route('https://tile.openstreetmap.org/**',route=>route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==','base64')}));
+ await page.route('**/api/auth/me',route=>route.fulfill({json:{ok:true,data:user}}));
+ await page.route('**/api/entregas?*',route=>route.fulfill({json:{ok:true,data:{items:[structuredClone(item)],total:1,page:1,pageSize:20}}}));
+ await page.route('**/api/entregas/delivery-map/estado',route=>{const body=route.request().postDataJSON();states.push(body);item.estado=body.estado;item.version++;if(item.estado==='entregada')item.destino=null;return route.fulfill({json:{ok:true,data:structuredClone(item)}});});
+ await page.route('**/api/entregas/delivery-map/ubicacion',route=>{if(route.request().method()==='PUT'){const body=route.request().postDataJSON();item.ubicacion=body;item.gpsVersion++;}else item.ubicacion=null;return route.fulfill({json:{ok:true,data:structuredClone(item)}});});
+ await page.route('**/api/entregas/delivery-map/ruta',route=>{
+  const body=route.request().postDataJSON();routes.push(body);
+  if(routeError)return route.fulfill({status:503,json:{ok:false,error:{code:'ROUTE_UNAVAILABLE',message:'No se pudo calcular una ruta por las calles.'}}});
+  return route.fulfill({json:{ok:true,data:{geometry:{type:'LineString',coordinates:[[body.longitud,body.latitud],[-79.26,.128],[body.longitudDestino??-79.25,body.latitudDestino??.125]]},distance:1800,duration:300}}});
+ });
+ await page.goto('/entregas.html');await expect(page.getByRole('button',{name:'Iniciar recorrido',exact:true})).toBeVisible();return {routes,states};
+}
+const capture=async page=>{await expect.poll(()=>page.evaluate(()=>typeof window.gpsFixture.callback)).toBe('function');await page.evaluate(()=>window.gpsFixture.callback({coords:{latitude:.12,longitude:-79.24,accuracy:8},timestamp:Date.now()}));};
+test('repartidor inicia, ve ruta trazada, actualiza su posición y cierra la entrega dentro de la app',async({page},testInfo)=>{
+ const {routes,states}=await setup(page);
+ await page.getByRole('button',{name:'Iniciar recorrido',exact:true}).focus();await page.keyboard.press('Enter');
+ await expect(page.locator('.courier-route-map')).toBeVisible();await capture(page);
+ await expect(page.locator('.courier-route-status')).toContainText('Ruta actualizada');expect(routes).toHaveLength(1);
+ await expect(page.locator('.leaflet-overlay-pane path[stroke="#b51c36"]')).toHaveCount(1);
+  const pathBox=await page.locator('.leaflet-overlay-pane path[stroke="#b51c36"]').boundingBox(),mapBox=await page.locator('.courier-route-map').boundingBox();
+  expect(pathBox.x).toBeGreaterThanOrEqual(mapBox.x);expect(pathBox.x+pathBox.width).toBeLessThanOrEqual(mapBox.x+mapBox.width);
+ await expect(page.locator('a[href*="google.com/maps"]')).toHaveCount(0);
+ await page.clock.fastForward(13000);await page.evaluate(()=>window.gpsFixture.callback({coords:{latitude:.121,longitude:-79.241,accuracy:7},timestamp:Date.now()}));await page.clock.fastForward(18000);
+ await expect.poll(()=>routes.length).toBeGreaterThan(1);expect(routes.at(-1).latitud).toBe(.121);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+ const audit=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();expect(audit.violations).toEqual([]);
+ await page.locator('#courier-route-panel').screenshot({path:'.superpowers/sdd/2026-11-03-reparto/mapa-'+testInfo.project.name+'.png'});
+ await page.getByRole('button',{name:'Llegué al destino',exact:true}).click();await expect(page.locator('a[href^="tel:"]')).toBeVisible();
+ await page.getByRole('button',{name:'Pedido entregado',exact:true}).click();await expect(page.locator('#confirm-dialog')).toBeVisible();await page.locator('#confirm-dialog [value=confirm]').click();
+ await expect(page.locator('#courier-route-panel')).toBeHidden();await expect(page.locator('.courier-route-map')).toHaveCount(0);await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);expect(states.map(value=>value.estado)).toEqual(['en_camino','en_destino','entregada']);
+});
+test('sin punto GPS permite confirmar el destino con teclado y no dibuja una ruta si falla el proveedor',async({page})=>{
+ const {routes}=await setup(page,{destination:false,routeError:true});await page.getByRole('button',{name:'Iniciar recorrido',exact:true}).click();await capture(page);
+ await page.getByLabel('Latitud del destino',{exact:true}).fill('0.125');await page.getByLabel('Longitud del destino',{exact:true}).fill('-79.25');
+ await page.getByRole('button',{name:'Confirmar destino de navegación'}).focus();await page.keyboard.press('Enter');
+ await expect(page.locator('.courier-route-status')).toContainText('No se pudo calcular');expect(routes[0]).toEqual({latitud:.12,longitud:-79.24,latitudDestino:.125,longitudDestino:-79.25});
+ await expect(page.locator('.leaflet-overlay-pane path[stroke="#b51c36"]')).toHaveCount(0);
+});

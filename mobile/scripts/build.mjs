@@ -8,4 +8,7 @@ await mkdir(path.join(output,'assets'),{recursive:true});
 await build({entryPoints:[path.join(root,'src/app.js')],outfile:path.join(output,'app.js'),bundle:true,format:'esm',platform:'browser',target:['chrome100','safari15'],minify:true,legalComments:'eof',sourcemap:false});
 for(const file of ['index.html','styles.css'])await copyFile(path.join(root,'src',file),path.join(output,file));
 await copyFile(path.join(root,'../frontend/assets/images/logo-reina-del-cisne.png'),path.join(output,'assets/logo-reina-del-cisne.png'));
+await mkdir(path.join(output,'assets/leaflet'),{recursive:true});
+for(const file of ['leaflet.js','leaflet.css','LICENSE.txt'])await copyFile(path.join(root,'../frontend/assets/vendor/leaflet',file),path.join(output,'assets/leaflet',file));
+await copyFile(path.join(root,'../frontend/assets/route-map.css'),path.join(output,'assets/route-map.css'));
 console.log('App de reparto empaquetada con contenido local.');

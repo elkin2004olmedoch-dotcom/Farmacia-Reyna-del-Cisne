@@ -10,10 +10,10 @@ module.exports=function createApp(settings=require('./config.cjs')()) {
   const cloudImages=require('./models/cloudimages.cjs');
   const imageOrigins=cloudImages.isCloudStorage()?[new URL(cloudImages.getPublicImageUrl('assets/uploads/00000000-0000-4000-8000-000000000000.webp')).origin]:[];
   app.use(require('./middleware/logger.cjs'));
-  app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'"],styleSrc:["'self'"],imgSrc:["'self'",'data:',...imageOrigins],connectSrc:["'self'",...settings.origins],frameSrc:['https://www.google.com','https://www.openstreetmap.org'],objectSrc:["'none'"],baseUri:["'self'"],formAction:["'self'"],upgradeInsecureRequests:settings.production?[]:null}},strictTransportSecurity:settings.production?undefined:false}));
+  app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'"],styleSrc:["'self'"],imgSrc:["'self'",'data:','https://tile.openstreetmap.org',...imageOrigins],connectSrc:["'self'",...settings.origins],frameSrc:['https://www.google.com','https://www.openstreetmap.org'],objectSrc:["'none'"],baseUri:["'self'"],formAction:["'self'"],upgradeInsecureRequests:settings.production?[]:null}},strictTransportSecurity:settings.production?undefined:false}));
   app.use((req,res,next)=>{res.setHeader('Permissions-Policy','camera=(), microphone=(), geolocation=(self)');next();});
   // PayPhone validates the storefront origin; the URL and order query remain private.
-  app.get('/pagos.html',(req,res,next)=>{res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');next();});
+  app.get(['/pagos.html','/entregas.html'],(req,res,next)=>{res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');next();});
   app.use('/api',(req,res,next)=>{res.setHeader('Cache-Control','no-store');next();},cors({origin(origin,callback){if(!origin || settings.origins.includes(origin))return callback(null,true);callback(new AppError(403,'CORS_FORBIDDEN','Origen no autorizado.'));},credentials:false,methods:['GET','POST','PUT','DELETE','OPTIONS'],allowedHeaders:['Content-Type','Authorization']}));
   // Readiness has its own per-IP budget, independent of commercial traffic.
   app.get('/api/salud',rateLimit({windowMs:60*1000,limit:60,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'HEALTH_RATE_LIMIT','Espera antes de comprobar la disponibilidad.'))}),require('./controllers/salud.cjs'));
@@ -36,7 +36,7 @@ module.exports=function createApp(settings=require('./config.cjs')()) {
     if(!url)return next(new AppError(404,'NOT_FOUND','La imagen solicitada no existe.'));
     res.setHeader('Cache-Control','public, max-age=86400');res.redirect(302,url);
   });
-  app.get('/descargas/reparto-0.1.0.apk',(req,res,next)=>{res.attachment('Reina-del-Cisne-Reparto-pruebas.apk');res.setHeader('Cache-Control','public, max-age=31536000, immutable');next();});
+  app.get('/descargas/reparto-0.2.0.apk',(req,res,next)=>{res.attachment('Reina-del-Cisne-Reparto-pruebas.apk');res.setHeader('Cache-Control','public, max-age=31536000, immutable');next();});
   app.get('/confirmar-correo',(req,res)=>{res.setHeader('Cache-Control','no-store');res.sendFile('confirmar-correo.html',{root:app.locals.frontendRoot});});
   app.use(express.static(app.locals.frontendRoot,{dotfiles:'deny',index:'index.html',maxAge:0}));
   app.use((req,res,next)=>next(new AppError(404,'NOT_FOUND','La página solicitada no existe.')));

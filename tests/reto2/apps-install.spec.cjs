@@ -12,7 +12,7 @@ test.describe('tienda instalable',()=>{
   await page.goto('/');const open=page.locator('.site-footer').getByRole('button',{name:'Instalar aplicación',exact:true});await expect(open).toBeVisible();
   await open.focus();await page.keyboard.press('Enter');await expect(page.getByRole('dialog',{name:'Tu cuidado, más cerca.'})).toBeVisible();
   await page.getByRole('button',{name:'iPhone y iPad'}).click();await expect(page.locator('#install-guidance')).toContainText('Añadir a pantalla de inicio');await expect(page.locator('#app-install-action')).toBeHidden();
-  await expect(page.locator('a[download]')).toHaveAttribute('href','descargas/reparto-0.1.0.apk');
+  await expect(page.locator('a[download]')).toHaveAttribute('href','descargas/reparto-0.2.0.apk');
   const result=await new AxeBuilder({page}).include('#app-install-dialog').analyze();expect(result.violations.filter(v=>['serious','critical'].includes(v.impact))).toEqual([]);
   await page.screenshot({path:path.resolve('.superpowers/sdd/2026-11-01-apps-instalables',`tienda-${test.info().project.name}.png`)});
   await page.keyboard.press('Escape');await expect(page.locator('#app-install-dialog')).not.toBeVisible();await expect(open).toBeFocused();

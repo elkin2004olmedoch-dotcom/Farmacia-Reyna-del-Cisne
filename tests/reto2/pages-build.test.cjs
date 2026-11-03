@@ -20,7 +20,7 @@ test('artefacto solo publica estáticos cliente y configuración pública con CS
   assert.throws(()=>config.apiUrl('//evil.example'));
   const headers=fs.readFileSync(path.join(output,'_headers'),'utf8');
   assert.match(headers,/connect-src 'self' https:\/\/api\.example\.test;/);
-  assert.match(headers,/img-src 'self' data: https:\/\/api\.example\.test https:\/\/images\.example\.test;/);
+  assert.match(headers,/img-src 'self' data: https:\/\/tile\.openstreetmap\.org https:\/\/api\.example\.test https:\/\/images\.example\.test;/);
   assert.match(headers,/frame-ancestors 'none'/);assert.match(headers,/max-age=0, must-revalidate/);
   assert.ok(!headers.includes('unsafe-inline') && !headers.includes('unsafe-eval'));
   assert.equal(fs.readFileSync(path.join(output,'index.html'),'utf8'),fs.readFileSync('frontend/index.html','utf8'));

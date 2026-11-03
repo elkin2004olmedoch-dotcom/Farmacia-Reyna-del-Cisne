@@ -4,6 +4,7 @@ import {deliveries,ZONE_FORM_DRAFT} from '../models/deliveries.js';
 import {administration} from '../models/admin.js';
 import {requireUser} from './layout.js';
 import {confirmAction} from './dialog.js';
+import {createRouteMap} from './route-map.js';
 import {watchUpdates,preserveFocus} from './updates.js';
 import {message,busy,formErrors} from '../views/common.js';
 import {zonesView,couriersView,assignmentOrdersView,assignmentStateView,deliveriesView,trackingView,trackingLocationView,trackingMapView,recentLocation} from '../views/deliveries.js';
@@ -26,6 +27,16 @@ export async function deliveriesController(){
   area.hidden=false;byId('delivery-admin').hidden=!admin;
   let live=true,page=1,orderPage=1,requestId=0,ordersRequestId=0,working=false,listLoading=false,listPending=false,snapshot='',result={items:[]},zones=[],couriers=[],reassign=null,sharing=null,gpsGeneration=0;
   let orders=[],ordersSnapshot='',confirmingAssignment=false;
+  let routeMap=null,routeId=null,routeGeneration=0;
+  function closeRoute(){routeGeneration++;routeMap?.dispose();routeMap=null;routeId=null;const panel=byId('courier-route-panel');if(panel)panel.hidden=true;}
+  async function openRoute(item){
+    closeRoute();if(!item?.destino)return;
+    const generation=routeGeneration;routeId=item.id;byId('courier-route-panel').hidden=false;
+    byId('courier-route-title').textContent='Ruta del pedido '+item.pedidoId.slice(0,8);
+    const map=await createRouteMap(byId('courier-route-map'),{destination:item.destino,requestRoute:input=>deliveries.route(item.id,input)});
+    if(!live || generation!==routeGeneration){map.dispose();return;}routeMap=map;
+    if(item.ubicacion)map.update(item.ubicacion);byId('courier-route-title').focus();
+  }
   const selectedOrder=()=>orders.find(order=>order.id===byId('delivery-order-select').value);
   const assignmentState=()=>assignmentStateView(selectedOrder());
   const gpsNotice=text=>{if(live)byId('delivery-gps-status').textContent=text;};
@@ -33,6 +44,7 @@ export async function deliveriesController(){
   function resetZone(){zoneForm.reset();zoneForm.elements.id.value='';zoneForm.elements.esperadoVersion.value='';formErrors(zoneForm,{});}
   function stopLocal(){
     gpsGeneration++;const previous=sharing;sharing=null;
+    if(previous?.item.id===routeId)routeMap?.update(null);
     if(previous?.watchId!==undefined)navigator.geolocation?.clearWatch(previous.watchId);
     return previous;
   }
@@ -44,16 +56,18 @@ export async function deliveriesController(){
     catch{if(notice)gpsNotice('Se detuvo el GPS local. No se pudo confirmar la retirada en el servidor; la ubicación dejará de mostrarse al vencer en dos minutos. Puedes reintentar la retirada.');if(live && auth.user)retirePending.add(previous.item.id);}
   }
   const retirePending=new Set();
-  function expire(){if(!live)return;live=false;requestId++;ordersRequestId++;stopLocal();zones=[];couriers=[];orders=[];result={items:[]};reassign=null;clearPrivate(area);}
+  function expire(){if(!live)return;closeRoute();live=false;requestId++;ordersRequestId++;stopLocal();zones=[];couriers=[];orders=[];result={items:[]};reassign=null;clearPrivate(area);}
   events.addEventListener('session:expired',expire);
   events.addEventListener('session:changed',()=>{if(!auth.user)expire();});
-  window.addEventListener('pagehide',()=>{void stopGps({notice:false,drawList:false,keepalive:true});});
+  window.addEventListener('pagehide',()=>{closeRoute();void stopGps({notice:false,drawList:false,keepalive:true});});
+  byId('courier-route-close').addEventListener('click',closeRoute);
   async function refreshList(){
     if(!live || working)return;if(listLoading){listPending=true;return;}listLoading=true;const id=++requestId,requested=page;
     try{
       const loaded=await deliveries.list(requested,byId('delivery-filter').value);
       if(!live || !auth.user || id!==requestId || requested!==page)return;
       result=loaded;
+      if(routeId){const current=result.items.find(item=>item.id===routeId);if(!current?.destino)closeRoute();else if(current.ubicacion)routeMap?.update(current.ubicacion);}
       if(sharing){const current=result.items.find(item=>item.id===sharing.item.id);if(!activeDelivery(current)){await stopGps({notice:false,drawList:false});gpsNotice('El GPS se detuvo porque la entrega dejó de estar activa en esta bandeja.');}else sharing.item={...current,gpsVersion:Math.max(current.gpsVersion,sharing.item.gpsVersion)};}
       const next=JSON.stringify(loaded);if(next!==snapshot){snapshot=next;draw();}
     }finally{listLoading=false;if(listPending && live && !working){listPending=false;await refreshList();}}
@@ -95,6 +109,7 @@ export async function deliveriesController(){
       if(!live || sharing!==session || gpsGeneration!==generation || !activeDelivery(session.item) || session.pending || Date.now()-session.lastAttempt<12000)return;
       const {latitude,longitude,accuracy}=position.coords,at=position.timestamp,age=Date.now()-at;
       if(![latitude,longitude,accuracy,at].every(Number.isFinite) || Math.abs(latitude)>90 || Math.abs(longitude)>180 || accuracy<0 || accuracy>10000 || age>120000 || age< -15000){gpsNotice('El dispositivo no proporcionó una ubicación reciente con precisión válida. Los estados de entrega siguen disponibles.');return;}
+      if(routeId===item.id)routeMap?.update({latitud:latitude,longitud:longitude,registradaAt:new Date(at).toISOString()});
       if(!navigator.onLine){gpsNotice('Sin conexión. El GPS no se enviará hasta recuperar la red; puedes volver a intentar los estados.');return;}
       session.lastAttempt=Date.now();
       session.pending=(async()=>{
@@ -110,11 +125,20 @@ export async function deliveriesController(){
   }
   area.addEventListener('click',async event=>{
     const button=event.target.closest('button');if(!button || !live || working)return;
-    const item=result.items.find(entry=>entry.id===(button.dataset.id || button.dataset.deliveryGps || button.dataset.deliveryReassign));
+    const item=result.items.find(entry=>entry.id===(button.dataset.id || button.dataset.deliveryGps || button.dataset.deliveryReassign || button.dataset.deliveryRoute));
+    if(button.hasAttribute('data-delivery-route') && item?.destino){await action(button,()=>openRoute(item),'Mapa de la entrega abierto.');return;}
     if(button.hasAttribute('data-delivery-gps') && courier && activeDelivery(item)){
       if(sharing?.item.id===item.id)await stopGps();else await startGps(item);return;
     }
-    if(button.hasAttribute('data-delivery-state') && item){await action(button,async()=>{await deliveries.changeState(item.id,button.dataset.deliveryState,item.version);if(['entregada','cancelada'].includes(button.dataset.deliveryState) && sharing?.item.id===item.id)await stopGps({notice:false,drawList:false});},'Estado de entrega actualizado.');return;}
+    if(button.hasAttribute('data-delivery-state') && item){
+      const next=button.dataset.deliveryState;
+      if(next==='entregada' && !await confirmAction('¿Confirmas que entregaste el pedido al destinatario? Esta acción cierra el seguimiento.'))return;
+      await action(button,async()=>{
+        const saved=await deliveries.changeState(item.id,next,item.version);
+        if(courier && next==='en_camino'){await openRoute(saved);await startGps(saved);}
+        if(['entregada','cancelada'].includes(next)){if(sharing?.item.id===item.id)await stopGps({notice:false,drawList:false});if(routeId===item.id)closeRoute();}
+      },'Estado de entrega actualizado.');return;
+    }
     if(admin && button.hasAttribute('data-delivery-reassign') && item?.estado==='asignada'){
       reassign={pedidoId:item.pedidoId,esperadoVersion:item.version};const select=byId('delivery-order-select');if(![...select.options].some(option=>option.value===item.pedidoId)){const option=new Option(item.pedidoId.slice(0,8)+' · Reasignar',item.pedidoId);select.add(option);}select.value=item.pedidoId;assignmentState();byId('delivery-courier-select').value=item.repartidorId;byId('delivery-courier-select').focus();return;
     }

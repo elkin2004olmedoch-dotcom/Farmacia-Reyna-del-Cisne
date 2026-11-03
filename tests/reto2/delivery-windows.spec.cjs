@@ -30,6 +30,7 @@ test('un pedido pendiente a domicilio permite confirmar y asignar sin adelantar 
   const data=await basicFixture(request);
   const zone=await api(request,'/admin/zonas-entrega',{token:data.admin.token,method:'post',status:201,data:{nombre:'Zona pendiente '+data.suffix,provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:200,ivaCategoria:'general',fundamentoIva:null,activa:true}});
   const courier=await api(request,'/admin/repartidores',{token:data.admin.token,method:'post',status:201,data:{nombre:'Repartidor Pendiente',email:'pendiente-'+data.suffix+'@example.ec',telefono:'0979275988',password:'RepartidorPrueba2026!'}});
+  await api(request,'/admin/repartidores',{token:data.admin.token,method:'post',status:201,data:{nombre:'Repartidor Alternativo',email:'alternativo-'+data.suffix+'@example.ec',telefono:'0979275988',password:'RepartidorPrueba2026!'}});
   const order=await newOrder(request,data,zone,{prepare:false});
   await signedIn(page,data.admin.token,'/entregas.html');
   await expect(page.locator('#delivery-order-select option[value="'+order.id+'"]')).toHaveCount(1);
@@ -43,14 +44,14 @@ test('un pedido pendiente a domicilio permite confirmar y asignar sin adelantar 
   expect((await api(request,'/entregas',{token:data.admin.token})).items.some(item=>item.pedidoId===order.id)).toBe(false);
   await submit.focus();await page.keyboard.press('Enter');await page.locator('#confirm-dialog [value=confirm]').click();
   const card=page.locator('[data-delivery]').filter({hasText:order.id.slice(0,8)});
-  await expect(card).toContainText('Confirmado');await expect(card.getByRole('button',{name:'Marcar salida'})).toBeDisabled();
+  await expect(card).toContainText('Confirmado');await expect(card.getByRole('button',{name:'Iniciar recorrido'})).toBeDisabled();
   saved=await api(request,'/pedidos/mis-pedidos',{token:data.customer.token});
   const confirmed=saved.items.find(item=>item.id===order.id);expect(confirmed.estado).toBe('confirmado');expect(confirmed.total).toBe(order.total);expect(confirmed.costoEnvioCentavos).toBe(order.costoEnvioCentavos);
   const assigned=(await api(request,'/entregas',{token:data.admin.token})).items.find(item=>item.pedidoId===order.id);expect(assigned.repartidorId).toBe(courier.id);
   const courierSession=await api(request,'/auth/login',{method:'post',data:{email:'pendiente-'+data.suffix+'@example.ec',password:'RepartidorPrueba2026!'}});
   await signedIn(page,courierSession.token,'/entregas.html');await expect(page.locator('[data-delivery="'+assigned.id+'"]')).toContainText(order.id.slice(0,8));
-  await expect(page.getByRole('link',{name:'Navegar con Google Maps'})).toHaveAttribute('href',/google\.com\/maps\/dir/);
-  await expect(page.getByRole('button',{name:'Marcar salida'})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'Ver ruta en la app'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Iniciar recorrido'})).toBeDisabled();
   await accessibleAt320(page);
 });
 
@@ -164,10 +165,10 @@ test('administración configura reparto, cliente consulta mapa voluntario y repa
     // Mi cuenta conserva el perfil editable del personal; Mis entregas abre su bandeja.
     await courierPage.getByRole('link',{name:'Mis entregas',exact:true}).first().click();
     await expect(courierPage).toHaveURL(/\/entregas\.html$/);await expect(courierPage.locator('#delivery-admin')).toBeHidden();
-    const card=courierPage.locator('[data-delivery]').filter({hasText:order.id.slice(0,8)});await expect(card).toBeVisible();await expect(card.locator('a[href^="tel:"]')).toHaveCount(0);await expect(card.locator('a[href^="https://www.google.com/maps/dir/"]')).toHaveAttribute('href',/destination=0.125%2C-79.25/);
+    const card=courierPage.locator('[data-delivery]').filter({hasText:order.id.slice(0,8)});await expect(card).toBeVisible();await expect(card.locator('a[href^="tel:"]')).toHaveCount(0);await expect(card.getByRole('button',{name:'Ver ruta en la app'})).toBeVisible();
     expect(await courierPage.evaluate(()=>window.testGps.callback)).toBeNull();
     let gpsRequests=0;courierPage.on('request',req=>{if(req.method()==='PUT' && /\/entregas\/[^/]+\/ubicacion$/.test(new URL(req.url()).pathname))gpsRequests++;});
-    await card.locator('[data-delivery-state="en_camino"]').click();await expect(card).toContainText('En camino');await card.locator('[data-delivery-gps]').click();
+    await card.locator('[data-delivery-state="en_camino"]').click();await expect(card).toContainText('En camino');
     await courierPage.evaluate(()=>window.testGps.callback({coords:{latitude:0.12,longitude:-79.24,accuracy:18},timestamp:Date.now()}));await expect(courierPage.locator('#delivery-gps-status')).toContainText('Ubicación compartida');
     await adminCard.locator('summary').focus();await page.bringToFront();await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(adminCard).toContainText('En camino');await expect(adminCard.locator('details')).toHaveAttribute('open','');await expect(adminCard.locator('summary')).toBeFocused();
     await courierPage.evaluate(()=>window.testGps.callback({coords:{latitude:0.121,longitude:-79.241,accuracy:18},timestamp:Date.now()}));expect(gpsRequests).toBe(1);
@@ -178,7 +179,7 @@ test('administración configura reparto, cliente consulta mapa voluntario y repa
     await card.locator('[data-delivery-gps]').click();await expect(courierPage.locator('#delivery-gps-status')).toContainText('retirada del servidor');await expect.poll(()=>courierPage.evaluate(()=>window.testGps.cleared)).toBe(1);
     await customerPage.locator('#tracking-refresh').click();await expect(customerPage.locator('#tracking-map-panel iframe')).toHaveCount(0);
     await card.locator('[data-delivery-state="en_destino"]').click();await expect(card.locator('a[href^="tel:"]')).toHaveAttribute('href',/^tel:\+?\d+$/);await accessibleAt320(courierPage);
-    await card.locator('[data-delivery-state="entregada"]').click();await expect(card).toContainText('Entrega cerrada');await expect(card.locator('a[href^="tel:"]')).toHaveCount(0);await expect(card).not.toContainText('Calle de prueba');
+    await card.locator('[data-delivery-state="entregada"]').click();await courierPage.locator('#confirm-dialog [value=confirm]').click();await expect(card).toContainText('Entrega cerrada');await expect(card.locator('a[href^="tel:"]')).toHaveCount(0);await expect(card).not.toContainText('Calle de prueba');
     await customerPage.locator('#tracking-refresh').click();await expect(customerPage.locator('#tracking-content')).toContainText('Entregada');await expect(customerPage.locator('[data-delivery-step="entregada"]')).toHaveAttribute('aria-current','step');expect(mapRequests).toBe(1);
     expect(errors).toEqual([]);
   }finally{await courierContext.close();await customerContext.close();await api(request,'/productos/'+data.product.id,{token:data.admin.token,method:'delete',status:204}).catch(()=>{});}

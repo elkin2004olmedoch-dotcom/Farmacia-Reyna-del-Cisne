@@ -8,7 +8,7 @@ Tienda y gestión farmacéutica para Puerto Quito, con catálogo, carrito, pedid
 - [Administración instalable en Windows](https://farmacia-reyna-del-cisne-pruebas.pages.dev/instalar-admin): Edge/Chrome normal y cuenta de administrador.
 - [Entregas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/entregas): requiere cuenta de administrador o repartidor.
 - [Pago de pedidos](https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos): abre un pedido desde **Mis pedidos** para consultar su importe y coordinar el pago con la farmacia.
-- [Reparto Android de pruebas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/reparto-0.1.0.apk).
+- [Reparto Android de pruebas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/reparto-0.2.0.apk).
 
 Los accesos privados se entregan fuera del repositorio. [Instalación de las apps](docs/APPS-E-INSTALACION.md).
 
@@ -152,3 +152,9 @@ Crea antes la carpeta entrega si no existe. El archivo se obtiene del commit ind
 ## Evidencias
 
 [Pruebas y publicación actuales](docs/APPS-INSTALABLES-2026-11-01.md). El material auxiliar y los informes históricos retirados tienen respaldo local privado del propietario; las mascotas activas y el código de negocio se conservan.
+
+### Reparto integrado (0.2.0)
+
+El repartidor dispone de **Ver ruta en la app**, **Iniciar recorrido**, **Llegué al destino**, llamada y **Pedido entregado**, con confirmación del cierre. El inicio solicita GPS; la app instalada conserva el seguimiento nativo con los permisos del teléfono. El mapa y la línea se muestran dentro de la app y la web; no abren Google Maps para navegar. Sin un punto del cliente se confirma un destino de navegación, sólo en memoria. Un único repartidor activo recibe automáticamente los pedidos a domicilio nuevos y los antiguos al confirmarlos/prepararlos. Con cero o varios activos se conserva la asignación administrativa. Asignar no confirma el pedido, no prueba su pago y no autoriza salir antes de prepararlo.
+
+[Implementación, revisión de seguridad y comparación con PLIEGO](docs/REPARTO-Y-REVISION-2026-11-03.md).

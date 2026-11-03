@@ -10,6 +10,7 @@ module.exports={
  async driverActive(req,res){send(res,await model.setDriverActive(req.input.id,req.input.activo,req.user));},
  async list(req,res){send(res,await model.list(req.input,req.user));},
  async find(req,res){send(res,await model.find(req.input.id,req.user));},
+ async route(req,res){const {id,...input}=req.input;send(res,await require('../models/rutas.cjs').calculate(id,req.user,input));},
  async claimTracking(req,res){send(res,await model.claimTracking(req.input.id,req.user));},
  async releaseTracking(req,res){send(res,await model.releaseTracking(req.input.id,req.user));},
  async assign(req,res){send(res,await model.assign(req.input,req.user));},
