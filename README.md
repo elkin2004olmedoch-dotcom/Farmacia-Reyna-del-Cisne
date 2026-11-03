@@ -39,6 +39,14 @@ El HTML de frontend/ se genera desde scripts/build-frontend.cjs y scripts/templa
 
 La confirmación de correo conserva el backend JWT existente: enlace de un solo uso, caducidad y reenvío, con bloqueo de las cuentas nuevas que lo requieran. Está desactivada hasta configurar el remitente y el proveedor; no se enviaron correos reales. Las cuentas anteriores conservan su acceso sin marcarse como verificadas. La [guía de correo y dominio](docs/CORREO-Y-DOMINIO.md) explica la activación, las migraciones aditivas y los pasos para conectar un `.com` propio.
 
+## Mascotas y confirmaciones
+
+En administración, escribe **actualizar** para elegir productos, promociones, pedidos o zonas. **Actualizar productos** lista el catálogo activo y permite seleccionar precio y stock; **poner en promoción** pide producto, porcentaje y fecha final en Ecuador. Pedidos y zonas muestran sus registros y datos editables. Proveedores y lotes abren sus formularios específicos. Las órdenes completas que guardan cambios muestran un resumen y requieren **Sí, confirmar**; **No, cancelar** descarta la propuesta. Una orden nueva invalida la anterior. El backend conserva permisos, restricciones sanitarias y controles de versión.
+
+En la tienda, escribe **buscar productos** o **buscar Gel** para elegir producto y cantidad. La mascota pide confirmar antes de agregar, quitar o vaciar el carrito, vuelve a consultar precio y disponibilidad y solicita otra confirmación si cambia el precio. **Comprar** abre el checkout después de confirmar; no crea pedidos ni procesa pagos desde el chat. Las consultas médicas mantienen la derivación al farmacéutico.
+
+Los cambios confirmados usan las mismas APIs que los formularios. La tienda visible se actualiza al recuperar el foco y en sus consultas periódicas de 30 segundos, sin recargar; conserva los formularios abiertos. Los asistentes son locales y de órdenes definidas: no usan servicios externos de IA. La conversación no se guarda.
+
 ## Desarrollo y pruebas
 
 Requiere Node.js 22.13 o posterior compatible y las versiones fijadas en package-lock.json. Para probar una extracción NUEVA del proyecto, sin .env ni base existente:

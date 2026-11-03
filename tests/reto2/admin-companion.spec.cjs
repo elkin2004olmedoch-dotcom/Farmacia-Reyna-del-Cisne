@@ -36,6 +36,9 @@ test('el asistente local del panel actualiza productos y publica promociones par
     const priceResponse=page.waitForResponse(response=>response.request().method()==='PUT'&&new URL(response.url()).pathname==='/api/productos/'+product.id);
     await companion.locator('#input').fill(`Actualiza el precio de "${product.nombre}" a ${price.toFixed(2)} y el stock a ${stock}`);
     await companion.locator('#form [type=submit]').click();
+    await expect(companion.getByRole('button',{name:'Sí, confirmar'})).toBeVisible();
+    expect(Number((await (await page.request.get('/api/productos/'+product.id)).json()).data.precio)).toBe(Number(product.precio));
+    await companion.getByRole('button',{name:'Sí, confirmar'}).click();
     expect((await priceResponse).status()).toBe(200);
     await expect.poll(()=>summaryReads).toBeGreaterThan(0);
     await expect(companion.locator('#input')).toBeEnabled();
@@ -52,6 +55,7 @@ test('el asistente local del panel actualiza productos y publica promociones par
     const promotionResponse=page.waitForResponse(response=>response.request().method()==='POST'&&new URL(response.url()).pathname==='/api/promociones');
     await companion.locator('#input').fill(`Publica una promoción de 20% para "${productAfter.nombre}" hasta 2030-12-31 titulada "Prueba asistente"`);
     await companion.locator('#form [type=submit]').click();
+    await companion.getByRole('button',{name:'Sí, confirmar'}).click();
     const createdPromotionResponse=await promotionResponse;
     expect(createdPromotionResponse.status()).toBe(201);
     promotion=(await createdPromotionResponse.json()).data;

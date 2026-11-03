@@ -3,6 +3,8 @@ import {administration} from '../models/admin.js';
 import {events} from '../models/events.js';
 import {interpretAdminCommand,ecuadorCommandDay} from './admin-command.mjs';
 import {deliveries} from '../models/deliveries.js';
+import {companionControls,disableCompanionControls} from './companion-controls.js';
+import '../models/pharmacy-policy.js';
 
 const ASSETS=new URL('../assets/mascotas/',import.meta.url);
 
@@ -31,8 +33,8 @@ const instructions={
 };
 
 /** Executes only parsed operations through the same authenticated models as the forms. */
-export function createAdminCommandExecutor({model=administration,deliveryModel=deliveries,isAdmin=()=>auth.isAdmin,refresh=()=>{},navigate,openEditor}={}){
-  let pending=false;
+export function createAdminCommandExecutor({model=administration,deliveryModel=deliveries,isAdmin=()=>auth.isAdmin,refresh=()=>{},navigate,openEditor,confirm=false}={}){
+  let pending=false,proposal=null,operation='update';
   const requireAdmin=()=>{if(!isAdmin())throw new Error('Inicia sesión nuevamente como administrador.');};
   const reply=text=>({type:'reply',text});
   async function findDelivery(predicate){
@@ -42,8 +44,55 @@ export function createAdminCommandExecutor({model=administration,deliveryModel=d
   return async text=>{
     requireAdmin();if(pending)throw new Error('Espera a que termine la orden anterior.');pending=true;
     try{
-      let command=interpretAdminCommand(text);
+      const normalized=String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+      if(confirm && /^(no|no,? cancelar|cancelar|cancela)$/.test(normalized)){proposal=null;return reply('Cancelado. No se guardó ningún cambio.');}
+      let command;
+      if(confirm && /^(si|si,? confirmo|si,? confirmar|confirmar|confirmo)$/.test(normalized)){
+        command=proposal;proposal=null;if(!command)return reply('No hay cambios pendientes de confirmar. Escribe una orden nueva.');
+      }else{
+      proposal=null;
+      const recordChoice=normalized.match(/^seleccionar (pedido|zona) ([a-z0-9-]{1,80})$/);
+      if(confirm && recordChoice){
+        const [,entity,id]=recordChoice;
+        if(entity==='pedido'){
+          const order=await model.order(id);requireAdmin();
+          const options={pendiente:['confirmado','cancelado'],confirmado:['preparado','cancelado'],preparado:['entregado','cancelado']}[order.estado]||[];
+          if(!options.length)return reply('Ese pedido está cerrado y no admite otro estado.');
+          return {text:`Pedido ${id}. Estado actual: ${order.estado}.`,fields:[{name:'state',label:'Nuevo estado del pedido',options:options.map(value=>({value,label:value}))}],submit:values=>`cambia pedido "${id}" a ${values.state}`};
+        }
+        const zones=await deliveryModel.adminZones();requireAdmin();const zone=zones.find(z=>z.id===id);if(!zone)return reply('La zona ya no está disponible.');
+        return {text:`Zona ${zone.nombre}. Los pedidos anteriores conservarán su tarifa.`,fields:[{name:'fee',label:'Tarifa de envío en USD',type:'number',min:0,max:100000,step:.01,value:zone.tarifaCentavos==null?'':zone.tarifaCentavos/100}],submit:values=>`modifica zona "${id}": tarifaCentavos=${Math.round(Number(values.fee)*100)}`};
+      }
+      if(confirm && /^(actualizar pedidos|actualizar zonas)$/.test(normalized)){
+        const zones=normalized.endsWith('zonas');let items=[];
+        if(zones)items=await deliveryModel.adminZones();
+        else{let page=1,total=Infinity;while(items.length<total){const data=await model.table('pedidos',page++);requireAdmin();items.push(...data.items);total=data.total;if(!data.items.length)break;}}
+        requireAdmin();if(!items.length)return reply('No hay registros disponibles en esa sección.');
+        return {text:`Selecciona ${zones?'una zona':'un pedido'} para actualizar.`,fields:[{name:'record',label:zones?'Zonas de cobertura':'Pedidos registrados',options:items.map(item=>({value:item.id,label:zones?item.nombre:`${item.id} · ${item.nombre} · ${item.estado}`}))}],submit:values=>`seleccionar ${zones?'zona':'pedido'} ${values.record}`};
+      }
+      const choose=normalized.match(/^seleccionar producto ([a-z0-9-]{1,80})$/);
+      if(confirm && choose){
+        const products=await model.products();requireAdmin();const product=products.find(p=>p.id===choose[1]&&p.activo);
+        if(!product)return reply('Ese producto ya no está disponible. Solicita la lista de nuevo.');
+        return {type:'form',text:`${product.nombre}. Completa los cambios y revisa antes de confirmar.`,fields:operation==='promotion'?[{name:'percentage',label:'Descuento (%)',type:'number',min:1,max:85,step:1},{name:'until',label:'Válida hasta (Ecuador)',type:'date',min:ecuadorCommandDay(Date.now())}]:[{name:'price',label:'Precio en USD',type:'number',min:0,max:100000,step:.01,value:product.precio},{name:'stock',label:'Stock',type:'number',min:0,max:100000,step:1,value:product.stock}],submit:values=>operation==='promotion'?`Publica promoción ${values.percentage}% para "id:${product.id}" hasta ${values.until}`:`modifica producto "id:${product.id}": precio=${values.price}; stock=${values.stock}`};
+      }
+      if(confirm && /^(actualizar|actualiza|modificar|modifica|cambiar|cambia)(?: algo)?$/.test(normalized))return {type:'choice',text:'¿Qué quieres gestionar?',actions:[{label:'Productos: precio y stock',command:'actualizar productos'},{label:'Poner en promoción',command:'poner en promocion'},{label:'Pedidos',command:'actualizar pedidos'},{label:'Zonas y tarifas',command:'actualizar zonas'},{label:'Proveedores',command:'abre proveedores'},{label:'Lotes',command:'abre lotes'}]};
+      if(confirm && (/^(actualiz|modific|cambi).*(productos?|precios?|stock)$/.test(normalized)||/^(?:poner|pon|publicar|publica|crear|crea)(?: una)?(?: en)? promo(?:cion(?:es)?)?$/.test(normalized))){
+        operation=/promo/.test(normalized)?'promotion':'update';const products=(await model.products()).filter(p=>p.activo && (operation!=='promotion'||globalThis.Farmacia?.pharmacyPolicy?.allowsPromotion(p)!==false));requireAdmin();
+        return products.length?{type:'selection',text:`Hay ${products.length} productos. Selecciona uno para ${operation==='promotion'?'ponerlo en promoción':'actualizarlo'}.`,fields:[{name:'product',label:'Todos los productos disponibles',options:products.map(p=>({value:p.id,label:`${p.nombre} · $${Number(p.precio).toFixed(2)} · stock ${p.stock}`}))}],submit:values=>'seleccionar producto '+values.product}:reply('No hay productos disponibles para esa acción.');
+      }
+      command=interpretAdminCommand(text);
       if(command.type==='needs-products'){const products=await model.products();requireAdmin();command=interpretAdminCommand(text,products);}
+      if(confirm && !['help','off-topic','needs-details','navigate','open-editor'].includes(command.type)){
+        if(command.type==='update-zone'){command.zone=(await deliveryModel.adminZones()).find(zone=>zone.id===command.id);requireAdmin();if(!command.zone)return reply('No encuentro esa zona. Solicita la lista de nuevo.');}
+        if(command.type==='change-order-state'){command.order=await model.order(command.id);requireAdmin();}
+        proposal=command;
+        const details=command.changes||command.values||{estado:command.estado,pedidoId:command.pedidoId,repartidorId:command.repartidorId};
+        const labels={precio:'Precio (USD)',stock:'Stock',tarifaCentavos:'Tarifa de envío (centavos)',descuentoPorcentaje:'Descuento (%)',titulo:'Título',descripcion:'Descripción',fin:'Válida hasta (Ecuador)',estado:'Nuevo estado'};
+        const changes=Object.entries(details).filter(([key,value])=>value!==undefined&&value!==null&&!['productoId','orden','vistaPrevia','imagen','alt'].includes(key)).map(([key,value])=>`${labels[key]||key}: ${key==='fin'?ecuadorCommandDay(value):value}`).join('\n');
+        return {type:'confirmation',text:`Revisa la orden: ${command.product?.nombre||command.id||command.type}\n${changes}\n¿Confirmas guardar este cambio?`,actions:[{label:'Sí, confirmar',command:'confirmar'},{label:'No, cancelar',command:'cancelar'}]};
+      }
+      }
       if(command.type==='help')return reply(Object.values(instructions).join('\n\n'));
       if(['off-topic','needs-details'].includes(command.type))return reply(command.message);
       if(command.type==='navigate'){if(!navigate)throw new Error('La navegación del panel no está disponible.');await navigate(command.section);return reply('Sección abierta.');}
@@ -60,13 +109,13 @@ export function createAdminCommandExecutor({model=administration,deliveryModel=d
         case 'create-lot':await model.saveLot(command.values);message='Lote registrado y existencias actualizadas.';break;
         case 'create-movement':await model.saveMovement(command.values);message='Ajuste registrado en el historial de inventario.';break;
         case 'change-order-state':{
-          const order=await model.order(command.id);requireAdmin();
+          const order=command.order||await model.order(command.id);requireAdmin();
           if(!order?.updatedAt)throw new Error('No se pudo consultar la versión actual del pedido.');
           await model.changeOrderState(command.id,command.estado,order.updatedAt);message=`Pedido actualizado a ${command.estado}.`;break;
         }
         case 'create-zone':await deliveryModel.saveZone({...command.values,fundamentoIva:command.values.fundamentoIva??null});message='Zona y tarifa registradas.';break;
         case 'update-zone':{
-          const zones=await deliveryModel.adminZones();requireAdmin();const zone=zones.find(zone=>zone.id===command.id);
+          const zone=command.zone||(await deliveryModel.adminZones()).find(zone=>zone.id===command.id);requireAdmin();
           if(!zone)throw new Error('No encuentro esa zona. Copia su identificador del panel.');
           const values=Object.fromEntries(['nombre','provincia','canton','tarifaCentavos','ivaCategoria','fundamentoIva','activa'].map(key=>[key,zone[key]??null]));
           await deliveryModel.saveZone({...values,...command.changes,esperadoVersion:zone.version},zone.id);message='Tarifa de zona actualizada; los pedidos anteriores conservan su tarifa.';break;
@@ -81,7 +130,7 @@ export function createAdminCommandExecutor({model=administration,deliveryModel=d
         }
         default:return reply('No reconocí una orden administrativa admitida. Escribe ayuda para ver ejemplos.');
       }
-      requireAdmin();await refresh();return reply(message);
+      requireAdmin();try{await refresh();}catch{return reply(message+' El cambio se guardó, pero no se pudo refrescar el panel. Actualiza la página para consultarlo.');}return reply(message);
     }finally{pending=false;}
   };
 }
@@ -92,9 +141,10 @@ export function adminCompanionController({refresh=()=>{},navigate,openEditor}={}
   const host=document.createElement('farmacia-admin-companion');
   const root=host.attachShadow({mode:'open'});
   const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('admin-companion.css',ASSETS).href;
+  const conversationStyle=document.createElement('link');conversationStyle.rel='stylesheet';conversationStyle.href=new URL('conversation.css',ASSETS).href;
   const template=document.createElement('template');
   template.innerHTML=`<aside class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">ASISTENTE LOCAL DE LA FARMACIA</span><h2 id="title">Farmi te ayuda a gestionar</h2><p>Catálogo, pedidos y entregas</p></div><button class="close" id="close" type="button" aria-label="Cerrar asistente">×</button></header><div class="messages" id="messages" role="log" aria-label="Asistente de administración" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Ayuda rápida de administración"></nav><form id="form"><label for="input" class="sr-only">Escribe una orden para el panel</label><input id="input" maxlength="3000" autocomplete="off" placeholder="Ej. actualiza precio de…" required><button type="submit" aria-label="Enviar orden">↑</button></form><p class="local-note">No uso servicios externos · los cambios se guardan con tu sesión de administrador</p></section><button class="launcher" id="launcher" type="button" aria-label="Abrir asistente administrativo" aria-expanded="false" aria-controls="panel"><img src="${new URL('art/farmi-base.png',ASSETS).href}" alt=""><span><span class="online" aria-hidden="true"></span> Ayuda administrativa</span><span aria-hidden="true">↗</span></button></aside>`;
-  root.append(style,template.content.cloneNode(true));document.body.append(host);
+  root.append(style,conversationStyle,template.content.cloneNode(true));document.body.append(host);
   const find=selector=>root.querySelector(selector);
   function append(text,type='bot'){
     const item=document.createElement('div');item.className=`message ${type}`;
@@ -108,27 +158,29 @@ export function adminCompanionController({refresh=()=>{},navigate,openEditor}={}
     quick.replaceChildren();
     for(const [label,key] of options){
       const button=document.createElement('button');button.type='button';button.textContent=label;
-      button.addEventListener('click',()=>append(instructions[key]));quick.append(button);
+      button.addEventListener('click',()=>key==='product'||key==='promotion'?void send(key==='product'?'actualizar productos':'poner en promocion'):append(instructions[key]));quick.append(button);
     }
   }
   refreshQuickQuestions();
   document.getElementById('admin-table-choice')?.addEventListener('change',refreshQuickQuestions);
-  const execute=createAdminCommandExecutor({refresh,navigate,openEditor});
+  const execute=createAdminCommandExecutor({refresh,navigate,openEditor,confirm:true});
   let pending=false;
-  find('#form').addEventListener('submit',async event=>{
-    event.preventDefault();if(pending||!auth.isAdmin)return;
-    const input=find('#input'),submit=find('#form [type=submit]'),text=input.value.trim();if(!text)return;
+  async function send(text){
+    if(pending||!auth.isAdmin)return;
+    const input=find('#input'),submit=find('#form [type=submit]');text=String(text).trim();if(!text)return;
+    disableCompanionControls(root);
     input.value='';append(text,'user');pending=true;input.disabled=true;submit.disabled=true;
     const thinking=append('Farmi está revisando la orden…','thinking');
-    try{const result=await execute(text);thinking.remove();append(result.text);}
+    try{const result=await execute(text);thinking.remove();companionControls(append(result.text),result,send);}
     catch(error){thinking.remove();append(`No pude guardar el cambio: ${error.message}`,'error');}
     finally{pending=false;input.disabled=false;submit.disabled=false;if(!find('#panel').hidden)input.focus();}
-  });
+  }
+  find('#form').addEventListener('submit',event=>{event.preventDefault();void send(find('#input').value);});
   function open(value){find('#panel').hidden=!value;find('#launcher').setAttribute('aria-expanded',String(value));if(value)find('#input').focus();else find('#launcher').focus();}
   find('#launcher').addEventListener('click',()=>open(find('#panel').hidden));
   find('#close').addEventListener('click',()=>open(false));
   root.addEventListener('keydown',event=>{if(event.key==='Escape'&&!find('#panel').hidden){event.preventDefault();open(false);}});
   append('¡Hola! Soy Farmi. Puedo gestionar productos, promociones, proveedores, lotes, inventario, pedidos y entregas con los permisos del panel. Proceso tus órdenes aquí mismo; no uso IA externa. Escribe ayuda para ver órdenes y campos requeridos. Si faltan datos reales, te los pediré o abriré su formulario.');
   events.addEventListener('session:expired',()=>host.remove(),{once:true});
-  return Object.freeze({send:async text=>execute(text),open,remove:()=>host.remove()});
+  return Object.freeze({send,open,remove:()=>host.remove()});
 }

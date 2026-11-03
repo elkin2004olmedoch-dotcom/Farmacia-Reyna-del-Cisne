@@ -9,7 +9,7 @@ function findProduct(text,products){
   if(!products)return {type:'needs-products'};
   const quoted=[...String(text).matchAll(/["“]([^"”]+)["”]/g)].map(match=>normalize(match[1]));
   const value=normalize(text);
-  const matches=products.filter(product=>product?.nombre&&(quoted.length?quoted.includes(normalize(product.nombre)):new RegExp(`(?:^|[^\\p{L}\\p{N}])${normalize(product.nombre).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?=$|[^\\p{L}\\p{N}])`,'u').test(value)));
+  const matches=products.filter(product=>product?.nombre&&(quoted.length?(quoted.some(q=>q.startsWith('id:'))?quoted.includes('id:'+normalize(product.id)):quoted.includes(normalize(product.nombre))):new RegExp(`(?:^|[^\\p{L}\\p{N}])${normalize(product.nombre).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?=$|[^\\p{L}\\p{N}])`,'u').test(value)));
   if(matches.length!==1)return needsDetails(matches.length?'Veo más de un producto en la orden. Escribe el nombre exacto de uno solo.':'No encuentro ese nombre exacto en el catálogo. Copia el nombre tal como aparece en Productos.');
   return {product:matches[0]};
 }
@@ -94,7 +94,7 @@ export function interpretAdminCommand(text,products){
     if(!percentageMatch||Number(percentageMatch[1])<1||Number(percentageMatch[1])>85)return needsDetails('Dime el porcentaje de descuento entero, entre 1 % y 85 %.');
     if(!until||!realDay(until[1])||until[1]<ecuadorCommandDay(Date.now()))return needsDetails('Dime una fecha final real de hoy o futura en formato AAAA-MM-DD (hora de Ecuador).');
     const title=original.match(/\b(?:titulada?|llamada?)\s+["“]([^"”]{2,120})["”]\s*$/i);
-    let remainder=normalize(original.replace(title?.[0]||'','')).replace(normalize(found.product.nombre),'').replace(until[0],'').replace(percentageMatch[0],'');
+    let remainder=normalize(original.replace(title?.[0]||'','')).replace(normalize(found.product.nombre),'').replace(`"id:${normalize(found.product.id)}"`,'').replace(until[0],'').replace(percentageMatch[0],'');
     remainder=remainder.replace(/["“”]/g,'').replace(/\b(?:pon|poner|publica|publicar|activa|activar|crea|crear|sube|subir|una|la|promocion|promo|descuento|oferta|de|del|para|en|el|producto)\b/g,'').trim();
     if(remainder)return needsDetails('Usa una sola orden de promoción: producto, porcentaje entero, fecha y título opcional.');
     const percentage=Number(percentageMatch[1]),product=found.product,titulo=title?.[1].trim()||`Promoción ${percentage}% · ${product.nombre}`;
