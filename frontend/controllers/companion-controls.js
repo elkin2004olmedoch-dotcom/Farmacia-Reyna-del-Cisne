@@ -13,7 +13,7 @@ export function companionControls(item,result,send){
   }
   const actions=result.actions||[{label:'Revisar antes de confirmar',submit:true}];
   for(const action of actions){const button=document.createElement('button');button.type=action.submit?'submit':'button';button.textContent=action.label;
-    if(!action.submit)button.addEventListener('click',()=>{if(!button.disabled)void send(action.command);});form.append(button);}
-  form.addEventListener('submit',event=>{event.preventDefault();if(form.reportValidity())void send(result.submit(Object.fromEntries(new FormData(form))));});item.append(form);item.parentElement.scrollTop=item.parentElement.scrollHeight;
+    if(!action.submit)button.addEventListener('click',()=>{if(!button.disabled)void send(action.command,action.label);});form.append(button);}
+  form.addEventListener('submit',event=>{event.preventDefault();if(form.reportValidity())void send(result.submit(Object.fromEntries(new FormData(form))),'Revisar los datos seleccionados');});item.append(form);item.parentElement.scrollTop=item.parentElement.scrollHeight;
 }
 export function disableCompanionControls(root){for(const form of root.querySelectorAll('.companion-controls')){for(const control of form.querySelectorAll('button,input,select'))control.disabled=true;form.remove();}}

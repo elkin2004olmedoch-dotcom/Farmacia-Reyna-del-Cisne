@@ -165,11 +165,11 @@ export function adminCompanionController({refresh=()=>{},navigate,openEditor}={}
   document.getElementById('admin-table-choice')?.addEventListener('change',refreshQuickQuestions);
   const execute=createAdminCommandExecutor({refresh,navigate,openEditor,confirm:true});
   let pending=false;
-  async function send(text){
+  async function send(text,display){
     if(pending||!auth.isAdmin)return;
     const input=find('#input'),submit=find('#form [type=submit]');text=String(text).trim();if(!text)return;
     disableCompanionControls(root);
-    input.value='';append(text,'user');pending=true;input.disabled=true;submit.disabled=true;
+    input.value='';append(display||text,'user');pending=true;input.disabled=true;submit.disabled=true;
     const thinking=append('Farmi está revisando la orden…','thinking');
     try{const result=await execute(text);thinking.remove();companionControls(append(result.text),result,send);}
     catch(error){thinking.remove();append(`No pude guardar el cambio: ${error.message}`,'error');}
