@@ -152,13 +152,13 @@ export async function mascotaController(){
   }
   const executeCustomer=createCustomerCommandExecutor({catalog,cart,allowed:product=>!globalThis.Farmacia.pharmacyPolicy.requiresProfessionalReview(product),navigate:href=>{location.href=href;}});
   let commandBusy=false;
-  async function send(text){
+  async function send(text,display){
     if(commandBusy)return;
     const message=String(text||'').trim().slice(0,180);if(!message)return;
     disableCompanionControls(root);
     clearTimeout(replyTimer);requestVersion+=1;const version=requestVersion;
     root.querySelectorAll('.message.thinking').forEach(node=>node.remove());
-    append(message,'user');find('#input').value='';
+    append(display||message,'user');find('#input').value='';
     const pending=append(`${PEOPLE[selected]} está pensando…`,'thinking');
     setState('running',{loop:true});
     commandBusy=true;
