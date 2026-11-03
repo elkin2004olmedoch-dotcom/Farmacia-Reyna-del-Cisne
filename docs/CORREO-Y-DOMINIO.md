@@ -33,7 +33,7 @@ Para el envío se propone un subdominio del nombre adquirido, como `correo.<domi
 
 El dominio de prueba `resend.dev` sólo permite enviar al correo asociado con la cuenta de Resend. No permite confirmar los correos de todos los clientes. Para otros destinatarios se necesita un dominio propio verificado y un `from` de ese dominio. La dirección actual de Pages se conserva para la web; no se utiliza como remitente de los clientes. [Restricción oficial de resend.dev](https://resend.com/docs/knowledge-base/403-error-resend-dev-domain).
 
-El backend puede usar la API HTTPS `POST https://api.resend.com/emails`, con autenticación Bearer y los campos `from`, `to`, `subject`, `html` y/o `text`. La integración mantiene Node.js/Express y puede usar `fetch` nativo; no necesita añadir un SDK para este envío. La clave no debe llegar al frontend. [API oficial de envío](https://resend.com/docs/api-reference/emails/send-email).
+El backend integra la API HTTPS `POST https://api.resend.com/emails`, con autenticación Bearer y los campos `from`, `to`, `subject`, `html` y `text`. La integración mantiene Node.js/Express y usa `fetch` nativo, sin añadir un SDK para este envío. La clave no debe llegar al frontend. [API oficial de envío](https://resend.com/docs/api-reference/emails/send-email).
 
 ### Cuotas gratuitas verificadas
 
@@ -48,11 +48,11 @@ Los nombres aceptados por esta integración son:
 | `EMAIL_VERIFICATION_ENABLED` | Mantener `false` mientras falten cuenta, clave, remitente verificado o validación completa. Cambiar a `true` sólo al activar el flujo preparado. |
 | `EMAIL_PUBLIC_ORIGIN` | Origen HTTPS exacto de la tienda, incluido en la allowlist CORS. Inicialmente puede ser el origen actual de Pages; sin ruta ni fragmento. |
 | `RESEND_API_KEY` | Clave privada de envío de Resend. Se introduce en el servicio Render, no en Git, Pages, capturas, logs ni chats. |
-| `EMAIL_FROM` | Nombre de la farmacia y dirección perteneciente al dominio verificado. No se rellena con una dirección inventada mientras el dominio no exista. |
+| `EMAIL_FROM` | Sólo la dirección perteneciente al dominio verificado, sin nombre ni cabeceras. El servidor añade el nombre **Farmacia Reina del Cisne**. No se rellena con una dirección inventada mientras el dominio no exista. |
 
-El propietario puede configurarlas en **Render → servicio farmacia-reina-del-cisne → Environment**. **Save only** guarda sin aplicar hasta el siguiente despliegue; las opciones de guardar y desplegar sí actualizan el servicio. La activación debe coordinarse con el despliegue manual existente, sin recrear el servicio ni ejecutar un seed. No se han inspeccionado ni cambiado sus valores privados. [Variables y secretos en Render](https://render.com/docs/configure-environment-variables).
+El propietario puede configurarlas en **Render → servicio farmacia-reina-del-cisne → Environment**. **Save only** guarda sin aplicar hasta el siguiente despliegue; las opciones de guardar y desplegar sí actualizan el servicio. La activación debe coordinarse con el despliegue manual existente, sin recrear el servicio ni ejecutar un seed. [Variables y secretos en Render](https://render.com/docs/configure-environment-variables).
 
-En esta sesión no hay herramientas Render MCP expuestas y el ejecutable `render` no está en `PATH`. Se comprobó sólo su disponibilidad; no se instalaron herramientas ni se inició sesión. El panel de Render sigue siendo una vía para la configuración futura.
+La integración está publicada mediante la [PR #17](https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/pull/17), con la migración aditiva aplicada en PostgreSQL. Se verificó el respaldo antes del despliegue. El conector de Render ya está conectado; se mantuvo el plan gratuito y se guardaron únicamente `SKIP_INITIAL_SEED=true` y `EMAIL_VERIFICATION_ENABLED=false`, conservando las demás variables. El envío real sigue desactivado porque faltan la cuenta Resend, el dominio de envío y sus credenciales.
 
 ## Contrato de confirmación
 
