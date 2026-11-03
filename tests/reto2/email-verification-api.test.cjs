@@ -10,7 +10,7 @@ let fixture,messages;
 const registration=()=>({nombre:'Cliente Verificación',email:'correo-'+randomUUID().slice(0,8)+'@example.ec',telefono:'0990000000',cedula:'0102030400',password:'CorreoCliente2026!'});
 const digest=token=>createHash('sha256').update(token).digest('hex');
 const publicOnly=body=>{
-  const json=JSON.stringify(body);assert.doesNotMatch(json,/"(?:token|tokenHash|passwordHash|password|apiKey|secret|RESEND_API_KEY)"|re_synthetic_email_api_not_real/);
+  const data=body.data?.verified===true?{...body.data,token:undefined}:body.data;const json=JSON.stringify({...body,data});assert.doesNotMatch(json,/"(?:token|tokenHash|passwordHash|password|apiKey|secret|RESEND_API_KEY)"|re_synthetic_email_api_not_real/);
   assert.equal((messages || []).filter(message=>typeof message.token==='string' && json.includes(message.token)).length,0,'La API no debe devolver tokens de correo, tampoco dentro de mensajes.');
 };
 const sign=user=>jwt.sign({version:user.tokenVersion},fixture.config.secret,{algorithm:'HS256',subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'});
@@ -48,9 +48,9 @@ test('registro pendiente no crea sesión ni expone token/hash; login y JWT váli
   const authorization='Bearer '+sign(user);for(const [method,url,body] of [['get','/api/auth/me'],['get','/api/pedidos/mis-pedidos'],['post','/api/pedidos',{}]]){let request=api[method](url).set('Authorization',authorization);if(body)request=request.send(body);const guarded=await request.expect(403);assert.equal(guarded.body.error.code,'EMAIL_NOT_VERIFIED');publicOnly(guarded.body);}
 });
 
-test('confirmación se consume una vez, revoca JWT anterior y exige iniciar sesión de nuevo',async()=>{
+test('confirmación se consume una vez y entrega una sesión de cliente con la versión nueva',async()=>{
   const api=fixture.api(),pending=await register(api),old=sign(pending.user);
-  const confirmed=await verify(api,pending.token).expect(200);assert.equal(confirmed.body.data.verified,true);publicOnly(confirmed.body);assert.deepEqual(Object.keys(confirmed.body.data).sort(),['message','verified']);
+  const confirmed=await verify(api,pending.token).expect(200);assert.equal(confirmed.body.data.verified,true);publicOnly(confirmed.body);assert.deepEqual(Object.keys(confirmed.body.data).sort(),['message','token','usuario','verified']);assert.equal(confirmed.body.data.usuario.id,pending.user.id);assert.equal(confirmed.body.data.usuario.role,'user');assert.equal(confirmed.headers['cache-control'],'no-store');await api.get('/api/auth/me').set('Authorization','Bearer '+confirmed.body.data.token).expect(200);
   const current=await fixture.db.usuario.findUnique({where:{id:pending.user.id}});assert.ok(current.emailVerifiedAt);assert.equal(current.tokenVersion,pending.user.tokenVersion+1);assert.equal(await fixture.db.emailVerification.count({where:{usuarioId:current.id}}),0);
   const replay=await verify(api,pending.token).expect(422);assert.equal(replay.body.error.code,'EMAIL_VERIFICATION_INVALID');publicOnly(replay.body);
   await api.get('/api/auth/me').set('Authorization','Bearer '+old).expect(401);
@@ -65,6 +65,13 @@ test('token expirado y correo cambiado no confirman y dejan la cuenta pendiente'
     const response=await verify(api,pending.token).expect(422);assert.equal(response.body.error.code,'EMAIL_VERIFICATION_INVALID');publicOnly(response.body);
     const user=await fixture.db.usuario.findUnique({where:{id:pending.user.id}});assert.equal(user.emailVerifiedAt,null);assert.equal(user.tokenVersion,pending.user.tokenVersion);assert.equal(await fixture.db.emailVerification.count({where:{usuarioId:user.id}}),0);
   }
+});
+
+test('confirmar correo de personal no entrega una sesión administrativa',async()=>{
+  const api=fixture.api(),pending=await register(api);
+  await fixture.db.usuario.update({where:{id:pending.user.id},data:{role:'admin'}});
+  const confirmed=await verify(api,pending.token).expect(200);
+  assert.equal(confirmed.body.data.verified,true);assert.equal(confirmed.body.data.token,undefined);assert.equal(confirmed.body.data.usuario,undefined);publicOnly(confirmed.body);
 });
 
 test('reenviar respeta cooldown, rota el hash y rechaza el enlace anterior',async()=>{

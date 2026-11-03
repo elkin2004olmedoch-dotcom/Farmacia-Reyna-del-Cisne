@@ -8,7 +8,7 @@ const {app,db,directory}=require('./fixture.cjs');
 let request=require('supertest')(app);
 beforeEach(()=>{request=require('supertest')(require('../../server/app.cjs')());});
 const originalFetch=global.fetch;
-const envNames=['PAYPHONE_ENABLED','PAYPHONE_TOKEN','PAYPHONE_STORE_ID','PAYPHONE_ENVIRONMENT','PAYMENT_PUBLIC_ORIGIN','PAYMENT_API_ORIGIN'];
+const envNames=['PAYPHONE_ENABLED','PAYPHONE_TOKEN','PAYPHONE_STORE_ID','PAYPHONE_ENVIRONMENT','PAYMENT_PUBLIC_ORIGIN','PAYMENT_API_ORIGIN','TRANSFER_BANK_NAME','TRANSFER_ACCOUNT_TYPE','TRANSFER_ACCOUNT_NUMBER','TRANSFER_ACCOUNT_HOLDER'];
 const originalEnv=Object.fromEntries(envNames.map(name=>[name,process.env[name]]));
 function disabled(){for(const name of envNames)delete process.env[name];}
 function enabled(environment='sandbox') {Object.assign(process.env,{PAYPHONE_ENABLED:'true',PAYPHONE_TOKEN:'synthetic-private-token',PAYPHONE_STORE_ID:randomUUID(),PAYPHONE_ENVIRONMENT:environment,PAYMENT_PUBLIC_ORIGIN:'https://tienda.example.ec',PAYMENT_API_ORIGIN:'https://api.example.ec',CORS_ORIGIN:'http://localhost:3000,https://tienda.example.ec'});}
@@ -33,6 +33,17 @@ test('pago desactivado conserva pedidos y no expone credenciales',async()=>{
  assert.equal(await db.pago.count(),0);
  assert.equal((await db.pedido.findUnique({where:{id:pedido.id}})).estado,'pendiente');
 });
+test('datos de transferencia sólo se entregan al propietario o administrador y no acreditan pago',async()=>{
+ disabled();Object.assign(process.env,{TRANSFER_BANK_NAME:'Banco Ejemplo',TRANSFER_ACCOUNT_TYPE:'ahorros',TRANSFER_ACCOUNT_NUMBER:'0123456789',TRANSFER_ACCOUNT_HOLDER:'Titular Sintético'});
+ const pedido=await order(),route=`/api/pedidos/${pedido.id}/pago`,before=await db.pago.count();
+ const result=(await request.get(route).set('Authorization',auth(user)).expect(200)).body.data;
+ assert.deepEqual(result.transferencia,{disponible:true,banco:'Banco Ejemplo',tipo:'ahorros',numeroCuenta:'0123456789',titular:'Titular Sintético'});assert.equal(result.pago,null);assert.equal(result.pedido.estado,'pendiente');assert.equal(await db.pago.count(),before);
+ const configuration=await request.get('/api/pagos/configuracion').expect(200);assert.ok(!JSON.stringify(configuration.body).includes('0123456789'));
+ await request.get(route).expect(401);await request.get(route).set('Authorization',auth(other)).expect(404);await request.get(route).set('Authorization',auth(driver)).expect(403);
+ process.env.TRANSFER_ACCOUNT_TYPE='otro';assert.deepEqual((await request.get(route).set('Authorization',auth(user)).expect(200)).body.data.transferencia,{disponible:false});
+ disabled();
+});
+
 test('pago exige propietario o administrador, rechaza repartidor y campos de importe/tarjeta',async()=>{
  disabled();const pedido=await order(),route=`/api/pedidos/${pedido.id}/pago`;
  await request.get(route).expect(401);

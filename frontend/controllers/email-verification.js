@@ -45,9 +45,9 @@ export function emailVerificationController(){
     status(message,'Este enlace no es válido o ya venció. Solicita un nuevo correo de confirmación.',true);
   }
   function acceptLink(value){
-    generation++;token=value;pending=false;completed=false;busy(button,false);button.textContent='Confirmar mi correo';button.disabled=!token;pendingPanel.hidden=Boolean(token);
+    generation++;token=value;pending=false;completed=false;busy(button,false);button.textContent='Confirmar y entrar';button.disabled=!token;pendingPanel.hidden=Boolean(token);
     if(!token){invalid();return;}
-    status(message,'Confirma tu dirección para continuar con tu cuenta. El correo se confirma sólo cuando pulses el botón.');
+    status(message,'Al confirmar, tu sesión de cliente se iniciará y volverás a la tienda. El correo se confirma sólo cuando pulses el botón.');
   }
   function locationChanged(event){
     // A history traversal may emit both events; popstate can already have removed the fragment.
@@ -64,6 +64,9 @@ export function emailVerificationController(){
       if(request!==generation)return;
       if(result?.verified!==true)throw new Error('No se pudo confirmar el correo. Inténtalo nuevamente.');
       token=null;completed=true;pendingPanel.hidden=true;
+      if(typeof result.token==='string'&&result.usuario?.role==='user'){
+        auth.save(result);location.replace('catalogo.html');return;
+      }
       status(message,'Correo confirmado. Ya puedes iniciar sesión');message.focus();
     }catch(error){
       if(request!==generation)return;
@@ -72,7 +75,7 @@ export function emailVerificationController(){
     }finally{
       if(request===generation){
         pending=false;busy(button,false);button.disabled=!token;
-        button.textContent=completed?'Correo confirmado':token?'Volver a intentar':'Confirmar mi correo';
+        button.textContent=completed?'Correo confirmado':token?'Volver a intentar':'Confirmar y entrar';
         if(token && wasFocused && document.activeElement===document.body)button.focus({preventScroll:true});
       }
     }

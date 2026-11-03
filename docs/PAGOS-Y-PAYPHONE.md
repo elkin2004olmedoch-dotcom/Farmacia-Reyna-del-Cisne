@@ -9,7 +9,7 @@ El pedido registrado abre `/pagos.html?pedido=ID`, exige sesión y consulta su i
 | Método | Comportamiento |
 |---|---|
 | Tarjeta de crédito o débito | Permanece visible. Si PayPhone está habilitado, continúa hacia el formulario alojado del proveedor con los controles del intento existente. Mientras no lo esté, **Solicitar enlace seguro** prepara un mensaje de WhatsApp con el pedido y su importe; no crea un intento de pago ni recoge datos de tarjeta. |
-| Transferencia bancaria | Muestra el importe guardado y la referencia del pedido. **Copiar importe y referencia** copia únicamente esos dos datos; **Solicitar datos bancarios** prepara la consulta por WhatsApp. La farmacia proporciona los datos de su cuenta. |
+| Transferencia bancaria | Muestra el banco, tipo de cuenta, número y titular configurados por la farmacia, junto al importe guardado y la referencia del pedido. **Copiar datos de transferencia** copia esos datos; **Enviar comprobante a la farmacia** abre el contacto para su revisión. Sin configuración válida conserva la consulta de datos bancarios. Ninguna de estas acciones aprueba un pago. |
 | Pago con la farmacia | Permite contactar al equipo para acordar el pago del pedido. Abrir el contacto no registra ni acredita un pago. |
 
 El cliente revisa y envía el mensaje en WhatsApp por su propia decisión. La solicitud de un enlace o de datos bancarios no realiza cobros ni confirma transferencias; tampoco cambia el estado del pago. Sin un intento registrado, la pantalla muestra **Pago por coordinar con la farmacia**. Si hay un intento previo y PayPhone queda desactivado, la interfaz impide solicitar otro enlace o iniciar una transferencia y conserva la consulta del estado y el contacto con la farmacia.
@@ -17,6 +17,14 @@ El cliente revisa y envía el mensaje en WhatsApp por su propia decisión. La so
 En el carrito, `paymentPreference` permite elegir tarjeta, transferencia o coordinación manual. El controlador retira ese campo antes de enviar el pedido a la API; no crea una columna ni registra un pago. Tras la confirmación, el enlace de pago conserva la preferencia mediante `metodo=card|transfer|manual`. La pantalla acepta sólo esos valores; un valor desconocido o duplicado vuelve a la coordinación manual.
 
 Abrir `/pagos.html` sin un pedido muestra **Ver mis pedidos** para elegir una compra. No presenta un importe de ejemplo, resultados simulados ni un formulario de tarjeta. El pedido y el pago mantienen estados separados.
+
+### Datos de transferencia
+
+El servicio existente lee `TRANSFER_BANK_NAME`, `TRANSFER_ACCOUNT_TYPE` (`ahorros` o `corriente`), `TRANSFER_ACCOUNT_NUMBER` y `TRANSFER_ACCOUNT_HOLDER` desde sus variables de entorno. No se añaden tablas ni se fijan cuentas en el frontend. Los datos sólo forman parte de la consulta autenticada del pago de un pedido propio o de un administrador; el endpoint público de configuración no los expone. La farmacia debe comprobar que los datos del titular sean correctos antes de aceptar transferencias. El importe y referencia proceden del pedido y no se sustituyen por datos del navegador.
+
+### Tarjetas y compras futuras
+
+La captura y validación de tarjetas se realizan en el formulario alojado de PayPhone. La integración existente no acepta PAN ni CVV en la API de la farmacia. No hay tarjetas guardadas ni cobros reales habilitados mientras falten la cuenta comercial y sus credenciales. PayPhone ofrece tokenización mediante `cardToken`, que requiere autorización previa y una primera transacción aprobada. No se implementa un almacén de tarjetas ficticio ni se crean tablas para tokens de un servicio aún no autorizado. [Tokenización oficial](https://docs.payphone.app/cajita-de-pagos).
 
 ### Entornos de PayPhone
 

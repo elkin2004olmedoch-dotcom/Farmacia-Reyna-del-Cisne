@@ -59,11 +59,11 @@ function createEmailVerification({db,deliver=values=>delivery.sendVerification(v
         const claimed=await tx.emailVerification.deleteMany({where:{usuarioId:row.usuarioId,tokenHash,expiresAt:{gt:instant}}});
         if(claimed.count!==1)return false;
         const changed=await tx.usuario.updateMany({where:{id:row.usuarioId,email:row.email,activo:true,emailVerificationRequired:true,emailVerifiedAt:null},data:{emailVerifiedAt:instant,tokenVersion:{increment:1}}});
-        return changed.count===1;
+        return changed.count===1?row.usuarioId:null;
       });
     }catch{record('consume_database_failed');throw new AppError(503,'EMAIL_VERIFICATION_UNAVAILABLE','No se pudo confirmar el correo. Intenta nuevamente.');}
     if(!verified){record('invalid');throw invalid();}
-    record('verified');return {verified:true};
+    record('verified');return {verified:true,usuarioId:verified};
   }
   return {issue,consume,requiresVerification};
 }

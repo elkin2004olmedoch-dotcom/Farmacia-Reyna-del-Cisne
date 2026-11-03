@@ -33,8 +33,10 @@ module.exports = config=> {
     async updateProfile(req,res){res.json({ok:true,data:await users.updateProfile(req.user.id,req.input)});},
     async logout(req,res) { await users.revoke(req.user.id);res.status(204).end(); },
     async verifyEmail(req,res){
-      const result=await verification.consume(req.input.token);
-      res.json({ok:true,data:{...result,message:'Correo confirmado. Ya puedes iniciar sesión.'}});
+      const {usuarioId}=await verification.consume(req.input.token);
+      const user=await users.findById(usuarioId,{...users.publicFields,tokenVersion:true});
+      const enter=user?.activo&&user.emailVerifiedAt&&user.role==='user';
+      res.json({ok:true,data:{verified:true,...(enter?session(user):{}),message:enter?'Correo confirmado. Bienvenido a la farmacia.':'Correo confirmado. Inicia sesión para continuar.'}});
     },
     async resendVerification(req,res){
       if(!config.emailVerification?.enabled)throw new AppError(503,'EMAIL_UNAVAILABLE','La confirmación por correo todavía no está habilitada. Contacta con la farmacia.');
