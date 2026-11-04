@@ -2,6 +2,14 @@
 
 3 de noviembre de 2026. Alcance: reparto web/nativo, asignación, límites de navegación y contraste de controles. No es una certificación ni una auditoría completa de ambos negocios.
 
+## Identidad del personal y ayuda de reparto
+
+Administración y reparto web comparten la paleta crema/vino del catálogo mediante `frontend/assets/operations.css`, sin duplicar sus modelos ni APIs. Se conservan logos, Goti y los colores de las estadísticas. Tablas, formularios y tarjetas de entrega ofrecen controles principales de al menos 44 píxeles; el mapa conserva la ruta dentro de la app y cerrar su panel devuelve el foco al pedido que lo abrió.
+
+El administrador mantiene su panel, métricas, formularios y órdenes con resumen y confirmación/cancelación. En **Entregas y cobertura** configura zonas y coordina repartidores. El repartidor ve **Mis entregas**, sin formularios administrativos. Goti aparece también en esa bandeja con ayuda para actualizar la lista, consultar instrucciones de ruta/ubicación/entrega y abrir el perfil. La ayuda de reparto no modifica precios, promociones, pedidos ni estados; las acciones de entrega siguen pasando por los botones y confirmaciones existentes. Al perder sesión se retiran la mascota, el mapa y los datos privados.
+
+`operations-polish.spec.cjs` comprueba identidad compartida, editor/tablas, roles, foco, controles, accesibilidad y ayuda de reparto en 320, 375, 768 y 1440 píxeles. Se mantienen las pruebas de conversación administrativa, asignación, permisos, GPS y cierre de entregas. Esta actualización visual corresponde a las pantallas web; no cambia permisos nativos ni recompila el APK 0.3.0. Las verificaciones con GPS sintético no sustituyen pruebas en teléfonos físicos.
+
 ## Recorrido
 
 1. El pedido a domicilio nuevo se asigna dentro de su transacción si existe exactamente un repartidor activo. El pedido sigue pendiente; la farmacia confirma y prepara conforme a su operación. Los pedidos anteriores sin asignación se revisan al confirmarlos/prepararlos. Con cero o varios repartidores se utiliza la asignación administrativa. Retiro no crea entrega.

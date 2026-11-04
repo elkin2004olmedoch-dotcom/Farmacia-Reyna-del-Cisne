@@ -24,7 +24,8 @@ function cartCount(){try{const mvc=JSON.parse(localStorage.getItem('farmacia-mvc
 function pageContext(){const path=location.pathname.split('/').pop()||'index.html',page=document.body.dataset.page,section=location.hash.slice(1),map={'index.html':page==='home'?'home':'home','catalogo.html':'catalog','producto.html':'product','comparar.html':'compare','checkout.html':'checkout','cuenta.html':'account','pedidos.html':'orders','ayuda.html':'help','pagos.html':'payments'};if(path==='index.html'&&['servicios','promos','ubicacion','contacto','featured-title'].includes(section))return section==='promos'?'promotions':section==='ubicacion'||section==='contacto'?'contact':'home';return map[path]||({'home':'home','catalog':'catalog','product':'product','compare':'compare','checkout':'checkout','account':'account','orders':'orders','help':'help','payments':'payments'}[page]||'home');}
 
 /** A small, local store-navigation helper. Messages never leave this module. */
-export async function mascotaController({administration=false,command,questions,greeting,onMount}={}){
+export async function mascotaController({administration=false,courier=false,command,questions,greeting,onMount}={}){
+  const staff=administration||courier;
   const tag=administration?'farmacia-admin-companion':'farmacia-mascota';
   if(document.querySelector(tag))return;
   const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('widget.css',ASSETS).href;
@@ -34,7 +35,7 @@ export async function mascotaController({administration=false,command,questions,
   const root=host.attachShadow({mode:'open'});
   root.append(style,responsiveStyle,conversationStyle);
   const template=document.createElement('template');
-  template.innerHTML=`<div class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">${administration?"ASISTENTE LOCAL DE LA FARMACIA":"TU COMPAÑERO DE FARMACIA"}</span><h2 id="title">Goti te acompaña</h2><p>${administration?"Catálogo, pedidos y entregas":"Ayuda para navegar y preparar tu compra"}</p></div><button class="close" id="close" aria-label="Cerrar ayuda" type="button">×</button></header><div class="preferences"><label>Compañero<select id="character"><option value="farmi">Farmi</option><option value="boti">Boti</option><option value="goti">Goti</option></select></label></div><div class="messages" id="messages" role="log" aria-label="${administration?"Asistente de administración":"Ayuda de la farmacia"}" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Preguntas rápidas de esta sección"></nav><form id="form"><label for="input" class="sr-only">¿Qué necesitas?</label><input id="input" maxlength="${administration?3000:180}" autocomplete="off" placeholder="${administration?"Ej. actualiza precio de…":"¿Qué necesitas?"}" required><button type="submit" aria-label="Enviar consulta">↑</button></form><p class="local-note">${administration?"Los cambios usan tu sesión y requieren confirmación":"Guía local de la tienda · tus mensajes no se envían"}</p></section><div class="bubble" id="bubble" role="status" hidden></div><button class="avatar" id="avatar" type="button" aria-label="Haz saltar a Goti"><canvas id="canvas" width="192" height="208" aria-hidden="true"></canvas></button><button class="launcher" id="launcher" type="button" aria-label="${administration?"Abrir asistente administrativo":"Abrir ayuda de la farmacia"}" aria-expanded="false" aria-controls="panel"><span class="online" aria-hidden="true"></span><span id="launcher-label">${administration?"Ayuda administrativa":"¿Te ayudo?"}</span><span aria-hidden="true">↗</span></button></div>`;
+  template.innerHTML=`<div class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">${courier?"TU ASISTENTE DE REPARTO":administration?"ASISTENTE LOCAL DE LA FARMACIA":"TU COMPAÑERO DE FARMACIA"}</span><h2 id="title">Goti te acompaña</h2><p>${courier?"Pedidos, rutas y entrega":administration?"Catálogo, pedidos y entregas":"Ayuda para navegar y preparar tu compra"}</p></div><button class="close" id="close" aria-label="Cerrar ayuda" type="button">×</button></header><div class="preferences"><label>Compañero<select id="character"><option value="farmi">Farmi</option><option value="boti">Boti</option><option value="goti">Goti</option></select></label></div><div class="messages" id="messages" role="log" tabindex="0" aria-label="${courier?"Ayuda de reparto":administration?"Asistente de administración":"Ayuda de la farmacia"}" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Preguntas rápidas de esta sección"></nav><form id="form"><label for="input" class="sr-only">¿Qué necesitas?</label><input id="input" maxlength="${administration?3000:180}" autocomplete="off" placeholder="${administration?"Ej. actualiza precio de…":"¿Qué necesitas?"}" required><button type="submit" aria-label="Enviar consulta">↑</button></form><p class="local-note">${courier?"Ayuda de tus entregas · tus mensajes no se guardan":administration?"Los cambios usan tu sesión y requieren confirmación":"Guía local de la tienda · tus mensajes no se envían"}</p></section><div class="bubble" id="bubble" role="status" hidden></div><button class="avatar" id="avatar" type="button" aria-label="Haz saltar a Goti"><canvas id="canvas" width="192" height="208" aria-hidden="true"></canvas></button><button class="launcher" id="launcher" type="button" aria-label="${courier?"Abrir ayuda de reparto":administration?"Abrir asistente administrativo":"Abrir ayuda de la farmacia"}" aria-expanded="false" aria-controls="panel"><span class="online" aria-hidden="true"></span><span id="launcher-label">${courier?"Ayuda de reparto":administration?"Ayuda administrativa":"¿Te ayudo?"}</span><span aria-hidden="true">↗</span></button></div>`;
   root.append(template.content.cloneNode(true));document.body.append(host);
   const find=selector=>root.querySelector(selector);
   const canvas=find('#canvas');let context;try{context=canvas.getContext('2d');}catch{context=null;}
@@ -71,7 +72,7 @@ export async function mascotaController({administration=false,command,questions,
   function contextSignature(){if(administration)return new URLSearchParams(location.search).get('tabla')||'dashboard';const context=pageContext();return context==='product'?`${context}:${productName()}`:context;}
   function refreshQuickQuestions(){
     currentSignature=contextSignature();
-    if(administration){const nav=find('#shortcuts');nav.replaceChildren();for(const option of questions?.()||[]){const button=document.createElement('button');button.type='button';button.textContent=option.label;button.addEventListener('click',()=>option.reply?append(option.reply):send(option.text));nav.append(button);}return;}
+    if(staff){const nav=find('#shortcuts');nav.replaceChildren();for(const option of questions?.()||[]){const button=document.createElement('button');button.type='button';button.textContent=option.label;button.addEventListener('click',()=>option.reply?append(option.reply):send(option.text));nav.append(button);}return;}
     currentContext=pageContext();
     currentSignature=contextSignature();
     const options=[...(quickQuestions[currentContext]||quickQuestions.home)];
@@ -115,7 +116,7 @@ export async function mascotaController({administration=false,command,questions,
   function open(value){
     refreshQuickQuestions();
     find('#panel').hidden=!value;find('#launcher').setAttribute('aria-expanded',String(value));
-    find('#launcher-label').textContent=value?'Cerrar ayuda':administration?'Ayuda administrativa':'¿Te ayudo?';
+    find('#launcher-label').textContent=value?'Cerrar ayuda':courier?'Ayuda de reparto':administration?'Ayuda administrativa':'¿Te ayudo?';
     if(value){find('#bubble').hidden=true;setState('waving',{loops:1});find('#input').focus();}
     else find('#launcher').focus();
   }
@@ -156,7 +157,7 @@ export async function mascotaController({administration=false,command,questions,
     const query=text.replace(/^(hola[, ]*)?(quiero |necesito |puedes |por favor )*(buscar |busca |encontrar |un producto[: ]*|producto[: ]*)/i,'').trim().slice(0,100)||text.slice(0,100);
     return{state:'waiting',text:`Puedes buscar «${query}» en el catálogo. Allí verás las presentaciones y los precios publicados. Confirma con la farmacia cualquier duda de disponibilidad o receta.`,actions:[{label:`Buscar ${query}`,href:`catalogo.html?q=${encodeURIComponent(query)}`},whatsapp]};
   }
-  const executeCustomer=administration?command:createCustomerCommandExecutor({catalog,cart,allowed:product=>!globalThis.Farmacia.pharmacyPolicy.requiresProfessionalReview(product),navigate:href=>{location.href=href;}});
+  const executeCustomer=staff?command:createCustomerCommandExecutor({catalog,cart,allowed:product=>!globalThis.Farmacia.pharmacyPolicy.requiresProfessionalReview(product),navigate:href=>{location.href=href;}});
   let commandBusy=false;
   async function send(text,display){
     if(commandBusy)return;
@@ -168,14 +169,14 @@ export async function mascotaController({administration=false,command,questions,
     const pending=append(`${PEOPLE[selected]} está pensando…`,'thinking');
     setState('running',{loop:true});
     commandBusy=true;
-    if(administration){find('#input').disabled=true;find('#form [type=submit]').disabled=true;}
+    if(staff){find('#input').disabled=true;find('#form [type=submit]').disabled=true;}
     try{
-      const medical=!administration&&classifyMascotaQuestion(message,knownProductNames())==='medical';
+      const medical=!staff&&classifyMascotaQuestion(message,knownProductNames())==='medical';
       if(medical)await executeCustomer('cancelar');
       const result=medical?null:await executeCustomer(message);
       if(result){pending.remove();companionControls(append(result.text),result,send);setState('review');return;}
     }catch(error){pending.remove();append(administration?'No pude guardar el cambio: '+error.message:error.message||'No se pudo completar la consulta. Inténtalo nuevamente.');setState('waiting');return;}
-    finally{commandBusy=false;if(administration){find('#input').disabled=false;find('#form [type=submit]').disabled=false;if(!find('#panel').hidden)find('#input').focus();}}
+    finally{commandBusy=false;if(staff){find('#input').disabled=false;find('#form [type=submit]').disabled=false;if(!find('#panel').hidden)find('#input').focus();}}
     replyTimer=setTimeout(()=>{
       if(version!==requestVersion)return;pending.remove();const response=answer(message);append(response.text,'bot',response.actions);
       if(!setState(response.state))setState('idle');
@@ -210,7 +211,7 @@ export async function mascotaController({administration=false,command,questions,
   find('#launcher').addEventListener('click',()=>open(find('#panel').hidden));
   find('#close').addEventListener('click',()=>open(false));
   root.addEventListener('keydown',event=>{if(event.key==='Escape'&&!find('#panel').hidden){event.preventDefault();open(false);}});
-  find('#avatar').addEventListener('click',()=>{setState('jumping',{loops:1});sayBubble(administration?'¡Aquí estoy! Pulsa «Ayuda administrativa» para gestionar.':'¡Aquí estoy! Pulsa «¿Te ayudo?» para conversar.');});
+  find('#avatar').addEventListener('click',()=>{setState('jumping',{loops:1});sayBubble(courier?'¡Aquí estoy! Pulsa «Ayuda de reparto» para conversar.':administration?'¡Aquí estoy! Pulsa «Ayuda administrativa» para gestionar.':'¡Aquí estoy! Pulsa «¿Te ayudo?» para conversar.');});
   find('#avatar').addEventListener('pointerenter',()=>{if(state==='idle')setState('waving',{loops:1});});
   find('#avatar').addEventListener('pointermove',event=>{if(state==='jumping')return;const box=canvas.getBoundingClientRect();offset=Math.max(-8,Math.min(8,(event.clientX-box.left-box.width/2)/4));if(Math.abs(offset)>5 && state==='idle')setState(offset>0?'running-right':'running-left',{loops:1});});
   find('#avatar').addEventListener('pointerleave',()=>{offset=0;});
@@ -229,7 +230,7 @@ export async function mascotaController({administration=false,command,questions,
     lastCartCount=count;
   });
   setCharacter(selected);
-  append(greeting||`¡Hola! Soy ${PEOPLE[selected]}. Te ayudo a encontrar productos y a preparar tu compra. Elige una opción o escribe el nombre de un producto.`, 'bot',administration?[]:[{label:'Explorar catálogo',href:'catalogo.html'}]);
+  append(greeting||`¡Hola! Soy ${PEOPLE[selected]}. Te ayudo a encontrar productos y a preparar tu compra. Elige una opción o escribe el nombre de un producto.`, 'bot',staff?[]:[{label:'Explorar catálogo',href:'catalogo.html'}]);
   function remove(){clearTimeout(replyTimer);clearTimeout(bubbleTimer);clearInterval(refreshTimer);questionObserver.disconnect();window.removeEventListener('hashchange',refreshQuickQuestions);document.getElementById('admin-table-choice')?.removeEventListener('change',refreshQuickQuestions);host.remove();if(globalThis.FarmaciaMascota?.open===open)delete globalThis.FarmaciaMascota;}
   onMount?.(remove);
   await loadManifest();if(!host.isConnected)return null;refreshTimer=manifest?.complete?null:setInterval(loadManifest,15000);
