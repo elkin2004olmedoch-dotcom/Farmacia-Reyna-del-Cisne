@@ -75,23 +75,32 @@ async function list({page,pageSize},userId) {
   const [items,total]=await db.$transaction([db.pedido.findMany({where,include,orderBy:[{createdAt:'desc'},{id:'asc'}],skip:(page-1)*pageSize,take:pageSize}),db.pedido.count({where})]);
   return {items,total,page,pageSize};
 }
-async function updateStatus(id,{estado,esperadoUpdatedAt},actorId) {
+async function updateStatus(id,{estado,esperadoUpdatedAt},actorId,buyer=null) {
   for(let attempt=0;attempt<3;attempt++) {
     try {
       const result=await db.$transaction(async tx=> {
-        return updateStatusTx(tx,id,{estado,esperadoUpdatedAt},actorId);
+        return updateStatusTx(tx,id,{estado,esperadoUpdatedAt},actorId,buyer);
       },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable,maxWait:10000,timeout:15000});
       if(result.error)throw result.error;return result;
     } catch(error) {if(['P2034','P2028','P1008'].includes(error.code) && attempt<2)continue;throw error;}
   }
 }
-async function updateStatusTx(tx,id,{estado,esperadoUpdatedAt,codigoEntrega},actorId) {
+async function cancelOwn(id,{esperadoUpdatedAt},actor) {
+  return updateStatus(id,{estado:'cancelado',esperadoUpdatedAt},actor.id,actor);
+}
+async function updateStatusTx(tx,id,{estado,esperadoUpdatedAt,codigoEntrega},actorId,buyer=null) {
+  if(buyer){
+    const actor=await tx.usuario.findUnique({where:{id:buyer.id},select:{activo:true,role:true,tokenVersion:true,tokenEpoch:true}});
+    if(!actor?.activo || !['user','admin'].includes(actor.role) || actor.role!==buyer.role || actor.tokenVersion!==buyer.tokenVersion || actor.tokenEpoch!==buyer.tokenEpoch)throw new AppError(401,'INVALID_TOKEN','Tu sesión ya no es válida.');
+    if(buyer.webSession&&!await require('./sesiones-web.cjs').checkTx(tx,buyer.webSession,buyer.id,buyer.tokenVersion))throw new AppError(401,'INVALID_TOKEN','Tu sesión web ya no es válida.');
+  }
   const current=await tx.pedido.findUnique({where:{id},include});
-  if(!current)throw new AppError(404,'NOT_FOUND','No se encontró el pedido.');
+  if(!current || buyer && current.userId!==buyer.id)throw new AppError(404,'NOT_FOUND','No se encontró el pedido.');
   // Repeating the same transition is safe and never returns stock twice.
   if(current.estado===estado)return {pedido:current,replayed:true};
   const expected=new Date(esperadoUpdatedAt);
   if(current.updatedAt.getTime()!==expected.getTime())throw new AppError(409,'ORDER_CHANGED','El pedido cambió. Actualiza sus datos antes de cambiar el estado.');
+  if(buyer && !['pendiente','confirmado'].includes(current.estado))throw new AppError(409,'INVALID_ORDER_TRANSITION','Sólo puedes cancelar antes de que la farmacia prepare el pedido.');
   if(!transitions[current.estado]?.includes(estado))throw new AppError(409,'INVALID_ORDER_TRANSITION','Ese cambio de estado no está permitido. Los pedidos entregados o cancelados son definitivos.');
   if(estado==='cancelado') {
     const payment=await tx.pago.findUnique({where:{pedidoId:id},select:{estado:true,entorno:true}});
@@ -115,4 +124,4 @@ async function updateStatusTx(tx,id,{estado,esperadoUpdatedAt,codigoEntrega},act
 async function assertOrderLotsCurrent(tx,pedidoId) {
   if(await tx.lote.count({where:{detalles:{some:{detalle:{pedidoId}}},vencimiento:{lt:inventory.ecuadorDay()}}}))throw new AppError(409,'LOT_EXPIRED_ORDER','El pedido contiene un lote que venció después de la reserva. Cancélalo y coordina una nueva dispensación con unidades vigentes.');
 }
-module.exports={create,list,updateStatus,updateStatusTx,assertOrderLotsCurrent};
+module.exports={create,list,updateStatus,cancelOwn,updateStatusTx,assertOrderLotsCurrent};

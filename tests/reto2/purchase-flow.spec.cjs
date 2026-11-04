@@ -40,7 +40,7 @@ test('compra con tarifa real, confirmación y seguimiento conservan importes y e
       const changed=await request.put('/api/pedidos/'+order.id+'/estado',{headers:staff,data:{estado,esperadoUpdatedAt:order.updatedAt}});expect(changed.status()).toBe(200);order=(await changed.json()).data;
       await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(card.locator('[aria-current=step]')).toHaveAttribute('data-order-step',estado);
     }
-    await expect(card).toContainText('14,00');await expect(card).not.toContainText('0102030400');await card.locator('[data-order-invoice]').click();await expect(card.locator('[id^=invoice-]')).toContainText('La farmacia todavía no ha creado una factura');
+    await expect(card).toContainText('14,00');await expect(card).not.toContainText('0102030400');await expect(card.locator('[data-order-invoice]')).toHaveCount(0);await expect(card.locator('[data-order-receipt]')).toHaveCount(1);await card.locator('[data-order-receipt]').click();await expect(page.locator('.order-receipt-dialog')).toContainText('14,00');await page.locator('[data-receipt-close]').click();const invoice=await request.get('/api/pedidos/'+order.id+'/factura',{headers:{Authorization:'Bearer '+customer.token}});expect(invoice.status()).toBe(200);expect((await invoice.json()).data).toBeNull();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);expect(errors).toEqual([]);
     const remaining=await request.get('/api/productos/'+product.id);expect((await remaining.json()).data.stock).toBe(7);
   }finally{
