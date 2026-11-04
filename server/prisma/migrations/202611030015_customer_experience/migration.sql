@@ -90,4 +90,3 @@ CREATE INDEX "EntregaIncidencia_entregaId_createdAt_idx" ON "EntregaIncidencia"(
 
 -- CreateIndex
 CREATE INDEX "EntregaIncidencia_actorId_idx" ON "EntregaIncidencia"("actorId");
-
