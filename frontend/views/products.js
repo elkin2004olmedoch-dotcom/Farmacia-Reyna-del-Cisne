@@ -5,10 +5,10 @@ import '../models/pharmacy-policy.js';
 const {requiresProfessionalReview,restrictionReason,allowsPromotion}=globalThis.Farmacia.pharmacyPolicy;
 const prescriptionNote=product=>`<p class="prescription-note">${escape(restrictionReason(product))} <a href="index.html#contacto">Coordinar con la farmacia</a>.</p>`;
 const categoryLabel=category=>({bienestar:'Bienestar',cuidado:'Cuidado personal',bebe:'Mamá y bebé'}[category] || 'Productos');
-export function productCard(product) {
+export function productCard(product,{priority=false,highPriority=false}={}) {
   const id=escape(product.id),url='producto.html?id='+encodeURIComponent(product.id),review=requiresProfessionalReview(product);
   return `<article class="featured-card pharmacy-product-card" aria-labelledby="name-${id}">
-    <a class="featured-image" href="${url}"><img data-product-image src="${escape(productImageUrl(product.imagen))}" alt="${escape(product.alt || product.nombre)}" width="320" height="320" loading="lazy">${product.stock===0?'<span class="product-sold-out">Agotado</span>':''}${promotionRibbon(product.descuentoPorcentaje)}</a>
+    <a class="featured-image" href="${url}"><img data-product-image src="${escape(productImageUrl(product.imagen))}" alt="${escape(product.alt || product.nombre)}" width="320" height="320" loading="${priority?'eager':'lazy'}" decoding="async"${highPriority?' fetchpriority="high"':''}>${product.stock===0?'<span class="product-sold-out">Agotado</span>':''}${promotionRibbon(product.descuentoPorcentaje)}</a>
     <div class="product-card-copy"><small>${escape(categoryLabel(product.categoria))}</small><h3 id="name-${id}"><a href="${url}">${escape(product.nombre)}</a></h3>
       ${productMetadata(product,'product-card-meta')}
       ${product.descripcion?`<p class="product-card-description">${escape(product.descripcion)}</p>`:''}
@@ -20,8 +20,8 @@ export function productCard(product) {
     </div>
   </article>`;
 }
-export function catalogView(products,target) {
-  target.innerHTML=products.length?products.map(productCard).join(''):'<div class="shop-empty catalog-empty"><h2>No encontramos productos con esos filtros.</h2><p>Prueba otra palabra, revisa la categoría o restablece los filtros.</p><a class="button button-outline" href="catalogo.html">Ver todo el catálogo</a></div>';
+export function catalogView(products,target,{prioritizeImages=false}={}) {
+  target.innerHTML=products.length?products.map((product,index)=>productCard(product,{priority:prioritizeImages&&index<3,highPriority:prioritizeImages&&index===0})).join(''):'<div class="shop-empty catalog-empty"><h2>No encontramos productos con esos filtros.</h2><p>Prueba otra palabra, revisa la categoría o restablece los filtros.</p><a class="button button-outline" href="catalogo.html">Ver todo el catálogo</a></div>';
 }
 export function productView(product) {
   const review=requiresProfessionalReview(product);

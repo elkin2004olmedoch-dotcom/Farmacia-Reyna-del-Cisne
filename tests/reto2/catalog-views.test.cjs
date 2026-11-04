@@ -46,3 +46,15 @@ test('catálogo vacío explica cómo recuperar resultados',async()=>{
   const {catalogView}=await views;const target={innerHTML:''};catalogView([],target);
   assert.match(target.innerHTML,/No encontramos productos/);assert.match(target.innerHTML,/restablece los filtros/);assert.match(target.innerHTML,/href="catalogo.html"/);
 });
+
+test('el catálogo prioriza sólo tres fotos y reserva la prioridad alta para la primera',async()=>{
+  const {catalogView}=await views,target={innerHTML:''},items=Array.from({length:6},(_,index)=>({...product(),id:'foto-'+index}));
+  catalogView(items,target,{prioritizeImages:true});const images=target.innerHTML.match(/<img\b[^>]+>/g);
+  assert.equal(images.length,6);
+  images.forEach((image,index)=>{assert.match(image,index<3?/loading="eager"/:/loading="lazy"/);assert.match(image,/decoding="async"/);assert.match(image,/width="320" height="320"/);if(index===0)assert.match(image,/fetchpriority="high"/);else assert.doesNotMatch(image,/fetchpriority="high"/);});
+});
+
+test('los destacados de portada y las tarjetas sueltas mantienen carga diferida',async()=>{
+  const {catalogView,productCard}=await views,target={innerHTML:''};catalogView([product(),{...product(),id:'otra'}],target);
+  for(const image of [...target.innerHTML.match(/<img\b[^>]+>/g),productCard(product()).match(/<img\b[^>]+>/)[0]]){assert.match(image,/loading="lazy"/);assert.doesNotMatch(image,/fetchpriority="high"/);}
+});
