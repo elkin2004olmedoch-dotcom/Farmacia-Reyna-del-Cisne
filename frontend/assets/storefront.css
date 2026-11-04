@@ -279,3 +279,8 @@ body:not(.admin-page):not(.admin-install-page) :is(.purchase-heading,.payment-he
 body:not(.admin-page):not(.admin-install-page) .ref-store-intro :focus-visible{outline-color:#ffdfaa}
 @media(max-width:640px){body:not(.admin-page):not(.admin-install-page) .ref-store-intro{margin-top:16px;padding:28px 22px;gap:24px;border-radius:16px}}
 body:not(.admin-page):not(.admin-install-page) .ref-store-intro h1{color:var(--brand-cream)}
+.purchase-header-back { display:inline-flex;align-items:center;min-height:44px;padding:8px 4px;color:var(--ink,#681e2a);font-weight:600;font-size:13px;line-height:1.5;text-align:right;text-decoration:underline;text-underline-offset:4px; }
+body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header-inner { display:flex;align-items:center;justify-content:space-between;gap:16px; }
+body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header #menu-button,body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .ref-nav,body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .ref-search,body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .ref-actions,body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .mobile-nav { display:none; }
+body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .ref-brand { width:min(50vw,190px);flex:0 1 190px; }
+body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .ref-brand img { width:100%;height:auto;max-height:72px;object-fit:contain; }
