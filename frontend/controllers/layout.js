@@ -44,7 +44,7 @@ export function layoutController() {
   document.addEventListener('keydown',event=>{
     if(event.key==='Escape' && document.body.dataset.searchOpen==='true' && !document.querySelector('dialog[open]')){closeSearch();searchToggle?.focus();}
     if(event.key==='Escape' && !menu.hidden)closeMenu(true);
-    if(event.key==='Tab' && overlay && !menu.hidden){const links=[button,...menu.querySelectorAll('a[href]')];const position=links.indexOf(document.activeElement);event.preventDefault();links[(position+(event.shiftKey?-1:1)+links.length)%links.length].focus();}
+    if(event.key==='Tab' && overlay && !menu.hidden){const links=[button,...menu.querySelectorAll('a[href],summary')].filter(control=>control.getClientRects().length);const position=links.indexOf(document.activeElement);event.preventDefault();links[(position+(event.shiftKey?-1:1)+links.length)%links.length].focus();}
   });
   overlay?.addEventListener('click',()=>closeMenu(true));menu.addEventListener('click',event=>{if(event.target.closest('a'))closeMenu();});
   if(overlay)matchMedia('(min-width:901px)').addEventListener('change',event=>{if(event.matches)closeMenu();});

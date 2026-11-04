@@ -52,6 +52,7 @@ module.exports=config=> {
   router.put('/productos/:id',auth,admin,V.id,...V.productUpdate,V.validated,products.update);
   router.delete('/productos/:id',auth,admin,V.id,V.validated,products.remove);
   router.post('/pedidos',auth,buyer,...V.order,orders.create);
+  router.post('/pedidos/:id/cancelacion',auth,buyer,V.id,...V.orderCancellation,V.validated,orders.cancelOwn);
   const documentLimit=rateLimit({windowMs:60*60*1000,limit:5,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'EMAIL_RATE_LIMIT','Espera antes de reenviar el comprobante.'))});
   router.post('/pedidos/:id/correo',auth,buyer,documentLimit,V.id,V.validated,(req,res,next)=>{if(Object.keys(req.body||{}).length)throw new AppError(422,'VALIDATION_ERROR','No se admite cambiar el destinatario.');next();},orders.email);
   router.get('/pedidos/mis-pedidos',auth,buyer,...V.pagination,orders.mine);

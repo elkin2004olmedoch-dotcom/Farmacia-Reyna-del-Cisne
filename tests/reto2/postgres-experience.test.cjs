@@ -28,5 +28,17 @@ test('PostgreSQL temporal: cuenta, reseñas, constraints y RLS de las tablas nue
  assert.equal(rls.length,4);assert.ok(rls.every(row=>row.relrowsecurity));
  const indexes=await db.$queryRaw`SELECT indexname FROM pg_indexes WHERE tablename IN ('DireccionGuardada','Favorito','ResenaProducto','EntregaIncidencia')`;assert.ok(indexes.length>=12);
  const reorder=(await request.get('/api/cuenta/pedidos/'+order.id+'/recompra').set(headers(a)).expect(200)).body.data;assert.ok(JSON.stringify(reorder).includes(product.id));await request.get('/api/cuenta/pedidos/'+order.id+'/recompra').set(headers(b)).expect(404);
+ await t.test('cancelación propia conserva propietario, actor y stock una sola vez',async()=>{
+  const before=await db.producto.findUnique({where:{id:product.id}});
+  const placed=(await request.post('/api/pedidos').set(headers(a)).send({claveSolicitud:randomUUID(),carrito:[{productoId:product.id,cantidad:1}],comprador:{name:a.nombre,email:a.email,phone:'0991234567',documentType:'cedula',document:'0102030400',delivery:'pickup'}}).expect(201)).body.data;
+  const endpoint='/api/pedidos/'+placed.id+'/cancelacion',body={esperadoUpdatedAt:placed.updatedAt};
+  await request.post(endpoint).set(headers(b)).send(body).expect(404);
+  const results=await Promise.all([request.post(endpoint).set(headers(a)).send(body),request.post(endpoint).set(headers(a)).send(body)]);
+  assert.deepEqual(results.map(result=>result.status),[200,200]);assert.equal(results.filter(result=>result.body.replayed).length,1);
+  await request.post(endpoint).set(headers(a)).send(body).expect(200);await request.post(endpoint).set(headers(b)).send(body).expect(404);
+  assert.equal((await db.producto.findUnique({where:{id:product.id}})).stock,before.stock);
+  const history=await db.pedidoEstado.findMany({where:{pedidoId:placed.id,estado:'cancelado'}});assert.equal(history.length,1);assert.equal(history[0].actorId,a.id);
+  assert.equal(await db.movimientoInventario.count({where:{pedidoId:placed.id,tipo:'devolucion'}}),1);
+ });
  t.diagnostic('Base sintética retenida: '+name);
 });

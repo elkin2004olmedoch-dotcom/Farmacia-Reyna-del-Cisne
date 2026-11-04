@@ -24,7 +24,7 @@ test('añadir abre carrito lateral accesible; cantidades, IVA, quitar y foco usa
   if(testInfo.project.name==='escritorio'){
     const bounds=await drawer.boundingBox();expect(bounds.x).toBeGreaterThan(0);await page.mouse.click(Math.max(1,bounds.x/2),40);await expect(drawer).toBeHidden();await expect(open).toBeFocused();await open.click();
   }
-  await item.locator('[data-drawer-remove]').click();await expect(drawer).toBeVisible();await expect(drawer).toContainText('Tu carrito está vacío.');await expect(drawer.locator('.cart-drawer-footer')).toBeHidden();await expect(page.locator('[data-shop-count]').first()).toHaveText('0');
+  await item.locator('[data-drawer-remove]').click();await expect(page.locator('#confirm-dialog')).toBeVisible();await page.locator('#confirm-dialog [value=confirm]').click();await expect(drawer).toBeVisible();await expect(drawer).toContainText('Tu carrito está vacío.');await expect(drawer.locator('.cart-drawer-footer')).toBeHidden();await expect(page.locator('[data-shop-count]').first()).toHaveText('0');
   await drawer.getByRole('button',{name:'Cerrar carrito'}).click();await expect(open).toBeFocused();expect(requests).toEqual([]);
 });
 

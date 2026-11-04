@@ -39,6 +39,10 @@ El catálogo consulta páginas de 24 productos y conserva búsqueda, filtros y o
 
 Las nuevas entregas se confirman mediante un código privado del comprador, con límite de intentos. El seguimiento incluye incidencias y una ventana estimada cuando existe una ruta calculada desde GPS reciente del repartidor; indica su origen, caducidad y posibles retrasos. Goti presenta productos y resúmenes visuales y abre el registro exacto después de una orden administrativa confirmada.
 
+La [comparación con PLIEGO](docs/COMPARACION-PLIEGO-Y-ALCANCE.md) distingue requisitos académicos, mejoras útiles y funciones exclusivas de libros digitales. La compra concentra marca y regreso al catálogo; administración agrupa las opciones avanzadas. El carrito lateral confirma quitar/vaciar y permite deshacer una retirada comprobando disponibilidad actual. Al verificar el correo en otra pestaña del mismo navegador, el registro pendiente comprueba la sesión y continúa sin repetir contraseña; una señal sin sesión o de otra cuenta no autentica al usuario.
+
+**Mis pedidos** permite al comprador cancelar sus pedidos pendientes o confirmados, con confirmación y control de versión. La API comprueba propiedad antes de cualquier reintento y repone existencias una sola vez; los cobros reales y las facturas emitidas mantienen sus restricciones de conciliación. La confirmación y el historial ofrecen un único acceso al comprobante, con impresión y envío al correo registrado; los controles técnicos de SRI permanecen en administración.
+
 ## Compra, pago y seguimiento
 
 - Con pagos de prueba habilitados, el checkout revisa tarjeta o transferencia y total antes de guardar; pedido y pago se registran juntos. Cancelar conserva el carrito. El comprobante se solicita por correo después de confirmar. [Compra, seguridad y privacidad](docs/COMPRA-SEGURIDAD-Y-PRIVACIDAD.md).
@@ -120,6 +124,7 @@ Las rutas tienen prefijo /api. Las operaciones privadas reciben Authorization: B
 | PUT /api/productos/:id | admin | 200: producto actualizado |
 | DELETE /api/productos/:id | admin | 204: baja lógica; conserva relaciones históricas |
 | POST /api/pedidos | user/admin | 201: pedido y detalles en BD; total/stock calculados en servidor |
+| POST /api/pedidos/:id/cancelacion | user/admin propietario | 200: cancelación pendiente/confirmada o reintento seguro; exige esperadoUpdatedAt y conserva conciliación de pagos/facturas |
 | GET /api/pedidos/mis-pedidos | user/admin | 200: pedidos del usuario autenticado |
 | GET /api/pedidos | admin | 200: todos los pedidos, paginados |
 | GET /api/admin/tablas?tabla=productos | admin | 200: consulta administrativa; también usuarios, pedidos, detalles y promociones |

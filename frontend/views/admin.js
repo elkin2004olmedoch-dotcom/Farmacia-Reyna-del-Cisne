@@ -24,6 +24,7 @@ export function adminSectionView(name) {
   document.getElementById('admin-section-title').textContent=title;document.getElementById('admin-section-description').textContent=description;
   if(!['dashboard','fiscal','facturacion'].includes(name))document.getElementById('admin-table-choice').value=name;
   for(const link of document.querySelectorAll('[data-admin-section]')){if(link.dataset.adminSection===name)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
+  for(const group of document.querySelectorAll('.admin-advanced')){if(group.dataset.section!==name && group.querySelector('[aria-current="page"]'))group.open=true;group.dataset.section=name;}
   document.getElementById('admin-create').textContent=({productos:'Crear producto →',promociones:'Crear promoción →',proveedores:'Crear proveedor →',lotes:'Registrar lote →',movimientos:'Registrar ajuste →'})[name] || 'Crear registro →';
   document.getElementById('admin-table').setAttribute('aria-label',title);
 }

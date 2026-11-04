@@ -1,5 +1,5 @@
 import '../models/ecuador.js';
-import {auth} from '../models/auth.js';
+import {auth,sessionSignalKey} from '../models/auth.js';
 import {catalog} from '../models/catalog.js';
 import {cart} from '../models/cart.js';
 import {orders} from '../models/orders.js';
@@ -11,7 +11,6 @@ import {confirmAction} from './dialog.js';
 import {requireUser} from './layout.js';
 import {events} from '../models/events.js';
 import {watchUpdates,preserveFocus} from './updates.js';
-import {connectCustomerInvoices} from './billing.js';
 import {deliveryCheckout} from './delivery-checkout.js';
 import {connectOrderReceipts} from './receipts.js';
 import {connectOrderMaps} from './order-map.js';
@@ -20,7 +19,6 @@ import '../models/pharmacy-policy.js';
 const {requiresProfessionalReview}=globalThis.Farmacia.pharmacyPolicy;
 export async function checkoutController() {
   connectReorder(document.getElementById('order-confirmation'));
-  connectCustomerInvoices(document.getElementById('order-confirmation'));
   const updateReceipts=connectOrderReceipts(document.getElementById('order-confirmation'));
   const updateMaps=connectOrderMaps(document.getElementById('order-confirmation'));
   let products=await catalog.all();const form=document.getElementById('delivery-form');const next=document.getElementById('checkout-next');
@@ -87,16 +85,56 @@ export async function checkoutController() {
   target.addEventListener('focusout',()=>{void refresh();});
 }
 export async function ordersController() {
-  connectReorder(document.getElementById('orders-list'));
-  connectCustomerInvoices(document.getElementById('orders-list'));
-  if(!requireUser('pedidos.html'))return;let page=1,requestId=0,snapshot='',navigating=false;
-  const updateReceipts=connectOrderReceipts(document.getElementById('orders-list'));
-  const updateMaps=connectOrderMaps(document.getElementById('orders-list'));
-  async function render(requestedPage=page){const id=++requestId;const result=await orders.mine(requestedPage);if(id!==requestId || !auth.user || document.querySelector('#orders-list .order-invoice [aria-busy="true"]'))return;const loaded=JSON.stringify(result);if(loaded!==snapshot){updateReceipts(result.items);updateMaps(result.items);preserveFocus(document.getElementById('orders-list'),()=>ordersView(result));snapshot=loaded;}page=requestedPage;document.getElementById('orders-page-info').textContent=`Página ${requestedPage} · ${result.total} pedidos`;document.getElementById('orders-prev').disabled=requestedPage<=1;document.getElementById('orders-next').disabled=requestedPage*result.pageSize>=result.total;}
+  const area=document.getElementById('orders-list');connectReorder(area);
+  if(!requireUser('pedidos.html'))return;
+  let page=1,requestId=0,snapshot='',navigating=false,cancelling=false,sessionVersion=0,sessionDirty=false;
+  const available=new Map(),updateReceipts=connectOrderReceipts(area),updateMaps=connectOrderMaps(area);
+  function invalidate(){sessionVersion++;requestId++;sessionDirty=true;snapshot='';available.clear();updateReceipts([]);updateMaps([]);area.replaceChildren();}
+  events.addEventListener('session:changed',invalidate);events.addEventListener('session:expired',invalidate);
+  window.addEventListener('storage',event=>{if(event.key===sessionSignalKey)invalidate();});
+  async function restoreSession(){
+    const previous=auth.user;await auth.restore();
+    const changed=previous?.id!==auth.user?.id || previous?.role!==auth.user?.role;
+    if(changed)events.dispatchEvent(new Event('session:changed'));
+    return changed;
+  }
+  async function render(requestedPage=page){
+    const id=++requestId,version=sessionVersion;
+    if(sessionDirty){if(await restoreSession())return render(1);if(id!==requestId || version!==sessionVersion)return;sessionDirty=false;}
+    const owner=auth.user?.id;if(!owner)return;
+    const result=await orders.mine(requestedPage);
+    if(id!==requestId || version!==sessionVersion || auth.user?.id!==owner)return;
+    const loaded=JSON.stringify(result);
+    if(loaded!==snapshot){available.clear();for(const order of result.items)available.set(order.id,order);updateReceipts(result.items);updateMaps(result.items);preserveFocus(area,()=>ordersView(result));snapshot=loaded;}
+    page=requestedPage;document.getElementById('orders-page-info').textContent=`Página ${requestedPage} · ${result.total} pedidos`;document.getElementById('orders-prev').disabled=requestedPage<=1;document.getElementById('orders-next').disabled=requestedPage*result.pageSize>=result.total;
+  }
+  area.addEventListener('click',async event=>{
+    const button=event.target.closest('[data-order-cancel]');if(!button || button.disabled || cancelling || navigating)return;
+    const order=available.get(button.dataset.orderCancel),owner=auth.user?.id,version=sessionVersion;
+    if(!order || !owner || order.userId!==owner || !['pendiente','confirmado'].includes(order.estado))return;
+    const sameSession=()=>sessionVersion===version && auth.user?.id===owner;
+    const focusOrder=()=>{(document.getElementById('order-title-'+order.id) || document.getElementById('page-status')).focus({preventScroll:true});};
+    cancelling=true;requestId++;
+    try{
+      if(!await confirmAction('¿Cancelar este pedido antes de su preparación? Sus productos se devolverán al inventario. Si existe un cobro real o una factura emitida, la farmacia debe revisar la cancelación.'))return;
+      if(!sameSession())throw new Error('Tu sesión cambió. Revisa tus pedidos antes de volver a confirmar.');
+      await restoreSession();
+      if(!sameSession())throw new Error('Tu sesión cambió. Revisa tus pedidos antes de volver a confirmar.');
+      busy(button,true);await orders.cancel(order.id,order.updatedAt);
+      if(!sameSession())return;
+      await render();if(!sameSession())return;
+      message('Pedido cancelado. Sus productos se devolvieron al inventario.');focusOrder();
+    }catch(error){
+      if(error.status===409 && sameSession()){
+        try{await render();}catch(refreshError){message(`${error.message} ${refreshError.message}`,true,true);return;}
+      }
+      message(error.message,true);focusOrder();if(error.status===401)requireUser('pedidos.html');
+    }finally{cancelling=false;if(button.isConnected)busy(button,false);}
+  });
   for(const [id,offset] of [['orders-prev',-1],['orders-next',1]])document.getElementById(id).addEventListener('click',async()=>{
-    if(navigating)return;navigating=true;
+    if(navigating || cancelling)return;navigating=true;
     try{await render(page+offset);}catch(error){message(error.message,true);}finally{navigating=false;}
   });
-  const refresh=watchUpdates(render,{canRefresh:()=>Boolean(auth.user) && !navigating && !document.querySelector('#orders-list .order-invoice [aria-busy="true"]'),intervalMs:5000});
+  const refresh=watchUpdates(render,{canRefresh:()=>Boolean(auth.user) && !navigating && !cancelling,intervalMs:5000});
   await refresh();if(auth.user && !snapshot)document.getElementById('orders-list').textContent='No se pudieron cargar los pedidos. Volveremos a intentar.';
 }

@@ -33,7 +33,7 @@ test('mapa voluntario, comprobante y PDF conservan el pedido y la privacidad',as
   try{
     await openOrders(page,data.user);await expect(page.locator('iframe')).toHaveCount(0);expect(mapReads).toBe(0);expect(await page.evaluate(()=>window.documentGpsCalls)).toBe(0);
     const mapButton=page.locator('[data-order-map="'+data.order.id+'"]');await expect(mapButton).toBeVisible();await mapButton.focus();await page.keyboard.press('Enter');
-    await expect(page.locator('iframe')).toHaveCount(1);const url=new URL(await page.locator('iframe').getAttribute('src'));expect(url.origin).toBe('https://www.openstreetmap.org');expect(url.searchParams.get('marker')).toBe('0.125,-79.25');expect(mapReads).toBe(1);
+    await expect(page.locator('iframe')).toHaveCount(1);const url=new URL(await page.locator('iframe').getAttribute('src'));expect(url.origin).toBe('https://www.openstreetmap.org');expect(url.searchParams.get('marker')).toBe('0.125,-79.25');await expect.poll(()=>mapReads).toBe(1);
     await page.screenshot({path:testInfo.outputPath('pedido-con-mapa.png'),fullPage:true,animations:'disabled'});
     const receipt=page.locator('[data-order-receipt="'+data.order.id+'"]');await receipt.focus();await page.keyboard.press('Enter');const dialog=page.locator('.order-receipt-dialog');await expect(dialog).toBeVisible();
     await expect(dialog).toContainText(data.product.nombre);await expect(dialog).toContainText('14,00');await expect(dialog).toContainText('2,50');await expect(dialog).toContainText('sin validez tributaria');await expect(dialog).not.toContainText('0102030400');await expect(dialog).not.toContainText('Pagado');

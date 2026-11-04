@@ -145,7 +145,9 @@ body:not(.admin-page):not(.admin-install-page) .cart-drawer-copy p { margin:6px 
 body:not(.admin-page):not(.admin-install-page) .cart-drawer-copy .quantity-picker { margin-top:12px; border-color:#af9585; border-radius:6px; }
 body:not(.admin-page):not(.admin-install-page) .cart-drawer-copy .quantity-picker button { width:44px; height:44px; background:#fff3df; }
 body:not(.admin-page):not(.admin-install-page) .cart-drawer-quantity { min-width:36px; text-align:center; font-size:13px; font-variant-numeric:tabular-nums; }
-body:not(.admin-page):not(.admin-install-page) [data-drawer-remove] { min-height:40px; margin-top:5px; padding:8px 0; border:0; background:transparent; color:var(--brand-dark); font:inherit; font-size:12px; text-decoration:underline; }
+body:not(.admin-page):not(.admin-install-page) :is([data-drawer-remove],[data-drawer-clear],[data-drawer-undo]) { min-height:44px; padding:8px; border:0; background:transparent; color:var(--brand-dark); font:inherit; font-size:12px; text-decoration:underline; }
+body:not(.admin-page):not(.admin-install-page) :is([data-drawer-remove],[data-drawer-clear]) svg { vertical-align:middle; margin-right:4px; }
+body:not(.admin-page):not(.admin-install-page) [data-drawer-undo] { align-self:flex-start; margin:0 16px 8px; }
 body:not(.admin-page):not(.admin-install-page) .cart-drawer-footer { flex-shrink:0; padding:20px 24px max(24px,env(safe-area-inset-bottom)); border-top:1px solid #dfcdb8; background:#fff3df; }
 body:not(.admin-page):not(.admin-install-page) .cart-drawer-note { margin:0 0 16px; color:var(--muted); font-size:11px; line-height:1.7; }
 body:not(.admin-page):not(.admin-install-page) .cart-drawer-empty { display:grid; justify-items:start; gap:16px; padding:30px 24px; }
@@ -277,3 +279,8 @@ body:not(.admin-page):not(.admin-install-page) :is(.purchase-heading,.payment-he
 body:not(.admin-page):not(.admin-install-page) .ref-store-intro :focus-visible{outline-color:#ffdfaa}
 @media(max-width:640px){body:not(.admin-page):not(.admin-install-page) .ref-store-intro{margin-top:16px;padding:28px 22px;gap:24px;border-radius:16px}}
 body:not(.admin-page):not(.admin-install-page) .ref-store-intro h1{color:var(--brand-cream)}
+.purchase-header-back { display:inline-flex;align-items:center;min-height:44px;padding:8px 4px;color:var(--ink,#681e2a);font-weight:600;font-size:13px;line-height:1.5;text-align:right;text-decoration:underline;text-underline-offset:4px; }
+body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header-inner { display:flex;align-items:center;justify-content:space-between;gap:16px; }
+body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header #menu-button,body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .ref-nav,body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .ref-search,body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .ref-actions,body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .mobile-nav { display:none; }
+body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .ref-brand { width:min(50vw,190px);flex:0 1 190px; }
+body[data-page="checkout"]:not(.admin-page):not(.admin-install-page) .ref-header .ref-brand img { width:100%;height:auto;max-height:72px;object-fit:contain; }

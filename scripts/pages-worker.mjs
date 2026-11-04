@@ -17,6 +17,10 @@ export function createProxy(send=fetch){return async(request,env)=>{
  try{
   const response=await send(upstream+url.pathname+url.search,{method:request.method,headers,body:['GET','HEAD'].includes(request.method)?undefined:request.body,redirect:'manual',signal:AbortSignal.timeout(65000),duplex:'half',cache:'no-store'});
   if(response.status>=300&&response.status<400)return error(502,'No se pudo completar la solicitud.');
+  if([429,502,503,504].includes(response.status)&&!/^application\/(?:[\w.+-]+\+)?json(?:\s*;|$)/i.test(response.headers.get('Content-Type')||'')){
+   await response.body?.cancel();
+   return error(response.status,response.status===429?'El servicio está temporalmente limitado. Espera un momento y vuelve a intentar.':'La farmacia está tardando en responder. Intenta nuevamente.');
+  }
   const output=new Headers(response.headers);output.set('Cache-Control','no-store');
   for(const name of ['Content-Length','Access-Control-Allow-Origin','Access-Control-Allow-Credentials'])output.delete(name);
   return new Response(response.body,{status:response.status,headers:output});
