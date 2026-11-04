@@ -15,9 +15,11 @@ import {connectCustomerInvoices} from './billing.js';
 import {deliveryCheckout} from './delivery-checkout.js';
 import {connectOrderReceipts} from './receipts.js';
 import {connectOrderMaps} from './order-map.js';
+import {connectSavedAddresses,connectReorder} from './customer-account.js';
 import '../models/pharmacy-policy.js';
 const {requiresProfessionalReview}=globalThis.Farmacia.pharmacyPolicy;
 export async function checkoutController() {
+  connectReorder(document.getElementById('order-confirmation'));
   connectCustomerInvoices(document.getElementById('order-confirmation'));
   const updateReceipts=connectOrderReceipts(document.getElementById('order-confirmation'));
   const updateMaps=connectOrderMaps(document.getElementById('order-confirmation'));
@@ -58,6 +60,7 @@ export async function checkoutController() {
   render();globalThis.Farmacia.validation.provinces.forEach(province=>{const option=document.createElement('option');option.value=option.textContent=province;document.getElementById('checkout-province').append(option);});
   for(const [key,value] of Object.entries({name:auth.user?.nombre || '',email:auth.user?.email || '',phone:auth.user?.telefono || ''}))form.elements.namedItem(key).value=value;
   shipping=deliveryCheckout(form,render);render();void shipping.ready;
+  void connectSavedAddresses(form,shipping);
   const address=document.getElementById('delivery-address');
   for(const field of form.querySelectorAll('[name=delivery]'))field.addEventListener('change',()=>{address.hidden=form.elements.delivery.value!=='delivery';const pickup=document.getElementById('purchase-pickup-info');if(pickup)pickup.hidden=!address.hidden;if(form.elements.delivery.value==='pickup')shipping.reset();render();});
   next.addEventListener('click',()=>{if(!requireUser())return;showDetails(true);form.querySelector('input[name=name]').focus();});
@@ -84,6 +87,7 @@ export async function checkoutController() {
   target.addEventListener('focusout',()=>{void refresh();});
 }
 export async function ordersController() {
+  connectReorder(document.getElementById('orders-list'));
   connectCustomerInvoices(document.getElementById('orders-list'));
   if(!requireUser('pedidos.html'))return;let page=1,requestId=0,snapshot='',navigating=false;
   const updateReceipts=connectOrderReceipts(document.getElementById('orders-list'));

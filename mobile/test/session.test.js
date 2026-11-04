@@ -47,6 +47,13 @@ test('login persists only refresh credentials and a safe repartidor profile', as
   assert.equal(JSON.stringify(saved).includes('password'), false);
 });
 
+test('delivery code rejection retains session and uses a safe actionable message',async t=>{
+ const f=await fixture(t,(route)=>route==='/auth/mobile/login'?ok(credentials()):denied(422,'DELIVERY_CODE_INVALID'));
+ await f.session.login('synthetic@example.invalid','synthetic-password');
+ await assert.rejects(()=>f.session.request('/entregas/synthetic/estado',{method:'PUT',data:{estado:'entregada',codigoEntrega:'000000',esperadoVersion:1}}),error=>error.code==='DELIVERY_CODE_INVALID'&&/no coincide/.test(error.message)&&!error.message.includes('synthetic-secret'));
+ assert.equal(f.session.authenticated,true);
+});
+
 test('restore without secure credentials returns null without contacting the API', async t => {
   const f = await fixture(t, () => assert.fail('unexpected network call'));
   assert.equal(await f.session.restore(), null);

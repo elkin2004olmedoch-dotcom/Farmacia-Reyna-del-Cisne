@@ -15,7 +15,7 @@ test.beforeAll(async () => {
       return;
     }
     if (pathname === '/app.js') { response.setHeader('Content-Type', 'text/javascript'); response.end('/* Native bootstrap replaced explicitly by test mountApp fixture. */'); return; }
-    const shared={'/frontend/controllers/route-map.js':'controllers/route-map.js','/assets/route-map.css':'assets/route-map.css','/assets/leaflet/leaflet.js':'assets/vendor/leaflet/leaflet.js','/assets/leaflet/leaflet.css':'assets/vendor/leaflet/leaflet.css'}[pathname];
+    const shared={'/frontend/controllers/delivery-dialog.js':'controllers/delivery-dialog.js','/frontend/controllers/route-map.js':'controllers/route-map.js','/assets/route-map.css':'assets/route-map.css','/assets/leaflet/leaflet.js':'assets/vendor/leaflet/leaflet.js','/assets/leaflet/leaflet.css':'assets/vendor/leaflet/leaflet.css'}[pathname];
     if(shared){response.setHeader('Content-Type',shared.endsWith('.js')?'text/javascript':'text/css');response.end(await fs.readFile(path.join(__dirname,'../../frontend',shared)));return;}
     if (pathname === '/assets/logo-reina-del-cisne.png') {
       response.setHeader('Content-Type', 'image/png');
@@ -35,13 +35,13 @@ test.afterAll(async () => { await new Promise(resolve => server.close(resolve));
 
 // All substitutes live in the test and enter through mountApp's public arguments.
 // No API requests, browser credential storage or native plugin calls occur here.
-async function mount(page, {restored = true, role = 'repartidor', conflict = false, loginFailure = false, notificationDenied = false, logoutFailure = false, localLogoutFailure = false, stopFailure = false, pageFailure = false,pinned=false} = {}) {
+async function mount(page, {restored = true, role = 'repartidor', conflict = false, loginFailure = false, notificationDenied = false, logoutFailure = false, localLogoutFailure = false, stopFailure = false, pageFailure = false,pinned=false,codeRequired=false} = {}) {
   await page.route('https://tile.openstreetmap.org/**',route=>route.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==','base64')}));
   await page.goto(origin);
   await page.evaluate(async options => {
     const {mountApp} = await import('/ui.js');
     const user = {id: 'courier-fixture', nombre: 'Repartidora de prueba', role: options.role, activo: true};
-    const delivery = {id: 'delivery-fixture', pedidoId: 'pedido-fixture-123', repartidorId: user.id, estado: 'asignada', estadoPedido: 'preparado', version: 4, gpsVersion: 0, origenSeguimiento: null, ubicacion: null,
+    const delivery = {id: 'delivery-fixture', pedidoId: 'pedido-fixture-123', repartidorId: user.id, estado: 'asignada', estadoPedido: 'preparado',codigoRequerido:options.codeRequired, version: 4, gpsVersion: 0, origenSeguimiento: null, ubicacion: null,
       destino: {nombre: '<img src=x onerror=alert(1)>', telefono: '0991234567', direccion: 'Calle de prueba 123', ciudad: 'Puerto Quito', provincia: 'Pichincha', latitud: options.pinned?.125:null, longitud:options.pinned?-79.25:null}};
     const fixture = {calls: [], deliveries: [delivery], authenticated: options.restored, conflict: options.conflict, pageFailure: options.pageFailure};
     const session = {
@@ -54,6 +54,7 @@ async function mount(page, {restored = true, role = 'repartidor', conflict = fal
         fixture.calls.push({route, ...options});
         if(route.endsWith('/ruta'))return {destino:{latitud:.125,longitud:-79.25,fuente:'direccion'},geometry:{type:'LineString',coordinates:[[-79.24,.12],[-79.245,.123],[-79.25,.125]]},distance:1800,duration:300};
         if (route.endsWith('/estado')) {
+          if(delivery.codigoRequerido&&options.data.estado==='entregada'&&options.data.codigoEntrega!=='123456')throw Object.assign(new Error('El código no coincide.'),{status:422,code:'DELIVERY_CODE_INVALID'});
           if (fixture.conflict) { fixture.conflict = false; delivery.version = 6; delivery.estado = 'en_destino'; throw Object.assign(new Error('version'), {status: 409}); }
           if (options.data.esperadoVersion !== delivery.version) throw new Error('Wrong state version');
           delivery.estado = options.data.estado; delivery.version++;
@@ -77,8 +78,13 @@ async function mount(page, {restored = true, role = 'repartidor', conflict = fal
     const runtime = {async locate(){fixture.calls.push('locate');return {latitud:.12,longitud:-79.24,registradaAt:new Date().toISOString()};},async ensureNotifications() { fixture.calls.push('notifications'); if (options.notificationDenied) throw Object.assign(new Error('fixture notification'), {code: 'NOTIFICATIONS_DENIED'}); }, async openSettings() { fixture.calls.push('settings'); }};
     fixture.ui = await mountApp({root: document.getElementById('app'), session, tracker, runtime});
     window.uiFixture = fixture;
-  }, {restored, role, conflict, loginFailure, notificationDenied, logoutFailure, localLogoutFailure, stopFailure, pageFailure,pinned});
+  }, {restored, role, conflict, loginFailure, notificationDenied, logoutFailure, localLogoutFailure, stopFailure, pageFailure,pinned,codeRequired});
 }
+
+test('la app exige código y permite corregirlo por teclado sin cerrar sesión',async({page})=>{
+ await mount(page,{codeRequired:true});await page.getByRole('button',{name:'Iniciar recorrido',exact:true}).click();await page.getByRole('button',{name:'Llegué al destino',exact:true}).click();await page.getByRole('button',{name:'Pedido entregado',exact:true}).click();
+ const input=page.getByLabel('Código de entrega de 6 dígitos');await expect(input).toBeFocused();await input.fill('000000');await input.press('Enter');await expect(page.locator('#delivery-progress-error')).toContainText('no coincide');await expect(input).toBeFocused();await input.fill('123456');await input.press('Enter');await expect(page.locator('.delivery-progress-dialog')).toHaveCount(0);await expect(page.getByText('Entrega cerrada. Los datos del destino ya no se muestran.')).toBeVisible();
+});
 
 test('la app instalada inicia GPS y muestra una ruta dentro del contenedor local',async({page},testInfo)=>{
   await mount(page,{pinned:true});await page.getByRole('button',{name:'Iniciar recorrido',exact:true}).click();

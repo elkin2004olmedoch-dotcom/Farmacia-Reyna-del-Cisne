@@ -74,5 +74,7 @@ module.exports=config=> {
   router.get('/admin/tablas',auth,admin,query('tabla').isIn(['productos','usuarios','pedidos','detalles','promociones']),...V.pagination,require('../controllers/admin.cjs'));
   router.get('/admin/auditoria',auth,admin,...V.pagination,async(req,res)=>res.json({ok:true,data:await require('../models/admin-audit.cjs').list(req.input)}));
   router.get('/admin/resumen',auth,admin,require('../controllers/admin-summary.cjs'));
+  router.use(require('./resenas.cjs')(config));
+  router.use('/cuenta',require('./cuenta.cjs')(config));
   return router;
 };

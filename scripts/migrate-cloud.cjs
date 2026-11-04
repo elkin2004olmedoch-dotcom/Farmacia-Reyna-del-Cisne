@@ -2,7 +2,7 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
-const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','adminMfa','sesionWeb','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','pagoPractica','auditoriaAdmin','semilla']);
+const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','adminMfa','sesionWeb','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','pagoPractica','direccionGuardada','favorito','resenaProducto','entregaIncidencia','auditoriaAdmin','semilla']);
 const privateActions=new Set(['emailVerification','passwordReset','sesionWeb','adminMfa']);
 const INITIAL_FISCAL=Object.freeze({id:'iva-general-inicial',tarifaGeneral:15,inicioVigencia:'2024-04-01T05:00:00.000Z',referenciaNormativa:'Ley de Régimen Tributario Interno, art. 65; Decreto Ejecutivo 198; Circular SRI NAC-DGECCGC25-00000006 (vigencia 2026).',actorId:null});
 const INITIAL_DEFAULTS=Object.freeze({
@@ -64,6 +64,13 @@ function assertSnapshotRelations(snapshot){
     if(ids[model].size!==snapshot[model].length || keys.some(id=>typeof id!=='string' || !id))fail('SOURCE_DATA','La base local contiene identificadores inválidos.');
   }
   const valid=snapshot.emailVerification.every(row=>ids.usuario.has(row.usuarioId))
+    && snapshot.direccionGuardada.every(row=>ids.usuario.has(row.userId))
+    && snapshot.favorito.every(row=>ids.usuario.has(row.userId)&&ids.producto.has(row.productoId))
+    && snapshot.resenaProducto.every(row=>{
+      const detail=snapshot.pedidoDetalle.find(item=>item.id===row.detalleId),order=detail&&snapshot.pedido.find(item=>item.id===detail.pedidoId);
+      return ids.usuario.has(row.userId)&&ids.producto.has(row.productoId)&&detail?.productoId===row.productoId&&order?.userId===row.userId;
+    })
+    && snapshot.entregaIncidencia.every(row=>ids.entrega.has(row.entregaId)&&ids.usuario.has(row.actorId))
     && snapshot.passwordReset.every(row=>ids.usuario.has(row.usuarioId))
     && snapshot.sesionWeb.every(row=>ids.usuario.has(row.usuarioId))
     && snapshot.sesionMovil.every(row=>ids.usuario.has(row.usuarioId))

@@ -1,14 +1,16 @@
 const STORAGE_KEY = 'farmacia.reparto.session.v1';
 const CODES = new Set(['INVALID_TOKEN', 'FORBIDDEN', 'NOT_FOUND', 'VALIDATION_ERROR', 'INVALID_CREDENTIALS', 'MOBILE_SESSION_REQUIRED', 'GPS_CHANGED', 'GPS_STALE', 'GPS_NOT_ACTIVE', 'GPS_TOO_FREQUENT', 'GPS_OWNED', 'GPS_SESSION_BUSY', 'DELIVERY_CHANGED', 'INVALID_DELIVERY_TRANSITION', 'ORDER_NOT_READY', 'ORDER_NOT_DELIVERABLE', 'TOO_MANY_REQUESTS']);
+for(const code of ['DELIVERY_CODE_INVALID','DELIVERY_CODE_REQUIRED','DELIVERY_CODE_LOCKED','DELIVERY_CODE_RATE_LIMIT','DELIVERY_PROGRESS_RATE_LIMIT'])CODES.add(code);
 
 function failure(status, code) {
-  const message = status === 0 ? 'No se pudo conectar. Comprueba tu conexión e intenta nuevamente.'
+  const codeMessage={DELIVERY_CODE_INVALID:'El código no coincide. Pide al destinatario que revise su seguimiento.',DELIVERY_CODE_REQUIRED:'Pide al destinatario su código de entrega.',DELIVERY_CODE_LOCKED:'Demasiados códigos incorrectos. Espera quince minutos.',DELIVERY_CODE_RATE_LIMIT:'Espera antes de volver a confirmar la entrega.',DELIVERY_PROGRESS_RATE_LIMIT:'Espera un minuto antes de guardar otra actualización.'}[code];
+  const message = codeMessage || (status === 0 ? 'No se pudo conectar. Comprueba tu conexión e intenta nuevamente.'
     : status === 401 ? 'La sesión venció. Inicia sesión nuevamente.'
       : status === 403 ? 'No tienes permiso para esta acción.'
         : status === 404 ? 'La entrega ya no está disponible.'
           : status === 409 ? 'Los datos cambiaron. Actualiza antes de continuar.'
             : status === 429 ? 'Espera unos segundos antes de intentar nuevamente.'
-              : 'No se pudo completar la solicitud.';
+              : 'No se pudo completar la solicitud.');
   return Object.assign(new Error(message), { status, code });
 }
 

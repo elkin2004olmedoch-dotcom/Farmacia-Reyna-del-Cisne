@@ -4,6 +4,7 @@ import {mfaAccount,mfaPrompt} from './mfa.js';
 import {accountView} from '../views/layout.js';
 import {formErrors,message,busy} from '../views/common.js';
 import {connectVerificationResend} from './email-verification.js';
+import {customerAccountController} from './customer-account.js';
 const V=globalThis.Farmacia.validation;
 export function accountController() {
   const next=new URLSearchParams(location.search).get('next');
@@ -11,6 +12,7 @@ export function accountController() {
   const deliveryDestination=destination==='entregas.html' || destination?.startsWith('entregas.html?pedido=');
   if(auth.user){
     accountView(auth.user);
+    customerAccountController();
     if(auth.isAdmin)void mfaAccount();
     const form=document.getElementById('profile-form'),status=document.getElementById('profile-status'),cancel=document.getElementById('profile-cancel');let saving=false;
     function restore(){form.elements.nombre.value=auth.user.nombre;form.elements.telefono.value=auth.user.telefono;formErrors(form,{});}

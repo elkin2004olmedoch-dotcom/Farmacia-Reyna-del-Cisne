@@ -45,9 +45,9 @@ function buildPages({output=defaultOutput,apiOrigin=process.env.PUBLIC_API_ORIGI
   const pages=['index.html','catalogo.html','producto.html','comparar.html','cuenta.html','confirmar-correo.html','recuperar-cuenta.html','checkout.html','pedidos.html','admin.html','ayuda.html','entregas.html','seguimiento.html','pagos.html','instalar-admin.html','offline.html'];
   for(const file of pages)write(file,read(file));
   for(const file of ['store.webmanifest','admin.webmanifest','app-worker.js','descargas/SHA256SUMS.txt'])write(file,read(file));
-  const apk=read('descargas/reparto-0.3.0.apk');
-  if(require('node:crypto').createHash('sha256').update(apk).digest('hex')!=='28d3d1324c6e7223cae153d6ea04c86368862c87c143de09d5fbb839f2473f10')throw new Error('La descarga Android no coincide con la versión verificada.');
-  write('descargas/reparto-0.3.0.apk',apk);
+  const apk=read('descargas/reparto-0.4.0.apk');
+  if(require('node:crypto').createHash('sha256').update(apk).digest('hex')!=='2f113c59f5266f357237fe4bcbfd577355dea8dfbc32bcd0746a96825b579fd4')throw new Error('La descarga Android no coincide con la versión verificada.');
+  write('descargas/reparto-0.4.0.apk',apk);
   function copy(directory){
     for(const entry of fs.readdirSync(path.join(root,'frontend',directory),{withFileTypes:true})){
       if(entry.name.startsWith('.') || entry.isSymbolicLink() || entry.name==='uploads')continue;
@@ -67,7 +67,7 @@ function buildPages({output=defaultOutput,apiOrigin=process.env.PUBLIC_API_ORIGI
   write('_routes.json',JSON.stringify({version:1,include:['/api/*'],exclude:[]}));
   const images=["'self'",'data:','https://tile.openstreetmap.org',apiOrigin,...(imageOrigin?[imageOrigin]:[])].join(' ');
   const csp=`default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src ${images}; connect-src 'self' ${apiOrigin}; frame-src https://www.google.com https://www.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
-  write('_headers',`/*\n  Content-Security-Policy: ${csp}\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: DENY\n  Cross-Origin-Opener-Policy: same-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=(self)\n\n/*.webmanifest\n  Content-Type: application/manifest+json\n\n/descargas/reparto-0.3.0.apk\n  Content-Type: application/vnd.android.package-archive\n  Content-Disposition: attachment; filename="Reina-del-Cisne-Reparto-pruebas.apk"\n  Cache-Control: public, max-age=31536000, immutable\n`);
+  write('_headers',`/*\n  Content-Security-Policy: ${csp}\n  Cache-Control: public, max-age=0, must-revalidate\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: DENY\n  Cross-Origin-Opener-Policy: same-origin\n  Permissions-Policy: camera=(), microphone=(), geolocation=(self)\n\n/*.webmanifest\n  Content-Type: application/manifest+json\n\n/descargas/reparto-0.4.0.apk\n  Content-Type: application/vnd.android.package-archive\n  Content-Disposition: attachment; filename="Reina-del-Cisne-Reparto-pruebas.apk"\n  Cache-Control: public, max-age=31536000, immutable\n`);
   write('_redirects','/clase / 302\n/clase.html / 302\n');
   write('404.html','<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Página no encontrada | Farmacia Reina del Cisne</title><link rel="stylesheet" href="/assets/styles.css"><link rel="stylesheet" href="/assets/shop.css"></head><body><main class="section-wrap shop-main"><h1>No encontramos esta página.</h1><p>Revisa la dirección o vuelve al inicio de la farmacia.</p><a class="button button-primary" href="/">Volver al inicio</a></main></body></html>\n');
   return {output,files,bytes,maxFileBytes,apiOrigin,imageOrigin};

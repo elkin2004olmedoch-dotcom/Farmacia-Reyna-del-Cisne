@@ -5,6 +5,7 @@ import {administration} from '../models/admin.js';
 import {requireUser} from './layout.js';
 import {confirmAction} from './dialog.js';
 import {createRouteMap} from './route-map.js';
+import {deliveryDialog} from './delivery-dialog.js';
 import {watchUpdates,preserveFocus} from './updates.js';
 import {message,busy,formErrors} from '../views/common.js';
 import {zonesView,couriersView,assignmentOrdersView,assignmentStateView,deliveriesView,trackingView,trackingLocationView,trackingMapView,recentLocation} from '../views/deliveries.js';
@@ -63,7 +64,7 @@ export async function deliveriesController(){
     catch{if(notice)gpsNotice('Se detuvo el GPS local. No se pudo confirmar la retirada en el servidor; la ubicación dejará de mostrarse al vencer en dos minutos. Puedes reintentar la retirada.');if(live && auth.user)retirePending.add(previous.item.id);}
   }
   const retirePending=new Set();
-  function expire(){if(!live)return;closeRoute();live=false;removeCompanion?.();requestId++;ordersRequestId++;stopLocal();zones=[];couriers=[];orders=[];result={items:[]};reassign=null;clearPrivate(area);}
+  function expire(){if(!live)return;document.dispatchEvent(new Event('delivery:clear'));closeRoute();live=false;removeCompanion?.();requestId++;ordersRequestId++;stopLocal();zones=[];couriers=[];orders=[];result={items:[]};reassign=null;clearPrivate(area);}
   events.addEventListener('session:expired',expire);
   events.addEventListener('session:changed',()=>{if(!auth.user)expire();});
   window.addEventListener('pagehide',()=>{closeRoute();void stopGps({notice:false,drawList:false,keepalive:true});});
@@ -102,8 +103,8 @@ export async function deliveriesController(){
   }
   async function action(button,perform,success){
     if(!live || working)return;working=true;requestId++;busy(button,true);
-    try{await perform();if(live && auth.user)message(success);}
-    catch(error){if(error.status!==401 && live){message(error.status===409?'Los datos cambiaron. Actualiza la página y revisa los valores antes de volver a guardar.':error.message,true);}}
+    try{const saved=await perform();if(saved!==null&&live && auth.user)message(success);}
+    catch(error){if(error.status!==401 && live){message(error.message,true);}}
     finally{working=false;if(button.isConnected)busy(button,false);if(live && auth.user){try{await refreshList();}catch(error){if(error.status!==401)message(error.message,true);}}}
   }
   async function retryRetirement(){for(const id of retirePending){try{await deliveries.stopSharing(id);retirePending.delete(id);}catch{gpsNotice('La retirada de ubicación sigue pendiente. Revisa la conexión y pulsa Actualizar entregas para reintentar.');}}}
@@ -132,16 +133,19 @@ export async function deliveriesController(){
   }
   area.addEventListener('click',async event=>{
     const button=event.target.closest('button');if(!button || !live || working)return;
-    const item=result.items.find(entry=>entry.id===(button.dataset.id || button.dataset.deliveryGps || button.dataset.deliveryReassign || button.dataset.deliveryRoute));
+    const item=result.items.find(entry=>entry.id===(button.dataset.id || button.dataset.deliveryGps || button.dataset.deliveryReassign || button.dataset.deliveryRoute || button.dataset.deliveryIncident));
+    if(button.hasAttribute('data-delivery-incident')&&item){await action(button,()=>deliveryDialog({incidence:true,submit:values=>deliveries.reportIncidence(item.id,{...values,esperadoVersion:item.version})}),'Incidencia compartida con el cliente.');return;}
+    if(button.hasAttribute('data-incident-resolve')&&item){await action(button,()=>deliveries.resolveIncidence(item.id,button.dataset.incidentResolve,item.version),'Incidencia resuelta.');return;}
     if(button.hasAttribute('data-delivery-route') && item?.destino){await action(button,()=>openRoute(item),'Mapa de la entrega abierto.');return;}
     if(button.hasAttribute('data-delivery-gps') && courier && activeDelivery(item)){
       if(sharing?.item.id===item.id)await stopGps();else await startGps(item);return;
     }
     if(button.hasAttribute('data-delivery-state') && item){
       const next=button.dataset.deliveryState;
-      if(next==='entregada' && !await confirmAction('¿Confirmas que entregaste el pedido al destinatario? Esta acción cierra el seguimiento.'))return;
+      if(next==='entregada' && !item.codigoRequerido && !await confirmAction('¿Confirmas que entregaste el pedido al destinatario? Esta acción cierra el seguimiento.'))return;
       await action(button,async()=>{
-        const saved=await deliveries.changeState(item.id,next,item.version);
+        const saved=next==='entregada'&&item.codigoRequerido?await deliveryDialog({submit:code=>deliveries.changeState(item.id,next,item.version,code)}):await deliveries.changeState(item.id,next,item.version);
+        if(!saved)return null;
         if(courier && next==='en_camino'){await openRoute(saved);await startGps(saved);}
         if(['entregada','cancelada'].includes(next)){if(sharing?.item.id===item.id)await stopGps({notice:false,drawList:false});if(routeId===item.id)closeRoute();}
       },'Estado de entrega actualizado.');return;
@@ -226,7 +230,7 @@ export async function trackingController(){
   if(!['user','admin'].includes(auth.user.role)){message('El seguimiento del comprador requiere una cuenta de cliente o administrador.',true,true);return;}
   const area=byId('tracking-area'),content=byId('tracking-content');area.hidden=false;
   let live=true,requestId=0,running=false,mapEnabled=false,data=null,snapshot='',locationSnapshot='';
-  function renderLocation(){if(!live)return;const point=recentLocation(data),next=JSON.stringify(point);if(next!==locationSnapshot){preserveFocus(byId('tracking-location'),()=>trackingLocationView(point));locationSnapshot=next;}trackingMapView(point,mapEnabled);}
+  function renderLocation(){if(!live)return;const point=recentLocation(data),next=JSON.stringify(point);if(next!==locationSnapshot){preserveFocus(byId('tracking-location'),()=>trackingLocationView(point));locationSnapshot=next;}trackingMapView(point,mapEnabled);if(data?.entrega?.estimacion)preserveFocus(content,()=>trackingView(data));}
   function expire(){if(!live)return;live=false;requestId++;data=null;mapEnabled=false;clearInterval(expiryTimer);clearPrivate(area);}
   events.addEventListener('session:expired',expire);events.addEventListener('session:changed',()=>{if(!auth.user)expire();});
   async function refresh(){

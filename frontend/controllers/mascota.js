@@ -4,6 +4,10 @@ import {createCustomerCommandExecutor} from './customer-command.mjs';
 import {companionControls,disableCompanionControls} from './companion-controls.js';
 import {catalog} from '../models/catalog.js';
 import {cart} from '../models/cart.js';
+import {auth} from '../models/auth.js';
+// Order data and its module load only when the customer asks for that summary.
+const orders={mine:(...args)=>import('../models/orders.js').then(module=>module.orders.mine(...args))};
+import {events} from '../models/events.js';
 const PEOPLE={farmi:'Farmi',boti:'Boti',goti:'Goti'};
 const STORED_CHARACTER='farmacia-companion';
 
@@ -89,7 +93,7 @@ export async function mascotaController({administration=false,courier=false,comm
     send(actions[intent]||intent);
   }
 
-  function image(src){if(!images.has(src)){const value=new Image();value.src=new URL(src,ASSETS).href;images.set(src,value);}return images.get(src);}
+  function image(src){if(!images.has(src)){const value=new Image();if(src.startsWith('sprites/'))value.fetchPriority='low';value.src=new URL(src,ASSETS).href;images.set(src,value);}return images.get(src);}
   function character(){return manifest?.characters.find(item=>item.id===selected);}
   function clip(){return character()?.states?.[state];}
   function setState(next,options={}){
@@ -157,7 +161,9 @@ export async function mascotaController({administration=false,courier=false,comm
     const query=text.replace(/^(hola[, ]*)?(quiero |necesito |puedes |por favor )*(buscar |busca |encontrar |un producto[: ]*|producto[: ]*)/i,'').trim().slice(0,100)||text.slice(0,100);
     return{state:'waiting',text:`Puedes buscar «${query}» en el catálogo. Allí verás las presentaciones y los precios publicados. Confirma con la farmacia cualquier duda de disponibilidad o receta.`,actions:[{label:`Buscar ${query}`,href:`catalogo.html?q=${encodeURIComponent(query)}`},whatsapp]};
   }
-  const executeCustomer=staff?command:createCustomerCommandExecutor({catalog,cart,allowed:product=>!globalThis.Farmacia.pharmacyPolicy.requiresProfessionalReview(product),navigate:href=>{location.href=href;}});
+  const executeCustomer=staff?command:createCustomerCommandExecutor({catalog,cart,orders,session:()=>auth.user,allowed:product=>!globalThis.Farmacia.pharmacyPolicy.requiresProfessionalReview(product),navigate:href=>{location.href=href;}});
+  const clearPrivate=()=>{for(const card of root.querySelectorAll('.companion-order'))card.closest('.message')?.remove();};
+  if(!staff){events.addEventListener('session:expired',clearPrivate);events.addEventListener('session:changed',clearPrivate);}
   let commandBusy=false;
   async function send(text,display){
     if(commandBusy)return;
@@ -173,7 +179,9 @@ export async function mascotaController({administration=false,courier=false,comm
     try{
       const medical=!staff&&classifyMascotaQuestion(message,knownProductNames())==='medical';
       if(medical)await executeCustomer('cancelar');
+      const customerSession=auth.user;
       const result=medical?null:await executeCustomer(message);
+      if(!staff&&result?.visualSummary?.kind==='orders'&&auth.user!==customerSession){pending.remove();append('Tu sesión cambió. Abre tu cuenta para consultar tus pedidos.');setState('waiting');return;}
       if(result){pending.remove();companionControls(append(result.text),result,send);setState('review');return;}
     }catch(error){pending.remove();append(administration?'No pude guardar el cambio: '+error.message:error.message||'No se pudo completar la consulta. Inténtalo nuevamente.');setState('waiting');return;}
     finally{commandBusy=false;if(staff){find('#input').disabled=false;find('#form [type=submit]').disabled=false;if(!find('#panel').hidden)find('#input').focus();}}
@@ -231,7 +239,7 @@ export async function mascotaController({administration=false,courier=false,comm
   });
   setCharacter(selected);
   append(greeting||`¡Hola! Soy ${PEOPLE[selected]}. Te ayudo a encontrar productos y a preparar tu compra. Elige una opción o escribe el nombre de un producto.`, 'bot',staff?[]:[{label:'Explorar catálogo',href:'catalogo.html'}]);
-  function remove(){clearTimeout(replyTimer);clearTimeout(bubbleTimer);clearInterval(refreshTimer);questionObserver.disconnect();window.removeEventListener('hashchange',refreshQuickQuestions);document.getElementById('admin-table-choice')?.removeEventListener('change',refreshQuickQuestions);host.remove();if(globalThis.FarmaciaMascota?.open===open)delete globalThis.FarmaciaMascota;}
+  function remove(){clearTimeout(replyTimer);clearTimeout(bubbleTimer);clearInterval(refreshTimer);questionObserver.disconnect();events.removeEventListener('session:expired',clearPrivate);events.removeEventListener('session:changed',clearPrivate);window.removeEventListener('hashchange',refreshQuickQuestions);document.getElementById('admin-table-choice')?.removeEventListener('change',refreshQuickQuestions);host.remove();if(globalThis.FarmaciaMascota?.open===open)delete globalThis.FarmaciaMascota;}
   onMount?.(remove);
   await loadManifest();if(!host.isConnected)return null;refreshTimer=manifest?.complete?null:setInterval(loadManifest,15000);
   requestAnimationFrame(tick);

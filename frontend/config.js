@@ -11,5 +11,6 @@ export function publicImageUrl(value){
 }
 export function productImageUrl(value){
   const url=publicImageUrl(value);
+  if(['assets/images/producto-bebe-pigeon.png','assets/images/producto-solar-eucerin.png'].includes(url))return url.replace(/\.png$/,'.webp');
   return url==='assets/images/logo-reina-del-cisne.png'?'assets/images/producto-sin-imagen.svg':url;
 }

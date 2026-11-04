@@ -11,11 +11,21 @@ const anotherReference='assets/uploads/12345678-1234-4123-8123-123456789abd.webp
 const privateHash='$2b$12$contraseña-hash-privado-no-publicable';
 const privateEmail='cliente-privado@example.ec';
 const privateVerificationHash='c'.repeat(64);
+test('la transferencia conserva direcciones, favoritos, reseñas e incidencias y valida sus relaciones',async()=>{
+ const snapshot=fixture(),createdAt=new Date('2026-11-03T12:00:00Z');
+ snapshot.direccionGuardada=[{id:'direccion-original',userId:'cliente-original',alias:'Casa',provincia:'Pichincha',ciudad:'Puerto Quito',direccion:'Calle principal s/n',codigoPostal:'170950',createdAt,updatedAt:createdAt}];
+ snapshot.favorito=[{id:'favorito-original',userId:'cliente-original',productoId:'producto-original',createdAt}];
+ snapshot.resenaProducto=[{id:'resena-original',userId:'cliente-original',productoId:'producto-original',detalleId:'detalle-original',puntuacion:4,comentario:'Entrega puntual',createdAt,updatedAt:createdAt}];
+ snapshot.entregaIncidencia=[{id:'incidencia-original',entregaId:'entrega-original',actorId:'repartidor-original',tipo:'retraso',descripcion:'Demora por lluvia',resueltaAt:createdAt,createdAt,updatedAt:createdAt}];
+ const target=targetClient(),result=await migrate({source:sourceClient(snapshot),target,apply:true});
+ for(const model of ['direccionGuardada','favorito','resenaProducto','entregaIncidencia']){assert.equal(result.origen[model],1);assert.deepEqual(target.state[model],snapshot[model]);}
+ const invalid={...snapshot,resenaProducto:[{...snapshot.resenaProducto[0],detalleId:'detalle-ajeno'}]};await assert.rejects(migrate({source:sourceClient(invalid),target:targetClient(),apply:true}),e=>e.code==='SOURCE_RELATIONS');
+});
 function fixture(uploaded=false){
   const createdAt=new Date('2024-01-02T03:04:05.123Z');
   const updatedAt=new Date('2024-02-03T04:05:06.789Z');
   return {
-    adminMfa:[],auditoriaAdmin:[],passwordReset:[{usuarioId:'cliente-original',tokenHash:'b'.repeat(64)}],sesionWeb:[{id:'web-original',usuarioId:'cliente-original',secretHash:'d'.repeat(64)}],pagoPractica:[],
+    direccionGuardada:[],favorito:[],resenaProducto:[],entregaIncidencia:[],adminMfa:[],auditoriaAdmin:[],passwordReset:[{usuarioId:'cliente-original',tokenHash:'b'.repeat(64)}],sesionWeb:[{id:'web-original',usuarioId:'cliente-original',secretHash:'d'.repeat(64)}],pagoPractica:[],
     usuario:[{id:'cliente-original',nombre:'Cliente privado',email:privateEmail,telefono:'0979275988',passwordHash:privateHash,role:'user',tokenVersion:7,activo:false,emailVerifiedAt:null,emailVerificationRequired:true,createdAt},{id:'repartidor-original',nombre:'Repartidor privado',email:'repartidor@example.ec',telefono:'0979275988',passwordHash:privateHash,role:'repartidor',tokenVersion:1,activo:true,emailVerifiedAt:updatedAt,emailVerificationRequired:false,createdAt}],
     emailVerification:[{usuarioId:'cliente-original',email:privateEmail,tokenHash:privateVerificationHash,createdAt,expiresAt:updatedAt}],
     sesionMovil:[{id:'sesion-movil-original',usuarioId:'repartidor-original',tokenVersion:1,secretHash:'a'.repeat(64),previousSecretHash:null,expiresAt:new Date('2030-01-01T00:00:00Z'),revokedAt:createdAt,createdAt,updatedAt}],

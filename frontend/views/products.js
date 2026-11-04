@@ -1,5 +1,6 @@
 import {escape,price,priceMarkup,promotionRibbon,taxMarkup,productMetadata} from './common.js';
 import {productImageUrl} from '../config.js';
+import {favoriteButton} from './customer-account.js';
 import '../models/pharmacy-policy.js';
 const {requiresProfessionalReview,restrictionReason,allowsPromotion}=globalThis.Farmacia.pharmacyPolicy;
 const prescriptionNote=product=>`<p class="prescription-note">${escape(restrictionReason(product))} <a href="index.html#contacto">Coordinar con la farmacia</a>.</p>`;
@@ -14,7 +15,7 @@ export function productCard(product) {
       ${review?prescriptionNote(product):''}
       <div class="product-card-purchase"><div class="featured-bottom">${priceMarkup(product)}</div>${taxMarkup(product)}<p class="product-stock${product.stock===0?' is-unavailable':''}">${product.stock} unidades disponibles</p>
         <div class="product-card-actions"><a class="button button-outline" href="${url}" aria-label="Ver detalles de ${escape(product.nombre)}">Ver detalles</a>${review?'<a class="text-link" href="index.html#contacto">Consultar dispensación →</a>':`<button type="button" class="button button-primary" data-customer-only data-add="${id}" ${product.stock===0?'disabled':''} aria-label="Agregar ${escape(product.nombre)} al carrito">Añadir</button>`}</div>
-        <label class="catalog-compare"><input type="checkbox" data-compare="${id}"> Comparar<span class="sr-only"> ${escape(product.nombre)}</span></label>
+        <label class="catalog-compare"><input type="checkbox" data-compare="${id}"> Comparar<span class="sr-only"> ${escape(product.nombre)}</span></label>${favoriteButton(product)}
       </div>
     </div>
   </article>`;
@@ -34,7 +35,7 @@ export function productView(product) {
         <form id="detail-add-form" data-customer-only><label for="detail-quantity">Cantidad</label><div class="product-buy-controls"><div class="quantity-picker"><button type="button" data-quantity="-1" aria-label="Reducir cantidad">−</button><input id="detail-quantity" name="cantidad" type="number" inputmode="numeric" autocomplete="off" aria-describedby="product-availability" min="1" max="${Math.max(1,Math.min(product.stock,99))}" value="1" required><button type="button" data-quantity="1" aria-label="Aumentar cantidad">+</button></div><button id="detail-add-button" class="button button-primary" type="submit" ${product.stock===0 || review?'disabled':''}>${review?'Coordina la atención farmacéutica':product.stock?'Añadir al carrito →':'Producto agotado'}</button></div></form>
         <dl class="product-fulfillment"><div><dt>Retiro en farmacia</dt><dd>Selecciona retiro al preparar tu pedido.</dd></div><div><dt>Envío</dt><dd>Tarifa al confirmar la dirección.</dd></div></dl>
       </div>
-      <a class="text-link product-compare-link" href="comparar.html">Comparar productos →</a>
+      <a class="text-link product-compare-link" href="comparar.html">Comparar productos →</a>${favoriteButton(product)}
     </div>
   </section><div class="product-information">${product.descripcion?`<section class="product-description" aria-labelledby="product-description-title"><h2 id="product-description-title">Descripción</h2><p class="shop-lead">${escape(product.descripcion)}</p></section>`:''}${ficha}</div>`;
 }
