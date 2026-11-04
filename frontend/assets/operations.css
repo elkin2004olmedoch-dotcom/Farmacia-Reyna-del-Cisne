@@ -1,0 +1,60 @@
+/* Identidad compartida por administración y reparto; la tienda conserva su propio alcance. */
+:is(body.admin-page,body.admin-install-page,body[data-page="deliveries"]) {
+  --admin-bg:#fffaf1; --admin-panel:#fffdf8; --admin-border:#dfcdb8; --admin-muted:#65534b; --admin-sidebar-bg:#fff3df;
+  --surface:#fffaf1; --soft:#fff3df; --line:#dfcdb8;
+  --operations-paper:#fffdf8; --operations-cream:#fff3df; --operations-wine:#681e2a; --operations-border:#dfcdb8;
+  color:var(--ink); background:#fffaf1;
+}
+.admin-page .admin-header { background:var(--operations-cream); }
+.admin-page .admin-role-badge { border:1px solid #e2bdc2; background:#f9e9e5; color:var(--operations-wine); }
+.admin-page .admin-nav-group > a:hover { background:#f6e9d8; }
+.admin-page .admin-nav-group > a[aria-current] { background:var(--operations-wine); color:#fffaf1; }
+.admin-page .admin-nav-group > a[aria-current] .admin-icon { color:inherit; }
+.admin-page :is(.admin-card,.admin-metric,.admin-session-card,.admin-analytics-panel) { border-color:var(--operations-border); border-radius:10px; }
+.admin-page .admin-analytics-panel { background:var(--operations-paper); }
+.admin-page .admin-data-table th { color:var(--operations-wine); background:var(--operations-cream); }
+.admin-page .admin-data-table tbody tr:hover { background:#fff3df80; }
+.admin-page .admin-data-table .text-link { display:inline-flex; align-items:center; min-height:44px; padding-block:8px; }
+.admin-page :is(.button,.admin-toolbar select) { min-height:44px; border-radius:6px; }
+.admin-page :is(.shop-form,.admin-toolbar) :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) { min-height:44px; border-color:#af9585; border-radius:6px; color:var(--ink); background:var(--operations-paper); }
+.admin-page .check-label { display:flex; flex-wrap:nowrap; align-items:flex-start; gap:10px; min-height:44px; }
+.admin-page .check-label input { flex:0 0 18px; margin-top:3px; accent-color:var(--operations-wine); }
+.admin-page .admin-editor-dialog { border:1px solid var(--operations-border); border-radius:12px; background:#fffaf1; }
+.admin-page .admin-page-heading h1 { color:var(--operations-wine); text-wrap:balance; }
+.admin-page .table-scroll { border:1px solid var(--operations-border); border-radius:10px; background:var(--operations-paper); overscroll-behavior:contain; }
+
+body[data-page="deliveries"] .operations-heading { margin:12px 0 30px; max-width:900px; }
+body[data-page="deliveries"] .operations-heading h1 { margin:10px 0 16px; color:var(--operations-wine); font-size:clamp(30px,4vw,42px); font-weight:650; line-height:1.18; text-wrap:balance; }
+body[data-page="deliveries"] .operations-heading .shop-lead { font-size:14px; line-height:1.75; }
+body[data-page="deliveries"] .delivery-workspace { gap:24px; }
+body[data-page="deliveries"] #delivery-admin:not([hidden]) { display:grid; gap:24px; }
+body[data-page="deliveries"] .delivery-admin-grid { gap:24px; }
+body[data-page="deliveries"] .delivery-workspace .shop-panel { margin:0; padding:24px; border:1px solid var(--operations-border); border-top:3px solid var(--operations-wine); border-radius:10px; background:#fffaf1; }
+body[data-page="deliveries"] .delivery-workspace :is(h2,h3) { font-family:inherit; letter-spacing:-.02em; overflow-wrap:anywhere; }
+body[data-page="deliveries"] .delivery-workspace h2 { margin-top:0; font-size:20px; }
+body[data-page="deliveries"] .delivery-workspace h3 { font-size:17px; }
+body[data-page="deliveries"] .delivery-workspace :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea) { min-height:44px; border-color:#af9585; border-radius:6px; color:var(--ink); background:var(--operations-paper); }
+body[data-page="deliveries"] .delivery-workspace :is(button,summary,a.button) { min-height:44px; }
+body[data-page="deliveries"] .delivery-workspace .text-link { display:inline-flex; align-items:center; padding-block:8px; }
+body[data-page="deliveries"] .delivery-workspace .button { border-radius:6px; font-size:13px; }
+body[data-page="deliveries"] .delivery-workspace .check-label { flex-wrap:nowrap; gap:10px; min-height:44px; }
+body[data-page="deliveries"] .delivery-workspace .check-label input { flex:0 0 18px; }
+body[data-page="deliveries"] .delivery-card { margin:18px 0; padding:20px; border:1px solid var(--operations-border); border-radius:10px; background:var(--operations-paper); }
+body[data-page="deliveries"] .delivery-card:last-child { margin-bottom:0; }
+body[data-page="deliveries"] .delivery-badge { border:1px solid var(--operations-border); border-radius:7px; color:var(--operations-wine); background:var(--operations-cream); font-size:12px; }
+body[data-page="deliveries"] .delivery-card[data-delivery-status="en_camino"] .delivery-badge { color:#fffaf1; background:var(--operations-wine); border-color:var(--operations-wine); }
+body[data-page="deliveries"] .delivery-card[data-delivery-status="entregada"] .delivery-badge { color:#205b39; background:#eaf4ec; border-color:#bcd3c2; }
+body[data-page="deliveries"] .delivery-destination { padding:16px; border:1px solid #eadfce; border-radius:8px; background:var(--operations-cream); line-height:1.8; font-size:14px; }
+body[data-page="deliveries"] .delivery-location-note { padding:14px 16px; border-left:3px solid var(--operations-wine); border-radius:0 8px 8px 0; color:var(--muted); background:var(--operations-cream); font-size:12px; line-height:1.75; }
+body[data-page="deliveries"] .delivery-reference { margin:8px 0 0; color:var(--muted); font-size:11px; line-height:1.6; }
+body[data-page="deliveries"] .delivery-pager { justify-content:space-between; padding-top:18px; border-top:1px solid var(--operations-border); font-variant-numeric:tabular-nums; }
+body[data-page="deliveries"] .delivery-pager span { font-size:12px; }
+body[data-page="deliveries"] .courier-route-map { border-color:var(--operations-border); border-radius:10px; }
+body[data-page="deliveries"] .courier-route-status { font-size:14px; line-height:1.7; }
+@media(max-width:700px) {
+  body[data-page="deliveries"] .delivery-workspace .shop-panel { padding:18px; }
+  body[data-page="deliveries"] .delivery-card { padding:16px; }
+  body[data-page="deliveries"] .delivery-actions > :is(button,a) { flex:1 1 180px; }
+  body[data-page="deliveries"] .delivery-toolbar { align-items:flex-start; }
+  .admin-page .admin-card { padding:18px; }
+}

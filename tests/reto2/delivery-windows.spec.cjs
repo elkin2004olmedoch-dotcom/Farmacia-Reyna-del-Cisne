@@ -52,6 +52,8 @@ test('un pedido pendiente a domicilio permite confirmar y asignar sin adelantar 
   await signedIn(page,courierSession.token,'/entregas.html');await expect(page.locator('[data-delivery="'+assigned.id+'"]')).toContainText(order.id.slice(0,8));
   await expect(page.getByRole('button',{name:'Ver ruta en la app'})).toBeVisible();
   await expect(page.getByRole('button',{name:'Iniciar recorrido'})).toBeDisabled();
+  const route=page.getByRole('button',{name:'Ver ruta en la app'});await route.click();await expect(page.locator('#courier-route-panel')).toBeVisible();await expect(route).toBeEnabled();
+  await page.locator('#courier-route-close').focus();await page.keyboard.press('Enter');await expect(page.locator('#courier-route-panel')).toBeHidden();await expect(route).toBeFocused();
   await accessibleAt320(page);
 });
 

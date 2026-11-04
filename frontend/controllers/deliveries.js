@@ -23,12 +23,19 @@ export async function deliveriesController(){
   if(!requireUser('entregas.html'+(seekOrder?'?pedido='+encodeURIComponent(seekOrder):'')))return;
   const admin=auth.user.role==='admin',courier=auth.user.role==='repartidor';
   if(!admin && !courier){message('Esta ventana está disponible para administradores y repartidores.',true,true);return;}
+  const heading=byId('delivery-page-title'),description=byId('delivery-page-description');
+  if(heading)heading.textContent=admin?'Entregas y cobertura':'Mis entregas';
+  if(description)description.textContent=admin?'Asigna pedidos, coordina repartidores y gestiona las tarifas de envío.':'Consulta tus pedidos, inicia el recorrido y sigue la ruta hasta cada destino.';
   const area=byId('deliveries-area'),list=byId('deliveries-list'),zoneForm=byId('delivery-zone-form'),courierForm=byId('courier-form'),assignment=byId('delivery-assignment-form');
   area.hidden=false;byId('delivery-admin').hidden=!admin;
   let live=true,page=1,orderPage=1,requestId=0,ordersRequestId=0,working=false,listLoading=false,listPending=false,snapshot='',result={items:[]},zones=[],couriers=[],reassign=null,sharing=null,gpsGeneration=0;
   let orders=[],ordersSnapshot='',confirmingAssignment=false;
-  let routeMap=null,routeId=null,routeGeneration=0;
-  function closeRoute(){routeGeneration++;routeMap?.dispose();routeMap=null;routeId=null;const panel=byId('courier-route-panel');if(panel)panel.hidden=true;}
+  let routeMap=null,routeId=null,routeGeneration=0,removeCompanion=null;
+  function closeRoute(restoreFocus=false){
+    const previous=routeId;routeGeneration++;routeMap?.dispose();routeMap=null;routeId=null;
+    const panel=byId('courier-route-panel');if(panel)panel.hidden=true;
+    if(restoreFocus){const opener=previous&&list.querySelector(`[data-delivery-route="${CSS.escape(previous)}"]`);(opener&&!opener.disabled?opener:byId('deliveries-refresh'))?.focus();}
+  }
   async function openRoute(item){
     closeRoute();if(!item?.destino)return;
     const generation=routeGeneration;routeId=item.id;byId('courier-route-panel').hidden=false;
@@ -56,11 +63,11 @@ export async function deliveriesController(){
     catch{if(notice)gpsNotice('Se detuvo el GPS local. No se pudo confirmar la retirada en el servidor; la ubicación dejará de mostrarse al vencer en dos minutos. Puedes reintentar la retirada.');if(live && auth.user)retirePending.add(previous.item.id);}
   }
   const retirePending=new Set();
-  function expire(){if(!live)return;closeRoute();live=false;requestId++;ordersRequestId++;stopLocal();zones=[];couriers=[];orders=[];result={items:[]};reassign=null;clearPrivate(area);}
+  function expire(){if(!live)return;closeRoute();live=false;removeCompanion?.();requestId++;ordersRequestId++;stopLocal();zones=[];couriers=[];orders=[];result={items:[]};reassign=null;clearPrivate(area);}
   events.addEventListener('session:expired',expire);
   events.addEventListener('session:changed',()=>{if(!auth.user)expire();});
   window.addEventListener('pagehide',()=>{closeRoute();void stopGps({notice:false,drawList:false,keepalive:true});});
-  byId('courier-route-close').addEventListener('click',closeRoute);
+  byId('courier-route-close').addEventListener('click',()=>closeRoute(true));
   async function refreshList(){
     if(!live || working)return;if(listLoading){listPending=true;return;}listLoading=true;const id=++requestId,requested=page;
     try{
@@ -196,6 +203,19 @@ export async function deliveriesController(){
     }catch{/* Un borrador local inválido nunca se guarda automáticamente. */}
     byId('delivery-zone-editor').open=true;byId('delivery-zone-name').focus();message('Revisa y completa los datos reales de la zona antes de guardarla.');
   }
+  if(courier&&live)void import('./mascota.js').then(({mascotaController})=>{
+    if(!live||!auth.isCourier)return;
+    return mascotaController({courier:true,greeting:'¡Hola! Soy Goti. Te ayudo con tu bandeja, las rutas, la ubicación y los pasos de entrega.',questions:()=>[['Mis entregas','mis entregas'],['Actualizar bandeja','actualizar entregas'],['Ruta y ubicación','ruta'],['Completar entrega','entregar'],['Mi perfil','perfil']].map(([label,text])=>({label,text})),onMount:remove=>{removeCompanion=remove;if(!live)remove();},command:async text=>{
+      if(!live||!auth.isCourier)throw new Error('Inicia sesión como repartidor para consultar tus entregas.');
+      const query=String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('es');
+      if(/^(actualizar|actualiza)( entregas| bandeja)?$/.test(query)){if(working)throw new Error('Espera a que termine la acción actual.');await refreshList();return {text:'Bandeja actualizada. Revisa los pedidos y sus estados.'};}
+      if(/^(mis entregas|bandeja|ayuda)$/.test(query))return {text:'Tu bandeja muestra los pedidos que tienes asignados. Puedes filtrar por estado, actualizar la lista y abrir la ruta del pedido que vas a atender.'};
+      if(/^(mi )?perfil$/.test(query))return {text:'Puedes actualizar tu nombre y teléfono desde Mi cuenta.',actions:[{label:'Abrir mi perfil',href:'cuenta.html'}]};
+      if(/^(ruta|mapa|ubicacion|gps)$/.test(query))return {text:'Pulsa «Ver ruta en la app» en el pedido que vas a atender. La ruta usa el permiso de ubicación de tu dispositivo. Compartir ubicación para el cliente es voluntario; en la web mantén abierta la página durante el recorrido.'};
+      if(/^(entregar|entrega|iniciar recorrido)$/.test(query))return {text:'Cuando la farmacia prepare el pedido, pulsa «Iniciar recorrido». Al llegar usa «Llegué al destino»; allí podrás llamar. Finalmente pulsa «Pedido entregado» y confirma. El cierre retira la ubicación compartida.'};
+      return {text:'Te ayudo con tus entregas, rutas, ubicación y perfil. Los precios y las promociones se gestionan desde administración. Usa las opciones de esta ayuda.'};
+    }});
+  }).catch(()=>{});
   return refresh;
 }
 
