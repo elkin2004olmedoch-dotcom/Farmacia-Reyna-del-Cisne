@@ -67,7 +67,7 @@ export async function catalogController() {
       total=result.total;const pages=Math.max(1,Math.ceil(total/24));
       if(page>pages){page=pages;writeRoute();return await load({silent});}
       if(JSON.stringify(loadedItems)!==JSON.stringify(result.items)){
-        loadedItems=result.items;preserveFocus(target,()=>{catalogView(result.items,target);for(const input of target.querySelectorAll('[data-compare]'))input.checked=selected().includes(input.dataset.compare);});
+        loadedItems=result.items;preserveFocus(target,()=>{catalogView(result.items,target,{prioritizeImages:true});for(const input of target.querySelectorAll('[data-compare]'))input.checked=selected().includes(input.dataset.compare);});
       }
       delete target.dataset.loading;
       count.textContent=total?`${total} productos encontrados · Mostrando ${(page-1)*24+1}–${Math.min(page*24,total)}`:'No hay productos con estos filtros.';

@@ -51,6 +51,7 @@ export function layoutController() {
   const currentPage=(location.pathname.replace(/\/+$/,'').split('/').pop() || 'index').replace(/\.html$/,'');
   for(const link of document.querySelectorAll('.shop-nav a'))if(link.getAttribute('href').replace(/\.html$/,'')===currentPage)link.setAttribute('aria-current','page');
   document.addEventListener('click',async event=>{const logout=event.target.closest('#logout');if(!logout)return;busy(logout,true);try{await auth.logout();location.replace('cuenta.html');}catch(error){message(error.message,true);location.replace('cuenta.html');}});
+  for(const control of document.querySelectorAll('#menu-button,#search-toggle,[data-cart-open],#account-menu-toggle'))control.disabled=false;
   return update;
 }
 export function requireUser(next='checkout.html',admin=false) {
