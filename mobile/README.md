@@ -90,7 +90,7 @@ Leaflet 1.9.4 se empaqueta localmente con su licencia BSD; no se ejecutan script
 
 El backend actual permanece en Render Free y el proveedor público de mapas no tiene SLA. No se afirma disponibilidad 24/7. Un teléfono apagado, sin batería, sin GPS/permisos o con la app detenida a la fuerza no puede garantizar nuevas ubicaciones. iPhone sigue pendiente de firma/distribución y pruebas físicas.
 
-### Actualización de ruta automática (0.3.0)
+### Actualización de ruta automática (0.4.0)
 
 Al abrir Ver ruta en la app se solicita la ubicación actual, también para consultar un pedido que todavía no ha salido. No se muestran campos de latitud/longitud ni se requiere confirmar un punto manual. Cuando falta el GPS de destino, el backend busca la dirección guardada con Nominatim: sólo acepta resultados específicos que coinciden con la calle o lugar y el cantón en Ecuador. Una calle se indica como aproximada; no se sustituye una dirección desconocida por el centro de la ciudad. Si el permiso se deniega se permite reintentar desde Usar mi ubicación; si no hay resultado o es ambiguo, la farmacia debe precisar la dirección. La captura continua del reparto comienza con Iniciar recorrido y conserva los controles existentes.
 

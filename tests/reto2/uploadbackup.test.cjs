@@ -13,6 +13,16 @@ const {validImagePath,MAX_BYTES}=require('../../server/middleware/imagevalidatio
 const {createBackup,validateBackup,restoreBackup,startAutomaticBackups}=require('../../server/models/backups.cjs');
 let adminToken,userToken,image,uploaded;
 const backups=path.join(directory,'backups');
+test('restaurar conserva preferencias, retira estimaciones y no revive un código de entrega anterior',async()=>{
+ const user=await db.usuario.findFirst({where:{role:'user'}}),product=await db.producto.findFirst({where:{activo:true}}),stamp=new Date();
+ const order=await db.pedido.create({data:{userId:user.id,total:5,estado:'preparado',entrega:'delivery',nombre:user.nombre,email:user.email,telefono:user.telefono,documento:'••••••0400',requestKey:randomUUID(),fingerprint:'synthetic-restore'}});
+ const delivery=await db.entrega.create({data:{pedidoId:order.id,repartidorId:user.id,estado:'en_camino',codigoEntregaRequerido:true,codigoEntregaNonce:'nonce-sintetico-anterior',codigoIntentos:3,latitud:0.120582,longitud:-79.239256,precision:10,registradaAt:stamp,recibidaAt:stamp,gpsVersion:1,estimadaDesde:stamp,estimadaHasta:stamp,estimadaCalculadaAt:stamp,estimadaFuente:'OSRM · FOSSGIS',estimadaGpsVersion:1,estimadaMuestraAt:stamp,estimadaVenceAt:stamp,estimadaRepartidorId:user.id}});
+ await db.favorito.upsert({where:{userId_productoId:{userId:user.id,productoId:product.id}},create:{userId:user.id,productoId:product.id},update:{}});
+ const source=await createBackup({client:db,backupRoot:backups}),target=path.join(directory,'experience-restored.db');await restoreBackup({from:source.directory,targetDatabase:target,backupRoot:backups,offline:true});
+ const restored=new PrismaClient({datasources:{db:{url:'file:'+target.replaceAll('\\','/')}}});
+ try{const next=await restored.entrega.findUnique({where:{id:delivery.id}});assert.equal(next.estimadaHasta,null);assert.equal(next.estimadaRepartidorId,null);assert.equal(next.latitud,null);assert.equal(next.codigoIntentos,0);assert.notEqual(next.codigoEntregaNonce,delivery.codigoEntregaNonce);assert.equal(await restored.favorito.count({where:{userId:user.id}}),1);assert.equal((await db.entrega.findUnique({where:{id:delivery.id}})).codigoEntregaNonce,delivery.codigoEntregaNonce);}
+ finally{await restored.$disconnect();}
+});
 before(async()=>{
   const response=await request.post('/api/auth/login').send({email:process.env.ADMIN_EMAIL,password:process.env.ADMIN_PASSWORD}).expect(200);adminToken=response.body.data.token;
   const user=await db.usuario.create({data:{email:'images-client@example.ec',nombre:'Cliente Imágenes',telefono:'+593979275988',passwordHash:await bcrypt.hash('UsuarioImagen2026!',4)}});

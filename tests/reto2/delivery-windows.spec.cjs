@@ -26,6 +26,28 @@ async function accessibleAt320(page){
   expect(audit.violations.map(issue=>({id:issue.id,targets:issue.nodes.map(node=>node.target)}))).toEqual([]);
 }
 
+test('código privado e incidencias permiten cierre accesible sin filtrar el código al repartidor',async({page,request,browser},testInfo)=>{
+ const data=await basicFixture(request),email='codigo-courier-'+data.suffix+'@example.ec',password='RepartidorPrueba2026!';
+ const driver=await api(request,'/admin/repartidores',{token:data.admin.token,method:'post',status:201,data:{nombre:'Repartidor Código',email,telefono:'0979275988',password}});
+ const zone=await api(request,'/admin/zonas-entrega',{token:data.admin.token,method:'post',status:201,data:{nombre:'Zona Código '+data.suffix,provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:0,ivaCategoria:'general',fundamentoIva:null,activa:true}}),order=await newOrder(request,data,zone);
+ let item=await api(request,'/entregas/asignar',{token:data.admin.token,method:'post',data:{pedidoId:order.id,repartidorId:driver.id}}),session=await api(request,'/auth/login',{method:'post',data:{email,password}});
+ for(const estado of ['en_camino','en_destino'])item=await api(request,'/entregas/'+item.id+'/estado',{token:session.token,method:'put',data:{estado,esperadoVersion:item.version}});
+ await api(request,'/entregas/'+item.id+'/ubicacion',{token:session.token,method:'put',data:{latitud:.12,longitud:-79.24,precision:12,registradaAt:new Date().toISOString(),esperadoGpsVersion:item.gpsVersion}});
+ await signedIn(page,data.customer.token,'/seguimiento.html?pedido='+order.id);const code=(await page.locator('[data-delivery-code]').textContent()).trim();expect(code).toMatch(/^\d{6}$/);await expect(page.locator('#tracking-content')).toContainText('Llegada estimada');
+ const context=await browser.newContext({baseURL:'http://localhost:3300',viewport:{width:320,height:850}}),courier=await context.newPage();
+ try{
+  await signedIn(courier,session.token,'/entregas.html');const card=courier.locator('[data-delivery="'+item.id+'"]');await expect(card.locator('[data-delivery-code]')).toHaveCount(0);
+  await card.getByRole('button',{name:'Reportar incidencia'}).click();await courier.getByLabel('Observación para el cliente').fill('El acceso principal está temporalmente cerrado.');await courier.locator('.delivery-progress-dialog [type=submit]').click();await expect(card).toContainText('El acceso principal');
+  await page.locator('#tracking-refresh').click();await expect(page.locator('#tracking-content')).toContainText('El acceso principal');await expect(page.locator('#tracking-content')).toContainText('Pendiente de resolver');
+  await card.getByRole('button',{name:'Marcar resuelta'}).click();await expect(card).toContainText('Resuelta');
+  await card.getByRole('button',{name:'Pedido entregado',exact:true}).click();const field=courier.getByLabel('Código de entrega de 6 dígitos');await expect(field).toBeFocused();
+  await field.fill(code==='000000'?'000001':'000000');await field.press('Enter');await expect(courier.locator('#delivery-progress-error')).toContainText('no coincide');await expect(field).toBeFocused();
+  await accessibleAt320(courier);await courier.screenshot({path:testInfo.outputPath('entrega-codigo-dialogo.png'),fullPage:true});
+  await field.fill(code);await field.press('Enter');await expect(card).toContainText('Entrega cerrada');await expect(courier.locator('.delivery-progress-dialog')).toHaveCount(0);
+  await page.locator('#tracking-refresh').click();await expect(page.locator('[data-delivery-code]')).toHaveCount(0);await expect(page.locator('#tracking-content')).toContainText('Entregada');await expect(page.locator('#tracking-content')).toContainText('Resuelta');
+ }finally{await context.close();}
+});
+
 test('un pedido pendiente a domicilio permite confirmar y asignar sin adelantar su salida',async({page,request},testInfo)=>{
   const data=await basicFixture(request);
   const zone=await api(request,'/admin/zonas-entrega',{token:data.admin.token,method:'post',status:201,data:{nombre:'Zona pendiente '+data.suffix,provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:200,ivaCategoria:'general',fundamentoIva:null,activa:true}});
@@ -181,7 +203,7 @@ test('administración configura reparto, cliente consulta mapa voluntario y repa
     await card.locator('[data-delivery-gps]').click();await expect(courierPage.locator('#delivery-gps-status')).toContainText('retirada del servidor');await expect.poll(()=>courierPage.evaluate(()=>window.testGps.cleared)).toBe(1);
     await customerPage.locator('#tracking-refresh').click();await expect(customerPage.locator('#tracking-map-panel iframe')).toHaveCount(0);
     await card.locator('[data-delivery-state="en_destino"]').click();await expect(card.locator('a[href^="tel:"]')).toHaveAttribute('href',/^tel:\+?\d+$/);await accessibleAt320(courierPage);
-    await card.locator('[data-delivery-state="entregada"]').click();await courierPage.locator('#confirm-dialog [value=confirm]').click();await expect(card).toContainText('Entrega cerrada');await expect(card.locator('a[href^="tel:"]')).toHaveCount(0);await expect(card).not.toContainText('Calle de prueba');
+    const deliveryCode=await customerPage.locator('[data-delivery-code]').textContent();await card.locator('[data-delivery-state="entregada"]').click();await courierPage.getByLabel('Código de entrega de 6 dígitos').fill(deliveryCode);await courierPage.locator('.delivery-progress-dialog [type=submit]').click();await expect(card).toContainText('Entrega cerrada');await expect(card.locator('a[href^="tel:"]')).toHaveCount(0);await expect(card).not.toContainText('Calle de prueba');
     await customerPage.locator('#tracking-refresh').click();await expect(customerPage.locator('#tracking-content')).toContainText('Entregada');await expect(customerPage.locator('[data-delivery-step="entregada"]')).toHaveAttribute('aria-current','step');expect(mapRequests).toBe(1);
     expect(errors).toEqual([]);
   }finally{await courierContext.close();await customerContext.close();await api(request,'/productos/'+data.product.id,{token:data.admin.token,method:'delete',status:204}).catch(()=>{});}

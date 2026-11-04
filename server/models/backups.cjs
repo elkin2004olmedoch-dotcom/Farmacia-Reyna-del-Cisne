@@ -129,7 +129,12 @@ async function restoreBackup({from,targetDatabase=databaseFile(),backupRoot=BACK
       if(has('PasswordReset'))await stagedClient.$executeRawUnsafe('DELETE FROM "PasswordReset"');
       for(const table of ['SesionWeb','SesionMovil'])if(has(table))await stagedClient.$executeRawUnsafe(`UPDATE "${table}" SET "revokedAt"=CURRENT_TIMESTAMP`);
       if(has('AdminMfa'))await stagedClient.$executeRawUnsafe('UPDATE "AdminMfa" SET "challengeHash"=NULL,"challengeUntil"=NULL,"recoveryHashes"=\'[]\',"lastCounter"=?,"setupExpiresAt"=CURRENT_TIMESTAMP',Math.floor(Date.now()/30000));
-      if(has('Entrega'))await stagedClient.$executeRawUnsafe('UPDATE "Entrega" SET "latitud"=NULL,"longitud"=NULL,"precision"=NULL,"registradaAt"=NULL,"recibidaAt"=NULL,"sesionSeguimientoId"=NULL,"gpsVersion"="gpsVersion"+1');
+      if(has('Entrega')){
+        const columns=await stagedClient.$queryRawUnsafe('PRAGMA table_info("Entrega")'),present=name=>columns.some(column=>column.name===name);
+        const estimateColumns=['estimadaDesde','estimadaHasta','estimadaCalculadaAt','estimadaFuente','estimadaGpsVersion','estimadaMuestraAt','estimadaVenceAt','estimadaRepartidorId'].filter(present).map(name=>`,"${name}"=NULL`).join('');
+        await stagedClient.$executeRawUnsafe('UPDATE "Entrega" SET "latitud"=NULL,"longitud"=NULL,"precision"=NULL,"registradaAt"=NULL,"recibidaAt"=NULL,"sesionSeguimientoId"=NULL,"gpsVersion"="gpsVersion"+1'+estimateColumns);
+        if(present('codigoEntregaNonce')&&present('codigoEntregaRequerido'))await stagedClient.$executeRawUnsafe('UPDATE "Entrega" SET "codigoEntregaNonce"=? || \':\' || "id","codigoIntentos"=0,"codigoBloqueadoHasta"=NULL WHERE "codigoEntregaRequerido"=true AND "estado" IN (\'asignada\',\'en_camino\',\'en_destino\')',randomUUID());
+      }
     }finally{await stagedClient.$disconnect();}
     // Uploaded paths are immutable UUIDs; publish their verified bytes before the DB.
     for(const file of checked.manifest.archivos.filter(item=>item.referencia)){

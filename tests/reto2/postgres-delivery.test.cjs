@@ -60,7 +60,7 @@ test('PostgreSQL aislado: migraciones, API, entrega, fiscalidad, permisos e impo
  const zone={nombre:'Todo Puerto Quito',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:230,ivaCategoria:'general',fundamentoIva:null,activa:true};
  async function setRate(value){const current=await db.zonaEntrega.findUnique({where:{id:'puerto-quito'}});return (await api.put('/api/admin/zonas-entrega/puerto-quito').set('Authorization',adminAuth).send({...zone,tarifaCentavos:value,esperadoVersion:current.version}).expect(200)).body.data;}
  async function state(value){order=(await api.put('/api/pedidos/'+order.id+'/estado').set('Authorization',adminAuth).send({estado:value,esperadoUpdatedAt:order.updatedAt}).expect(200)).body.data;}
- async function deliveryState(value){delivery=(await api.put('/api/entregas/'+delivery.id+'/estado').set('Authorization',driverAuth).send({estado:value,esperadoVersion:delivery.version}).expect(200)).body.data;}
+ async function deliveryState(value){const codigoEntrega=value==='entregada'?(await api.get('/api/pedidos/'+order.id+'/seguimiento').set('Authorization',userAuth).expect(200)).body.data.entrega.codigoEntrega:undefined;delivery=(await api.put('/api/entregas/'+delivery.id+'/estado').set('Authorization',driverAuth).send({estado:value,esperadoVersion:delivery.version,...(codigoEntrega?{codigoEntrega}:{})}).expect(200)).body.data;}
 
  await t.test('login, registro, roles, tarifa e IVA del pedido',async()=>{
   adminAuth='Bearer '+(await api.post('/api/auth/login').send({email:env.ADMIN_EMAIL,password:env.ADMIN_PASSWORD}).expect(200)).body.data.token;

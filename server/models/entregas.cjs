@@ -3,12 +3,13 @@ const db=require('./db.cjs');
 const sessions=require('./sesiones-moviles.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 const {inclusiveTax}=require('./fiscal.cjs');
+const progress=require('./delivery-progress.cjs');
 const ACTIVE=['asignada','en_camino','en_destino'];
 const {GPS_CLEAR,transaction}=sessions;
 const {sesionSeguimientoId:_owner,...POSITION_CLEAR}=GPS_CLEAR;
 const driverSelect={id:true,nombre:true,email:true,telefono:true,activo:true};
 const orderSelect={id:true,userId:true,estado:true,entrega:true,nombre:true,telefono:true,provincia:true,ciudad:true,direccion:true,latitudEntrega:true,longitudEntrega:true,updatedAt:true,zonaEntrega:{select:{alcance:true}}};
-const deliveryInclude={pedido:{select:orderSelect}};
+const deliveryInclude={pedido:{select:orderSelect},incidencias:{select:progress.incidenceSelect,orderBy:[{createdAt:'desc'},{id:'asc'}],take:50}};
 const normalize=value=>String(value||'').normalize('NFD').replace(/\p{M}/gu,'').trim().replace(/\s+/g,' ').toLowerCase();
 const fail=(code,message,status=409)=>{throw new AppError(status,code,message);};
 const notFound=()=>fail('NOT_FOUND','No se encontró el recurso.',404);
@@ -55,9 +56,9 @@ async function autoAssign(tx,order){
  if(order.entrega!=='delivery' || !['pendiente','confirmado','preparado'].includes(order.estado))return;
  const candidates=await tx.usuario.findMany({where:{role:'repartidor',activo:true},select:{id:true},take:2});
  if(candidates.length!==1)return;
- const existing=await tx.entrega.findUnique({where:{pedidoId:order.id},select:{id:true,repartidorId:true,estado:true}});
- if(!existing)await tx.entrega.create({data:{pedidoId:order.id,repartidorId:candidates[0].id}});
- else if(existing.estado==='asignada' && !existing.repartidorId)await tx.entrega.update({where:{id:existing.id},data:{repartidorId:candidates[0].id,version:{increment:1},asignadaAt:new Date(),...GPS_CLEAR}});
+ const existing=await tx.entrega.findUnique({where:{pedidoId:order.id},select:{id:true,repartidorId:true,estado:true,codigoEntregaRequerido:true}});
+ if(!existing)await tx.entrega.create({data:{pedidoId:order.id,repartidorId:candidates[0].id,...progress.newCode()}});
+ else if(existing.estado==='asignada' && !existing.repartidorId)await tx.entrega.update({where:{id:existing.id},data:{repartidorId:candidates[0].id,version:{increment:1},asignadaAt:new Date(),...GPS_CLEAR,...(existing.codigoEntregaRequerido?progress.newCode():{})}});
 }
 async function createDriver(input,user){
  const {password,...data}=input,passwordHash=await bcrypt.hash(password,12);
@@ -70,7 +71,7 @@ async function setDriverActive(id,activo,user){
   if(driver.activo===activo)return Object.fromEntries(Object.keys(driverSelect).map(k=>[k,driver[k]]));
   if(!activo){
    if(await tx.entrega.count({where:{repartidorId:id,estado:{in:['en_camino','en_destino']}}}))fail('DRIVER_HAS_ACTIVE_DELIVERY','Finaliza o cancela las entregas en curso antes de desactivar.');
-   await tx.entrega.updateMany({where:{repartidorId:id,estado:'asignada'},data:{repartidorId:null,version:{increment:1},...GPS_CLEAR}});
+   await tx.entrega.updateMany({where:{repartidorId:id,estado:'asignada'},data:{repartidorId:null,version:{increment:1},...GPS_CLEAR,codigoEntregaNonce:null,codigoIntentos:0,codigoBloqueadoHasta:null}});
    await sessions.revokeTx(tx,{usuarioId:id});
   }
   return tx.usuario.update({where:{id},data:{activo,tokenVersion:{increment:1}},select:driverSelect});
@@ -82,7 +83,7 @@ function location(delivery,now=new Date()) {
 }
 function dto(e) {
  const p=e.pedido,active=ACTIVE.includes(e.estado);
- return {id:e.id,pedidoId:e.pedidoId,repartidorId:e.repartidorId,estado:e.estado,version:e.version,gpsVersion:e.gpsVersion,asignadaAt:e.asignadaAt,salidaAt:e.salidaAt,llegadaAt:e.llegadaAt,finalizadaAt:e.finalizadaAt,estadoPedido:p.estado,ubicacion:location(e),origenSeguimiento:e.sesionSeguimientoId?'app':location(e)?'web':null,destino:active?{alcance:p.zonaEntrega?.alcance || 'local',nombre:p.nombre,telefono:p.telefono,provincia:p.provincia,ciudad:p.ciudad,direccion:p.direccion,latitud:p.latitudEntrega,longitud:p.longitudEntrega}:null};
+ return {id:e.id,pedidoId:e.pedidoId,repartidorId:e.repartidorId,estado:e.estado,version:e.version,gpsVersion:e.gpsVersion,codigoRequerido:Boolean(e.codigoEntregaRequerido),estimacion:progress.estimate(e),incidencias:e.incidencias||[],asignadaAt:e.asignadaAt,salidaAt:e.salidaAt,llegadaAt:e.llegadaAt,finalizadaAt:e.finalizadaAt,estadoPedido:p.estado,ubicacion:location(e),origenSeguimiento:e.sesionSeguimientoId?'app':location(e)?'web':null,destino:active?{alcance:p.zonaEntrega?.alcance || 'local',nombre:p.nombre,telefono:p.telefono,provincia:p.provincia,ciudad:p.ciudad,direccion:p.direccion,latitud:p.latitudEntrega,longitud:p.longitudEntrega}:null};
 }
 async function owned(tx,id,user){
  const current=await actor(tx,user,['admin','repartidor']);
@@ -137,16 +138,16 @@ async function assign({pedidoId,repartidorId,esperadoVersion},user){
    if(old.estado!=='asignada')fail('DELIVERY_ALREADY_STARTED','Solo se reasigna antes de salir.');
    if(old.repartidorId===repartidorId)return dto(old);
    if(old.version!==esperadoVersion)fail('DELIVERY_CHANGED','La entrega cambió; actualiza sus datos.');
-   const changed=await tx.entrega.updateMany({where:{id:old.id,version:esperadoVersion,estado:'asignada'},data:{repartidorId,asignadaAt:new Date(),version:{increment:1},...GPS_CLEAR}});
+   const changed=await tx.entrega.updateMany({where:{id:old.id,version:esperadoVersion,estado:'asignada'},data:{repartidorId,asignadaAt:new Date(),version:{increment:1},...GPS_CLEAR,...(old.codigoEntregaRequerido?progress.newCode():{})}});
    if(changed.count!==1)fail('DELIVERY_CHANGED','La entrega cambió; actualiza sus datos.');
    return dto(await tx.entrega.findUnique({where:{id:old.id},include:deliveryInclude}));
   }
   if(esperadoVersion!=null)fail('DELIVERY_CHANGED','La entrega no tiene la versión indicada.');
-  return dto(await tx.entrega.create({data:{pedidoId,repartidorId},include:deliveryInclude}));
+  return dto(await tx.entrega.create({data:{pedidoId,repartidorId,...progress.newCode()},include:deliveryInclude}));
  });
 }
-async function changeState(id,{estado,esperadoVersion},user){
- return transaction(async tx=>{
+async function changeState(id,{estado,esperadoVersion,codigoEntrega},user){
+ const result=await transaction(async tx=>{
   const e=await owned(tx,id,user);
   if(e.estado===estado)return dto(e);
   if(e.version!==esperadoVersion)fail('DELIVERY_CHANGED','La entrega cambió; actualiza sus datos.');
@@ -154,7 +155,8 @@ async function changeState(id,{estado,esperadoVersion},user){
   if(estado==='cancelada' ? user.role!=='admin'||!ACTIVE.includes(e.estado) : next[e.estado]!==estado)fail('INVALID_DELIVERY_TRANSITION','Ese cambio de estado no está permitido.');
   if(estado==='en_camino' && (!e.repartidorId||e.pedido.estado!=='preparado'))fail('ORDER_NOT_READY','El pedido debe estar preparado y tener repartidor antes de salir.');
   if(['entregada','cancelada'].includes(estado)){
-   await require('./pedidos.cjs').updateStatusTx(tx,e.pedidoId,{estado:estado==='entregada'?'entregado':'cancelado',esperadoUpdatedAt:e.pedido.updatedAt.toISOString()},user.id);
+   const changed=await require('./pedidos.cjs').updateStatusTx(tx,e.pedidoId,{estado:estado==='entregada'?'entregado':'cancelado',esperadoUpdatedAt:e.pedido.updatedAt.toISOString(),codigoEntrega},user.id);
+   if(changed.error)return changed;
   }else{
    if(!['confirmado','preparado'].includes(e.pedido.estado))fail('ORDER_NOT_DELIVERABLE','El pedido ya no admite entregas.');
    await require('./pedidos.cjs').assertOrderLotsCurrent(tx,e.pedidoId);
@@ -163,9 +165,10 @@ async function changeState(id,{estado,esperadoVersion},user){
   }
   return dto(await tx.entrega.findUnique({where:{id},include:deliveryInclude}));
  });
+ if(result.error)throw result.error;return result;
 }
 async function setLocation(id,input,user){
- return transaction(async tx=>{
+ const result=await transaction(async tx=>{
   await actor(tx,user,['repartidor']);const e=await owned(tx,id,user);
   if(!['en_camino','en_destino'].includes(e.estado))fail('GPS_NOT_ACTIVE','Solo puedes compartir ubicación durante la entrega.');
   assertGpsOwner(e,user);
@@ -175,8 +178,10 @@ async function setLocation(id,input,user){
   if(e.recibidaAt&&now-e.recibidaAt<10000)fail('GPS_TOO_FREQUENT','Espera diez segundos entre muestras.',429);
   const changed=await tx.entrega.updateMany({where:{id,gpsVersion:input.esperadoGpsVersion,repartidorId:user.id,sesionSeguimientoId:user.mobileSession||null,estado:{in:['en_camino','en_destino']}},data:{latitud:input.latitud,longitud:input.longitud,precision:input.precision,registradaAt:registered,recibidaAt:now,gpsVersion:{increment:1}}});
   if(changed.count!==1)fail('GPS_CHANGED','La ubicación cambió; actualiza el seguimiento.');
-  return {gpsVersion:e.gpsVersion+1,ubicacion:{latitud:input.latitud,longitud:input.longitud,precision:input.precision,registradaAt:registered}};
+  return {gpsVersion:e.gpsVersion+1,ubicacion:{latitud:input.latitud,longitud:input.longitud,precision:input.precision,registradaAt:registered},recalcular:!e.estimadaCalculadaAt||now-e.estimadaCalculadaAt>=30000};
  });
+ if(result.recalcular)try{await require('./rutas.cjs').calculate(id,user,{latitud:input.latitud,longitud:input.longitud});}catch{}
+ const {recalcular,...data}=result;return data;
 }
 async function clearLocation(id,user){
  return transaction(async tx=>{
@@ -187,9 +192,19 @@ async function clearLocation(id,user){
  });
 }
 async function tracking(id,user){
- const p=await db.pedido.findFirst({where:{id,...(user.role==='admin'?{}:{userId:user.id})},select:{id:true,estado:true,reparto:true}});if(!p)notFound();
+ const p=await db.pedido.findFirst({where:{id,...(user.role==='admin'?{}:{userId:user.id})},select:{id:true,userId:true,estado:true,reparto:{include:{incidencias:deliveryInclude.incidencias}}}});if(!p)notFound();
  const e=p.reparto;
- return {pedidoId:p.id,estadoPedido:p.estado,entrega:e?{id:e.id,estado:e.estado,version:e.version,asignadaAt:e.asignadaAt,salidaAt:e.salidaAt,llegadaAt:e.llegadaAt,finalizadaAt:e.finalizadaAt,ubicacion:location(e)}:null};
+ return {pedidoId:p.id,estadoPedido:p.estado,entrega:e?{id:e.id,estado:e.estado,version:e.version,codigoRequerido:Boolean(e.codigoEntregaRequerido),...(p.userId===user.id&&ACTIVE.includes(e.estado)?{codigoEntrega:progress.code(e)}:{}),estimacion:progress.estimate(e),incidencias:e.incidencias,asignadaAt:e.asignadaAt,salidaAt:e.salidaAt,llegadaAt:e.llegadaAt,finalizadaAt:e.finalizadaAt,ubicacion:location(e)}:null};
+}
+async function incidence(id,input,user){
+ return transaction(async tx=>{
+  const e=await owned(tx,id,user);if(!ACTIVE.includes(e.estado))fail('DELIVERY_CLOSED','La entrega ya está cerrada.');
+  if(e.version!==input.esperadoVersion)fail('DELIVERY_CHANGED','La entrega cambió; actualiza sus datos.');
+  const changed=await tx.entrega.updateMany({where:{id,version:input.esperadoVersion,repartidorId:e.repartidorId,estado:e.estado},data:{version:{increment:1}}});if(changed.count!==1)fail('DELIVERY_CHANGED','La entrega cambió; actualiza sus datos.');
+  if(input.incidenciaId){const old=await tx.entregaIncidencia.findFirst({where:{id:input.incidenciaId,entregaId:id}});if(!old)notFound();if(old.resueltaAt)return Object.fromEntries(Object.keys(progress.incidenceSelect).map(key=>[key,old[key]]));return tx.entregaIncidencia.update({where:{id:old.id},data:{resueltaAt:new Date()},select:progress.incidenceSelect});}
+  if(await tx.entregaIncidencia.count({where:{entregaId:id}})>=50)fail('INCIDENT_LIMIT','Esta entrega alcanzó el límite de incidencias.',429);
+  return tx.entregaIncidencia.create({data:{entregaId:id,actorId:user.id,tipo:input.tipo,descripcion:input.descripcion},select:progress.incidenceSelect});
+ });
 }
 const purgeExpiredLocations=(now=new Date())=>db.entrega.updateMany({where:{recibidaAt:{lt:new Date(now.getTime()-15*60000)}},data:POSITION_CLEAR});
-module.exports={shippingSnapshot,zones,saveZone,drivers,autoAssign,createDriver,setDriverActive,list,find,claimTracking,releaseTracking,assign,changeState,setLocation,clearLocation,tracking,purgeExpiredLocations};
+module.exports={shippingSnapshot,zones,saveZone,drivers,autoAssign,createDriver,setDriverActive,list,find,claimTracking,releaseTracking,assign,changeState,setLocation,clearLocation,tracking,incidence,purgeExpiredLocations};

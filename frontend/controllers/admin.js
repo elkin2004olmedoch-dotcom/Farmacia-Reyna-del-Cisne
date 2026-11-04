@@ -11,15 +11,28 @@ import {watchUpdates,preserveFocus} from './updates.js';
 import {imageController} from './images.js';
 import {billingController} from './billing.js';
 import {adminCompanionController} from './admin-companion.js';
-import {ZONE_FORM_DRAFT} from '../models/deliveries.js';
+import {ZONE_FORM_DRAFT,deliveries} from '../models/deliveries.js';
 
 const editableSections=['productos','promociones','proveedores','lotes','movimientos'];
 const sectionForms={productos:'product-form',promociones:'promotion-form',proveedores:'supplier-form',lotes:'lot-form',movimientos:'movement-form'};
+const companionTables=[...editableSections,'pedidos','zonas','entregas'];
+const companionRecordId=/^[a-z0-9][a-z0-9-]{0,79}$/;
+/** Locate the exact record across pages, checking the live administrator after every read. */
+export async function findCompanionRecord({table,record,load,allowed,first}){
+  if(!companionTables.includes(table)||!companionRecordId.test(record||''))throw new Error('El enlace de registro o tabla no es válido.');
+  for(let page=1;;page++){
+    if(!allowed())throw new Error('Inicia sesión nuevamente como administrador.');
+    const result=page===1&&first?first:await load(table,page);
+    if(!allowed())throw new Error('Inicia sesión nuevamente como administrador.');
+    const found=result.items.find(row=>row.id===record);if(found)return {record:found,page,result};
+    if(!result.items.length||!Number.isInteger(result.pageSize)||result.pageSize<1||page*result.pageSize>=result.total)return null;
+  }
+}
 export async function adminController() {
   if(!requireUser('admin.html',true))return;
   document.getElementById('admin-area').hidden=false;
-  const requested=new URLSearchParams(location.search).get('tabla');
-  let name=[...editableSections,'pedidos','usuarios','detalles','auditoria','fiscal','facturacion'].includes(requested)?requested:requested?'productos':'dashboard',page=1,result,editing=null,editingVersion=null,summarySnapshot='',requestId=0,openingId=0,previousFocus=null,stateFocus=null,lotRequest=0;
+  const query=new URLSearchParams(location.search),requested=query.get('tabla'),requestedRecord=query.get('registro');
+  let name=[...editableSections,'pedidos','usuarios','detalles','auditoria','fiscal','facturacion',...(['zonas','entregas'].includes(requested)&&requestedRecord?['zonas','entregas']:[])].includes(requested)?requested:requested?'productos':'dashboard',page=1,result,editing=null,editingVersion=null,summarySnapshot='',requestId=0,openingId=0,previousFocus=null,stateFocus=null,lotRequest=0;
   const dialog=document.getElementById('editor-dialog');const forms=Object.fromEntries(Object.entries(sectionForms).map(([section,id])=>[section,document.getElementById(id)]));
   const productImage=imageController(forms.productos,'product');const promoImage=imageController(forms.promociones,'promotion');
   const stateDialog=document.getElementById('order-state-dialog');const stateForm=document.getElementById('order-state-form');let stateOrder=null;
@@ -31,9 +44,31 @@ export async function adminController() {
     if(form===forms.productos){const file=document.getElementById('product-image-file');file.setAttribute('aria-invalid',String(Boolean(issues.imagen)));const note=document.getElementById('product-imagen-error');if(note){note.textContent=issues.imagen || '';note.hidden=!issues.imagen;}if(Object.keys(issues)[0]==='imagen')file.focus();}
     return valid;
   }
-  async function render({silent=false}={}){
+  function focusRecord(node,table){requestAnimationFrame(()=>{if(auth.isAdmin&&name===table&&node.isConnected){node.focus();node.scrollIntoView({block:'nearest'});}});}
+  async function linkedDeliveryRecord(table,id,silent){
+    const area=document.getElementById('admin-table');
+    adminSectionView('pedidos');document.getElementById('admin-table-choice').hidden=true;
+    const title=table==='zonas'?'Zona de cobertura':'Entrega';
+    for(const key of ['admin-page-title','admin-section-title'])document.getElementById(key).textContent=title;
+    for(const key of ['admin-page-description','admin-section-description'])document.getElementById(key).textContent='Registro guardado desde la ayuda administrativa.';
+    document.getElementById('admin-create').hidden=true;
+    for(const key of ['admin-prev','admin-next'])document.getElementById(key).disabled=true;
+    area.textContent='Consultando el registro…';area.setAttribute('aria-busy','true');
+    try{
+      const found=await findCompanionRecord({table,record:id,allowed:()=>auth.isAdmin&&name===table&&area.isConnected,load:async(_table,page)=>table==='entregas'?deliveries.list(page):deliveries.adminZones().then(items=>({items,total:items.length,pageSize:items.length||1}))});
+      if(!found){area.textContent='El registro ya no está disponible o no pertenece a esta sección.';return;}
+      const record=found.record,card=document.createElement('article');card.className='admin-card';card.tabIndex=-1;card.dataset.companionRecord=id;
+      const fields=table==='zonas'?[['Registro',record.id],['Nombre',record.nombre],['Provincia',record.provincia],['Cantón',record.canton],['Tarifa en USD',record.tarifaCentavos==null?'Por confirmar':(record.tarifaCentavos/100).toFixed(2)],['Activa',record.activa?'Sí':'No'],['Versión',record.version]]:[['Registro',record.id],['Pedido',record.pedidoId],['Estado',record.estado],['Repartidor',record.repartidor?.nombre||'Sin asignar'],['Versión',record.version]];
+      const list=document.createElement('dl');for(const [label,value] of fields){const term=document.createElement('dt'),description=document.createElement('dd');term.textContent=label;description.textContent=value??'—';list.append(term,description);}card.append(list);
+      const link=document.createElement('a');link.href='entregas.html';link.className='text-link';link.textContent='Gestionar entregas y cobertura';card.append(link);preserveFocus(area,()=>area.replaceChildren(card));document.getElementById('admin-page-info').textContent='Registro localizado';if(!silent)focusRecord(card,table);
+    }catch(error){if(auth.isAdmin&&name===table)area.textContent='No se pudo consultar el registro. Vuelve a abrir Ver registro para intentarlo de nuevo.';throw error;}
+    finally{area.removeAttribute('aria-busy');}
+  }
+  async function render({silent=false,loadedResult=null}={}){
     if(!auth.isAdmin || !document.getElementById('admin-area'))return;
     const id=++requestId;const tableName=name;const tablePage=page;
+    document.getElementById('admin-table-choice').hidden=false;
+    if(['zonas','entregas'].includes(tableName)){await linkedDeliveryRecord(tableName,requestedRecord,silent);return;}
     if(!silent)adminSectionView(tableName);
     if(tableName==='facturacion'){await billing.render({silent});return;}
     if(tableName==='fiscal'){
@@ -51,7 +86,7 @@ export async function adminController() {
     }
     const table=document.getElementById('admin-table');const create=document.getElementById('admin-create');
     table.setAttribute('aria-busy','true');if(!silent){result=null;table.innerHTML='<p class="shop-empty" role="status">Cargando registros…</p>';create.disabled=true;for(const button of ['admin-prev','admin-next'])document.getElementById(button).disabled=true;}
-    try{const loaded=await administration.table(tableName,tablePage);if(id!==requestId || !auth.isAdmin || (silent && document.querySelector('dialog[open]')))return;if(!silent || JSON.stringify(loaded)!==JSON.stringify(result)){result=loaded;preserveFocus(table,()=>tableView(tableName,loaded));}create.disabled=false;}
+    try{const loaded=loadedResult||await administration.table(tableName,tablePage);if(id!==requestId || !auth.isAdmin || (silent && document.querySelector('dialog[open]')))return;if(!silent || JSON.stringify(loaded)!==JSON.stringify(result)){result=loaded;preserveFocus(table,()=>tableView(tableName,loaded));}create.disabled=false;}
     catch(error){if(id!==requestId || !auth.isAdmin)return;if(!silent)table.innerHTML='<p class="shop-empty">No se pudieron cargar los registros. Selecciona la sección para volver a intentar.</p>';throw error;}
     finally{if(id===requestId)table.removeAttribute('aria-busy');}
   }
@@ -139,7 +174,15 @@ export async function adminController() {
   for(const button of document.querySelectorAll('[data-state-close]'))button.addEventListener('click',()=>stateDialog.close());
   for(const button of document.querySelectorAll('[data-editor-close]'))button.addEventListener('click',()=>dialog.close());
   // The section has its recovery handlers; a data error must not lock navigation.
-  try{await render();}catch(error){message(error.message,true,true);}
+  try{
+    await render();
+    if(requestedRecord&&!['zonas','entregas'].includes(name)){
+      const table=name,found=await findCompanionRecord({table,record:requestedRecord,first:result,load:administration.table,allowed:()=>auth.isAdmin&&name===table&&document.getElementById('admin-table')?.isConnected});
+      if(!found)throw new Error('El registro ya no está disponible o no pertenece a esta sección.');
+      if(page!==found.page){page=found.page;await render({loadedResult:found.result});}
+      if(auth.isAdmin&&name===table){const index=result.items.findIndex(row=>row.id===requestedRecord),row=document.querySelectorAll('#admin-table tbody tr')[index];if(row){row.tabIndex=-1;row.dataset.companionRecord=requestedRecord;focusRecord(row,table);}}
+    }
+  }catch(error){message(error.message,true,true);}
   async function navigate(section){
     if(!auth.isAdmin)throw new Error('Inicia sesión nuevamente como administrador.');
     if(document.querySelector('dialog[open]'))throw new Error('Termina o cierra el formulario abierto antes de cambiar de sección.');

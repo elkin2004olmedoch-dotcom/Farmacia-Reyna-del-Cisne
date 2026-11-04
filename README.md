@@ -10,7 +10,7 @@ La cobertura nacional comienza con envío gratuito; Puerto Quito conserva su tar
 - [Administración instalable en Windows](https://farmacia-reyna-del-cisne-pruebas.pages.dev/instalar-admin): Edge/Chrome normal y cuenta de administrador.
 - [Entregas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/entregas): requiere cuenta de administrador o repartidor.
 - [Pago de pedidos](https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos): abre un pedido desde **Mis pedidos** para consultar su importe y coordinar el pago con la farmacia.
-- [Reparto Android de pruebas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/reparto-0.3.0.apk).
+- [Reparto Android de pruebas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/reparto-0.4.0.apk).
 
 Los accesos privados se entregan fuera del repositorio. [Instalación de las apps](docs/APPS-E-INSTALACION.md).
 
@@ -34,6 +34,10 @@ El HTML de frontend/ se genera desde scripts/build-frontend.cjs y scripts/templa
 La ubicación pública y el enlace de retiro usan el mismo marcador de Consulab compartido por el titular, definido en `frontend/models/pharmacy.js`. Abrir **Visítanos** carga el mapa; cerrar la sección lo descarga. Se mantienen los colores vino, rojo y crema. [Revisión y preparación del Reto 2](docs/REVISION-RETO-2-2026-11-03.md).
 
 El catálogo consulta páginas de 24 productos y conserva búsqueda, filtros y orden en la URL. La cabecera y el catálogo ofrecen sugerencias con imagen y precio, selección por teclado y coincidencias aproximadas identificadas. Las fichas reúnen compra, disponibilidad, retiro/envío y los datos técnicos registrados. [Catálogo y búsqueda](docs/CATALOGO-Y-BUSQUEDA.md).
+
+**Mi cuenta** incorpora direcciones guardadas y favoritos persistentes. **Volver a comprar** revisa los precios, existencias y restricciones actuales antes de pedir confirmación para añadir al carrito. Las fichas admiten reseñas únicamente de compras propias entregadas, con nombre abreviado y sin publicar datos de contacto. [Experiencia completa](docs/EXPERIENCIA-COMPLETA.md).
+
+Las nuevas entregas se confirman mediante un código privado del comprador, con límite de intentos. El seguimiento incluye incidencias y una ventana estimada cuando existe una ruta calculada desde GPS reciente del repartidor; indica su origen, caducidad y posibles retrasos. Goti presenta productos y resúmenes visuales y abre el registro exacto después de una orden administrativa confirmada.
 
 ## Compra, pago y seguimiento
 
@@ -177,7 +181,7 @@ El repartidor dispone de **Ver ruta en la app**, **Iniciar recorrido**, **Llegu�
 
 [Implementación, revisión de seguridad y comparación con PLIEGO](docs/REPARTO-Y-REVISION-2026-11-03.md).
 
-### Actualización de ruta automática (0.3.0)
+### Actualización de ruta automática (0.4.0)
 
 Al abrir Ver ruta en la app se solicita la ubicación actual, también para consultar un pedido que todavía no ha salido. No se muestran campos de latitud/longitud ni se requiere confirmar un punto manual. Cuando falta el GPS de destino, el backend busca la dirección guardada con Nominatim: sólo acepta resultados específicos que coinciden con la calle o lugar y el cantón en Ecuador. Una calle se indica como aproximada; no se sustituye una dirección desconocida por el centro de la ciudad. Si el permiso se deniega se permite reintentar desde Usar mi ubicación; si no hay resultado o es ambiguo, la farmacia debe precisar la dirección. La captura continua del reparto comienza con Iniciar recorrido y conserva los controles existentes.
 

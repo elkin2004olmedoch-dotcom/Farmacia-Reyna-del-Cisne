@@ -1,6 +1,6 @@
 const {test,expect}=require('./browser-fixture.cjs'),AxeBuilder=require('@axe-core/playwright').default;
 test.use({serviceWorkers:'block'});
-async function setup(page,{destination=true,routeError=false,denied=false}={}){
+async function setup(page,{destination=true,routeError=false,denied=false,versionConflicts=0,routeStatus=503,routeCode='ROUTE_UNAVAILABLE'}={}){
  const user={id:'courier-map',nombre:'Repartidor Ruta',email:'ruta@example.ec',telefono:'0991234567',role:'repartidor',activo:true};
  const item={id:'delivery-map',pedidoId:'order-map',estado:'asignada',estadoPedido:'preparado',version:1,gpsVersion:0,repartidorId:user.id,destino:{nombre:'Cliente Ruta',direccion:'Calle principal 123',ciudad:'Puerto Quito',provincia:'Pichincha',telefono:'0991234567',latitud:destination?.125:null,longitud:destination?-79.25:null}},routes=[],states=[];
  await page.clock.install();
@@ -12,12 +12,29 @@ async function setup(page,{destination=true,routeError=false,denied=false}={}){
  await page.route('**/api/entregas/delivery-map/ubicacion',route=>{if(route.request().method()==='PUT'){const body=route.request().postDataJSON();item.ubicacion=body;item.gpsVersion++;}else item.ubicacion=null;return route.fulfill({json:{ok:true,data:structuredClone(item)}});});
  await page.route('**/api/entregas/delivery-map/ruta',route=>{
   const body=route.request().postDataJSON();routes.push(body);
-  if(routeError)return route.fulfill({status:503,json:{ok:false,error:{code:'ROUTE_UNAVAILABLE',message:'No se pudo calcular una ruta por las calles.'}}});
+  if(routes.length<=versionConflicts)return route.fulfill({status:409,json:{ok:false,error:{code:'DELIVERY_CHANGED',message:'La entrega o ubicación cambió; actualiza la ruta.'}}});
+  if(routeError)return route.fulfill({status:routeStatus,json:{ok:false,error:{code:routeCode,message:'No se pudo calcular una ruta por las calles.'}}});
   return route.fulfill({json:{ok:true,data:{destino:{latitud:.125,longitud:-79.25,fuente:destination?'cliente':'direccion'},geometry:{type:'LineString',coordinates:[[body.longitud,body.latitud],[-79.26,.128],[-79.25,.125]]},distance:1800,duration:300}}});
  });
  await page.goto('/entregas.html');await expect(page.getByRole('button',{name:'Iniciar recorrido',exact:true})).toBeVisible();return {routes,states};
 }
 const capture=async page=>{await expect.poll(()=>page.evaluate(()=>typeof window.gpsFixture.callback)).toBe('function');await page.evaluate(()=>window.gpsFixture.callback({coords:{latitude:.12,longitude:-79.24,accuracy:8},timestamp:Date.now()}));};
+
+test('ruta reintenta un conflicto GPS inicial y dibuja sin actualización manual',async({page})=>{
+ const {routes}=await setup(page,{versionConflicts:1});await page.getByRole('button',{name:'Ver ruta en la app'}).click();
+ await expect.poll(()=>routes.length,{timeout:4000}).toBe(2);await expect(page.locator('.courier-route-status')).toContainText('Ruta actualizada');await expect(page.locator('.leaflet-overlay-pane path[stroke="#b51c36"]')).toHaveCount(1);
+});
+test('conflictos GPS persistentes tienen un solo reintento y cerrar mapa lo cancela',async({page})=>{
+ const {routes}=await setup(page,{versionConflicts:20});await page.getByRole('button',{name:'Ver ruta en la app'}).click();
+ await expect.poll(()=>routes.length,{timeout:4000}).toBe(2);await expect(page.locator('.courier-route-status')).toContainText('La entrega o ubicación cambió');await page.clock.fastForward(5000);expect(routes).toHaveLength(2);
+ await page.locator('#courier-route-close').click();await page.clock.fastForward(30000);expect(routes).toHaveLength(2);
+});
+test('cerrar durante la espera del reintento impide otra solicitud y no recupera datos privados',async({page})=>{
+ const {routes}=await setup(page,{versionConflicts:1});await page.getByRole('button',{name:'Ver ruta en la app'}).click();await expect(page.locator('.courier-route-status')).toContainText('Actualizando la ruta');await page.locator('#courier-route-close').click();await page.clock.fastForward(3000);expect(routes).toHaveLength(1);await expect(page.locator('.courier-route-map')).toHaveCount(0);
+});
+test('una denegación de permiso no reintenta ni conserva el mapa',async({page})=>{
+ const {routes}=await setup(page,{routeError:true,routeStatus:403,routeCode:'FORBIDDEN'});await page.getByRole('button',{name:'Ver ruta en la app'}).click();await expect(page.locator('#courier-route-map')).toContainText('Ya no tienes acceso');await page.clock.fastForward(35000);expect(routes).toHaveLength(1);await expect(page.locator('.courier-route-map')).toHaveCount(0);
+});
 test('repartidor inicia, ve ruta trazada, actualiza su posición y cierra la entrega dentro de la app',async({page},testInfo)=>{
  const {routes,states}=await setup(page);
  await page.getByRole('button',{name:'Iniciar recorrido',exact:true}).focus();await page.keyboard.press('Enter');

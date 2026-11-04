@@ -1,4 +1,7 @@
 /* Catálogo y fichas: los colores y la tipografía proceden de la tienda. */
+/* Reserva la primera pantalla mientras llega la API y evita desplazar el pie visible. */
+body[data-page="catalog"] #catalog-grid[aria-busy="true"]:empty,
+body[data-page="product"] .product-loading { min-height:75vh; }
 body[data-page="catalog"] .catalog-heading { display:flex; flex-wrap:wrap; align-items:end; justify-content:space-between; gap:16px 32px; margin-bottom:32px; }
 body[data-page="catalog"] .catalog-heading > div { max-width:760px; }
 body[data-page="catalog"] .catalog-heading > .text-link { display:inline-flex; align-items:center; min-height:44px; }

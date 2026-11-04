@@ -78,13 +78,14 @@ async function list({page,pageSize},userId) {
 async function updateStatus(id,{estado,esperadoUpdatedAt},actorId) {
   for(let attempt=0;attempt<3;attempt++) {
     try {
-      return await db.$transaction(async tx=> {
+      const result=await db.$transaction(async tx=> {
         return updateStatusTx(tx,id,{estado,esperadoUpdatedAt},actorId);
       },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable,maxWait:10000,timeout:15000});
+      if(result.error)throw result.error;return result;
     } catch(error) {if(['P2034','P2028','P1008'].includes(error.code) && attempt<2)continue;throw error;}
   }
 }
-async function updateStatusTx(tx,id,{estado,esperadoUpdatedAt},actorId) {
+async function updateStatusTx(tx,id,{estado,esperadoUpdatedAt,codigoEntrega},actorId) {
   const current=await tx.pedido.findUnique({where:{id},include});
   if(!current)throw new AppError(404,'NOT_FOUND','No se encontró el pedido.');
   // Repeating the same transition is safe and never returns stock twice.
@@ -101,10 +102,11 @@ async function updateStatusTx(tx,id,{estado,esperadoUpdatedAt},actorId) {
   if(estado!=='cancelado')await assertOrderLotsCurrent(tx,id);
   const delivery=await tx.entrega.findUnique({where:{pedidoId:id}});
   if(estado==='entregado' && delivery && delivery.estado!=='en_destino')throw new AppError(409,'DELIVERY_NOT_ARRIVED','La entrega debe estar en destino para finalizar.');
+  if(estado==='entregado' && delivery){const error=await require('./delivery-progress.cjs').verify(tx,delivery,codigoEntrega);if(error)return {error};}
   const changedAt=new Date(Math.max(Date.now(),current.updatedAt.getTime()+1));
   const changed=await tx.pedido.updateMany({where:{id,estado:current.estado,updatedAt:expected},data:{estado,updatedAt:changedAt,...(['cancelado','entregado'].includes(estado)?{latitudEntrega:null,longitudEntrega:null}:{})}});
   if(changed.count!==1)throw new AppError(409,'ORDER_CHANGED','El pedido cambió. Actualiza sus datos antes de cambiar el estado.');
-  if(delivery && ['cancelado','entregado'].includes(estado))await tx.entrega.update({where:{id:delivery.id},data:{estado:estado==='cancelado'?'cancelada':'entregada',finalizadaAt:changedAt,version:{increment:1},...require('./sesiones-moviles.cjs').GPS_CLEAR}});
+  if(delivery && ['cancelado','entregado'].includes(estado))await tx.entrega.update({where:{id:delivery.id},data:{estado:estado==='cancelado'?'cancelada':'entregada',finalizadaAt:changedAt,version:{increment:1},codigoEntregaNonce:null,codigoIntentos:0,codigoBloqueadoHasta:null,...require('./sesiones-moviles.cjs').GPS_CLEAR}});
   if(estado==='cancelado')await inventory.restore(tx,current.detalles,id,actorId);
   await tx.pedidoEstado.create({data:{pedidoId:id,anterior:current.estado,estado,actorId,createdAt:changedAt}});
   if(['confirmado','preparado'].includes(estado))await require('./entregas.cjs').autoAssign(tx,{...current,estado});

@@ -55,6 +55,8 @@ test('ampliar una imagen usa el mismo origen remoto sin alterar el producto',asy
   const restore=globals({staticUrlResolver:value=>{assert.equal(value,upload);return remote;},staticUrlProduct:item,location:{search:'?id='+item.id},document:{getElementById:id=>({'product-detail':target,'detail-quantity':quantity,'image-dialog':dialog})[id]}});
   try{
     const {productController}=await load('frontend/controllers/catalog.js',{
+      './customer-account.js':'export const connectFavorites=()=>{};',
+      './reviews.js':'export const reviewsController=()=>{};',
       '../config.js':configStub,
       '../models/catalog.js':'export const catalog={find:async()=>globalThis.staticUrlProduct};',
       '../models/cart.js':'export const cart={};',
@@ -100,6 +102,8 @@ test('inicio registra recuperación antes de leer productos y no bloquea campañ
   },document:{getElementById:id=>id==='featured-products'?target:notes},sessionStorage:{getItem:()=>null}});
   try{
     const {homeController}=await load('frontend/controllers/catalog.js',{
+      './customer-account.js':'export const connectFavorites=()=>{};',
+      './reviews.js':'export const reviewsController=()=>{};',
       '../config.js':configStub,
       '../models/catalog.js':'export const catalog={featured:()=>globalThis.staticUrlHome.featured(),promotions:()=>globalThis.staticUrlHome.promotions()};',
       '../models/cart.js':'export const cart={};',

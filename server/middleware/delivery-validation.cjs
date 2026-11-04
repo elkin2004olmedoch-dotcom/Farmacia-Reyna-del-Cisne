@@ -1,4 +1,4 @@
-const {body,query}=require('express-validator');
+const {body,query,param}=require('express-validator');
 const {AppError}=require('./errors.cjs');
 const V=require('./validation.cjs');
 const ec=require('../../frontend/models/ecuador.js');
@@ -15,7 +15,9 @@ const destination=[only(['province','city','address','zonaEntregaId','latitudEnt
 const driver=[only(['nombre','email','telefono','password']),text('nombre',2,80).custom(ec.validName),body('email').isString().bail().trim().toLowerCase().custom(ec.validEmail),body('telefono').isString().bail().custom(ec.normalizePhone).customSanitizer(ec.normalizePhone),body('password').isString().bail().custom(v=>Buffer.byteLength(v,'utf8')<=72&&v.length>=10&&/\p{L}/u.test(v)&&/\d/.test(v)),V.validated];
 const driverActive=[only(['activo']),body('activo').custom(v=>typeof v==='boolean'),V.validated];
 const assign=[only(['pedidoId','repartidorId','esperadoVersion']),id('pedidoId'),id('repartidorId'),integer('esperadoVersion').optional(),V.validated];
-const state=[only(['estado','esperadoVersion']),body('estado').isIn(['en_camino','en_destino','entregada','cancelada']),integer('esperadoVersion'),V.validated];
+const state=[only(['estado','esperadoVersion','codigoEntrega']),body('estado').isIn(['en_camino','en_destino','entregada','cancelada']),integer('esperadoVersion'),body('codigoEntrega').optional().isString().bail().matches(/^\d{6}$/),V.validated];
+const incidence=[only(['tipo','descripcion','esperadoVersion']),body('tipo').isIn(['retraso','direccion','ausencia','averia','otro']),text('descripcion',8,300),integer('esperadoVersion'),V.validated];
+const resolveIncidence=[only(['esperadoVersion']),param('incidenciaId').isUUID(),integer('esperadoVersion'),V.validated];
 const location=[only(['latitud','longitud','precision','registradaAt','esperadoGpsVersion']),finite('latitud',-90,90),finite('longitud',-180,180),finite('precision',0,10000),body('registradaAt').isString().bail().isISO8601({strict:true,strictSeparator:true}).bail().matches(/(?:Z|[+-]\d{2}:\d{2})$/),integer('esperadoGpsVersion',0),V.validated];
 const list=[query('estado').optional().isIn(['asignada','en_camino','en_destino','entregada','cancelada']),...V.pagination];
 const route=[only(['latitud','longitud']),finite('latitud',-90,90),finite('longitud',-180,180),V.validated];
@@ -32,4 +34,4 @@ function validateBuyerDelivery(value){
  if(hasCoords&&!(value.consienteUbicacion===true&&ec.ecuadorPoint(value.latitudEntrega,value.longitudEntrega)))throw new Error('Comparte un destino válido en Ecuador únicamente con tu autorización expresa.');
  return true;
 }
-module.exports={zone,zoneUpdate,destination,driver,driverActive,assign,state,location,list,route,validateBuyerDelivery};
+module.exports={zone,zoneUpdate,destination,driver,driverActive,assign,state,incidence,resolveIncidence,location,list,route,validateBuyerDelivery};

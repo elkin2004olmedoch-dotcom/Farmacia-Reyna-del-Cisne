@@ -40,6 +40,8 @@ model Producto {
   movimientos MovimientoInventario[]
   detalles    PedidoDetalle[]
   promociones Promocion[]
+  favoritos Favorito[]
+  resenas ResenaProducto[]
   @@index([activo, categoria])
 }
 
@@ -64,6 +66,10 @@ model Usuario {
   sesionesWeb SesionWeb[]
   passwordReset PasswordReset?
   adminMfa AdminMfa?
+  direcciones DireccionGuardada[]
+  favoritos Favorito[]
+  resenas ResenaProducto[]
+  incidenciasEntrega EntregaIncidencia[]
   cambiosTarifa ZonaEntregaTarifa[]
   configuracionesFiscales ConfiguracionFiscal[]
   movimientos MovimientoInventario[]
@@ -136,6 +142,7 @@ model PedidoDetalle {
   baseImponible Decimal?
   ivaMonto Decimal?
   totalLinea Decimal?
+  resena ResenaProducto?
   lotes PedidoDetalleLote[]
   @@unique([pedidoId, productoId])
 }
@@ -336,6 +343,19 @@ model ZonaEntregaTarifa {
 }
 
 model Entrega {
+  codigoEntregaRequerido Boolean @default(false)
+  codigoEntregaNonce String?
+  codigoIntentos Int @default(0)
+  codigoBloqueadoHasta DateTime?
+  estimadaDesde DateTime?
+  estimadaHasta DateTime?
+  estimadaCalculadaAt DateTime?
+  estimadaFuente String?
+  estimadaGpsVersion Int?
+  estimadaMuestraAt DateTime?
+  estimadaVenceAt DateTime?
+  estimadaRepartidorId String?
+  incidencias EntregaIncidencia[]
   id String @id @default(uuid())
   pedidoId String @unique
   pedido Pedido @relation(fields:[pedidoId],references:[id],onDelete:Restrict)
@@ -456,4 +476,61 @@ model AuditoriaAdmin {
  status Int
  createdAt DateTime @default(now())
  @@index([createdAt,id])
+}
+
+model DireccionGuardada {
+  id String @id @default(uuid())
+  userId String
+  usuario Usuario @relation(fields:[userId],references:[id],onDelete:Restrict)
+  alias String
+  provincia String
+  ciudad String
+  direccion String
+  codigoPostal String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId,createdAt])
+}
+
+model Favorito {
+  id String @id @default(uuid())
+  userId String
+  usuario Usuario @relation(fields:[userId],references:[id],onDelete:Restrict)
+  productoId String
+  producto Producto @relation(fields:[productoId],references:[id],onDelete:Restrict)
+  createdAt DateTime @default(now())
+  @@unique([userId,productoId])
+  @@index([productoId])
+}
+
+model ResenaProducto {
+  id String @id @default(uuid())
+  userId String
+  usuario Usuario @relation(fields:[userId],references:[id],onDelete:Restrict)
+  productoId String
+  producto Producto @relation(fields:[productoId],references:[id],onDelete:Restrict)
+  detalleId String @unique
+  detallePedido PedidoDetalle @relation(fields:[detalleId],references:[id],onDelete:Restrict)
+  puntuacion Int
+  comentario String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([userId,productoId])
+  @@index([productoId,createdAt])
+  @@index([userId,createdAt])
+}
+
+model EntregaIncidencia {
+  id String @id @default(uuid())
+  entregaId String
+  entrega Entrega @relation(fields:[entregaId],references:[id],onDelete:Restrict)
+  actorId String
+  actor Usuario @relation(fields:[actorId],references:[id],onDelete:Restrict)
+  tipo String
+  descripcion String
+  resueltaAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([entregaId,createdAt])
+  @@index([actorId])
 }

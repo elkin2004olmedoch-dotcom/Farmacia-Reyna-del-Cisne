@@ -7,6 +7,8 @@ test('confirmar una cuenta de cliente abre el catálogo con sesión, sin JWT ni 
   const user={id:'cliente-confirmado',nombre:'Cliente Confirmado',email:'confirmado@example.ec',telefono:'0991234567',role:'user',activo:true,emailVerifiedAt:'2026-11-02T12:00:00Z'};
   const session='synthetic-confirmed-session',requests=[];page.on('request',request=>requests.push(request.url()));
   await page.route('**/api/auth/me',route=>route.fulfill({json:{ok:true,data:user}}));
+  // This test substitutes the session; private account reads must use that same fixture.
+  await page.route('**/api/cuenta/favoritos',route=>route.fulfill({json:{ok:true,data:[]}}));
   await page.route('**'+verifyPath,route=>route.fulfill({json:{ok:true,data:{verified:true,usuario:user}}}));
   await page.goto('/confirmar-correo#token='+token);await page.locator('#verification-submit').click();
   await expect(page).toHaveURL(/\/catalogo\.html$/);

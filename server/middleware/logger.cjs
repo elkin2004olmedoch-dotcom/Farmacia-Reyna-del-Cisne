@@ -16,6 +16,7 @@ const adminWrites=new Map([
   ['POST /api/admin/zonas-entrega','delivery.zone.create'],['PUT /api/admin/zonas-entrega/:id','delivery.zone.update'],
   ['POST /api/admin/repartidores','delivery.courier.create'],['PUT /api/admin/repartidores/:id','delivery.courier.update'],
   ['POST /api/entregas/asignar','delivery.assign'],['PUT /api/entregas/:id/estado','delivery.state.update'],
+  ['POST /api/entregas/:id/incidencias','delivery.incident.create'],['PUT /api/entregas/:id/incidencias/:incidenciaId','delivery.incident.resolve'],
 ]);
 module.exports = function logger(req,res,next) {
   req.id=randomUUID();res.setHeader('X-Request-Id',req.id);

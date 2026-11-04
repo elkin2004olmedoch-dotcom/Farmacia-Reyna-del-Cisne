@@ -4,10 +4,13 @@ const {AppError}=require('../middleware/errors.cjs');
 const V=require('../middleware/validation.cjs');
 const D=require('../middleware/delivery-validation.cjs');
 const C=require('../controllers/entregas.cjs');
+const {rateLimit}=require('express-rate-limit');
 module.exports=config=>{
  const router=Router(),auth=authenticate(config),admin=roles('admin'),operator=roles('admin','repartidor');
  const noStore=(req,res,next)=>{res.set('Cache-Control','no-store');next();};
  const empty=(req,res,next)=>{if(req.body!==undefined&&(!req.body||Array.isArray(req.body)||typeof req.body!=='object'||Object.keys(req.body).length))throw new AppError(422,'UNEXPECTED_FIELDS','La solicitud contiene campos no permitidos.');next();};
+ const codeLimit=rateLimit({windowMs:15*60000,limit:40,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'DELIVERY_CODE_RATE_LIMIT','Espera antes de volver a confirmar la entrega.'))});
+ const operatorLimit=rateLimit({windowMs:60000,limit:20,keyGenerator:req=>req.user.id,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'DELIVERY_PROGRESS_RATE_LIMIT','Espera un minuto antes de guardar otra actualización.'))});
  router.get('/zonas-entrega',noStore,C.zones);
  router.post('/entregas/verificar-destino',noStore,auth,roles('user','admin'),require('express-rate-limit').rateLimit({windowMs:60000,limit:10,keyGenerator:req=>req.user.id,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'DESTINATION_RATE_LIMIT','Espera un minuto antes de volver a ubicar el destino.'))}),...D.destination,C.destination);
  router.get('/admin/zonas-entrega',noStore,auth,admin,C.adminZones);
@@ -22,7 +25,9 @@ module.exports=config=>{
  router.post('/entregas/:id/seguimiento-movil',noStore,auth,roles('repartidor'),mobile,V.id,empty,V.validated,C.claimTracking);
  router.delete('/entregas/:id/seguimiento-movil',noStore,auth,roles('repartidor'),mobile,V.id,empty,V.validated,C.releaseTracking);
  router.post('/entregas/asignar',noStore,auth,admin,...D.assign,C.assign);
- router.put('/entregas/:id/estado',noStore,auth,operator,V.id,...D.state,(req,res)=>C.state(req,res,config));
+ router.put('/entregas/:id/estado',noStore,auth,operator,codeLimit,operatorLimit,V.id,...D.state,(req,res)=>C.state(req,res,config));
+ router.post('/entregas/:id/incidencias',noStore,auth,operator,operatorLimit,V.id,...D.incidence,C.incidence);
+ router.put('/entregas/:id/incidencias/:incidenciaId',noStore,auth,operator,operatorLimit,V.id,...D.resolveIncidence,C.incidence);
  router.put('/entregas/:id/ubicacion',noStore,auth,roles('repartidor'),V.id,...D.location,C.location);
  router.delete('/entregas/:id/ubicacion',noStore,auth,roles('repartidor'),V.id,V.validated,C.clearLocation);
  router.get('/pedidos/:id/seguimiento',noStore,auth,roles('user','admin'),V.id,V.validated,C.tracking);

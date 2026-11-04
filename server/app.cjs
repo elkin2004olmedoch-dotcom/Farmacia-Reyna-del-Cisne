@@ -36,7 +36,7 @@ module.exports=function createApp(settings=require('./config.cjs')()) {
     if(!url)return next(new AppError(404,'NOT_FOUND','La imagen solicitada no existe.'));
     res.setHeader('Cache-Control','public, max-age=86400');res.redirect(302,url);
   });
-  app.get('/descargas/reparto-0.3.0.apk',(req,res,next)=>{res.attachment('Reina-del-Cisne-Reparto-pruebas.apk');res.setHeader('Cache-Control','public, max-age=31536000, immutable');next();});
+  app.get('/descargas/reparto-0.4.0.apk',(req,res,next)=>{res.attachment('Reina-del-Cisne-Reparto-pruebas.apk');res.setHeader('Cache-Control','public, max-age=31536000, immutable');next();});
   app.get('/confirmar-correo',(req,res)=>{res.setHeader('Cache-Control','no-store');res.sendFile('confirmar-correo.html',{root:app.locals.frontendRoot});});
   app.get('/recuperar-cuenta',(req,res)=>{res.setHeader('Cache-Control','no-store');res.sendFile('recuperar-cuenta.html',{root:app.locals.frontendRoot});});
   app.use(express.static(app.locals.frontendRoot,{dotfiles:'deny',index:'index.html',maxAge:0}));

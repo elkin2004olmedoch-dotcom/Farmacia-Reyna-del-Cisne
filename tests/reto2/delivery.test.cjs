@@ -129,7 +129,8 @@ test('asignación y estados respetan propietario, preparación, versiones y DTO 
  await assert.rejects(()=>delivery.setDriverActive(driver.id,false,admin),e=>e.code==='DRIVER_HAS_ACTIVE_DELIVERY');
  await assert.rejects(()=>delivery.changeState(entrega.id,{estado:'en_destino',esperadoVersion:1},driver),e=>e.code==='DELIVERY_CHANGED');
  entrega=await delivery.changeState(entrega.id,{estado:'en_destino',esperadoVersion:entrega.version},driver);
- entrega=await delivery.changeState(entrega.id,{estado:'entregada',esperadoVersion:entrega.version},driver);
+ const codigoEntrega=(await delivery.tracking(pedido.id,user)).entrega.codigoEntrega;
+ entrega=await delivery.changeState(entrega.id,{estado:'entregada',esperadoVersion:entrega.version,codigoEntrega},driver);
  assert.equal(entrega.destino,null);assert.equal(entrega.estadoPedido,'entregado');assert.equal(entrega.ubicacion,null);
  assert.deepEqual(await delivery.changeState(entrega.id,{estado:'entregada',esperadoVersion:1},driver),entrega);
  assert.equal(await db.pedidoEstado.count({where:{pedidoId:pedido.id,estado:'entregado'}}),1);
@@ -169,7 +170,8 @@ test('cancelar desde reparto devuelve inventario una sola vez y respeta factura 
 test('carrera entregar/cancelar conserva un único cierre atómico',async()=>{
  let {pedido,entrega}=await assigned();entrega=await delivery.changeState(entrega.id,{estado:'en_camino',esperadoVersion:entrega.version},driver);entrega=await delivery.changeState(entrega.id,{estado:'en_destino',esperadoVersion:entrega.version},driver);
  const before=(await db.producto.findUnique({where:{id:product.id}})).stock;
- const results=await Promise.allSettled([delivery.changeState(entrega.id,{estado:'entregada',esperadoVersion:entrega.version},driver),orders.updateStatus(pedido.id,{estado:'cancelado',esperadoUpdatedAt:pedido.updatedAt.toISOString()},admin.id)]);
+ const codigoEntrega=(await delivery.tracking(pedido.id,user)).entrega.codigoEntrega;
+ const results=await Promise.allSettled([delivery.changeState(entrega.id,{estado:'entregada',esperadoVersion:entrega.version,codigoEntrega},driver),orders.updateStatus(pedido.id,{estado:'cancelado',esperadoUpdatedAt:pedido.updatedAt.toISOString()},admin.id)]);
  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
  const current=await db.pedido.findUnique({where:{id:pedido.id},include:{reparto:true}});assert.equal(current.reparto.estado,current.estado==='entregado'?'entregada':'cancelada');
  assert.equal((await db.producto.findUnique({where:{id:product.id}})).stock,before+(current.estado==='cancelado'?1:0));

@@ -99,40 +99,43 @@ export function createAdminCommandExecutor({model=administration,deliveryModel=d
       if(['off-topic','needs-details'].includes(command.type))return reply(command.message);
       if(command.type==='navigate'){if(!navigate)throw new Error('La navegación del panel no está disponible.');await navigate(command.section);return reply('Sección abierta.');}
       if(command.type==='open-editor'){if(!openEditor)throw new Error('El formulario del panel no está disponible.');await openEditor(command.section,command.values,command.record);return reply(command.message||'Formulario abierto. Completa los datos reales y guarda el registro.');}
-      requireAdmin();let message='Registro guardado en la farmacia.';
+      requireAdmin();let message='Registro guardado en la farmacia.',saved;
       switch(command.type){
         case 'update-product':
           if(!command.product.activo)return reply('Ese producto está inactivo. Revísalo desde Productos.');
-          await model.saveProduct(productValues(command.product,command.changes),command.product.id);message=`Producto actualizado: ${command.product.nombre}.`;break;
-        case 'create-product':await model.saveProduct(command.values);message=`Producto creado: ${command.values.nombre}.`;break;
+          saved=await model.saveProduct(productValues(command.product,command.changes),command.product.id);message=`Producto actualizado: ${command.product.nombre}.`;break;
+        case 'create-product':saved=await model.saveProduct(command.values);message=`Producto creado: ${command.values.nombre}.`;break;
         case 'deactivate-product':await model.removeProduct(command.product.id);message=`Producto desactivado: ${command.product.nombre}.`;break;
-        case 'create-promotion':await model.savePromotion(command.values);message=`Promoción publicada: ${command.values.titulo}, ${command.values.descuentoPorcentaje} % para ${command.product.nombre}, hasta ${ecuadorCommandDay(command.values.fin)} (hora de Ecuador).`;break;
-        case 'create-supplier':await model.saveSupplier(command.values);break;
-        case 'create-lot':await model.saveLot(command.values);message='Lote registrado y existencias actualizadas.';break;
-        case 'create-movement':await model.saveMovement(command.values);message='Ajuste registrado en el historial de inventario.';break;
+        case 'create-promotion':saved=await model.savePromotion(command.values);message=`Promoción publicada: ${command.values.titulo}, ${command.values.descuentoPorcentaje} % para ${command.product.nombre}, hasta ${ecuadorCommandDay(command.values.fin)} (hora de Ecuador).`;break;
+        case 'create-supplier':saved=await model.saveSupplier(command.values);break;
+        case 'create-lot':saved=await model.saveLot(command.values);message='Lote registrado y existencias actualizadas.';break;
+        case 'create-movement':saved=await model.saveMovement(command.values);message='Ajuste registrado en el historial de inventario.';break;
         case 'change-order-state':{
           const order=command.order||await model.order(command.id);requireAdmin();
           if(!order?.updatedAt)throw new Error('No se pudo consultar la versión actual del pedido.');
-          await model.changeOrderState(command.id,command.estado,order.updatedAt);message=`Pedido actualizado a ${command.estado}.`;break;
+          saved=await model.changeOrderState(command.id,command.estado,order.updatedAt);message=`Pedido actualizado a ${command.estado}.`;break;
         }
-        case 'create-zone':await deliveryModel.saveZone({...command.values,fundamentoIva:command.values.fundamentoIva??null});message='Zona y tarifa registradas.';break;
+        case 'create-zone':saved=await deliveryModel.saveZone({...command.values,fundamentoIva:command.values.fundamentoIva??null});message='Zona y tarifa registradas.';break;
         case 'update-zone':{
           const zone=command.zone||(await deliveryModel.adminZones()).find(zone=>zone.id===command.id);requireAdmin();
           if(!zone)throw new Error('No encuentro esa zona. Copia su identificador del panel.');
           const values=Object.fromEntries(['nombre','provincia','canton','tarifaCentavos','ivaCategoria','fundamentoIva','activa'].map(key=>[key,zone[key]??null]));
-          await deliveryModel.saveZone({...values,...command.changes,esperadoVersion:zone.version},zone.id);message='Tarifa de zona actualizada; los pedidos anteriores conservan su tarifa.';break;
+          saved=await deliveryModel.saveZone({...values,...command.changes,esperadoVersion:zone.version},zone.id);message='Tarifa de zona actualizada; los pedidos anteriores conservan su tarifa.';break;
         }
         case 'assign-delivery':{
           const current=await findDelivery(item=>item.pedidoId===command.pedidoId);requireAdmin();
-          await deliveryModel.assign({pedidoId:command.pedidoId,repartidorId:command.repartidorId,...(current?{esperadoVersion:current.version}:{})});message='Entrega asignada al repartidor indicado.';break;
+          saved=await deliveryModel.assign({pedidoId:command.pedidoId,repartidorId:command.repartidorId,...(current?{esperadoVersion:current.version}:{})});message='Entrega asignada al repartidor indicado.';break;
         }
         case 'change-delivery-state':{
           const current=await findDelivery(item=>item.id===command.id);requireAdmin();if(!current)throw new Error('No encuentro esa entrega. Copia su identificador del panel.');
-          await deliveryModel.changeState(command.id,command.estado,current.version);message=`Entrega actualizada a ${command.estado}.`;break;
+          saved=await deliveryModel.changeState(command.id,command.estado,current.version);message=`Entrega actualizada a ${command.estado}.`;break;
         }
         default:return reply('No reconocí una orden administrativa admitida. Escribe ayuda para ver ejemplos.');
       }
-      requireAdmin();try{await refresh();}catch{return reply(message+' El cambio se guardó, pero no se pudo refrescar el panel. Actualiza la página para consultarlo.');}return reply(message);
+      const table=({'update-product':'productos','create-product':'productos','deactivate-product':'productos','create-promotion':'promociones','create-supplier':'proveedores','create-lot':'lotes','create-movement':'movimientos','change-order-state':'pedidos','create-zone':'zonas','update-zone':'zonas','assign-delivery':'entregas','change-delivery-state':'entregas'})[command.type];
+      const id=saved?.id||command.id||(['update-product','deactivate-product'].includes(command.type)?command.product?.id:null);
+      const success=()=>({...reply(message),...(table&&/^[a-z0-9][a-z0-9-]{0,79}$/.test(id||'')?{actions:[{label:'Ver registro',href:`admin.html?tabla=${table}&registro=${id}`}]}:{})});
+      requireAdmin();try{await refresh();}catch{requireAdmin();message+=' El cambio se guardó, pero no se pudo refrescar el panel. Actualiza la página para consultarlo.';return success();}requireAdmin();return success();
     }finally{pending=false;}
   };
 }

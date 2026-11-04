@@ -4,8 +4,11 @@ import {catalogView,productView,promotionView,comparisonView} from '../views/pro
 import {message,busy} from '../views/common.js';
 import {watchUpdates,preserveFocus} from './updates.js';
 import {predictiveSearch} from './predictive-search.js';
+import {connectFavorites} from './customer-account.js';
+import {reviewsController} from './reviews.js';
 const selected=()=>{try{return JSON.parse(sessionStorage.getItem('farmacia-mvc-comparacion') || '[]').filter(id=>typeof id==='string').slice(0,4);}catch(_){return [];}};
 function actions(target) {
+  connectFavorites(target);
   target.addEventListener('click',async event=>{const button=event.target.closest('[data-add]');if(!button || button.disabled)return;const wasFocused=document.activeElement===button;busy(button,true);try{const product=await catalog.find(button.dataset.add);cart.add(product);message(`${product.nombre} se añadió al carrito.`);}catch(error){message(error.message,true);}finally{if(button.isConnected){busy(button,false);if(wasFocused && !document.querySelector('dialog[open]'))button.focus();}}});
   target.addEventListener('change',event=>{if(!event.target.matches('[data-compare]'))return;let chosen=selected();if(event.target.checked){if(chosen.length>=4){event.target.checked=false;message('Puedes comparar hasta cuatro productos.',true);return;}chosen.push(event.target.dataset.compare);}else chosen=chosen.filter(id=>id!==event.target.dataset.compare);sessionStorage.setItem('farmacia-mvc-comparacion',JSON.stringify(chosen));});
   for(const field of target.querySelectorAll('[data-compare]'))field.checked=selected().includes(field.dataset.compare);
@@ -99,7 +102,7 @@ export async function catalogController() {
 export async function productController() {
   const id=new URLSearchParams(location.search).get('id');if(!id)throw new Error('Selecciona un producto desde el catálogo.');let product=await catalog.find(id);const target=document.getElementById('product-detail');
   function render(){const quantity=document.getElementById('detail-quantity')?.value || '1';preserveFocus(target,()=>{productView(product);document.getElementById('detail-quantity').value=quantity;});document.title=product.nombre+' | Farmacia Reina del Cisne';}
-  render();
+  render();connectFavorites(target);reviewsController(id);
   target.addEventListener('click',event=>{const quantity=document.getElementById('detail-quantity');const button=event.target.closest('[data-quantity]');if(button)quantity.value=Math.min(Number(quantity.max),Math.max(1,Number(quantity.value)+Number(button.dataset.quantity)));if(event.target.closest('#zoom-product')){const dialog=document.getElementById('image-dialog');const image=dialog.querySelector('img');image.src=target.querySelector('#zoom-product img').src;image.alt=product.alt || product.nombre;dialog.showModal();}});
   target.addEventListener('submit',async event=>{event.preventDefault();const quantity=Number(document.getElementById('detail-quantity').value);const button=event.target.querySelector('[type=submit]');const wasFocused=document.activeElement===button;busy(button,true);try{product=await catalog.find(id);cart.add(product,quantity);message(`${product.nombre} se añadió al carrito.`);}catch(error){message(error.message,true);}finally{render();if(wasFocused && !document.querySelector('dialog[open]'))document.getElementById('detail-add-button')?.focus();}});
   watchUpdates(async()=>{try{const loaded=await catalog.find(id);if(JSON.stringify(loaded)!==JSON.stringify(product)){product=loaded;render();}}catch(error){if(error.status===404){target.innerHTML='<p class="shop-empty">Este producto fue retirado del catálogo. <a href="catalogo.html">Ver productos disponibles</a></p>';}throw error;}},{canRefresh:()=>!document.querySelector('dialog[open]') && document.activeElement?.id!=='detail-quantity' && !target.querySelector('[aria-busy=true]')});

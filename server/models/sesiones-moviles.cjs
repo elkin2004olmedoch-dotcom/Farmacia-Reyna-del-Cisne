@@ -4,7 +4,7 @@ const {Prisma}=require('./prisma-client.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 const userSelect={...require('./usuarios.cjs').publicFields,tokenVersion:true,tokenEpoch:true};
 const withUser={usuario:{select:userSelect}};
-const GPS_CLEAR={latitud:null,longitud:null,precision:null,registradaAt:null,recibidaAt:null,gpsVersion:{increment:1},sesionSeguimientoId:null};
+const GPS_CLEAR={latitud:null,longitud:null,precision:null,registradaAt:null,recibidaAt:null,gpsVersion:{increment:1},sesionSeguimientoId:null,...require('./delivery-progress.cjs').ESTIMATE_CLEAR};
 const SECRET=/^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 const REFRESH=/^([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})\.([A-Za-z0-9_-]{43})$/;
 const hash=value=>createHash('sha256').update(value).digest('hex');

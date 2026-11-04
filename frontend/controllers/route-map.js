@@ -38,8 +38,19 @@ export async function createRouteMap(root,{destination,requestRoute,locate=brows
     pending=true;update.disabled=true;attemptAt=Date.now();const id=++sequence;
     status.textContent='Calculando la ruta por las calles…';
     try{
-      const input={latitud:origin.latitud,longitud:origin.longitud};
-      const data=await requestRoute(input);if(disposed || id!==sequence)return;
+      let data;
+      for(let retry=0;retry<2;retry++){
+        if(disposed || id!==sequence || !recent() || document.hidden)return;
+        try{data=await requestRoute({latitud:origin.latitud,longitud:origin.longitud});break;}
+        catch(error){
+          if(disposed || id!==sequence || !recent() || document.hidden)return;
+          if(retry || error.status!==409 || error.code!=='DELIVERY_CHANGED')throw error;
+          status.textContent='La ubicación cambió durante el cálculo. Actualizando la ruta…';
+          // Let the GPS write settle and respect the routing provider's existing rate limit.
+          await new Promise(resolve=>setTimeout(resolve,1200));
+        }
+      }
+      if(disposed || id!==sequence)return;
       if(!end){if(!point(data.destino))throw new Error('No se pudo encontrar la dirección del pedido.');end=data.destino;showDestination();}
       addressPaused=false;
       const coordinates=data.geometry?.coordinates;

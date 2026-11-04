@@ -1,4 +1,5 @@
 import {createRouteMap} from '../../frontend/controllers/route-map.js';
+import {deliveryDialog} from '../../frontend/controllers/delivery-dialog.js';
 const deliveryLabels = {asignada: 'Asignada', en_camino: 'En camino', en_destino: 'En destino', entregada: 'Entregada', cancelada: 'Cancelada'};
 const nextStates = {asignada: 'en_camino', en_camino: 'en_destino', en_destino: 'entregada'};
 const actionLabels = {en_camino: 'Iniciar recorrido', en_destino: 'Llegué al destino', entregada: 'Pedido entregado'};
@@ -65,6 +66,7 @@ export async function mountApp({root, session, tracker, runtime}) {
     elements.main.append(elements.network);
   }
   function renderLogin(text = '') {
+    document.dispatchEvent(new Event('delivery:clear'));
     closeRoute();
     user = null; result.items = []; tracking = {...tracker.state};
     renderShell();
@@ -239,9 +241,10 @@ export async function mountApp({root, session, tracker, runtime}) {
       if (action === 'close-map') return closeRoute();
       if (action === 'previous' || action === 'next') page += action === 'next' ? 1 : -1;
       if (action === 'state' && item) {
-        if(control.dataset.state==='entregada' && !window.confirm('¿Confirmas que entregaste el pedido al destinatario? El seguimiento finalizará.'))return;
+        if(control.dataset.state==='entregada' && !item.codigoRequerido && !window.confirm('¿Confirmas que entregaste el pedido al destinatario? El seguimiento finalizará.'))return;
         if(control.dataset.state==='en_camino')await runtime.ensureNotifications();
-        const saved=await session.request('/entregas/' + encodeURIComponent(item.id) + '/estado', {method: 'PUT', data: {estado: control.dataset.state, esperadoVersion: item.version}});
+        const change=code=>session.request('/entregas/' + encodeURIComponent(item.id) + '/estado', {method: 'PUT', data: {estado: control.dataset.state, esperadoVersion: item.version,...(code?{codigoEntrega:code}:{})}});
+        const saved=control.dataset.state==='entregada'&&item.codigoRequerido?await deliveryDialog({submit:change}):await change();if(!saved)return;
         if(control.dataset.state==='en_camino'){await openRoute(saved);await tracker.start(saved);}
         if (control.dataset.state === 'entregada' && tracker.state.activeId === item.id) await tracker.stop();
       }
@@ -274,6 +277,7 @@ export async function mountApp({root, session, tracker, runtime}) {
   const ageTimer = window.setInterval(() => {updateTracking(tracking);recover();}, 15000);
   await perform(async () => { await acceptUser(await session.restore()); });
   return {updateTracking, dispose() {
+    document.dispatchEvent(new Event('delivery:clear'));
     closeRoute();
     disposed = true; window.clearInterval(ageTimer);
     root.removeEventListener('click', click); root.removeEventListener('submit', submit); root.removeEventListener('change', change);
