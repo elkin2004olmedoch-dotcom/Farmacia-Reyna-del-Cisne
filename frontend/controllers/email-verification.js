@@ -1,5 +1,5 @@
 import '../models/ecuador.js';
-import {auth} from '../models/auth.js';
+import {auth,sessionSignalKey} from '../models/auth.js';
 import {busy,formErrors} from '../views/common.js';
 
 const V=globalThis.Farmacia.validation;
@@ -24,6 +24,39 @@ export function connectVerificationResend(form=document.getElementById('verifica
     catch(error){status(message,error.message || 'No se pudo solicitar el correo. Inténtalo nuevamente.',true);}
     finally{pending=false;busy(button,false);if(wasFocused && form.isConnected && document.activeElement===document.body)button.focus({preventScroll:true});}
   });
+}
+
+// Attach only while the pending panel is open. A signal never carries an identity.
+export function connectVerificationSession(panel,onVerified){
+  let connection=null,checking=false,queued=null,revision=0,expected='',lastFocusCheck=-Infinity;
+  const normalize=value=>String(value || '').trim().toLowerCase();
+  function stop(){connection?.abort();connection=null;queued=null;expected='';}
+  async function check(event,retry=false){
+    if(!panel.isConnected || panel.hidden){stop();return;}
+    if(!connection)return;
+    if(event.type==='storage'){
+      if(event.key!==sessionSignalKey || event.storageArea!==localStorage || !event.newValue)return;
+    }
+    if(event.type!=='storage' && document.visibilityState==='hidden')return;
+    if(checking){revision++;queued=event;return;}
+    if(event.type!=='storage'){
+      if(!retry && performance.now()-lastFocusCheck<1000)return;
+      lastFocusCheck=performance.now();
+    }
+    const active=connection,matchingEmail=expected,request=++revision;checking=true;
+    try{
+      const user=await auth.restore({accept:user=>request===revision && connection===active && !active.signal.aborted && panel.isConnected && !panel.hidden && normalize(user?.email)===matchingEmail});
+      if(user){stop();onVerified();}
+    }catch{}finally{checking=false;if(queued && connection){const next=queued;queued=null;void check(next,true);}}
+  }
+  function watch(email){
+    stop();expected=normalize(email);lastFocusCheck=-Infinity;connection=new AbortController();
+    const options={signal:connection.signal};
+    window.addEventListener('storage',check,options);window.addEventListener('focus',check,options);
+    window.addEventListener('pageshow',check,options);document.addEventListener('visibilitychange',check,options);
+    window.addEventListener('pagehide',event=>{if(!event.persisted)stop();},options);
+  }
+  return {watch,stop};
 }
 
 function readVerificationToken(){
