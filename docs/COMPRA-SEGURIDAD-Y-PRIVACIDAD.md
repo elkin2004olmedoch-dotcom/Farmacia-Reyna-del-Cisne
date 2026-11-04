@@ -12,6 +12,10 @@ La configuración bancaria del checkout sólo está disponible para clientes/adm
 
 ## Cobertura e interfaz
 
+Catálogo, carrito lateral y checkout comparten el mismo renderizado de presentación y laboratorio o marca. La foto se conserva junto al nombre; si falla, aparece el recurso «Imagen no disponible» sin alterar producto, cantidad ni precio. El lateral y el carrito distinguen precio por unidad y subtotal de cada artículo; los controles de cantidad ofrecen un área de 44 × 44 píxeles. La revisión final conserva foto, presentación, empresa, cantidad, impuestos y envío.
+
+**Editar carrito** permite cambiar cantidades y regresar a entrega/pago sin perder los datos escritos. Si se quita el último artículo, se oculta el resumen vacío y el foco ofrece explorar productos. Se mantiene la identidad crema/vino, los logos y Goti; no se incorporan librerías visuales, pasarelas ni cambios de esquema. `purchase-polish.spec.cjs` comprueba continuidad de la información, importes, edición, teclado, fallback de fotos, carrito vacío y accesibilidad en escritorio/móvil y anchos de 320–1440 píxeles.
+
 Al cambiar provincia y cantón, el checkout elige una cobertura local coincidente; en caso contrario selecciona la nacional. El usuario revisa siempre tarifa y total. La tarifa nacional continúa en $0; se conserva el retiro si no se localiza el destino. La cobertura no incorpora una transportadora nacional.
 
 Las mascotas conservan confirmación/cancelación. La administrativa muestra precio y stock anteriores antes de aplicar cambios; la del cliente muestra el subtotal de la cantidad elegida y recuerda que el envío se revisa en la compra. El resumen administrativo añade lotes con existencias que vencen dentro de 90 días, con producto, número y fecha. La consulta es acotada a diez alertas, dentro de la misma instantánea del resumen.

@@ -54,7 +54,7 @@ export function deliveryCheckout(form,onChange){
       const quote=deliveryQuote(productCents,mode(),zone());
       byId('checkout-shipping-fee').textContent=mode()==='pickup'?'Retiro sin costo':quote.enabled?money(quote.shipping):'Pendiente de configurar';
       byId('checkout-grand-total').textContent=quote.enabled?money(quote.total):'Por confirmar';
-      byId('checkout-shipping-status').textContent=mode()==='pickup'?'El total de productos incluye los impuestos aplicables.':quote.enabled?'La tarifa de envío se incluye en este total. El servidor comprobará su vigencia al confirmar.':'La farmacia definirá la tarifa antes de habilitar la confirmación de entrega en esta zona.';
+      byId('checkout-shipping-status').textContent=mode()==='pickup'?'El total de productos incluye los impuestos aplicables.':quote.enabled?'La tarifa de envío está incluida. Revisa la dirección antes de confirmar.':'La tarifa de esta zona está pendiente. Actualiza la cobertura o elige retiro en farmacia.';
       select.required=mode()==='delivery';
     },
     reset(){position=null;locationRequest++;byId('checkout-remove-location').hidden=true;byId('checkout-location-status').textContent='No se ha compartido tu ubicación.';},

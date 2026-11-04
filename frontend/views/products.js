@@ -1,4 +1,4 @@
-import {escape,price,priceMarkup,promotionRibbon,taxMarkup} from './common.js';
+import {escape,price,priceMarkup,promotionRibbon,taxMarkup,productMetadata} from './common.js';
 import {productImageUrl} from '../config.js';
 import '../models/pharmacy-policy.js';
 const {requiresProfessionalReview,restrictionReason,allowsPromotion}=globalThis.Farmacia.pharmacyPolicy;
@@ -6,11 +6,10 @@ const prescriptionNote=product=>`<p class="prescription-note">${escape(restricti
 const categoryLabel=category=>({bienestar:'Bienestar',cuidado:'Cuidado personal',bebe:'Mamá y bebé'}[category] || 'Productos');
 export function productCard(product) {
   const id=escape(product.id),url='producto.html?id='+encodeURIComponent(product.id),review=requiresProfessionalReview(product);
-  const metadata=[['Presentación',product.presentacion],['Laboratorio o marca',product.laboratorio]].filter(([,value])=>value);
   return `<article class="featured-card pharmacy-product-card" aria-labelledby="name-${id}">
     <a class="featured-image" href="${url}"><img data-product-image src="${escape(productImageUrl(product.imagen))}" alt="${escape(product.alt || product.nombre)}" width="320" height="320" loading="lazy">${product.stock===0?'<span class="product-sold-out">Agotado</span>':''}${promotionRibbon(product.descuentoPorcentaje)}</a>
     <div class="product-card-copy"><small>${escape(categoryLabel(product.categoria))}</small><h3 id="name-${id}"><a href="${url}">${escape(product.nombre)}</a></h3>
-      ${metadata.length?`<dl class="product-card-meta">${metadata.map(([label,value])=>`<div><dt>${label}</dt><dd>${escape(value)}</dd></div>`).join('')}</dl>`:''}
+      ${productMetadata(product,'product-card-meta')}
       ${product.descripcion?`<p class="product-card-description">${escape(product.descripcion)}</p>`:''}
       ${review?prescriptionNote(product):''}
       <div class="product-card-purchase"><div class="featured-bottom">${priceMarkup(product)}</div>${taxMarkup(product)}<p class="product-stock${product.stock===0?' is-unavailable':''}">${product.stock} unidades disponibles</p>

@@ -47,7 +47,14 @@ export async function checkoutController() {
   for(const input of form.querySelectorAll('[name=paymentPreference]'))input.addEventListener('change',paymentView);paymentView();
   let shipping;
   function validCart(){const lines=cart.lines(products);return lines.length>0 && lines.every(line=>line.producto && !requiresProfessionalReview(line.producto) && line.cantidad<=line.producto.stock);}
-  function render(){const lines=cart.lines(products);preserveFocus(target,()=>cartView(lines,cart.total(products)));shipping?.render(cart.total(products));next.disabled=!validCart();const submit=form.querySelector('[type=submit]');submit.disabled=!validCart() || shipping?.enabled()===false || submit.getAttribute('aria-busy')==='true';document.getElementById('checkout-clear').hidden=!lines.length;}
+  function render(){
+    const lines=cart.lines(products);
+    if(!lines.length&&!form.hidden)showDetails(false);
+    preserveFocus(target,()=>cartView(lines,cart.total(products)));shipping?.render(cart.total(products));next.disabled=!validCart();
+    if(summary)summary.hidden=!lines.length;
+    document.getElementById('purchase-login-note').textContent=auth.user?'Al continuar podrás revisar la entrega y el pago.':'Inicia sesión para confirmar tu pedido.';
+    const submit=form.querySelector('[type=submit]');submit.disabled=!validCart() || shipping?.enabled()===false || submit.getAttribute('aria-busy')==='true';document.getElementById('checkout-clear').hidden=!lines.length;
+  }
   render();globalThis.Farmacia.validation.provinces.forEach(province=>{const option=document.createElement('option');option.value=option.textContent=province;document.getElementById('checkout-province').append(option);});
   for(const [key,value] of Object.entries({name:auth.user?.nombre || '',email:auth.user?.email || '',phone:auth.user?.telefono || ''}))form.elements.namedItem(key).value=value;
   shipping=deliveryCheckout(form,render);render();void shipping.ready;
@@ -55,9 +62,10 @@ export async function checkoutController() {
   for(const field of form.querySelectorAll('[name=delivery]'))field.addEventListener('change',()=>{address.hidden=form.elements.delivery.value!=='delivery';const pickup=document.getElementById('purchase-pickup-info');if(pickup)pickup.hidden=!address.hidden;if(form.elements.delivery.value==='pickup')shipping.reset();render();});
   next.addEventListener('click',()=>{if(!requireUser())return;showDetails(true);form.querySelector('input[name=name]').focus();});
   document.getElementById('purchase-edit-cart')?.addEventListener('click',()=>{showDetails(false);target.querySelector('input')?.focus();});
-  document.getElementById('checkout-clear').addEventListener('click',async()=>{if(await confirmAction('¿Vaciar todo el carrito?')){cart.clear();showDetails(false);render();message('Carrito vaciado.');}});
+  function focusCartAction(){(next.disabled?target.querySelector('input:not(:disabled),.shop-empty a'):next)?.focus();}
+  document.getElementById('checkout-clear').addEventListener('click',async()=>{if(await confirmAction('¿Vaciar todo el carrito?')){cart.clear();showDetails(false);render();focusCartAction();message('Carrito vaciado.');}});
   async function change(id,quantity){const product=products.find(p=>p.id===id);if(!product || (quantity>product.stock && quantity>=cart.read()[id]))throw new Error('La cantidad supera las unidades disponibles.');cart.update(id,quantity);render();message('Cantidad y total actualizados.');}
-  target.addEventListener('click',async event=>{const button=event.target.closest('button');if(!button)return;try{if(button.dataset.cartRemove){if(await confirmAction('¿Quitar este producto del carrito?')){cart.remove(button.dataset.cartRemove);render();next.focus();message('Producto eliminado del carrito.');}}else{const id=button.dataset.cartPlus || button.dataset.cartMinus;await change(id,cart.read()[id]+(button.dataset.cartPlus?1:-1));document.getElementById('qty-'+id)?.focus();}}catch(error){message(error.message,true);}});
+  target.addEventListener('click',async event=>{const button=event.target.closest('button');if(!button)return;try{if(button.dataset.cartRemove){if(await confirmAction('¿Quitar este producto del carrito?')){cart.remove(button.dataset.cartRemove);render();focusCartAction();message('Producto eliminado del carrito.');}}else{const id=button.dataset.cartPlus || button.dataset.cartMinus;await change(id,cart.read()[id]+(button.dataset.cartPlus?1:-1));document.getElementById('qty-'+id)?.focus();}}catch(error){message(error.message,true);}});
   target.addEventListener('change',async event=>{if(event.target.dataset.cartQuantity){const id=event.target.dataset.cartQuantity;try{await change(id,Number(event.target.value));}catch(error){render();message(error.message,true);}document.getElementById('qty-'+id)?.focus();}});
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(form.querySelector('[type=submit]').getAttribute('aria-busy')==='true'||!requireUser())return;const cartSignature=JSON.stringify(cart.payload());const values=Object.fromEntries(new FormData(form));const accepted=values.terms;const method=['card','transfer','manual'].includes(values.paymentPreference)?values.paymentPreference:'manual';delete values.paymentPreference;delete values.terms;delete values.zonaEntregaId;Object.assign(values,shipping.values());
