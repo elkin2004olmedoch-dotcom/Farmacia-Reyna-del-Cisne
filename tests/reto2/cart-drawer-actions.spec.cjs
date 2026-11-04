@@ -10,6 +10,7 @@ async function products(request){
 async function openCart(page,items){
   await page.goto('/catalogo.html');
   await page.evaluate(async items=>{const {cart}=await import('/models/cart.js');cart.write(items);},items);
+  await expect(page.locator('[data-cart-open]')).toHaveAttribute('aria-controls','cart-drawer');
   await page.locator('[data-cart-open]').click();
   const drawer=page.locator('#cart-drawer');await expect(drawer).toBeVisible();
   await expect(drawer.locator('[data-drawer-plus]').first()).toBeEnabled();return drawer;
