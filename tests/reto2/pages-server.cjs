@@ -3,6 +3,7 @@ const os=require('node:os');
 const path=require('node:path');
 const {execFileSync}=require('node:child_process');
 const {randomBytes}=require('node:crypto');
+const {Readable}=require('node:stream');
 const express=require('express');
 const {buildPages}=require('../../scripts/build-pages.cjs');
 
@@ -53,7 +54,11 @@ async function start(){
       const response=await proxy(new Request(staticOrigin+req.originalUrl,{method:req.method,headers:req.headers,body:['GET','HEAD'].includes(req.method)?undefined:req.body}),{});
       for(const [name,value] of response.headers)if(name!=='set-cookie')res.setHeader(name,value);
       const cookies=response.headers.getSetCookie();if(cookies.length)res.setHeader('Set-Cookie',cookies);
-      res.status(response.status).send(Buffer.from(await response.arrayBuffer()));
+      res.status(response.status);
+      if(!response.body){res.end();return;}
+      // Match the Worker's streaming response, including client cancellation.
+      res.flushHeaders();const body=Readable.fromWeb(response.body);
+      body.on('error',()=>res.destroy());res.once('close',()=>body.destroy());body.pipe(res);
     }catch{res.sendStatus(503);}
   });
   app.use((req,res,next)=>{

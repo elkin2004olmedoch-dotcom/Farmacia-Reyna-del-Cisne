@@ -19,6 +19,7 @@ function validatePvp(product) {
   if(product.pvpMaximo!=null && new Prisma.Decimal(product.precio).gt(product.pvpMaximo))throw new AppError(422,'PRICE_EXCEEDS_PVP','El precio no puede superar el PVP máximo impreso.');
 }
 module.exports = {
+  revision:()=>db.revisionCatalogo.findUnique({where:{id:'catalogo'},select:{token:true}}),
   async list({page=1,pageSize=50,sort='recommended',...filters}) {
     const now=new Date();
     // Keep the common unfiltered catalog on Prisma's paginated query.
@@ -71,14 +72,14 @@ module.exports = {
     return db.$transaction(async tx=> {
       const current=await tx.producto.findFirst({where:{id,activo:true},include:{lotes:true}});
       if(!current)throw new AppError(404,'NOT_FOUND','El producto no está disponible.');
-      if(data.stock<trackedStock(current))throw new AppError(409,'TRACKED_STOCK','El stock no puede bajar de las unidades registradas por lote. Usa un ajuste de inventario.');
       const merged={...current,...data};
+      if(merged.stock<trackedStock(current))throw new AppError(409,'TRACKED_STOCK','El stock no puede bajar de las unidades registradas por lote. Usa un ajuste de inventario.');
       validatePvp(merged);
       if(merged.ivaCategoria==='cero' && (!merged.fundamentoIva || merged.fundamentoIva.trim().length<8))throw new AppError(422,'IVA_JUSTIFICATION','Registra el fundamento legal de la tarifa de IVA 0 %.');
       const updatedAt=new Date(Math.max(Date.now(),current.updatedAt.getTime()+1));
       const updated=await tx.producto.updateMany({where:{id,activo:true,...(expectedUpdatedAt?{updatedAt:new Date(expectedUpdatedAt)}:{updatedAt:current.updatedAt})},data:{...data,updatedAt}});
       if(updated.count!==1)throw new AppError(409,'PRODUCT_CHANGED','El producto cambió mientras lo editabas. Cierra y vuelve a abrir la edición para cargar el stock actual antes de guardar.');
-      const delta=data.stock-current.stock;
+      const delta=merged.stock-current.stock;
       if(delta)await tx.movimientoInventario.create({data:{productoId:id,actorId,tipo:delta>0?'entrada':'salida',cantidad:Math.abs(delta),motivo:'Ajuste del saldo sin lote desde la edición del producto'}});
       return tx.producto.findUnique({where:{id}});
     },{isolationLevel:Prisma.TransactionIsolationLevel.Serializable});

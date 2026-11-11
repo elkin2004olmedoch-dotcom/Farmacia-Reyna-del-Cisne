@@ -3,7 +3,7 @@ const publicFields = {id:true,nombre:true,email:true,telefono:true,role:true,act
 module.exports = {
   findByEmail:email=>db.usuario.findUnique({where:{email}}),
   findById:(id,select)=>db.usuario.findUnique({where:{id},...(select?{select}:{})}),
-  create:data=>db.usuario.create({data,select:publicFields}),
+  create:(data,client=db)=>client.usuario.create({data,select:publicFields}),
   updateProfile:(id,{nombre,telefono})=>db.usuario.update({where:{id,activo:true},data:{nombre,telefono},select:publicFields}),
   revoke:id=>require('./sesiones-moviles.cjs').transaction(async tx=>{
     const user=await tx.usuario.update({where:{id},data:{tokenVersion:{increment:1}}});

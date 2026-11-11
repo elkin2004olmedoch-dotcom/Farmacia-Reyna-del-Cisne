@@ -3,7 +3,7 @@ import {publicImageUrl} from '../config.js';
 import {promotionPublication} from '../models/promotion-publication.js';
 const columns={
   auditoria:[['createdAt','Fecha · Ecuador'],['actor','Administrador'],['accion','Acción'],['status','Resultado']],
-  productos:[['nombre','Producto'],['precio','Precio con IVA'],['stock','Stock'],['descuentoPorcentaje','Descuento directo %'],['pvpMaximo','PVP máximo impreso'],['ivaCategoria','IVA'],['stockMinimo','Stock mínimo'],['requiereReceta','Receta'],['categoria','Categoría'],['activo','Activo']],
+  productos:[['id','ID'],['nombre','Nombre'],['categoria','Categoría'],['precio','PVP']],
   usuarios:[['id','Usuario'],['nombre','Nombre'],['role','Rol'],['activo','Activo'],['createdAt','Creado']],
   pedidos:[['id','Pedido'],['userId','Usuario'],['nombre','Comprador'],['email','Correo'],['telefono','Teléfono'],['documento','Documento enmascarado'],['total','Total'],['baseImponible','Base imponible'],['ivaMonto','IVA'],['estado','Estado'],['entrega','Entrega'],['provincia','Provincia'],['ciudad','Ciudad'],['direccion','Dirección'],['codigoPostal','Código postal'],['createdAt','Creado']],
   detalles:[['pedidoId','Pedido'],['productoId','Producto'],['nombreProducto','Nombre al comprar'],['cantidad','Cantidad'],['precioUnitario','Precio unitario'],['precioOriginal','Precio original'],['descuentoPorcentaje','Descuento %'],['ivaPorcentaje','IVA %'],['baseImponible','Base imponible'],['ivaMonto','IVA']],
@@ -25,19 +25,23 @@ export function adminSectionView(name) {
   if(!['dashboard','fiscal','facturacion'].includes(name))document.getElementById('admin-table-choice').value=name;
   for(const link of document.querySelectorAll('[data-admin-section]')){if(link.dataset.adminSection===name)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
   for(const group of document.querySelectorAll('.admin-advanced')){if(group.dataset.section!==name && group.querySelector('[aria-current="page"]'))group.open=true;group.dataset.section=name;}
-  document.getElementById('admin-create').textContent=({productos:'Crear producto →',promociones:'Crear promoción →',proveedores:'Crear proveedor →',lotes:'Registrar lote →',movimientos:'Registrar ajuste →'})[name] || 'Crear registro →';
+  document.getElementById('admin-create').textContent=({productos:'Nuevo registro',promociones:'Crear promoción →',proveedores:'Crear proveedor →',lotes:'Registrar lote →',movimientos:'Registrar ajuste →'})[name] || 'Crear registro →';
+  document.getElementById('admin-product-total').hidden=name!=='productos';
+  document.getElementById('admin-records').dataset.section=name;
   document.getElementById('admin-table').setAttribute('aria-label',title);
 }
 export function tableView(name,result) {
   const editable=['productos','promociones','proveedores'].includes(name);const manageOrder=name==='pedidos';const labels=columns[name];
   const actions=row=>editable?`<td><button class="text-link" data-edit="${escape(row.id)}" aria-label="Editar ${escape(row.nombre || row.titulo)}" ${row.activo===false && name!=='proveedores'?'disabled':''}>Editar</button>${name==='proveedores'?'':`<button class="text-link" data-delete="${escape(row.id)}" aria-label="Eliminar ${escape(row.nombre || row.titulo)}" ${row.activo===false?'disabled':''}>Eliminar</button>`}</td>`:manageOrder?`<td><button class="text-link" data-order-state="${escape(row.id)}" aria-label="Gestionar estado del pedido ${escape(row.id.slice(0,8))}">Gestionar estado</button>${row.entrega==='delivery' && ['pendiente','confirmado','preparado'].includes(row.estado)?`<a class="text-link" href="entregas.html?pedido=${encodeURIComponent(row.id)}">Asignar repartidor</a>`:''}<a class="text-link" href="admin.html?tabla=facturacion&pedido=${encodeURIComponent(row.id)}">Crear / consultar factura SRI</a></td>`:'';
-  document.getElementById('admin-table').innerHTML=result.items.length?`<table class="admin-data-table"><caption>${escape(name)} · ${result.total} registros</caption><thead><tr>${labels.map(([key,label])=>`<th scope="col">${label}</th>`).join('')}${editable || manageOrder?'<th scope="col">Acciones</th>':''}</tr></thead><tbody>${result.items.map(row=>`<tr>${labels.map(([key])=>`<td>${key==='publicacion'?escape(promotionPublication(row).label):cell(key,row[key])}</td>`).join('')}${actions(row)}</tr>`).join('')}</tbody></table>`:'<p class="shop-empty">No hay registros en esta tabla.</p>';
-  document.getElementById('admin-page-info').textContent=`Página ${result.page} · ${result.total} registros`;
+  document.getElementById('admin-table').innerHTML=result.items.length?`<table class="admin-data-table${name==='productos'?' admin-products-table':''}"><caption${name==='productos'?' class="sr-only"':''}>${escape(name)} · ${result.total} registros</caption><thead><tr>${labels.map(([key,label])=>`<th scope="col">${label}</th>`).join('')}${editable || manageOrder?'<th scope="col">Acciones</th>':''}</tr></thead><tbody>${result.items.map(row=>`<tr>${labels.map(([key])=>`<td>${key==='publicacion'?escape(promotionPublication(row).label):key==='categoria'?escape(({bienestar:'Bienestar',cuidado:'Cuidado personal',bebe:'Mamá y bebé'})[row[key]] || row[key]):cell(key,row[key])}${name==='productos' && key==='nombre' && row.activo===false?' <span class="admin-state-badge">Inactivo</span>':''}${name==='productos' && key==='nombre'?`<small class="admin-product-stock">Stock · <span data-product-stock>${cell('stock',row.stock)}</span></small>`:''}</td>`).join('')}${actions(row)}</tr>`).join('')}</tbody></table>`:'<p class="shop-empty">No hay registros en esta tabla.</p>';
+  document.getElementById('admin-page-info').textContent=name==='productos'?`Página ${result.page} de ${Math.max(1,Math.ceil(result.total/result.pageSize))} · ${result.total?(result.page-1)*result.pageSize+1:0}–${Math.min(result.page*result.pageSize,result.total)} de ${result.total} registros`:`Página ${result.page} · ${result.total} registros`;
+  if(name==='productos')document.getElementById('admin-product-total').textContent=`${result.total} productos`;
   document.getElementById('admin-prev').disabled=result.page<=1;document.getElementById('admin-next').disabled=result.page*result.pageSize>=result.total;
   document.getElementById('admin-create').hidden=!editable && !['lotes','movimientos'].includes(name);
 }
 export function editorView(form,values={}) {
   form.reset();for(const [key,value] of Object.entries(values)){const field=form.elements.namedItem(key);if(!field)continue;if(field.type==='checkbox')field.checked=value;else if(field.type==='datetime-local')field.value=value?localTime(value):'';else field.value=value??'';}
+  if(form.id==='product-form')document.getElementById('product-save-changes').hidden=!values.id;
   document.getElementById('editor-title').textContent=(values.id?'Editar ':'Crear ')+({ 'product-form':'producto','promotion-form':'promoción','supplier-form':'proveedor','lot-form':'lote','movement-form':'ajuste de inventario'})[form.id];
 }
 export function promotionEditorState(form){

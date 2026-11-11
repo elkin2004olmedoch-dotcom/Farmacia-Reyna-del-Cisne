@@ -13,11 +13,12 @@ module.exports=config=> {
   const promos=require('../controllers/promociones.cjs');
   const fiscal=require('../controllers/fiscal.cjs');
   const inventory=require('../controllers/inventario.cjs');
+  const resourcePatch=require('../middleware/resourcepatch.cjs');
   const authLimit=process.env.NODE_ENV==='test' && !config.production && Number.isInteger(config.testAuthLimit) && config.testAuthLimit>0?config.testAuthLimit:20;
   const limiter=rateLimit({windowMs:15*60*1000,limit:authLimit,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Demasiados intentos. Espera unos minutos.'))});
   const web=require('../models/sesiones-web.cjs');
   router.use('/auth',(req,res,next)=>{if(req.get('X-Farmacia-Web')==='1'&&!['GET','HEAD','OPTIONS'].includes(req.method))web.requireWeb(req,config);next();});
-  const webOnly=(req,res,next)=>{web.requireWeb(req,config);if(req.body&&Object.keys(req.body).length)throw new AppError(422,'UNEXPECTED_FIELDS','La solicitud contiene campos no permitidos.');next();};
+  const webOnly=(req,res,next)=>{web.requireWeb(req,config);if(req.body&&(Array.isArray(req.body)||Object.keys(req.body).length))throw new AppError(422,'UNEXPECTED_FIELDS','La solicitud contiene campos no permitidos.');next();};
   router.post('/auth/web/refresh',limiter,webOnly,authController.refresh);
   router.post('/auth/web/exchange',limiter,webOnly,auth,authController.exchange);
   router.post('/auth/register',limiter,...V.register,authController.register);
@@ -35,6 +36,8 @@ module.exports=config=> {
   router.post('/auth/reset-password',limiter,...V.resetPassword,authController.resetPassword);
   router.post('/auth/verify-email',limiter,...V.verifyEmail,authController.verifyEmail);
   router.post('/auth/resend-verification',resendLimiter,...V.resendVerification,authController.resendVerification);
+  const pendingLimit=rateLimit({windowMs:60000,limit:60,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Espera un momento antes de comprobar la confirmación.'))});
+  router.post('/auth/registro-pendiente',pendingLimit,(req,res,next)=>{web.requireWeb(req,config);if(!req.body||Array.isArray(req.body)||Object.keys(req.body).length!==1||typeof req.body.registrationId!=='string'||!/^[A-Za-z0-9_-]{43}$/.test(req.body.registrationId))throw new AppError(422,'VALIDATION_ERROR','La solicitud de confirmación no es válida.');next();},authController.pendingRegistration);
   router.post('/auth/mobile/login',limiter,...V.login,mobileController.login);
   router.post('/auth/mobile/renew',limiter,(req,res,next)=>{
     if(!req.body||Array.isArray(req.body)||Object.keys(req.body).some(k=>!['refreshToken','nextSecret'].includes(k))||!require('../models/sesiones-moviles.cjs').validRenew(req.body))throw new AppError(422,'VALIDATION_ERROR','La renovación de sesión no tiene un formato válido.');
@@ -45,11 +48,13 @@ module.exports=config=> {
   router.put('/auth/me',auth,...V.profile,authController.updateProfile);
   router.post('/auth/logout',auth,authController.logout);
   router.get('/productos',...V.catalog,products.list);
+  router.get('/actualizaciones',require('../controllers/catalog-updates.cjs'));
   router.get('/productos/sugerencias',...V.suggestions,products.suggestions);
   router.get('/productos/filtros',products.filters);
   router.get('/productos/:id',V.id,V.validated,products.find);
   router.post('/productos',auth,admin,...V.product,V.validated,products.create);
   router.put('/productos/:id',auth,admin,V.id,...V.productUpdate,V.validated,products.update);
+  router.patch('/productos/:id',auth,admin,V.id,...V.productPatch,V.validated,products.update);
   router.delete('/productos/:id',auth,admin,V.id,V.validated,products.remove);
   router.post('/pedidos',auth,buyer,...V.order,orders.create);
   router.post('/pedidos/:id/cancelacion',auth,buyer,V.id,...V.orderCancellation,V.validated,orders.cancelOwn);
@@ -60,14 +65,19 @@ module.exports=config=> {
   router.put('/pedidos/:id/estado',auth,admin,V.id,...V.orderStatus,V.validated,orders.updateStatus);
   router.get('/promociones',promos.list);
   router.post('/promociones',auth,admin,...V.promotion,V.validated,promos.create);
-  router.put('/promociones/:id',auth,admin,V.id,...V.promotion,V.validated,promos.update);
+  router.put('/promociones/:id',auth,admin,V.id,...resourcePatch.versionOptional,...V.promotion,V.validated,promos.update);
+  router.patch('/promociones/:id',auth,admin,V.id,...resourcePatch.promotionPatch,promos.update);
+  router.get('/admin/promociones/:id',auth,admin,V.id,V.validated,promos.find);
   router.delete('/promociones/:id',auth,admin,V.id,V.validated,promos.remove);
   router.get('/configuracion/fiscal',fiscal.current);
   router.get('/admin/configuracion/fiscal',auth,admin,fiscal.history);
   router.post('/admin/configuracion/fiscal',auth,admin,...V.fiscal,V.validated,fiscal.create);
   router.get('/admin/proveedores',auth,admin,...V.pagination,inventory.suppliers);
   router.post('/admin/proveedores',auth,admin,...V.supplier,V.validated,inventory.createSupplier);
-  router.put('/admin/proveedores/:id',auth,admin,V.id,...V.supplier,V.validated,inventory.updateSupplier);
+  router.get('/admin/proveedores/:id',auth,admin,V.id,V.validated,inventory.findSupplier);
+  router.put('/admin/proveedores/:id',auth,admin,V.id,...resourcePatch.versionOptional,...V.supplier,V.validated,inventory.updateSupplier);
+  router.patch('/admin/proveedores/:id',auth,admin,V.id,...resourcePatch.supplierPatch,inventory.updateSupplier);
+  router.delete('/admin/proveedores/:id',auth,admin,V.id,...resourcePatch.versionOnly,inventory.removeSupplier);
   router.get('/admin/lotes',auth,admin,...V.inventoryPagination,inventory.lots);
   router.post('/admin/lotes',auth,admin,...V.lot,V.validated,inventory.createLot);
   router.get('/admin/inventario/movimientos',auth,admin,...V.inventoryPagination,inventory.movements);

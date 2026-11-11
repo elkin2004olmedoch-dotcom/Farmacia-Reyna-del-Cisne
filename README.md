@@ -39,7 +39,7 @@ El catálogo consulta páginas de 24 productos y conserva búsqueda, filtros y o
 
 Las nuevas entregas se confirman mediante un código privado del comprador, con límite de intentos. El seguimiento incluye incidencias y una ventana estimada cuando existe una ruta calculada desde GPS reciente del repartidor; indica su origen, caducidad y posibles retrasos. Goti presenta productos y resúmenes visuales y abre el registro exacto después de una orden administrativa confirmada.
 
-La [comparación con PLIEGO](docs/COMPARACION-PLIEGO-Y-ALCANCE.md) distingue requisitos académicos, mejoras útiles y funciones exclusivas de libros digitales. La compra concentra marca y regreso al catálogo; administración agrupa las opciones avanzadas. El carrito lateral confirma quitar/vaciar y permite deshacer una retirada comprobando disponibilidad actual. Al verificar el correo en otra pestaña del mismo navegador, el registro pendiente comprueba la sesión y continúa sin repetir contraseña; una señal sin sesión o de otra cuenta no autentica al usuario.
+La [comparación con PLIEGO](docs/COMPARACION-PLIEGO-Y-ALCANCE.md) distingue requisitos académicos, mejoras útiles y funciones exclusivas de libros digitales. La compra concentra marca y regreso al catálogo; administración agrupa las opciones avanzadas. El carrito lateral confirma quitar/vaciar y permite deshacer una retirada comprobando disponibilidad actual. El registro web pendiente comprueba la confirmación cada dos segundos y puede continuar cuando el correo se verifica desde otro navegador, mediante un permiso temporal vinculado al alta. Una sesión ajena conserva su cuenta.
 
 **Mis pedidos** permite al comprador cancelar sus pedidos pendientes o confirmados, con confirmación y control de versión. La API comprueba propiedad antes de cualquier reintento y repone existencias una sola vez; los cobros reales y las facturas emitidas mantienen sus restricciones de conciliación. La confirmación y el historial ofrecen un único acceso al comprobante, con impresión y envío al correo registrado; los controles técnicos de SRI permanecen en administración.
 
@@ -64,7 +64,7 @@ En administración, escribe **actualizar** para elegir productos, promociones, p
 
 En la tienda, escribe **buscar productos** o **buscar Gel** para elegir producto y cantidad. La mascota pide confirmar antes de agregar, quitar o vaciar el carrito, vuelve a consultar precio y disponibilidad y solicita otra confirmación si cambia el precio. **Comprar** abre el checkout después de confirmar; no crea pedidos ni procesa pagos desde el chat. Las consultas médicas mantienen la derivación al farmacéutico.
 
-Los cambios confirmados usan las mismas APIs que los formularios. La tienda visible se actualiza al recuperar el foco y en sus consultas periódicas de 30 segundos, sin recargar; conserva los formularios abiertos. Los asistentes son locales y de órdenes definidas: no usan servicios externos de IA. La conversación no se guarda.
+Los cambios confirmados usan las mismas APIs que los formularios. La tienda visible recibe avisos del catálogo mediante una conexión compartida de eventos y conserva la recuperación por foco y las consultas periódicas. Los editores abiertos conservan su contenido. Los asistentes son locales y de órdenes definidas: no usan servicios externos de IA. La conversación no se guarda.
 
 ## Desarrollo y pruebas
 
@@ -107,6 +107,8 @@ La app nativa de reparto para iPhone requiere firma de Apple y pruebas físicas.
 | Inyección y XSS | Listas de campos permitidos, validación/sanitización con express-validator, consultas Prisma parametrizadas y salida de texto escapada. Entradas inesperadas producen 422; errores centralizados no exponen stack en producción. [Validación](server/middleware/validation.cjs), [errores](server/middleware/errors.cjs) y [vistas](frontend/views/common.js). |
 
 CORS admite orígenes exactos, sin comodín en producción. Los formularios tienen labels, foco visible y mensajes accesibles; el catálogo, carrito y modales se operan con teclado. Las pruebas de navegador verifican accesibilidad, adaptación móvil y manejo de red/401/403/500. Los permisos no dependen de ocultar botones en la interfaz.
+
+La administración de productos incorpora la tabla y el editor de la referencia entregada, PVP, edición parcial con versión y advertencias opcionales. [Productos, APIs y actualización automática](docs/PRODUCTOS-API-Y-ACTUALIZACIONES.md).
 
 ## API REST
 

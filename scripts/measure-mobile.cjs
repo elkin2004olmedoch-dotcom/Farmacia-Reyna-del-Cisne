@@ -2,6 +2,7 @@
 // Reproducible laboratory measurements; no credentials or commercial writes.
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{performance}=require('node:perf_hooks');
 const {chromium}=require('@playwright/test');
+const {trackNetwork,settleNetwork}=require('./browser-network.cjs');
 const root=path.resolve(__dirname,'..');process.chdir(root);
 const args=process.argv.slice(2),label=args.shift()||'sample';
 if(!/^[a-z0-9-]{1,50}$/.test(label))throw new Error('Etiqueta inválida.');
@@ -26,6 +27,7 @@ async function measure(origin){
   for(const [device,viewport,cpu,latency,download]of [['escritorio',{width:1440,height:1000},1,0,-1],['movil-4g',{width:390,height:844},4,80,1250000]]){
    for(const route of ['/','/catalogo.html','/producto.html?id='+encodeURIComponent(product.id)])for(let sample=0;sample<sampleCount;sample++){
     const context=await browser.newContext({viewport,deviceScaleFactor:device==='escritorio'?1:2,isMobile:device!=='escritorio',hasTouch:device!=='escritorio',serviceWorkers:'block'}),page=await context.newPage(),errors=[],failed=[];
+    trackNetwork(page);
     page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{const pathname=new URL(r.url()).pathname;if(r.status()>=400&&!(r.status()===401&&pathname==='/api/auth/me'))failed.push({path:pathname,status:r.status()});});
     const cdp=await context.newCDPSession(page);await cdp.send('Network.enable');await cdp.send('Network.setCacheDisabled',{cacheDisabled:true});await cdp.send('Emulation.setCPUThrottlingRate',{rate:cpu});
     if(latency)await cdp.send('Network.emulateNetworkConditions',{offline:false,latency,downloadThroughput:download,uploadThroughput:625000});
@@ -38,7 +40,7 @@ async function measure(origin){
     });
     await page.goto(origin+route,{waitUntil:'load',timeout:60000});
     await page.locator(route==='/'?'#featured-products article':route.startsWith('/catalogo')?'#catalog-grid article':'#product-detail h1').first().waitFor({timeout:30000});
-    await page.waitForLoadState('networkidle',{timeout:30000});
+    await settleNetwork(page,{timeout:30000});
     const lcpBeforeInteraction=await page.evaluate(()=>labMetrics.lcp);
     if(route.startsWith('/catalogo')){await page.locator('#catalog-search').fill('Eucerin');await page.locator('#catalog-grid article').first().waitFor();await page.locator('#catalog-search').press('Escape');}
     else if(route.startsWith('/producto')){const button=page.locator('#zoom-product');if(await button.count()){await button.click();await page.keyboard.press('Escape');}}

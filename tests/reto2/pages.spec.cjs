@@ -17,6 +17,20 @@ async function customer(api){
   const response=await api.post('/api/auth/register',{data:values});expect(response.status()).toBe(201);return {...values,token:(await response.json()).data.token};
 }
 async function withToken(page,token){await page.addInitScript(({token,origin})=>{if(location.origin===origin)sessionStorage.setItem('farmacia-mvc-token',token);},{token,origin:STATIC});}
+
+test('el proxy transmite PATCH autorizado y el aviso de catálogo como flujo',async({page,api})=>{
+ const token=await login(api),headers={Authorization:'Bearer '+token};
+ const product=(await (await api.get('/api/productos?pageSize=1')).json()).data.items[0];
+ const response=await api.patch(STATIC+'/api/productos/'+product.id,{headers,data:{advertencias:'Conservar según el envase.',esperadoUpdatedAt:product.updatedAt}});
+ expect(response.status()).toBe(200);expect((await response.json()).data.advertencias).toBe('Conservar según el envase.');
+ await page.goto('/ayuda.html');
+ const streamed=await page.evaluate(async()=>{
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),5000);
+  try{const response=await fetch('/api/actualizaciones',{signal:controller.signal}),reader=response.body.getReader(),decoder=new TextDecoder();let body='';while(!body.includes('data:')){const chunk=await reader.read();if(chunk.done)throw new Error('Flujo cerrado antes del aviso');body+=decoder.decode(chunk.value,{stream:true});}return {status:response.status,type:response.headers.get('content-type'),cache:response.headers.get('cache-control'),data:JSON.parse(body.split('\n').find(line=>line.startsWith('data:')).slice(5))};}
+  finally{clearTimeout(timeout);controller.abort();}
+ });
+ expect(streamed.status).toBe(200);expect(streamed.type).toContain('text/event-stream');expect(streamed.cache).toContain('no-store');expect(Object.keys(streamed.data)).toEqual(['revision']);expect(streamed.data.revision).toMatch(/^[a-f0-9]{32}$/);
+});
 async function hold(page,predicate){
   let release,attempts=0;const paths=[];const gate=new Promise(resolve=>release=resolve);
   await page.route(STATIC+'/api/**',async route=>{
@@ -118,7 +132,9 @@ test('admin carga imágenes en la API y la tienda estática muestra la subida y 
 test('un GET transitorio reintenta una vez y presenta datos reales',async({page})=>{
   let attempts=0;
   await page.route(STATIC+'/api/productos?*',async route=>{if(++attempts===1)return route.fulfill({status:503,headers:{'Access-Control-Allow-Origin':STATIC},json:{ok:false,error:{message:'Inicio temporal.'}}});return route.continue();});
-  await page.goto('/');await expect(page.locator('#featured-products article')).toHaveCount(4);expect(attempts).toBe(2);
+  await page.goto('/');await expect(page.locator('#featured-products article')).toHaveCount(4);
+  // One retry plus at most one consistency read when the event channel connects.
+  expect(attempts).toBeGreaterThanOrEqual(2);expect(attempts).toBeLessThanOrEqual(3);
 });
 
 for(const recover of [false,true])test(recover?'API retenida 30 s simulados permite portada y recuperación por foco':'API sin respuesta termina en error acotado y conserva el carrito',async({page},testInfo)=>{

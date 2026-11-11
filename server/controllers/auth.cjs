@@ -16,11 +16,12 @@ module.exports = config=> {
       const {nombre,email,telefono,password}=req.input;
       const passwordHash=await bcrypt.hash(password,12);
       const verifying=config.emailVerification?.enabled===true;
-      const user=await users.create({nombre,email,telefono,passwordHash,role:'user',emailVerificationRequired:verifying});
+      const data={nombre,email,telefono,passwordHash,role:'user',emailVerificationRequired:verifying};
+      const {user,registrationId}=verifying&&req.get('X-Farmacia-Web')==='1'?await require('../models/registro-pendiente.cjs').register(data,res,config):{user:await users.create(data)};
       if(verifying){
         const delivery=await verification.issue(user,config);
         const message=delivery.status==='sent'?'Revisa tu correo y confirma tu dirección para iniciar sesión.':'Tu cuenta está pendiente de confirmación. No se pudo enviar el correo; solicita otro enlace.';
-        res.status(202).json({ok:true,data:{requiresEmailVerification:true,deliveryStatus:delivery.status,message}});return;
+        res.status(202).json({ok:true,data:{requiresEmailVerification:true,deliveryStatus:delivery.status,message,...(registrationId?{registrationId}:{})}});return;
       }
       res.status(201).json({ok:true,data:await session(req,res,{...user,tokenVersion:0})});
     },
@@ -71,6 +72,15 @@ module.exports = config=> {
       const user=await users.findByEmail(req.input.email);
       if(user?.activo && verification.requiresVerification(user,config.requireVerifiedRegistration&&user.role==='user'))await verification.issue(user,config);
       res.status(202).json({ok:true,data:{message:'Si la cuenta existe y está pendiente, revisa tu correo y la carpeta de correo no deseado. Puedes solicitar otro enlace después de un minuto.'}});
+    },
+    async pendingRegistration(req,res){
+      const registration=require('../models/registro-pendiente.cjs'),result=await registration.resume(req,config);
+      if(result?.pending){res.status(202).json({ok:true,data:{verified:false}});return;}
+      if(result?.blocked){res.status(204).end();return;}
+      registration.clear(res,config);
+      if(!result){res.status(204).end();return;}
+      const data=result.usuario?result:web.write(res,config,result);
+      res.json({ok:true,data:{verified:true,...data}});
     },
   };
 };

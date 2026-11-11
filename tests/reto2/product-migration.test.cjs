@@ -1,0 +1,16 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{execFileSync}=require('node:child_process'),{randomBytes}=require('node:crypto');
+test('una promoción SQLite anterior a 016 se conserva y admite edición por su versión real',async t=>{
+ const root=path.resolve(__dirname,'../..'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-migracion-productos-')),schema=path.join(directory,'schema.prisma'),source=path.join(root,'server/prisma'),url='file:'+path.join(directory,'legacy.db').replaceAll('\\','/'),env={};
+ for(const key of ['SystemRoot','PATH','Path','TEMP','TMP','USERPROFILE','LOCALAPPDATA','NODE_OPTIONS'])if(process.env[key])env[key]=process.env[key];Object.assign(env,{NODE_ENV:'test',DATABASE_URL:url,JWT_SECRET:randomBytes(48).toString('hex'),CORS_ORIGIN:'http://localhost:3000',IMAGE_STORAGE:'local',EMAIL_VERIFICATION_ENABLED:'false',CUSTOMER_REGISTRATION_REQUIRE_EMAIL:'false'});
+ fs.copyFileSync(path.join(source,'schema.prisma'),schema);fs.cpSync(path.join(source,'migrations'),path.join(directory,'migrations'),{recursive:true,filter:file=>!file.includes('202611100016_product_api_sync')});
+ const migrate=()=>execFileSync(process.execPath,[path.join(root,'node_modules/prisma/build/index.js'),'migrate','deploy','--schema',schema],{env,stdio:'pipe',windowsHide:true});migrate();
+ const {PrismaClient}=require('@prisma/client'),legacy=new PrismaClient({datasources:{db:{url}}});let db;t.after(async()=>{await legacy.$disconnect();if(db)await db.$disconnect();});
+ await legacy.$executeRaw`INSERT INTO "Usuario" ("id","nombre","email","telefono","passwordHash","role") VALUES ('legacy-admin','Administrador','legacy@example.ec','+593991234567','synthetic','admin')`;
+ await legacy.$executeRaw`INSERT INTO "Producto" ("id","nombre","precio","stock","categoria","descripcion","imagen","alt","updatedAt") VALUES ('legacy-product','Producto histórico',5,10,'cuidado','Descripción histórica','assets/images/producto-vitaminas.jpg','Envase',0)`;
+ await legacy.$executeRaw`INSERT INTO "Promocion" ("id","titulo","descripcion","etiqueta","productoId") VALUES ('legacy-promo','Campaña histórica','Descripción histórica','Cuidado','legacy-product')`;
+ fs.cpSync(path.join(source,'migrations/202611100016_product_api_sync'),path.join(directory,'migrations/202611100016_product_api_sync'),{recursive:true});migrate();Object.assign(process.env,env);
+ const request=require('supertest')(require('../../server/app.cjs')()),jwt=require('jsonwebtoken');db=require('../../server/models/db.cjs');
+ const headers={Authorization:'Bearer '+jwt.sign({version:0},env.JWT_SECRET,{subject:'legacy-admin',issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'})};
+ const before=(await request.get('/api/admin/promociones/legacy-promo').set(headers).expect(200)).body.data;assert.equal(before.titulo,'Campaña histórica');
+ const changed=(await request.patch('/api/promociones/legacy-promo').set(headers).send({titulo:'Campaña actualizada',esperadoUpdatedAt:before.updatedAt}).expect(200)).body.data;assert.equal(changed.titulo,'Campaña actualizada');assert.equal(await db.producto.count(),1);assert.equal(await db.promocion.count(),1);
+});

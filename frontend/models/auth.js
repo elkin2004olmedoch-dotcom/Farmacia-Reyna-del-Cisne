@@ -10,11 +10,21 @@ export const auth={
   get isAdmin(){return current?.role==='admin';},
   get isCourier(){return current?.role==='repartidor';},
   get isStaff(){return ['admin','repartidor'].includes(current?.role);},
-  async restore({accept}={}){
+  async restore({accept,registrationId}={}){
     const saved=generation;
-    // Pending registration probes must not refresh cookies or expire another open form.
+    // The pending panel applies only the account its active registration expects.
     if(accept){
-      const user=await apiFetch('/auth/me',{sessionRetry:false},async response=>{
+      let user=null;
+      if(registrationId){
+        const result=await apiFetch('/auth/registro-pendiente',{method:'POST',headers:{'X-Farmacia-Web':'1','Content-Type':'application/json'},body:JSON.stringify({registrationId}),timeoutMs:10000,sessionRetry:false},async response=>{
+          if(response.status===204)return null;
+          if(!response.ok)throw new ApiError('No se pudo comprobar la confirmación.',response.status);
+          return (await response.json()).data;
+        });
+        if(result?.verified===false)return null;
+        user=result?.verified===true?result.usuario:null;
+      }
+      if(!user)user=await apiFetch('/auth/me',{sessionRetry:false},async response=>{
         if(!response.ok)throw new ApiError('No se pudo comprobar la sesión.',response.status);
         return (await response.json()).data;
       });

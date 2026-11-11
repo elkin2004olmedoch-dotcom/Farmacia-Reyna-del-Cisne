@@ -17,6 +17,21 @@ const editableSections=['productos','promociones','proveedores','lotes','movimie
 const sectionForms={productos:'product-form',promociones:'promotion-form',proveedores:'supplier-form',lotes:'lot-form',movimientos:'movement-form'};
 const companionTables=[...editableSections,'pedidos','zonas','entregas'];
 const companionRecordId=/^[a-z0-9][a-z0-9-]{0,79}$/;
+function productValues(form){
+  const fields=Object.fromEntries(Array.from(new FormData(form),([key,value])=>[key,typeof value==='string'?value.trim():value]));
+  const optionalFields=['codigoInterno','codigoBarras','laboratorio','principioActivo','concentracion','presentacion','registroSanitario','fundamentoIva','advertencias'];
+  const flags=['requiereReceta','controlado','biologico','cadenaFrio'];
+  return {
+    ...fields,
+    ...Object.fromEntries(optionalFields.map(key=>[key,fields[key] || null])),
+    precio:Number(fields.precio),
+    pvpMaximo:fields.pvpMaximo?Number(fields.pvpMaximo):null,
+    stock:Number(fields.stock),
+    stockMinimo:Number(fields.stockMinimo),
+    descuentoPorcentaje:Number(fields.descuentoPorcentaje),
+    ...Object.fromEntries(flags.map(key=>[key,form.elements[key].checked])),
+  };
+}
 /** Locate the exact record across pages, checking the live administrator after every read. */
 export async function findCompanionRecord({table,record,load,allowed,first}){
   if(!companionTables.includes(table)||!companionRecordId.test(record||''))throw new Error('El enlace de registro o tabla no es válido.');
@@ -32,7 +47,7 @@ export async function adminController() {
   if(!requireUser('admin.html',true))return;
   document.getElementById('admin-area').hidden=false;
   const query=new URLSearchParams(location.search),requested=query.get('tabla'),requestedRecord=query.get('registro');
-  let name=[...editableSections,'pedidos','usuarios','detalles','auditoria','fiscal','facturacion',...(['zonas','entregas'].includes(requested)&&requestedRecord?['zonas','entregas']:[])].includes(requested)?requested:requested?'productos':'dashboard',page=1,result,editing=null,editingVersion=null,summarySnapshot='',requestId=0,openingId=0,previousFocus=null,stateFocus=null,lotRequest=0;
+  let name=[...editableSections,'pedidos','usuarios','detalles','auditoria','fiscal','facturacion',...(['zonas','entregas'].includes(requested)&&requestedRecord?['zonas','entregas']:[])].includes(requested)?requested:requested?'productos':'dashboard',page=/^[1-9]\d*$/.test(query.get('page') || '')?Math.min(100000,Number(query.get('page'))):1,result,editing=null,editingVersion=null,editingValues=null,summarySnapshot='',requestId=0,openingId=0,previousFocus=null,stateFocus=null,lotRequest=0;
   const dialog=document.getElementById('editor-dialog');const forms=Object.fromEntries(Object.entries(sectionForms).map(([section,id])=>[section,document.getElementById(id)]));
   const productImage=imageController(forms.productos,'product');const promoImage=imageController(forms.promociones,'promotion');
   const stateDialog=document.getElementById('order-state-dialog');const stateForm=document.getElementById('order-state-form');let stateOrder=null;
@@ -53,7 +68,7 @@ export async function adminController() {
     for(const key of ['admin-page-description','admin-section-description'])document.getElementById(key).textContent='Registro guardado desde la ayuda administrativa.';
     document.getElementById('admin-create').hidden=true;
     for(const key of ['admin-prev','admin-next'])document.getElementById(key).disabled=true;
-    area.textContent='Consultando el registro…';area.setAttribute('aria-busy','true');
+    if(!silent)area.textContent='Consultando el registro…';area.setAttribute('aria-busy','true');
     try{
       const found=await findCompanionRecord({table,record:id,allowed:()=>auth.isAdmin&&name===table&&area.isConnected,load:async(_table,page)=>table==='entregas'?deliveries.list(page):deliveries.adminZones().then(items=>({items,total:items.length,pageSize:items.length||1}))});
       if(!found){area.textContent='El registro ya no está disponible o no pertenece a esta sección.';return;}
@@ -86,7 +101,17 @@ export async function adminController() {
     }
     const table=document.getElementById('admin-table');const create=document.getElementById('admin-create');
     table.setAttribute('aria-busy','true');if(!silent){result=null;table.innerHTML='<p class="shop-empty" role="status">Cargando registros…</p>';create.disabled=true;for(const button of ['admin-prev','admin-next'])document.getElementById(button).disabled=true;}
-    try{const loaded=loadedResult||await administration.table(tableName,tablePage);if(id!==requestId || !auth.isAdmin || (silent && document.querySelector('dialog[open]')))return;if(!silent || JSON.stringify(loaded)!==JSON.stringify(result)){result=loaded;preserveFocus(table,()=>tableView(tableName,loaded));}create.disabled=false;}
+    try{
+      const loaded=loadedResult||await administration.table(tableName,tablePage);
+      if(id!==requestId || !auth.isAdmin || (silent && document.querySelector('dialog[open]')))return;
+      const lastPage=Math.max(1,Math.ceil(loaded.total/loaded.pageSize));
+      if(tableName==='productos' && tablePage>lastPage){
+        page=lastPage;const route=new URLSearchParams(location.search);route.set('tabla',tableName);route.set('page',String(page));
+        history.replaceState(null,'','admin.html?'+route);await render({silent});return;
+      }
+      if(!silent || JSON.stringify(loaded)!==JSON.stringify(result)){result=loaded;preserveFocus(table,()=>tableView(tableName,loaded));}
+      create.disabled=false;
+    }
     catch(error){if(id!==requestId || !auth.isAdmin)return;if(!silent)table.innerHTML='<p class="shop-empty">No se pudieron cargar los registros. Selecciona la sección para volver a intentar.</p>';throw error;}
     finally{if(id===requestId)table.removeAttribute('aria-busy');}
   }
@@ -110,7 +135,7 @@ export async function adminController() {
     if(choices.length || ['promociones','lotes','movimientos'].includes(section))populate(form.elements.productoId,choices);
     if(section==='lotes')populate(form.elements.proveedorId,suppliers.items.filter(s=>s.activo),{empty:'Sin proveedor'});
     editorView(form,record);errors(form,{});document.getElementById('editor-status').textContent='';
-    if(section==='productos'){productImage.reset();pharmaceuticalRequired();}
+    if(section==='productos'){productImage.reset();pharmaceuticalRequired();editingValues=productValues(form);}
     if(section==='promociones'){promoImage.reset();promotionEditorState(form);}
     if(section==='lotes')form.elements.vencimiento.min=ecuadorToday();
     dialog.showModal();form.querySelector('input:not([type=hidden]),select,textarea')?.focus();
@@ -119,7 +144,7 @@ export async function adminController() {
   document.getElementById('admin-create').addEventListener('click',()=>open().catch(error=>message(error.message,true)));
   document.getElementById('admin-dashboard').addEventListener('click',async event=>{if(!event.target.closest('#admin-retry-summary'))return;try{message('');await render();}catch(error){message(error.message,true);}});
   document.getElementById('admin-table-choice').addEventListener('change',async event=>{name=event.target.value;page=1;history.replaceState(null,'','admin.html?tabla='+name);try{await render();}catch(error){message(error.message,true);}});
-  for(const [id,offset] of [['admin-prev',-1],['admin-next',1]])document.getElementById(id).addEventListener('click',async()=>{page+=offset;try{await render();}catch(error){message(error.message,true);}});
+  for(const [id,offset] of [['admin-prev',-1],['admin-next',1]])document.getElementById(id).addEventListener('click',async()=>{page+=offset;history.replaceState(null,'','admin.html?tabla='+name+'&page='+page);try{await render();}catch(error){message(error.message,true);}});
   forms.productos.elements.ivaCategoria.addEventListener('change',pharmaceuticalRequired);
   forms.productos.elements.tipoProducto.addEventListener('change',pharmaceuticalRequired);
   for(const event of ['input','change'])forms.promociones.addEventListener(event,()=>promotionEditorState(forms.promociones));
@@ -133,23 +158,34 @@ export async function adminController() {
     const row=result?.items.find(row=>row.id===(button.dataset.edit || button.dataset.delete || button.dataset.orderState));if(!row)return;
     try{if(button.dataset.orderState){stateFocus=button;stateOrder=row;orderStateView(row);stateDialog.showModal();stateForm.querySelector('select').focus();}else if(button.dataset.edit)await open(row);else if(button.dataset.delete && await confirmAction(`¿Eliminar ${row.nombre || row.titulo}? Los productos vendidos se conservan en el historial.`)){busy(button,true);await (name==='productos'?administration.removeProduct(row.id):administration.removePromotion(row.id));await render();if(auth.isAdmin){document.getElementById('admin-create')?.focus();message('Registro eliminado.');}}}catch(error){message(error.message,true);}finally{if(button.isConnected)busy(button,false);}
   });
-  for(const [section,form] of Object.entries(forms))form.addEventListener('submit',async event=>{
-    event.preventDefault();if(!auth.isAdmin || !form.isConnected || form.querySelector('[type=submit][aria-busy=true]'))return;
+  async function saveEditor(section,form,event,partial=false){
+    event.preventDefault();if(!auth.isAdmin || !form.isConnected || form.querySelector('button[aria-busy=true]'))return;
     const status=document.getElementById('editor-status');const image=section==='productos'?productImage:section==='promociones'?promoImage:null;
     if(image?.pending){status.textContent='Espera a que termine de cargar la imagen.';return;}
     const issues=adminFormIssues(form);if(!errors(form,issues)){status.textContent='Revisa los campos indicados antes de guardar.';return;}
     const fields=Object.fromEntries(new FormData(form));let values;
-    if(section==='productos')values={...fields,...Object.fromEntries(['codigoInterno','codigoBarras','laboratorio','principioActivo','concentracion','presentacion','registroSanitario','fundamentoIva'].map(key=>[key,fields[key]?.trim() || null])),precio:Number(fields.precio),pvpMaximo:fields.pvpMaximo?Number(fields.pvpMaximo):null,stock:Number(fields.stock),stockMinimo:Number(fields.stockMinimo),descuentoPorcentaje:Number(fields.descuentoPorcentaje),requiereReceta:form.elements.requiereReceta.checked,...Object.fromEntries(['controlado','biologico','cadenaFrio'].map(key=>[key,form.elements[key].checked])),...(editing?{esperadoUpdatedAt:editingVersion}:{})};
+    if(section==='productos'){
+      values=productValues(form);
+      if(partial){
+        if(!editing || !editingValues)return;
+        values=Object.fromEntries(Object.entries(values).filter(([key,value])=>value!==editingValues[key]));
+        if(!Object.keys(values).length){status.textContent='No hay cambios para guardar.';return;}
+      }
+      if(editing)values.esperadoUpdatedAt=editingVersion;
+    }
     else if(section==='promociones')values={...fields,imagen:fields.imagen || null,alt:fields.imagen?fields.alt:null,descuentoPorcentaje:Number(fields.descuentoPorcentaje),activa:form.elements.activa.checked,vistaPrevia:form.elements.vistaPrevia.checked,orden:Number(fields.orden),inicio:ecuadorDateTime(fields.inicio),fin:ecuadorDateTime(fields.fin)};
     else if(section==='proveedores')values={...fields,activo:form.elements.activo.checked};
     else if(section==='lotes')values={...fields,cantidad:Number(fields.cantidad),costoUnitario:Number(fields.costoUnitario),proveedorId:fields.proveedorId || null};
     else values={...fields,loteId:fields.loteId || null,cantidad:Number(fields.cantidad)};
-    const save={productos:()=>administration.saveProduct(values,editing),promociones:()=>administration.savePromotion(values,editing),proveedores:()=>administration.saveSupplier(values,editing),lotes:()=>administration.saveLot(values),movimientos:()=>administration.saveMovement(values)}[section];
-    const submit=form.querySelector('[type=submit]');const locked=Array.from(form.elements).filter(control=>!control.disabled && control!==submit);for(const control of locked)control.disabled=true;busy(submit,true);for(const button of dialog.querySelectorAll('[data-editor-close]'))button.disabled=true;status.textContent='';let serverIssues;
+    if(editing && ['promociones','proveedores'].includes(section))values.esperadoUpdatedAt=editingVersion;
+    const save={productos:()=>partial?administration.patchProduct(values,editing):administration.saveProduct(values,editing),promociones:()=>administration.savePromotion(values,editing),proveedores:()=>administration.saveSupplier(values,editing),lotes:()=>administration.saveLot(values),movimientos:()=>administration.saveMovement(values)}[section];
+    const submit=partial?document.getElementById('product-save-changes'):form.querySelector('[type=submit]');const locked=Array.from(form.elements).filter(control=>!control.disabled && control!==submit);for(const control of locked)control.disabled=true;busy(submit,true);for(const button of dialog.querySelectorAll('[data-editor-close]'))button.disabled=true;status.textContent='';let serverIssues;
     try{await save();if(!auth.isAdmin || !dialog.isConnected)return;dialog.close();await render();if(auth.isAdmin){message(section==='promociones'?promotionPublication(values).message:'Cambios guardados en la farmacia.');document.getElementById('admin-create')?.focus();}}
     catch(error){status.textContent=error.message;serverIssues=Object.fromEntries((error.details || []).map(issue=>[issue.field,issue.message]));}
     finally{for(const control of locked)control.disabled=false;busy(submit,false);for(const button of dialog.querySelectorAll('[data-editor-close]'))button.disabled=false;if(serverIssues)errors(form,serverIssues);}
-  });
+  }
+  for(const [section,form] of Object.entries(forms))form.addEventListener('submit',event=>saveEditor(section,form,event));
+  document.getElementById('product-save-changes').addEventListener('click',event=>saveEditor('productos',forms.productos,event,true));
   document.getElementById('admin-fiscal').addEventListener('submit',async event=>{
     if(event.target.id!=='fiscal-form')return;event.preventDefault();const form=event.target;const submit=form.querySelector('[type=submit]');if(submit.disabled)return;
     const status=document.getElementById('fiscal-status');const issues=adminFormIssues(form);if(!formErrors(form,issues)){status.textContent='Revisa la tarifa, fecha y respaldo normativo.';return;}
@@ -169,7 +205,7 @@ export async function adminController() {
     catch(error){document.getElementById('order-state-status').textContent=error.message;}
     finally{busy(submit,false);stateForm.elements.estado.disabled=false;stateForm.querySelector('[data-state-close]').disabled=false;}
   });
-  dialog.addEventListener('cancel',event=>{if(!productImage.pending && !promoImage.pending && dialog.querySelector('[type=submit][aria-busy=true]'))event.preventDefault();});
+  dialog.addEventListener('cancel',event=>{if(!productImage.pending && !promoImage.pending && dialog.querySelector('button[aria-busy=true]'))event.preventDefault();});
   stateDialog.addEventListener('cancel',event=>{if(stateForm.querySelector('[type=submit][aria-busy=true]'))event.preventDefault();});
   for(const button of document.querySelectorAll('[data-state-close]'))button.addEventListener('click',()=>stateDialog.close());
   for(const button of document.querySelectorAll('[data-editor-close]'))button.addEventListener('click',()=>dialog.close());
@@ -177,7 +213,7 @@ export async function adminController() {
   try{
     await render();
     if(requestedRecord&&!['zonas','entregas'].includes(name)){
-      const table=name,found=await findCompanionRecord({table,record:requestedRecord,first:result,load:administration.table,allowed:()=>auth.isAdmin&&name===table&&document.getElementById('admin-table')?.isConnected});
+      const table=name,found=await findCompanionRecord({table,record:requestedRecord,first:page===1?result:null,load:administration.table,allowed:()=>auth.isAdmin&&name===table&&document.getElementById('admin-table')?.isConnected});
       if(!found)throw new Error('El registro ya no está disponible o no pertenece a esta sección.');
       if(page!==found.page){page=found.page;await render({loadedResult:found.result});}
       if(auth.isAdmin&&name===table){const index=result.items.findIndex(row=>row.id===requestedRecord),row=document.querySelectorAll('#admin-table tbody tr')[index];if(row){row.tabIndex=-1;row.dataset.companionRecord=requestedRecord;focusRecord(row,table);}}

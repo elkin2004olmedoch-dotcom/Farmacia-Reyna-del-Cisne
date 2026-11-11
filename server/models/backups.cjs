@@ -122,6 +122,7 @@ async function restoreBackup({from,targetDatabase=databaseFile(),backupRoot=BACK
       if(verification.length)await stagedClient.$executeRawUnsafe('DELETE FROM "EmailVerification"');
       const tables=await stagedClient.$queryRawUnsafe("SELECT name FROM sqlite_master WHERE type='table'");
       const has=name=>tables.some(row=>row.name===name);
+      if(has('RegistroPendiente'))await stagedClient.$executeRawUnsafe('DELETE FROM "RegistroPendiente"');
       const userColumns=await stagedClient.$queryRawUnsafe('PRAGMA table_info("Usuario")');
       if(!userColumns.some(column=>column.name==='tokenEpoch'))throw new Error('Actualiza el esquema del respaldo en una copia aislada antes de restaurar.');
       // A version from an old snapshot can match a token issued after that snapshot.

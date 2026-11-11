@@ -3,6 +3,7 @@ const db=require('./db.cjs');
 const {transaction}=require('./sesiones-moviles.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 const prices=require('./prices.cjs');
+const fiscal=require('./fiscal.cjs');
 const {requiresProfessionalReview}=require('../../frontend/models/pharmacy-policy.js');
 const addressSelect={id:true,alias:true,provincia:true,ciudad:true,direccion:true,codigoPostal:true,createdAt:true,updatedAt:true};
 const productSelect={id:true,nombre:true,precio:true,stock:true,imagen:true,alt:true,activo:true,requiereReceta:true,controlado:true,biologico:true,cadenaFrio:true,descuentoPorcentaje:true,ivaCategoria:true};
@@ -20,7 +21,14 @@ module.exports={
   return tx.direccionGuardada.findFirst({where:{id,userId},select:addressSelect});
  }),
  removeAddress:async(userId,id)=>{if((await db.direccionGuardada.deleteMany({where:{id,userId}})).count!==1)missing();},
- async favorites(userId){const now=new Date(),items=await db.favorito.findMany({where:{userId},orderBy:[{createdAt:'desc'},{id:'asc'}],select:{productoId:true,createdAt:true,producto:{select:productPricing(now)}}});return items.map(item=>({productoId:item.productoId,createdAt:item.createdAt,producto:prices.effectivePrice(item.producto,undefined,now)}));},
+ async favorites(userId){
+  const now=new Date();
+  const [items,tax]=await Promise.all([
+   db.favorito.findMany({where:{userId},orderBy:[{createdAt:'desc'},{id:'asc'}],select:{productoId:true,createdAt:true,producto:{select:productPricing(now)}}}),
+   fiscal.current(db,now),
+  ]);
+  return items.map(item=>({productoId:item.productoId,createdAt:item.createdAt,producto:prices.effectivePrice(item.producto,undefined,now,tax.tarifaGeneral)}));
+ },
  async favorite(userId,productoId){return transaction(async tx=>{if(!await tx.producto.findFirst({where:{id:productoId,activo:true},select:{id:true}}))missing();return tx.favorito.upsert({where:{userId_productoId:{userId,productoId}},create:{userId,productoId},update:{},select:{productoId:true,createdAt:true}});});},
  removeFavorite:(userId,productoId)=>db.favorito.deleteMany({where:{userId,productoId}}),
  async reorder(userId,id){

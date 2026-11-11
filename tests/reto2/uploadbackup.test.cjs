@@ -105,6 +105,25 @@ test('restaurar invalida sesiones, recuperación y códigos MFA usados sin desac
  try{const mfa=await restored.adminMfa.findUnique({where:{usuarioId:user.id}});assert.equal(mfa.enabled,true);assert.equal(mfa.secretCipher,'cifrado-sintetico');assert.equal(mfa.recoveryHashes,'[]');assert.equal(mfa.challengeHash,null);assert.ok(mfa.lastCounter>=Math.floor(Date.now()/30000)-1);assert.equal(await restored.passwordReset.count(),0);assert.equal(await restored.sesionWeb.count({where:{revokedAt:null}}),0);assert.ok((await restored.usuario.findUnique({where:{id:user.id}})).tokenVersion>user.tokenVersion);assert.equal((await db.adminMfa.findUnique({where:{usuarioId:user.id}})).lastCounter,1);}
  finally{await restored.$disconnect();await db.adminMfa.delete({where:{usuarioId:user.id}});}
 });
+test('restaurar elimina continuaciones privadas de registro sólo de la copia publicada',async()=>{
+ const user=await db.usuario.create({data:{nombre:'Cliente Continuación',email:'pending-resume-backup@example.ec',telefono:'+593979275988',passwordHash:'fixture',emailVerificationRequired:true}});
+ await db.registroPendiente.create({data:{usuarioId:user.id,email:user.email,secretHash:'e'.repeat(64),tokenVersion:user.tokenVersion,expiresAt:new Date(Date.now()+3600000)}});
+ const source=await createBackup({client:db,backupRoot:backups}),target=path.join(directory,'pending-registration-restored.db');
+ await restoreBackup({from:source.directory,targetDatabase:target,backupRoot:backups,offline:true});
+ const restored=new PrismaClient({datasources:{db:{url:'file:'+target.replaceAll('\\','/')}}});
+ const original=new PrismaClient({datasources:{db:{url:'file:'+path.join(source.directory,'farmacia.db').replaceAll('\\','/')}}});
+ try{
+  assert.equal(await restored.registroPendiente.count(),0);
+  assert.equal(await original.registroPendiente.count({where:{usuarioId:user.id}}),1);
+  assert.equal(await db.registroPendiente.count({where:{usuarioId:user.id}}),1);
+  const recovered=await restored.usuario.findUnique({where:{id:user.id}});
+  assert.equal(recovered.emailVerifiedAt,null);
+  assert.equal(recovered.emailVerificationRequired,true);
+ }finally{
+  await Promise.all([restored.$disconnect(),original.$disconnect()]);
+  await db.registroPendiente.delete({where:{usuarioId:user.id}});
+ }
+});
 test('cada restauración cambia la época JWT aunque se repita la versión del respaldo',async()=>{
  const source=await createBackup({client:db,backupRoot:backups}),target=path.join(directory,'epoch-restored.db'),user=await db.usuario.findUnique({where:{email:'images-client@example.ec'}});
  await restoreBackup({from:source.directory,targetDatabase:target,backupRoot:backups,offline:true});
