@@ -9,7 +9,7 @@ if(!fs.existsSync('.env')) {
   fs.writeFileSync('.env',config,{mode:0o600});
   console.info('Se creó .env con claves aleatorias. Consulta ADMIN_EMAIL y ADMIN_PASSWORD en ese archivo privado.');
 }
-for(const args of [['node_modules/prisma/build/index.js','generate','--schema','server/prisma/schema.prisma'],['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],['server/prisma/seed.cjs'],['scripts/build-frontend.cjs']]) {
+for(const args of [['node_modules/prisma/build/index.js','generate','--schema','server/prisma/schema.prisma'],['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],['server/prisma/seed.cjs'],['scripts/sync-catalog.cjs'],['scripts/build-frontend.cjs']]) {
   const result=spawnSync(process.execPath,args,{cwd:root,stdio:'inherit'});
   if(result.status!==0)process.exit(result.status || 1);
 }

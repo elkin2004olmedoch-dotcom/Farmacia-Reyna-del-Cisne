@@ -1,6 +1,7 @@
 const {Prisma}=require('./prisma-client.cjs');
 const db=require('./db.cjs');
 const {ecuadorDay}=require('./inventario.cjs');
+const {visibleWhere}=require('./prices.cjs');
 const TIME_ZONE='America/Guayaquil';
 const LOW_STOCK=5;
 const ECUADOR_OFFSET_MS=5*60*60*1000;
@@ -24,7 +25,7 @@ function months(now) {
 module.exports=async function summary(now=new Date()) {
   if(!(now instanceof Date) || Number.isNaN(now.getTime()))throw new TypeError('La fecha del resumen no es válida.');
   const periods=months(now);
-  const visibleCampaigns={activa:true,producto:{activo:true},AND:[{OR:[{inicio:null},{inicio:{lte:now}}]},{OR:[{fin:null},{fin:{gt:now}}]}]};
+  const visibleCampaigns=visibleWhere(now);
   // All counts, balances and lists describe the same database snapshot.
   return db.$transaction(async tx=> {
     const [groups,monthly,products,customers,administrators,lowStock,campaigns,alerts,recent,catalogProducts,bestSellerTotals]=await Promise.all([
@@ -33,9 +34,9 @@ module.exports=async function summary(now=new Date()) {
       tx.producto.count({where:{activo:true}}),
       tx.usuario.count({where:{activo:true,role:'user'}}),
       tx.usuario.count({where:{activo:true,role:'admin'}}),
-      tx.producto.count({where:{activo:true,stock:{lte:db.producto.fields.stockMinimo}}}),
+      tx.producto.count({where:{activo:true,soloConsulta:false,stock:{lte:db.producto.fields.stockMinimo}}}),
       tx.promocion.count({where:visibleCampaigns}),
-      tx.producto.findMany({where:{activo:true,stock:{lte:db.producto.fields.stockMinimo}},select:{id:true,nombre:true,stock:true,stockMinimo:true},orderBy:[{stock:'asc'},{nombre:'asc'},{id:'asc'}],take:10}),
+      tx.producto.findMany({where:{activo:true,soloConsulta:false,stock:{lte:db.producto.fields.stockMinimo}},select:{id:true,nombre:true,stock:true,stockMinimo:true},orderBy:[{stock:'asc'},{nombre:'asc'},{id:'asc'}],take:10}),
       tx.pedido.findMany({select:{id:true,nombre:true,total:true,estado:true,createdAt:true},orderBy:[{createdAt:'desc'},{id:'desc'}],take:5}),
       tx.producto.findMany({select:{id:true,nombre:true,categoria:true}}),
       tx.pedidoDetalle.groupBy({by:['productoId'],where:{pedido:{estado:{in:['confirmado','preparado','entregado']}}},_sum:{cantidad:true}}),

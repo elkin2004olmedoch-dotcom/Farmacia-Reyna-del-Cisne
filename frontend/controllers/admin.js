@@ -20,7 +20,7 @@ const companionRecordId=/^[a-z0-9][a-z0-9-]{0,79}$/;
 function productValues(form){
   const fields=Object.fromEntries(Array.from(new FormData(form),([key,value])=>[key,typeof value==='string'?value.trim():value]));
   const optionalFields=['codigoInterno','codigoBarras','laboratorio','principioActivo','concentracion','presentacion','registroSanitario','fundamentoIva','advertencias'];
-  const flags=['requiereReceta','controlado','biologico','cadenaFrio'];
+  const flags=['requiereReceta','controlado','biologico','cadenaFrio','soloConsulta'];
   return {
     ...fields,
     ...Object.fromEntries(optionalFields.map(key=>[key,fields[key] || null])),
@@ -52,7 +52,7 @@ export async function adminController() {
   const productImage=imageController(forms.productos,'product');const promoImage=imageController(forms.promociones,'promotion');
   const stateDialog=document.getElementById('order-state-dialog');const stateForm=document.getElementById('order-state-form');let stateOrder=null;
   const billing=billingController();
-  function pharmaceuticalRequired(){const form=forms.productos;form.elements.fundamentoIva.required=form.elements.ivaCategoria.value==='cero';for(const key of ['pvpMaximo','laboratorio','presentacion','registroSanitario'])form.elements[key].required=form.elements.tipoProducto.value==='medicamento';}
+  function pharmaceuticalRequired(){const form=forms.productos;form.elements.fundamentoIva.required=form.elements.ivaCategoria.value==='cero';for(const key of ['precio','stock'])form.elements[key].required=!form.elements.soloConsulta.checked;for(const key of ['pvpMaximo','laboratorio','presentacion','registroSanitario'])form.elements[key].required=form.elements.tipoProducto.value==='medicamento'&&!form.elements.soloConsulta.checked;}
   function errors(form,issues){
     if(!auth.isAdmin || !form.isConnected)return false;
     const valid=formErrors(form,issues);
@@ -126,7 +126,7 @@ export async function adminController() {
     catch(error){if(id!==lotRequest || !auth.isAdmin)return;status.textContent=error.message;message(error.message,true);}
   }
   async function open(record){
-    const id=++openingId;const section=name;const opener=document.activeElement;const choices=['promociones','lotes','movimientos'].includes(section)?await catalog.all():[];
+    const id=++openingId;const section=name;const opener=document.activeElement;const choices=['promociones','lotes','movimientos'].includes(section)?(await catalog.all()).filter(product=>section!=='promociones'||globalThis.Farmacia.pharmacyPolicy.allowsPromotion(product)):[];
     const suppliers=section==='lotes'?await administration.suppliers():null;
     if(id!==openingId || name!==section || !auth.isAdmin || !dialog.isConnected)return;
     editing=record?.id || null;editingVersion=record?.updatedAt || null;previousFocus=opener;
@@ -147,6 +147,7 @@ export async function adminController() {
   for(const [id,offset] of [['admin-prev',-1],['admin-next',1]])document.getElementById(id).addEventListener('click',async()=>{page+=offset;history.replaceState(null,'','admin.html?tabla='+name+'&page='+page);try{await render();}catch(error){message(error.message,true);}});
   forms.productos.elements.ivaCategoria.addEventListener('change',pharmaceuticalRequired);
   forms.productos.elements.tipoProducto.addEventListener('change',pharmaceuticalRequired);
+  forms.productos.elements.soloConsulta.addEventListener('change',pharmaceuticalRequired);
   for(const event of ['input','change'])forms.promociones.addEventListener(event,()=>promotionEditorState(forms.promociones));
   document.getElementById('promotion-publish-discount')?.addEventListener('click',()=>{
     const form=forms.promociones;if(!auth.isAdmin || form.querySelector('[type=submit][aria-busy=true]'))return;

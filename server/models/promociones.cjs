@@ -8,9 +8,9 @@ async function save(data,id,expectedUpdatedAt){
   return db.$transaction(async tx=>{
     const current=id?await tx.promocion.findUnique({where:{id}}):null;
     if(id&&!current)throw new AppError(404,'NOT_FOUND','No se encontró la promoción.');
-    const product=await tx.producto.findFirst({where:{id:data.productoId??current?.productoId,activo:true},select:{requiereReceta:true,controlado:true,biologico:true}});
+    const product=await tx.producto.findFirst({where:{id:data.productoId??current?.productoId,activo:true},select:{soloConsulta:true,requiereReceta:true,controlado:true,biologico:true}});
     if(!product)throw new AppError(422,'INVALID_PRODUCT','Selecciona un producto disponible.');
-    if(!allowsPromotion(product))throw new AppError(422,'PHARMACY_PROMOTION_RESTRICTED','Este producto requiere revisión profesional y no puede aparecer en campañas públicas.');
+    if(!allowsPromotion(product))throw new AppError(422,'PHARMACY_PROMOTION_RESTRICTED','Este producto no puede aparecer en campañas públicas en su estado actual.');
     if(!id)return tx.promocion.create({data});
     const updatedAt=new Date(Math.max(Date.now(),current.updatedAt.getTime()+1));
     const changed=await tx.promocion.updateMany({where:{id,updatedAt:expectedUpdatedAt?new Date(expectedUpdatedAt):current.updatedAt},data:{...data,updatedAt}});

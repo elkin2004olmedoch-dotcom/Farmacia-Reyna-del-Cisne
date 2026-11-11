@@ -55,6 +55,16 @@ test('producto con stock ausente o precio no numérico no prepara una compra',as
     setProduct({...product,...invalid});await assert.rejects(run('seleccionar agregar gel-prueba 1'),/disponible/i);
   }
 });
+
+test('Goti muestra referencias de consulta sin revelar precio técnico y bloquea su selección',async()=>{
+  const {run,cart,setProduct}=await customer();setProduct({...product,soloConsulta:true,precio:17,stock:20});
+  const found=await run('buscar gel');
+  assert.equal(found.visualSummary.items[0].soloConsulta,true);
+  assert.equal(found.visualSummary.items[0].precio,null);assert.equal(found.visualSummary.items[0].stock,null);
+  assert.equal(found.fields,undefined);
+  await assert.rejects(run('seleccionar agregar gel-prueba 1'),/disponible|consulta/i);
+  assert.deepEqual(cart.read(),{});
+});
 test('resumen pendiente mantiene bloqueo hasta terminar la lectura y evita una confirmación simultánea',async()=>{
   let release;const gate=new Promise(resolve=>{release=resolve;});
   const {run,cart}=await customer({catalog:{find:async()=>{await gate;return product;}}});cart.add(product,1);

@@ -2,6 +2,7 @@ import '../models/ecuador.js';
 import {auth,sessionSignalKey} from '../models/auth.js';
 import {catalog} from '../models/catalog.js';
 import {cart} from '../models/cart.js';
+import {cartPricing} from '../models/pricing.js';
 import {orders} from '../models/orders.js';
 import {payments} from '../models/payments.js';
 import {paymentCardController} from './payment-card.js';
@@ -16,7 +17,7 @@ import {connectOrderReceipts} from './receipts.js';
 import {connectOrderMaps} from './order-map.js';
 import {connectSavedAddresses,connectReorder} from './customer-account.js';
 import '../models/pharmacy-policy.js';
-const {requiresProfessionalReview}=globalThis.Farmacia.pharmacyPolicy;
+const {allowsPurchase}=globalThis.Farmacia.pharmacyPolicy;
 export async function checkoutController() {
   connectReorder(document.getElementById('order-confirmation'));
   const updateReceipts=connectOrderReceipts(document.getElementById('order-confirmation'));
@@ -46,11 +47,16 @@ export async function checkoutController() {
   function paymentView(){const method=form.elements.paymentPreference.value;payRoot.hidden=!practice||method!=='card';if(payRoot.hidden)cardWidget?.clear();const bank=document.getElementById('checkout-transfer-details');bank.hidden=method!=='transfer';bank.replaceChildren();if(method==='transfer'){const value=config.transferencia;if(value?.disponible){for(const text of [value.banco,`Cuenta de ${value.tipo} · ${value.numeroCuenta}`,value.titular]){const p=document.createElement('p');p.textContent=text;bank.append(p);}}else bank.textContent='Consulta los datos de transferencia con la farmacia.';}payNote.textContent=practice?'Sin cobro real. Completa el pago antes de confirmar tu compra; no realices una transferencia bancaria.':'Coordina el pago con la farmacia antes de retirar tu compra.';form.querySelector('[type=submit]').textContent=practice?'Pagar y confirmar compra':'Confirmar pedido';}
   for(const input of form.querySelectorAll('[name=paymentPreference]'))input.addEventListener('change',paymentView);paymentView();
   let shipping;
-  function validCart(){const lines=cart.lines(products);return lines.length>0 && lines.every(line=>line.producto && !requiresProfessionalReview(line.producto) && line.cantidad<=line.producto.stock);}
+  function validCart(){const lines=cart.lines(products);return lines.length>0 && lines.every(line=>line.producto && allowsPurchase(line.producto) && line.cantidad<=line.producto.stock);}
   function render(){
-    const lines=cart.lines(products);
+    const lines=cart.lines(products),totals=cartPricing(lines);
     if(!lines.length&&!form.hidden)showDetails(false);
-    preserveFocus(target,()=>cartView(lines,cart.total(products)));shipping?.render(cart.total(products));next.disabled=!validCart();
+    preserveFocus(target,()=>cartView(lines,totals.total));shipping?.render(totals.complete?totals.total:null);next.disabled=!validCart();
+    if(!totals.complete){
+      document.getElementById('checkout-grand-total').textContent='Por confirmar';
+      document.getElementById('checkout-shipping-fee').textContent='Por confirmar';
+      document.getElementById('checkout-shipping-status').textContent='Revisa los productos y consulta los importes pendientes con la farmacia antes de continuar.';
+    }
     if(summary)summary.hidden=!lines.length;
     document.getElementById('purchase-login-note').textContent=auth.user?'Al continuar podrás revisar la entrega y el pago.':'Inicia sesión para confirmar tu pedido.';
     const submit=form.querySelector('[type=submit]');submit.disabled=!validCart() || shipping?.enabled()===false || submit.getAttribute('aria-busy')==='true';document.getElementById('checkout-clear').hidden=!lines.length;

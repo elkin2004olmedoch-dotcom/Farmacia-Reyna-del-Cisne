@@ -42,7 +42,7 @@ test('producción acepta Secret key sin legacy y prioriza la nueva sin imprimirl
     calls.push(args);
     return {status: 0, stdout: env.SUPABASE_SECRET_KEY, stderr: env.SUPABASE_SECRET_KEY};
   }});
-  assert.equal(calls.length, 4);
+  assert.equal(calls.length, 5);
   assert.equal(calls[0][2].env.SUPABASE_SECRET_KEY, env.SUPABASE_SECRET_KEY);
   assert.ok(!messages.join('\n').includes(env.SUPABASE_SECRET_KEY));
   assert.equal(productionEnvironment({...env, SUPABASE_SECRET_KEY: '', SUPABASE_SERVICE_ROLE_KEY: valid().SUPABASE_SERVICE_ROLE_KEY}).SUPABASE_SECRET_KEY, '');
@@ -87,11 +87,12 @@ test('preparación usa el cliente separado, migraciones y seed; no imprime secre
     calls.push(args);
     return {status: 0, stdout: env.DATABASE_URL + env.ADMIN_PASSWORD, stderr: env.SUPABASE_SERVICE_ROLE_KEY};
   }});
-  assert.equal(calls.length, 4);
+  assert.equal(calls.length, 5);
   assert.deepEqual(calls[0][1], ['node_modules/prisma/build/index.js', 'generate', '--schema', 'server/prisma/postgresql/schema.prisma']);
   assert.deepEqual(calls[1][1].slice(1, 3), ['migrate', 'deploy']);
   assert.deepEqual(calls[2][1], ['server/prisma/seed.cjs']);
-  assert.deepEqual(calls[3][1], ['scripts/build-frontend.cjs']);
+  assert.deepEqual(calls[3][1], ['scripts/sync-catalog.cjs']);
+  assert.deepEqual(calls[4][1], ['scripts/build-frontend.cjs']);
   assert.equal(calls[0][2].env.HOST, '0.0.0.0');
   assert.equal(calls[0][2].stdio, 'pipe');
   const output = messages.join('\n');
@@ -101,8 +102,9 @@ test('preparación usa el cliente separado, migraciones y seed; no imprime secre
 test('SKIP_INITIAL_SEED permite migrar una base vacía antes de importar datos privados', () => {
   const calls = [];
   runSetup({env: {...valid(), SKIP_INITIAL_SEED: 'true'}, logger: {info() {}}, run: (command, args) => {calls.push(args); return {status: 0};}});
-  assert.equal(calls.length, 3);
+  assert.equal(calls.length, 4);
   assert.ok(!calls.some(args => args[0] === 'server/prisma/seed.cjs'));
+  assert.deepEqual(calls[2], ['scripts/sync-catalog.cjs']);
 });
 
 test('fallo de migración detiene seed y frontend sin exponer stderr ni cadenas privadas', () => {

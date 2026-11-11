@@ -10,7 +10,7 @@ import '../models/pharmacy-policy.js';
 
 function productValues(product,changes){
   return {
-    nombre:product.nombre,precio:Number(product.precio),stock:Number(product.stock),categoria:product.categoria,
+    nombre:product.nombre,precio:Number(product.precio),stock:Number(product.stock),categoria:product.categoria,soloConsulta:Boolean(product.soloConsulta),
     descripcion:product.descripcion,imagen:product.imagen,alt:product.alt,
     descuentoPorcentaje:Number(product.descuentoPorcentaje||0),ivaCategoria:product.ivaCategoria||'general',
     fundamentoIva:product.fundamentoIva??null,tipoProducto:product.tipoProducto||'cuidado',
@@ -27,7 +27,7 @@ function productValues(product,changes){
 const instructions={
   product:'Actualiza el precio de "Ensure Advance vainilla 850 g" a 13,50 y el stock a 24. Modifica producto "Ensure Advance vainilla 850 g": descripcion="Descripción real". Desactiva producto "Ensure Advance vainilla 850 g".',
   promotion:'Publica promoción de 20 % para "Ensure Advance vainilla 850 g" hasta 2026-12-31 titulada "Fin de año". La fecha usa hora de Ecuador.',
-  records:'Altas: crea producto: nombre="Gel"; precio=2; stock=20; categoria=cuidado; tipoProducto=cuidado; descripcion="Gel de manos"; imagen="assets/images/gel.webp"; alt="Frasco de gel"; ivaCategoria=general. La imagen debe existir. Si falta información abro el formulario. Para medicamentos exige PVP, laboratorio, presentación, registro y clasificación sanitaria reales.',
+  records:'Altas: crea producto: nombre="Gel"; precio=2; stock=20; categoria=cuidado; tipoProducto=cuidado; descripcion="Gel de manos"; imagen="assets/images/gel.webp"; alt="Frasco de gel"; ivaCategoria=general. La imagen debe existir. Si falta información abro el formulario. Usa soloConsulta=true para publicar referencias pendientes de precio y existencias. Para activar la venta de medicamentos exige PVP, laboratorio, presentación, registro y clasificación sanitaria reales.',
   inventory:'Crea proveedor: nombre="Distribuidora"; ruc="RUC real"; email="ventas@example.com"; telefono="0991234567"; direccion="Calle Central s/n"; activo=true. Registra lote: producto="Ensure Advance vainilla 850 g"; numero="L-01"; vencimiento=2027-12-31; cantidad=20; costoUnitario=1,25. Ajusta inventario: producto="Ensure Advance vainilla 850 g"; tipo=salida; cantidad=2; motivo="Rotura de envase". Opcionales: proveedorId en lote, loteId en ajuste.',
   navigation:'Abre proveedores. Abre formulario de producto. Cambia pedido "ID" a preparado. Abre entregas para zonas y repartidores. Asigna pedido "ID" a repartidor "ID". Cambia entrega "ID" a en_destino. Crea zona: nombre="Puerto Quito"; provincia="Pichincha"; canton="Puerto Quito"; tarifaCentavos=250; ivaCategoria=general; activa=true. Modifica zona "ID": tarifaCentavos=300. Usa identificadores reales del panel.',
 };
@@ -80,7 +80,7 @@ export function createAdminCommandExecutor({model=administration,deliveryModel=d
       if(confirm && /^(actualizar|actualiza|modificar|modifica|cambiar|cambia)(?: algo)?$/.test(normalized))return {type:'choice',text:'¿Qué quieres gestionar?',actions:[{label:'Productos: precio y stock',command:'actualizar productos'},{label:'Poner en promoción',command:'poner en promocion'},{label:'Pedidos',command:'actualizar pedidos'},{label:'Zonas y tarifas',command:'actualizar zonas'},{label:'Proveedores',command:'abre proveedores'},{label:'Lotes',command:'abre lotes'}]};
       if(confirm && (/^(actualiz|modific|cambi).*(productos?|precios?|stock)$/.test(normalized)||/^(?:poner|pon|publicar|publica|crear|crea)(?: una)?(?: en)? promo(?:cion(?:es)?)?$/.test(normalized))){
         operation=/promo/.test(normalized)?'promotion':'update';const products=(await model.products()).filter(p=>p.activo && (operation!=='promotion'||globalThis.Farmacia?.pharmacyPolicy?.allowsPromotion(p)!==false));requireAdmin();
-        return products.length?{type:'selection',text:`Hay ${products.length} productos. Selecciona uno para ${operation==='promotion'?'ponerlo en promoción':'actualizarlo'}.`,fields:[{name:'product',label:'Todos los productos disponibles',options:products.map(p=>({value:p.id,label:`${p.nombre} · $${Number(p.precio).toFixed(2)} · stock ${p.stock}`}))}],submit:values=>'seleccionar producto '+values.product}:reply('No hay productos disponibles para esa acción.');
+        return products.length?{type:'selection',text:`Hay ${products.length} productos. Selecciona uno para ${operation==='promotion'?'ponerlo en promoción':'actualizarlo'}.`,fields:[{name:'product',label:'Todos los productos disponibles',options:products.map(p=>({value:p.id,label:`${p.nombre} · ${p.soloConsulta?'Solo consulta':'$'+Number(p.precio).toFixed(2)+' · stock '+p.stock}`}))}],submit:values=>'seleccionar producto '+values.product}:reply('No hay productos disponibles para esa acción.');
       }
       command=interpretAdminCommand(text);
       if(command.type==='needs-products'){const products=await model.products();requireAdmin();command=interpretAdminCommand(text,products);}
@@ -90,7 +90,7 @@ export function createAdminCommandExecutor({model=administration,deliveryModel=d
         proposal=command;
         const details=command.changes||command.values||{estado:command.estado,pedidoId:command.pedidoId,repartidorId:command.repartidorId};
         const labels={precio:'Precio (USD)',stock:'Stock',tarifaCentavos:'Tarifa de envío (centavos)',descuentoPorcentaje:'Descuento (%)',titulo:'Título',descripcion:'Descripción',fin:'Válida hasta (Ecuador)',estado:'Nuevo estado'};
-        const before=command.product?`Precio actual: USD ${Number(command.product.precio).toFixed(2)} · Stock actual: ${command.product.stock}\n`:command.zone?`Tarifa actual: ${command.zone.tarifaCentavos==null?'Pendiente':'USD '+(command.zone.tarifaCentavos/100).toFixed(2)}\n`:'';
+        const before=command.product?.soloConsulta?'Solo consulta · precio y disponibilidad por confirmar\n':command.product?`Precio actual: USD ${Number(command.product.precio).toFixed(2)} · Stock actual: ${command.product.stock}\n`:command.zone?`Tarifa actual: ${command.zone.tarifaCentavos==null?'Pendiente':'USD '+(command.zone.tarifaCentavos/100).toFixed(2)}\n`:'';
         const changes=Object.entries(details).filter(([key,value])=>value!==undefined&&value!==null&&!['productoId','orden','vistaPrevia','imagen','alt'].includes(key)).map(([key,value])=>`${labels[key]||key}: ${key==='fin'?ecuadorCommandDay(value):value}`).join('\n');
         return {type:'confirmation',text:`Revisa la orden: ${command.product?.nombre||command.id||command.type}\n${before}${changes}\n¿Confirmas guardar este cambio?`,actions:[{label:'Sí, confirmar',command:'confirmar'},{label:'No, cancelar',command:'cancelar'}]};
       }

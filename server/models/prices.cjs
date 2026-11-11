@@ -4,7 +4,7 @@ const {sellableStock,ecuadorDay}=require('./inventario.cjs');
 const {allowsPromotion}=require('../../frontend/models/pharmacy-policy.js');
 
 function visibleWhere(now=new Date()) {
-  return {activa:true,producto:{activo:true,requiereReceta:false,controlado:false,biologico:false},AND:[{OR:[{inicio:null},{inicio:{lte:now}}]},{OR:[{fin:null},{fin:{gt:now}}]}]};
+  return {activa:true,producto:{activo:true,soloConsulta:false,requiereReceta:false,controlado:false,biologico:false},AND:[{OR:[{inicio:null},{inicio:{lte:now}}]},{OR:[{fin:null},{fin:{gt:now}}]}]};
 }
 function discountWhere(now=new Date()) {return {...visibleWhere(now),vistaPrevia:false,descuentoPorcentaje:{gt:0}};}
 // Public prices need only the expired balance; reservations still load complete lots.

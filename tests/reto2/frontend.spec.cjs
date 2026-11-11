@@ -1,5 +1,6 @@
 const {test,expect,apiToken}=require('./browser-fixture.cjs');
 const AxeBuilder=require('@axe-core/playwright').default;
+const {sections}=require('../../frontend/models/catalog-sections.js');
 const tinyPNG=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGP4fGkRVsQwtCQAJ4yZwRji18kAAAAASUVORK5CYII=','base64');
 async function closeCartDrawer(page){
   const drawer=page.locator('#cart-drawer');await expect(drawer).toBeVisible();await drawer.locator('[data-cart-close]').first().click();await expect(drawer).toBeHidden();
@@ -18,7 +19,7 @@ test('catálogo, persistencia, login obligatorio, registro y pedido real',async(
   const createdZone=await page.request.post('/api/admin/zonas-entrega',{headers,data:zoneInput});expect(createdZone.status()).toBe(201);const zone=(await createdZone.json()).data;
   try{
   await page.goto('/');await expect(page.locator('#featured-products article')).toHaveCount(4);await expect(page.locator('.promotion-card')).toHaveCount(2);
-  await expect(page.locator('.ref-store-category-image img')).toHaveCount(3);await expect(page.locator('.ref-store-category-image img').first()).toBeVisible();await expect.poll(()=>page.locator('.ref-store-category-image img').first().evaluate(img=>img.complete && img.naturalWidth>0)).toBe(true);
+  await expect(page.locator('.ref-store-category-image img')).toHaveCount(sections.length);await expect(page.locator('.ref-store-category-image img').first()).toBeVisible();await expect.poll(()=>page.locator('.ref-store-category-image img').first().evaluate(img=>img.complete && img.naturalWidth>0)).toBe(true);
   if(!await page.locator('#global-search').isVisible()){await page.locator('#search-toggle').focus();await page.keyboard.press('Enter');await expect(page.locator('#global-search')).toBeFocused();}
   await page.locator('#global-search').fill('solar');await page.locator('.header-search button').click();await expect(page.locator('#catalog-grid article')).toHaveCount(1);
   await page.locator('[data-add=solar]').click();await closeCartDrawer(page);await expect(page.locator('[data-shop-count]')).toHaveText('1');

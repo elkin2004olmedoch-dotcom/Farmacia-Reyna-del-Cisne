@@ -5,7 +5,7 @@ const {AppError}=require('../middleware/errors.cjs');
 const {discountWhere,effectivePrice}=require('./prices.cjs');
 const fiscal=require('./fiscal.cjs');
 const inventory=require('./inventario.cjs');
-const {requiresProfessionalReview,restrictionReason}=require('../../frontend/models/pharmacy-policy.js');
+const {allowsPurchase,restrictionReason}=require('../../frontend/models/pharmacy-policy.js');
 const include={pagoPractica:true,detalles:{include:{lotes:true}},historial:{orderBy:[{createdAt:'asc'},{id:'asc'}]}};
 const transitions={pendiente:['confirmado','cancelado'],confirmado:['preparado','cancelado'],preparado:['entregado','cancelado'],entregado:[],cancelado:[]};
 async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTotalCentavos},{actor}={}) {
@@ -41,10 +41,12 @@ async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTota
         for(const item of sorted) {
           const product=products.find(product=>product.id===item.productoId);
           if(!product)throw new AppError(409,'PRODUCT_UNAVAILABLE','Uno de los productos ya no está disponible.');
+          if(product.soloConsulta)throw new AppError(409,'PRODUCT_CONSULTATION_ONLY',restrictionReason(product));
           if(product.requiereReceta)throw new AppError(409,'PRESCRIPTION_REQUIRED',`${product.nombre} requiere receta. Coordina con la farmacia la revisión de la receta y su dispensación presencial.`);
-          if(requiresProfessionalReview(product))throw new AppError(409,'PROFESSIONAL_REVIEW_REQUIRED',restrictionReason(product));
+          if(!allowsPurchase(product))throw new AppError(409,'PROFESSIONAL_REVIEW_REQUIRED',restrictionReason(product));
           const priced=effectivePrice(product,product.promociones,now,tax.tarifaGeneral);
           const unit=Math.round(Number(priced.precio)*100);
+          if(unit<=0)throw new AppError(409,'COMMERCIAL_PRICE_REQUIRED','La farmacia debe confirmar el precio antes de habilitar la compra de este producto.');
           const reserved=await inventory.reserve(tx,product,item.cantidad,now);
           const lineTax=fiscal.inclusiveTax(unit*item.cantidad,priced.ivaPorcentaje);
           cents+=unit*item.cantidad;

@@ -1,3 +1,4 @@
+import '../models/catalog-sections.js';
 function normalize(text){return String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').trim();}
 
 const medicalAdvice=/\b(dosis|sintoma|tratamiento|me duele|embaraz|diagnostic|efectos secundarios|contraindicaciones|interacciones|es seguro tomar|puedo tomar|que (?:tomo|tomar))\b|(?=.*\b(?:que es|para que sirve)\b)(?=.*\b(?:medicamento|medicina|paracetamol|acetaminofen|ibuprofeno|amoxicilina|loratadina)\b)/;
@@ -10,6 +11,7 @@ export function classifyMascotaQuestion(text,knownProducts=[]){
   if(!value)return 'off-topic';
   if(medicalAdvice.test(value))return 'medical';
   if(unrelatedIntent.test(value))return 'off-topic';
+  if(globalThis.Farmacia.catalogSections.sections.some(section=>value.includes(normalize(section.nombre))))return 'pharmacy';
   const knownProduct=knownProducts.some(name=>name&&value.includes(normalize(name)));
   if(pharmacyTerms.test(value)||knownProduct||availability.test(value)&&knownProduct)return 'pharmacy';
   return 'off-topic';

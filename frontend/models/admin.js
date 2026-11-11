@@ -49,7 +49,7 @@ export function adminFormIssues(form) {
     if(values.codigoBarras){const code=values.codigoBarras;const sum=[...code.slice(0,-1)].reverse().reduce((n,d,i)=>n+Number(d)*(i%2?1:3),0);if(!/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(code) || /^(\d)\1+$/.test(code) || (10-sum%10)%10!==Number(code.at(-1)))issues.codigoBarras='Usa un código GTIN de 8, 12, 13 o 14 dígitos con verificador correcto.';}
     if(values.codigoInterno && !/^[A-Za-z0-9][A-Za-z0-9._-]{1,39}$/.test(values.codigoInterno))issues.codigoInterno='Usa de 2 a 40 letras, números, puntos o guiones; inicia con una letra o número.';
     if(values.ivaCategoria==='cero' && String(values.fundamentoIva || '').trim().length<8)issues.fundamentoIva='Indica el fundamento legal específico que respalda la tarifa 0 %, por ejemplo artículo 55 de la LRTI y la clasificación del medicamento.';
-    if(values.tipoProducto==='medicamento'){
+    if(values.tipoProducto==='medicamento'&&!form.elements.soloConsulta?.checked){
       if(!values.pvpMaximo || Number(values.pvpMaximo)<=0)issues.pvpMaximo='Registra el PVP máximo impreso del medicamento.';
       for(const key of ['laboratorio','presentacion','registroSanitario'])if(!String(values[key] || '').trim())issues[key]='Completa este dato obligatorio para medicamentos.';
     }

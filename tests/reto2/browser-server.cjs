@@ -10,7 +10,9 @@ process.env.NODE_ENV='test';process.env.CORS_ORIGIN='http://localhost:3300';proc
 process.env.EMAIL_VERIFICATION_ENABLED='false';process.env.CUSTOMER_REGISTRATION_REQUIRE_EMAIL='false';process.env.PAYPHONE_ENABLED='false';
 process.env.UPLOAD_DIR=path.join(directory,'uploads');
 process.env.JWT_SECRET=randomBytes(48).toString('hex');process.env.ADMIN_EMAIL='admin-browser@example.ec';process.env.ADMIN_PASSWORD='AdminBrowser2026!';
-for(const args of [['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],['server/prisma/seed.cjs']])execFileSync(process.execPath,args,{env:process.env,stdio:'pipe'});
+const steps=[['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],['server/prisma/seed.cjs']];
+if(process.env.PHARMACY_BROWSER_EXPANDED_CATALOG==='true')steps.push(['scripts/sync-catalog.cjs']);
+for(const args of steps)execFileSync(process.execPath,args,{env:process.env,stdio:'pipe'});
 const settings={...require('../../server/config.cjs')(),testAuthLimit:200,testApiLimit:2000};
 require('./geocoder-fixture.cjs')();
 const createApp=require('../../server/app.cjs'),db=require('../../server/models/db.cjs'),{Prisma}=require('../../server/models/prisma-client.cjs');

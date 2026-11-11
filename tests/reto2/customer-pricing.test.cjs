@@ -17,6 +17,12 @@ test('todas las tarifas de farmacia y descuentos finales conservan el precio cob
 test('un pedido antiguo sin información fiscal no inventa una tarifa histórica',async()=>{
   const {cartPricing}=await prices;const result=cartPricing([{producto:{precio:'2.01'},cantidad:1}]);assert.equal(result.complete,false);assert.equal(result.total,201);assert.equal(result.base,0);assert.equal(result.iva,0);
 });
+
+test('un carrito con referencias de consulta mantiene sus importes pendientes',async()=>{
+  const {cartPricing}=await prices;
+  const result=cartPricing([{producto:{soloConsulta:true,precio:17,ivaPorcentaje:15},cantidad:2}]);
+  assert.equal(result.complete,false);assert.equal(result.total,0);assert.deepEqual(result.rates,{});
+});
 test('la validación MVC admite RUC empresarial sin exigir un algoritmo no definido por SRI',()=>{
   for(const ruc of ['1790016918001','1770016919001','1760001560001'])assert.equal(ec.validRuc(ruc),true);
   for(const ruc of ['0000000000001','1790016918002','1790016918','179001691A001'])assert.equal(ec.validRuc(ruc),false);

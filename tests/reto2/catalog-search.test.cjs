@@ -103,7 +103,11 @@ test(provider+': señala una errata conservadora solo cuando no hay coincidencia
 });
 test(provider+': filtros únicos de productos activos sin inventar metadatos',async()=>{
  const {body}=await api.get('/api/productos/filtros').expect(200);
- assert.deepEqual(body.data,{laboratorios:['Laboratórios LÓPEZ'],presentaciones:['Cápsulas','Tabletas']});
+ const {categorias,...metadata}=body.data;
+ assert.deepEqual(metadata,{laboratorios:['Laboratórios LÓPEZ'],presentaciones:['Cápsulas','Tabletas']});
+ assert.equal(categorias.find(section=>section.id==='bebe').total,27);
+ assert.equal(categorias.find(section=>section.id==='cuidado').total,20);
+ assert.equal(categorias.find(section=>section.id==='medicamentos').total,0);
 });
 test(provider+': trata comodines y SQL como texto literal sin ampliar resultados',async()=>{
  for(const [q,expected] of [['100%',['percent']],['A_B',['underscore']],["' OR 1=1 --",[]],['%', ['percent']],['_',['underscore']]]){

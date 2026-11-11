@@ -10,7 +10,7 @@ export function linePricing(product, quantity = 1) {
 export function cartPricing(lines) {
   const result = {total: 0, base: 0, iva: 0, complete: true, rates: {}};
   for (const line of lines) {
-    if (!line.producto) { result.complete = false; continue; }
+    if (!line.producto || line.producto.soloConsulta) { result.complete = false; continue; }
     const value = linePricing(line.producto, line.cantidad);
     result.total += value.total;
     if (value.rate === null) { result.complete = false; continue; }

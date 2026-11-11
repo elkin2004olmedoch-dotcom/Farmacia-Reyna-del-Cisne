@@ -15,5 +15,5 @@
 .predictive-copy{display:grid;gap:3px;min-width:0;flex:1}
 .predictive-copy strong{font-size:.86rem;line-height:1.35;overflow-wrap:anywhere}
 .predictive-copy small{font-size:.74rem;color:#66514d}
-.predictive-price{font-size:.85rem;font-weight:700;white-space:nowrap;color:#681e2a}
+.predictive-price{max-width:132px;font-size:.85rem;font-weight:700;white-space:normal;color:#681e2a}
 @media(max-width:640px){.predictive-panel{width:100%;max-width:100%}.header-search .predictive-panel{left:0;right:0}.predictive-hint{font-size:.7rem}}

@@ -66,7 +66,15 @@ export async function createRouteMap(root,{destination,requestRoute,locate=brows
   update.addEventListener('click',()=>void(recent()?route(true):getPosition()));center.addEventListener('click',fit);
   const timer=setInterval(()=>{if(disposed)return;if(!recent() && marker){map.removeLayer(marker);marker=null;removeLine();status.textContent='Sin ubicación GPS reciente. Comprueba la señal y los permisos.';}void route();},5000);
   handle={
-    update(position){if(disposed)return;if(position===null){origin=null;if(marker){map.removeLayer(marker);marker=null;}removeLine();status.textContent='Ubicación detenida. Inicia o reanuda el seguimiento para actualizar la ruta.';return;}if(!point(position))return;origin={latitud:position.latitud,longitud:position.longitud,registradaAt:position.registradaAt};if(recent()){if(marker)marker.setLatLng([origin.latitud,origin.longitud]);else marker=L.circleMarker([origin.latitud,origin.longitud],{radius:8,color:'#fff',weight:3,fillColor:'#2563a3',fillOpacity:1}).addTo(map).bindTooltip(node('span','Tu última ubicación GPS'));}void route();},
+    update(position){
+      if(disposed)return;
+      if(position===null){origin=null;if(marker){map.removeLayer(marker);marker=null;}removeLine();status.textContent='Ubicación detenida. Inicia o reanuda el seguimiento para actualizar la ruta.';return;}
+      if(!point(position))return;
+      if(recent()&&Date.parse(position.registradaAt)<Date.parse(origin.registradaAt))return;
+      origin={latitud:position.latitud,longitud:position.longitud,registradaAt:position.registradaAt};
+      if(recent()){if(marker)marker.setLatLng([origin.latitud,origin.longitud]);else marker=L.circleMarker([origin.latitud,origin.longitud],{radius:8,color:'#fff',weight:3,fillColor:'#2563a3',fillOpacity:1}).addTo(map).bindTooltip(node('span','Tu última ubicación GPS'));}
+      void route();
+    },
     dispose(){if(disposed)return;disposed=true;sequence++;clearInterval(timer);origin=null;end=null;map.remove();root.replaceChildren();},
   };
   void getPosition();return handle;

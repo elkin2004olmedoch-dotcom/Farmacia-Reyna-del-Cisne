@@ -19,6 +19,7 @@ model Producto {
   imagen      String
   alt         String
   activo      Boolean  @default(true)
+  soloConsulta Boolean @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   descuentoPorcentaje Int @default(0)

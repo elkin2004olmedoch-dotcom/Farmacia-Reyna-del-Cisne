@@ -1,16 +1,33 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{execFileSync}=require('node:child_process'),{randomBytes}=require('node:crypto');
-test('una promoción SQLite anterior a 016 se conserva y admite edición por su versión real',async t=>{
+test('016 y 017 conservan productos históricos y la edición versionada de promociones',async t=>{
  const root=path.resolve(__dirname,'../..'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-migracion-productos-')),schema=path.join(directory,'schema.prisma'),source=path.join(root,'server/prisma'),url='file:'+path.join(directory,'legacy.db').replaceAll('\\','/'),env={};
  for(const key of ['SystemRoot','PATH','Path','TEMP','TMP','USERPROFILE','LOCALAPPDATA','NODE_OPTIONS'])if(process.env[key])env[key]=process.env[key];Object.assign(env,{NODE_ENV:'test',DATABASE_URL:url,JWT_SECRET:randomBytes(48).toString('hex'),CORS_ORIGIN:'http://localhost:3000',IMAGE_STORAGE:'local',EMAIL_VERIFICATION_ENABLED:'false',CUSTOMER_REGISTRATION_REQUIRE_EMAIL:'false'});
- fs.copyFileSync(path.join(source,'schema.prisma'),schema);fs.cpSync(path.join(source,'migrations'),path.join(directory,'migrations'),{recursive:true,filter:file=>!file.includes('202611100016_product_api_sync')});
+ fs.copyFileSync(path.join(source,'schema.prisma'),schema);fs.cpSync(path.join(source,'migrations'),path.join(directory,'migrations'),{recursive:true,filter:file=>!file.includes('202611100016_product_api_sync')&&!file.includes('202611100017_catalog_sections')});
  const migrate=()=>execFileSync(process.execPath,[path.join(root,'node_modules/prisma/build/index.js'),'migrate','deploy','--schema',schema],{env,stdio:'pipe',windowsHide:true});migrate();
  const {PrismaClient}=require('@prisma/client'),legacy=new PrismaClient({datasources:{db:{url}}});let db;t.after(async()=>{await legacy.$disconnect();if(db)await db.$disconnect();});
  await legacy.$executeRaw`INSERT INTO "Usuario" ("id","nombre","email","telefono","passwordHash","role") VALUES ('legacy-admin','Administrador','legacy@example.ec','+593991234567','synthetic','admin')`;
+ await legacy.$executeRaw`INSERT INTO "Usuario" ("id","nombre","email","telefono","passwordHash","role") VALUES ('legacy-user','Cliente histórico','legacy-user@example.ec','+593991234567','synthetic','user')`;
  await legacy.$executeRaw`INSERT INTO "Producto" ("id","nombre","precio","stock","categoria","descripcion","imagen","alt","updatedAt") VALUES ('legacy-product','Producto histórico',5,10,'cuidado','Descripción histórica','assets/images/producto-vitaminas.jpg','Envase',0)`;
+ await legacy.$executeRaw`INSERT INTO "Producto" ("id","nombre","precio","stock","categoria","descripcion","imagen","alt","updatedAt") VALUES ('legacy-zero','Precio histórico pendiente',0,2,'cuidado','Descripción histórica','assets/images/producto-vitaminas.jpg','Envase',0)`;
  await legacy.$executeRaw`INSERT INTO "Promocion" ("id","titulo","descripcion","etiqueta","productoId") VALUES ('legacy-promo','Campaña histórica','Descripción histórica','Cuidado','legacy-product')`;
- fs.cpSync(path.join(source,'migrations/202611100016_product_api_sync'),path.join(directory,'migrations/202611100016_product_api_sync'),{recursive:true});migrate();Object.assign(process.env,env);
+ for(const name of ['202611100016_product_api_sync','202611100017_catalog_sections'])fs.cpSync(path.join(source,'migrations',name),path.join(directory,'migrations',name),{recursive:true});
+ migrate();Object.assign(process.env,env);
  const request=require('supertest')(require('../../server/app.cjs')()),jwt=require('jsonwebtoken');db=require('../../server/models/db.cjs');
  const headers={Authorization:'Bearer '+jwt.sign({version:0},env.JWT_SECRET,{subject:'legacy-admin',issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'})};
+ const historical=(await request.get('/api/productos/legacy-product').expect(200)).body.data;
+ assert.equal(historical.soloConsulta,false);assert.equal(Number(historical.precio),5);assert.equal(historical.stock,10);
+ const zero=(await request.get('/api/productos/legacy-zero').expect(200)).body.data;assert.equal(Number(zero.precio),0);assert.equal(zero.soloConsulta,false);
+ const edited=(await request.patch('/api/productos/legacy-zero').set(headers).send({advertencias:'Referencia histórica pendiente de precio.',categoria:'ortopedia',esperadoUpdatedAt:zero.updatedAt}).expect(200)).body.data;
+ assert.equal(edited.categoria,'ortopedia');assert.equal(edited.advertencias,'Referencia histórica pendiente de precio.');assert.equal(Number(edited.precio),0);assert.equal(edited.stock,2);
+ const unchanged=(await request.patch('/api/productos/legacy-zero').set(headers).send({precio:0,esperadoUpdatedAt:edited.updatedAt}).expect(200)).body.data;
+ const fullBody={nombre:unchanged.nombre,precio:0,stock:2,categoria:'ortopedia',descripcion:unchanged.descripcion,imagen:unchanged.imagen,alt:unchanged.alt,advertencias:'Advertencias editadas desde el formulario completo.',esperadoUpdatedAt:unchanged.updatedAt};
+ const full=(await request.put('/api/productos/legacy-zero').set(headers).send(fullBody).expect(200)).body.data;
+ assert.equal(Number(full.precio),0);assert.equal(full.stock,2);assert.equal(full.soloConsulta,false);assert.equal(full.advertencias,fullBody.advertencias);
+ await request.patch('/api/productos/legacy-product').set(headers).send({precio:0,esperadoUpdatedAt:historical.updatedAt}).expect(422);
+ await legacy.producto.update({where:{id:'legacy-zero'},data:{nombre:'Precio histórico conservado'}});
+ const customerHeaders={Authorization:'Bearer '+jwt.sign({version:0},env.JWT_SECRET,{subject:'legacy-user',issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'})};
+ const blocked=await request.post('/api/pedidos').set(customerHeaders).send({carrito:[{productoId:'legacy-zero',cantidad:1}],comprador:{name:'Cliente histórico',email:'legacy-user@example.ec',phone:'0991234567',documentType:'cedula',document:'0102030400',delivery:'pickup'},claveSolicitud:require('node:crypto').randomUUID()}).expect(409);
+ assert.equal(blocked.body.error.code,'COMMERCIAL_PRICE_REQUIRED');assert.equal(await db.pedido.count(),0);
  const before=(await request.get('/api/admin/promociones/legacy-promo').set(headers).expect(200)).body.data;assert.equal(before.titulo,'Campaña histórica');
- const changed=(await request.patch('/api/promociones/legacy-promo').set(headers).send({titulo:'Campaña actualizada',esperadoUpdatedAt:before.updatedAt}).expect(200)).body.data;assert.equal(changed.titulo,'Campaña actualizada');assert.equal(await db.producto.count(),1);assert.equal(await db.promocion.count(),1);
+ const changed=(await request.patch('/api/promociones/legacy-promo').set(headers).send({titulo:'Campaña actualizada',esperadoUpdatedAt:before.updatedAt}).expect(200)).body.data;assert.equal(changed.titulo,'Campaña actualizada');assert.equal(await db.producto.count(),2);assert.equal(await db.promocion.count(),1);
 });
