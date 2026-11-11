@@ -1,4 +1,4 @@
-const {test,expect}=require('./browser-fixture.cjs'),AxeBuilder=require('@axe-core/playwright').default;
+const {test,expect,settleNetwork}=require('./browser-fixture.cjs'),AxeBuilder=require('@axe-core/playwright').default;
 test.use({serviceWorkers:'block'});
 async function setup(page,{destination=true,routeError=false,denied=false,versionConflicts=0,routeStatus=503,routeCode='ROUTE_UNAVAILABLE'}={}){
  const user={id:'courier-map',nombre:'Repartidor Ruta',email:'ruta@example.ec',telefono:'0991234567',role:'repartidor',activo:true};
@@ -16,7 +16,7 @@ async function setup(page,{destination=true,routeError=false,denied=false,versio
   if(routeError)return route.fulfill({status:routeStatus,json:{ok:false,error:{code:routeCode,message:'No se pudo calcular una ruta por las calles.'}}});
   return route.fulfill({json:{ok:true,data:{destino:{latitud:.125,longitud:-79.25,fuente:destination?'cliente':'direccion'},geometry:{type:'LineString',coordinates:[[body.longitud,body.latitud],[-79.26,.128],[-79.25,.125]]},distance:1800,duration:300}}});
  });
- await page.goto('/entregas.html');await expect(page.getByRole('button',{name:'Iniciar recorrido',exact:true})).toBeVisible();return {routes,states};
+ await page.goto('/entregas.html');await expect(page.getByRole('button',{name:'Iniciar recorrido',exact:true})).toBeVisible();return {routes,states,item};
 }
 const capture=async page=>{await expect.poll(()=>page.evaluate(()=>typeof window.gpsFixture.callback)).toBe('function');await page.evaluate(()=>window.gpsFixture.callback({coords:{latitude:.12,longitude:-79.24,accuracy:8},timestamp:Date.now()}));};
 
@@ -35,6 +35,28 @@ test('cerrar durante la espera del reintento impide otra solicitud y no recupera
 test('una denegación de permiso no reintenta ni conserva el mapa',async({page})=>{
  const {routes}=await setup(page,{routeError:true,routeStatus:403,routeCode:'FORBIDDEN'});await page.getByRole('button',{name:'Ver ruta en la app'}).click();await expect(page.locator('#courier-route-map')).toContainText('Ya no tienes acceso');await page.clock.fastForward(35000);expect(routes).toHaveLength(1);await expect(page.locator('.courier-route-map')).toHaveCount(0);
 });
+
+test('una lista de entregas anterior al GPS confirmado conserva el origen más reciente del mapa',async({page})=>{
+ const {routes,item}=await setup(page);
+ await page.getByRole('button',{name:'Iniciar recorrido',exact:true}).click();
+ const first=page.waitForResponse(response=>response.request().method()==='PUT'&&new URL(response.url()).pathname.endsWith('/ubicacion'));
+ await capture(page);expect((await first).status()).toBe(200);await settleNetwork(page);
+ await page.clock.fastForward(13000);await settleNetwork(page);await page.clock.pauseAt(await page.evaluate(()=>Date.now()+5000));await settleNetwork(page);
+ const previous=structuredClone(item);let release,requested;
+ const delayed=new Promise(resolve=>{release=resolve;}),held=new Promise(resolve=>{requested=resolve;});
+ const oldList=async route=>{requested();await delayed;await route.fulfill({json:{ok:true,data:{items:[previous],total:1,page:1,pageSize:20}}});};
+ await page.route('**/api/entregas?*',oldList);
+ try{
+  await page.locator('#deliveries-refresh').click();await held;
+  const updated=page.waitForResponse(response=>response.request().method()==='PUT'&&new URL(response.url()).pathname.endsWith('/ubicacion')&&response.request().postDataJSON().latitud===.121);
+  await page.evaluate(()=>window.gpsFixture.callback({coords:{latitude:.121,longitude:-79.241,accuracy:7},timestamp:Date.now()}));
+  expect((await updated).status()).toBe(200);await expect(page.locator('#delivery-gps-status')).toContainText('7 metros');
+  release();await settleNetwork(page);await page.clock.fastForward(30000);
+  await expect.poll(()=>routes.at(-1)?.latitud).toBe(.121);await expect.poll(()=>routes.at(-1)?.longitud).toBe(-79.241);
+ }finally{release();await page.unroute('**/api/entregas?*',oldList);}
+ await page.getByRole('button',{name:'Detener ubicación',exact:true}).click();
+ await expect(page.locator('.courier-route-status')).toContainText('Ubicación detenida');await expect(page.locator('.leaflet-overlay-pane path[stroke="#b51c36"]')).toHaveCount(0);
+});
 test('repartidor inicia, ve ruta trazada, actualiza su posición y cierra la entrega dentro de la app',async({page},testInfo)=>{
  const {routes,states}=await setup(page);
  await page.getByRole('button',{name:'Iniciar recorrido',exact:true}).focus();await page.keyboard.press('Enter');
@@ -48,7 +70,7 @@ test('repartidor inicia, ve ruta trazada, actualiza su posición y cierra la ent
  await expect.poll(()=>routes.length).toBeGreaterThan(1);expect(routes.at(-1).latitud).toBe(.121);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
  const audit=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();expect(audit.violations).toEqual([]);
- await page.locator('#courier-route-panel').screenshot({path:'.superpowers/sdd/2026-11-03-reparto/mapa-'+testInfo.project.name+'.png'});
+ await page.locator('#courier-route-panel').screenshot({path:testInfo.outputPath('mapa-'+testInfo.project.name+'.png')});
  await page.getByRole('button',{name:'Llegué al destino',exact:true}).click();await expect(page.locator('a[href^="tel:"]')).toBeVisible();
  await page.getByRole('button',{name:'Pedido entregado',exact:true}).click();await expect(page.locator('#confirm-dialog')).toBeVisible();await page.locator('#confirm-dialog [value=confirm]').click();
  await expect(page.locator('#courier-route-panel')).toBeHidden();await expect(page.locator('.courier-route-map')).toHaveCount(0);await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);expect(states.map(value=>value.estado)).toEqual(['en_camino','en_destino','entregada']);
