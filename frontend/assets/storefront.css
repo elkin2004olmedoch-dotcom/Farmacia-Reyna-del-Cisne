@@ -272,6 +272,22 @@ body:not(.admin-page):not(.admin-install-page) .ref-store-intro-copy .text-link{
 body:not(.admin-page):not(.admin-install-page) .ref-store-category{overflow:hidden;border:1px solid #dec7b9;border-bottom:4px solid var(--brand-dark);border-radius:14px;background:#f4eddf}
 body:not(.admin-page):not(.admin-install-page) .ref-store-category>span:not(.ref-store-category-arrow){display:block;padding:0 22px 6px}
 body:not(.admin-page):not(.admin-install-page) .ref-store-category .ref-store-category-arrow{right:12px;padding:0;color:var(--brand-dark)}
+body:not(.admin-page):not(.admin-install-page) .ref-store-categories .store-category-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category{padding-bottom:18px;background:#fffaf1}
+body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category-image{margin-bottom:16px}
+body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category img{height:160px;padding:18px;object-fit:contain;background:#fffdf8}
+body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category strong{font-size:23px;line-height:1.2}
+body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category small{line-height:1.6}
+body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category .ref-store-category-arrow{bottom:18px}
+@media(max-width:1000px){body:not(.admin-page):not(.admin-install-page) .ref-store-categories .store-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){
+  body:not(.admin-page):not(.admin-install-page) .ref-store-categories .store-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category img{height:120px;padding:14px}
+  body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category>span:not(.ref-store-category-arrow){padding:0 12px}
+  body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category strong{padding-right:0;font-size:19px;overflow-wrap:normal}
+  body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category small{font-size:11px}
+  body:not(.admin-page):not(.admin-install-page) .ref-store-categories .ref-store-category .ref-store-category-arrow{display:none}
+}
 body:not(.admin-page):not(.admin-install-page) .ref-store-offers{border-color:#d6b6ae;border-radius:18px;background:#f3ded7}
 body:not(.admin-page):not(.admin-install-page) .ref-store-help{border-radius:18px;background:#681e2a}
 body:not(.admin-page):not(.admin-install-page) :is(.purchase-panel,.purchase-summary,.payment-summary){border-color:#dfc6b6;border-top:4px solid var(--brand-dark);background:#fffaf1}

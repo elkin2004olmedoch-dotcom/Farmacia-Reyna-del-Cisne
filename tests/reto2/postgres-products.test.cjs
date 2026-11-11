@@ -11,6 +11,7 @@ test('PostgreSQL aislado conserva relaciones y comprueba PATCH, advertencias, re
  const config=require('../../server/config.cjs')(),request=require('supertest')(require('../../server/app.cjs')(config));db=require('../../server/models/db.cjs');
  const admin=await db.usuario.findFirst({where:{role:'admin'}}),jwt=require('jsonwebtoken'),headers={Authorization:'Bearer '+jwt.sign({version:admin.tokenVersion},config.secret,{subject:admin.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'})};
  const product=await db.producto.findFirst({where:{tipoProducto:'cuidado',activo:true}}),marker=await db.revisionCatalogo.findUnique({where:{id:'catalogo'}});
+ assert.equal(product.soloConsulta,false);
  const changed=(await request.patch('/api/productos/'+product.id).set(headers).send({advertencias:'Conservar según el envase.',esperadoUpdatedAt:product.updatedAt.toISOString()}).expect(200)).body.data;
  assert.equal(changed.stock,product.stock);assert.notEqual((await db.revisionCatalogo.findUnique({where:{id:'catalogo'}})).token,marker.token);
  await request.patch('/api/productos/'+product.id).set(headers).send({precio:3,esperadoUpdatedAt:product.updatedAt.toISOString()}).expect(409);
@@ -25,5 +26,24 @@ test('PostgreSQL aislado conserva relaciones y comprueba PATCH, advertencias, re
  await assert.rejects(db.$executeRaw`UPDATE "RegistroPendiente" SET "secretHash"='invalid' WHERE "usuarioId"=${admin.id}`);assert.ok(pending);
  const tables=await db.$queryRaw`SELECT relname,relrowsecurity FROM pg_class WHERE relname IN ('RegistroPendiente','RevisionCatalogo')`;assert.equal(tables.length,2);assert.ok(tables.every(row=>row.relrowsecurity));
  for(const role of ['anon','authenticated']){await db.$executeRawUnsafe('GRANT USAGE ON SCHEMA public TO "'+role+'"');await db.$executeRawUnsafe('GRANT SELECT ON "RegistroPendiente","RevisionCatalogo" TO "'+role+'"');await db.$transaction(async tx=>{await tx.$executeRawUnsafe('SET LOCAL ROLE "'+role+'"');assert.equal((await tx.$queryRaw`SELECT * FROM "RegistroPendiente"`).length,0);assert.equal((await tx.$queryRaw`SELECT * FROM "RevisionCatalogo"`).length,0);});}
+ const consultation={nombre:'Consulta PostgreSQL',precio:0,stock:0,categoria:'medicamentos',tipoProducto:'medicamento',soloConsulta:true,descripcion:'Referencia sintética para consulta',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase sintético'};
+ const reference=(await request.post('/api/productos').set(headers).send(consultation).expect(201)).body.data;
+ assert.equal(reference.soloConsulta,true);assert.equal(reference.registroSanitario,null);
+ const categories=(await request.get('/api/productos/filtros').expect(200)).body.data.categorias;
+ assert.equal(categories.length,16);assert.equal(categories.find(section=>section.id==='medicamentos').total,await db.producto.count({where:{activo:true,categoria:'medicamentos'}}));
+ assert.equal((await request.get('/api/productos?categoria=medicamentos&q=Consulta').expect(200)).body.data.items[0].id,reference.id);
+ await assert.rejects(db.producto.update({where:{id:reference.id},data:{soloConsulta:false}}));
+ await request.patch('/api/productos/'+reference.id).set(headers).send({soloConsulta:false,precio:10,esperadoUpdatedAt:reference.updatedAt}).expect(422);
+ const activated=(await request.patch('/api/productos/'+reference.id).set(headers).send({soloConsulta:false,precio:10,stock:2,pvpMaximo:12,laboratorio:'Empresa sintética',presentacion:'Caja sintética',registroSanitario:'REGISTRO-SINTETICO',esperadoUpdatedAt:reference.updatedAt}).expect(200)).body.data;
+ assert.equal(activated.soloConsulta,false);
+ const current=await db.producto.findUnique({where:{id:reference.id}});
+ const versions=await Promise.all([true,false].map(soloConsulta=>request.patch('/api/productos/'+reference.id).set(headers).send({soloConsulta,esperadoUpdatedAt:current.updatedAt.toISOString()})));
+ assert.deepEqual(versions.map(result=>result.status).sort(),[200,409]);
+ const commercial=(await request.patch('/api/productos/'+reference.id).set(headers).send({soloConsulta:true,esperadoUpdatedAt:(await db.producto.findUnique({where:{id:reference.id}})).updatedAt.toISOString()}).expect(200)).body.data;
+ const priced=(await request.get('/api/productos?categoria=medicamentos&sort=high').expect(200)).body.data.items;assert.equal(priced.at(-1).id,commercial.id);
+ const customer=await db.usuario.create({data:{nombre:'Cliente PostgreSQL',email:randomUUID()+'@example.ec',telefono:'+593991234567',passwordHash:'synthetic'}}),customerHeaders={Authorization:'Bearer '+jwt.sign({version:0},config.secret,{subject:customer.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'})};
+ const beforeOrders=await db.pedido.count();
+ const blocked=await request.post('/api/pedidos').set(customerHeaders).send({carrito:[{productoId:reference.id,cantidad:1}],comprador:{name:'Cliente PostgreSQL',email:'cliente-pg@example.ec',phone:'0991234567',documentType:'cedula',document:'0102030400',delivery:'pickup'},claveSolicitud:randomUUID()}).expect(409);
+ assert.equal(blocked.body.error.code,'PRODUCT_CONSULTATION_ONLY');assert.equal(await db.pedido.count(),beforeOrders);assert.equal((await db.producto.findUnique({where:{id:reference.id}})).stock,2);
  t.diagnostic('Solo base sintética '+database);
 });

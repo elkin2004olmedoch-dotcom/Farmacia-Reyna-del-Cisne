@@ -37,10 +37,11 @@ test('productos muestra ID, nombre, categoría y PVP con contador y navegación 
   await page.goto('/admin.html?tabla=productos&page=2&registro='+data.items[0].id);
   await expect(page.locator('tr[data-companion-record="'+data.items[0].id+'"]').first()).toContainText(data.items[0].nombre);
   await page.goto('/admin.html?tabla=productos&page=999999');
-  await expect(page.locator('#admin-page-info')).toHaveText(`Página 2 de 2 · 21–${data.total} de ${data.total} registros`);
-  await expect(page).toHaveURL(/tabla=productos&page=2$/);
+  const lastPage=Math.max(1,Math.ceil(data.total/20));
+  await expect(page.locator('#admin-page-info')).toHaveText(`Página ${lastPage} de ${lastPage} · ${(lastPage-1)*20+1}–${data.total} de ${data.total} registros`);
+  await expect(page).toHaveURL(new RegExp('tabla=productos&page='+lastPage+'$'));
   await page.locator('#admin-prev').click();
-  await expect(page.locator('#admin-page-info')).toContainText('Página 1 de');
+  await expect(page.locator('#admin-page-info')).toContainText('Página '+(lastPage-1)+' de');
   for(const width of [320,768,1440]){
     await page.setViewportSize({width,height:1000});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

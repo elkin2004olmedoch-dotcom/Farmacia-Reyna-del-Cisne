@@ -109,11 +109,13 @@ test('un atlas lento permite mostrar la mascota de respaldo y después recuperar
 
 test('la imagen principal reserva espacio y prioriza su carga',async({page})=>{
   await page.goto('/');
+  const {sections}=require('../../frontend/models/catalog-sections.js');
+  const metadata=await require('sharp')(require('node:path').resolve(__dirname,'../../frontend',sections[0].imagen)).metadata();
   const image=page.locator('.ref-store-category img').first();
-  await expect(image).toHaveAttribute('src','assets/images/farmacia-8.jpg');
-  await expect(image).toHaveAttribute('width','900');await expect(image).toHaveAttribute('height','620');await expect(image).toHaveAttribute('fetchpriority','high');await expect(image).not.toHaveAttribute('loading','lazy');
-  await expect.poll(()=>image.evaluate(img=>img.complete && img.naturalWidth)).toBe(700);
-  expect(await image.evaluate(img=>img.naturalHeight)).toBe(467);
+  await expect(image).toHaveAttribute('src',sections[0].imagen);
+  await expect(image).toHaveAttribute('width','320');await expect(image).toHaveAttribute('height','240');await expect(image).toHaveAttribute('fetchpriority','high');await expect(image).not.toHaveAttribute('loading','lazy');
+  await expect.poll(()=>image.evaluate(img=>img.complete && img.naturalWidth)).toBe(metadata.width);
+  expect(await image.evaluate(img=>img.naturalHeight)).toBe(metadata.height);
 });
 
 test('la portada muestra productos mientras resuelve una sesión admin y mantiene la compra oculta',async({page},testInfo)=>{

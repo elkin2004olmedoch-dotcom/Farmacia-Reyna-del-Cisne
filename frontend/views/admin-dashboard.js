@@ -1,3 +1,4 @@
+import '../models/catalog-sections.js';
 import {escape,money} from './common.js';
 const paths={
   trend:'M3 17l6-6 4 4 8-10M15 5h6v6',
@@ -13,7 +14,7 @@ const icon=name=>`<svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"
 const count=value=>new Intl.NumberFormat('es-EC').format(value);
 const date=value=>new Intl.DateTimeFormat('es-EC',{dateStyle:'medium',timeStyle:'short',timeZone:'America/Guayaquil'}).format(new Date(value));
 const stateLabel=value=>({pendiente:'Pendiente',confirmado:'Confirmado',entregado:'Entregado',cancelado:'Cancelado'}[value] || value);
-const categoryLabel=value=>({bienestar:'Bienestar',cuidado:'Cuidado personal',bebe:'Mamá y bebé'}[value] || value);
+const categoryLabel=value=>(globalThis.Farmacia.catalogSections.find(value)?.nombre || value);
 function metric(key,label,value,detail,section,tone,symbol) {
   return `<a class="admin-metric" data-metric="${key}" href="admin.html?tabla=${section}"><div class="admin-metric-head"><span>${label}</span><span class="admin-metric-icon tone-${tone}">${icon(symbol)}</span></div><strong class="admin-metric-value">${value}</strong><small class="admin-metric-meta">${detail}</small></a>`;
 }

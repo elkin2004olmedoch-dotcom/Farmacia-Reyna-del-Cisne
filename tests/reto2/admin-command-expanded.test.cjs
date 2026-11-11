@@ -3,6 +3,16 @@ const assert=require('node:assert/strict');
 const parser=()=>import('../../frontend/controllers/admin-command.mjs');
 const products=[{id:'curitas',nombre:'Curitas clásicas',activo:true,updatedAt:'2026-10-01T12:00:00Z'}];
 
+test('Goti administra las nuevas secciones y el modo consulta sin exigir un precio comercial',async()=>{
+  const {interpretAdminCommand:p}=await parser();
+  const result=p('crea producto: nombre="Referencia real"; soloConsulta=true; categoria=ortopedia; tipoProducto=insumo; descripcion="Descripción verificada"; imagen="assets/images/gel.webp"; alt="Envase de la referencia"; ivaCategoria=general');
+  assert.equal(result.type,'create-product');assert.equal(result.values.soloConsulta,true);assert.equal(result.values.categoria,'ortopedia');
+  assert.equal(result.values.precio,0);assert.equal(result.values.stock,0);
+  const update=p('modifica producto "Curitas clásicas": soloConsulta=true; categoria=primeros-auxilios',products);
+  assert.equal(update.type,'update-product');assert.deepEqual(update.changes,{soloConsulta:true,categoria:'primeros-auxilios'});
+  assert.equal(p('Publica promoción de 20 % para "Curitas clásicas" hasta 2027-12-31',products.map(item=>({...item,soloConsulta:true}))).type,'needs-details');
+});
+
 test('navega a secciones y formularios sin cargar productos',async()=>{
   const {interpretAdminCommand:p}=await parser();
   assert.deepEqual(p('abre proveedores'),{type:'navigate',section:'proveedores'});

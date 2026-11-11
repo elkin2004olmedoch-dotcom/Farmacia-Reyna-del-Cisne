@@ -60,6 +60,7 @@ function runSetup({env = process.env, run = spawnSync, logger = console} = {}) {
     ['Aplicar migraciones PostgreSQL', ['node_modules/prisma/build/index.js', 'migrate', 'deploy', '--schema', schema]]
   ];
   if (productionEnv.SKIP_INITIAL_SEED !== 'true') steps.push(['Preparar catálogo y administrador', ['server/prisma/seed.cjs']]);
+  steps.push(['Incorporar referencias verificadas para consulta', ['scripts/sync-catalog.cjs']]);
   steps.push(['Generar frontend', ['scripts/build-frontend.cjs']]);
   for (const [label, args] of steps) {
     logger.info(label + '…');

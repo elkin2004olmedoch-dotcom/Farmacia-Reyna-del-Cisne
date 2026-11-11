@@ -9,6 +9,7 @@ body[data-page="catalog"] .catalog-heading h1 { margin-block:12px 18px; text-wra
 body[data-page="catalog"] .mvc-catalog { align-items:start; gap:32px; }
 body[data-page="catalog"] .mvc-filters { padding:20px; border:1px solid #dfcdb8; border-radius:10px; background:#fff3df; }
 body[data-page="catalog"] #catalog-filter-form { display:grid; gap:20px; min-width:0; }
+.product-consultation{display:block;color:var(--brand-dark)}
 body[data-page="catalog"] .catalog-filter:not([hidden]) { display:grid; gap:8px; min-width:0; }
 body[data-page="catalog"] .mvc-filters label { line-height:1.4; }
 body[data-page="catalog"] .mvc-filters :is(input,select) { min-width:0; background:#fffaf1; border-color:#af9585; font-size:13px; }
@@ -141,3 +142,5 @@ body:not(.admin-page) .featured-card.pharmacy-product-card .featured-image:focus
   #product-detail .detail-price strong { font-size:36px; }
   #product-detail .product-fulfillment > div { grid-template-columns:minmax(0,1fr); gap:2px; }
 }
+body:not(.admin-page) .featured-card.pharmacy-product-card .featured-bottom strong.product-consultation,
+#product-detail .detail-price strong.product-consultation{font-size:20px;line-height:1.4;letter-spacing:normal}

@@ -28,9 +28,9 @@ export function appendCompanionCards(target,summary,doc=document){
     const copy=doc.createElement('div');copy.className='companion-card-copy';
     const link=text('a',product.nombre);link.href='producto.html?id='+product.id;copy.append(link);
     if(product.presentacion)copy.append(text('p',product.presentacion));
-    const amount=price(product.precio);copy.append(text('p',amount===null?'Precio por confirmar':money(amount)+(historical?' al comprar':' por unidad')));
+    const amount=price(product.precio);copy.append(text('p',!historical&&product.soloConsulta?'Consultar precio y disponibilidad':amount===null?'Precio por confirmar':money(amount)+(historical?' al comprar':' por unidad')));
     if(product.cantidad)copy.append(text('p','Cantidad: '+product.cantidad));
-    if(!historical){copy.append(text('p',product.activo===false?'Ya no está disponible':!Number.isInteger(product.stock)?'Disponibilidad por confirmar':product.stock===0?'Agotado':product.cantidad>product.stock?'Stock insuficiente: '+product.stock+' unidades':product.stock+' unidades disponibles'));if(product.restricted)copy.append(text('p','Requiere atención farmacéutica'));}
+    if(!historical){if(!product.soloConsulta)copy.append(text('p',product.activo===false?'Ya no está disponible':!Number.isInteger(product.stock)?'Disponibilidad por confirmar':product.stock===0?'Agotado':product.cantidad>product.stock?'Stock insuficiente: '+product.stock+' unidades':product.stock+' unidades disponibles'));if(product.restricted)copy.append(text('p','Requiere atención farmacéutica'));}
     card.append(image,copy);return card;
   }
   for(const item of summary.items){

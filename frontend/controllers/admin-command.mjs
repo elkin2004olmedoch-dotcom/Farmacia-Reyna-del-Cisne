@@ -1,3 +1,4 @@
+import '../models/catalog-sections.js';
 function normalize(value){return String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').trim();}
 const needsDetails=message=>({type:'needs-details',message});
 const sections={dashboard:'dashboard',resumen:'dashboard',productos:'productos',producto:'productos',promociones:'promociones',promocion:'promociones',proveedores:'proveedores',proveedor:'proveedores',lotes:'lotes',lote:'lotes',inventario:'movimientos',movimientos:'movimientos',pedidos:'pedidos',usuarios:'usuarios',iva:'fiscal',fiscal:'fiscal',facturacion:'facturacion',entregas:'entregas',zonas:'entregas',repartidores:'entregas'};
@@ -13,7 +14,7 @@ function findProduct(text,products){
   if(matches.length!==1)return needsDetails(matches.length?'Veo más de un producto en la orden. Escribe el nombre exacto de uno solo.':'No encuentro ese nombre exacto en el catálogo. Copia el nombre tal como aparece en Productos.');
   return {product:matches[0]};
 }
-const productFields={nombre:'text',precio:'money',stock:'integer',categoria:['bienestar','cuidado','bebe'],descripcion:'text',imagen:'text',alt:'text',descuentoPorcentaje:'percent',ivaCategoria:['general','cero'],fundamentoIva:'text',tipoProducto:['cuidado','medicamento','insumo','suplemento'],codigoInterno:'text',codigoBarras:'text',laboratorio:'text',principioActivo:'text',concentracion:'text',presentacion:'text',registroSanitario:'text',requiereReceta:'boolean',controlado:'boolean',biologico:'boolean',cadenaFrio:'boolean',stockMinimo:'integer',pvpMaximo:'money'};
+const productFields={nombre:'text',precio:'money',stock:'integer',categoria:globalThis.Farmacia.catalogSections.ids,soloConsulta:'boolean',descripcion:'text',imagen:'text',alt:'text',descuentoPorcentaje:'percent',ivaCategoria:['general','cero'],fundamentoIva:'text',tipoProducto:['cuidado','medicamento','insumo','suplemento'],codigoInterno:'text',codigoBarras:'text',laboratorio:'text',principioActivo:'text',concentracion:'text',presentacion:'text',registroSanitario:'text',requiereReceta:'boolean',controlado:'boolean',biologico:'boolean',cadenaFrio:'boolean',stockMinimo:'integer',pvpMaximo:'money'};
 const schemas={producto:productFields,proveedor:{nombre:'text',ruc:'text',email:'text',telefono:'text',direccion:'text',activo:'boolean'},lote:{producto:'text',numero:'text',vencimiento:'day',cantidad:'positive',costoUnitario:'money',proveedorId:'id'},inventario:{producto:'text',tipo:['entrada','salida'],cantidad:'positive',motivo:'text',loteId:'id'},zona:{nombre:'text',provincia:'text',canton:'text',tarifaCentavos:'integer',ivaCategoria:['general','cero'],fundamentoIva:'text',activa:'boolean'}};
 // Grammar: verbo entidad: campo=valor; campo="texto". Only these fields exist.
 function readFields(source,schema){
@@ -52,7 +53,8 @@ function structuredCommand(original,products){
     return {type:'update-product',product:found.product,changes:values};
   }
   const required={producto:['nombre','precio','stock','categoria','tipoProducto','descripcion','imagen','alt','ivaCategoria'],proveedor:['nombre','ruc','email','telefono','direccion','activo'],lote:['producto','numero','vencimiento','cantidad','costoUnitario'],inventario:['producto','tipo','cantidad','motivo'],zona:['nombre','provincia','canton','tarifaCentavos','ivaCategoria','activa']}[entity];
-  if(entity==='producto'&&values.tipoProducto==='medicamento')required.push('pvpMaximo','laboratorio','presentacion','registroSanitario','requiereReceta','controlado','biologico','cadenaFrio');
+  if(entity==='producto'&&values.soloConsulta){values.precio??=0;values.stock??=0;}
+  if(entity==='producto'&&!values.soloConsulta&&values.tipoProducto==='medicamento')required.push('pvpMaximo','laboratorio','presentacion','registroSanitario','requiereReceta','controlado','biologico','cadenaFrio');
   if(['producto','zona'].includes(entity)&&values.ivaCategoria==='cero')required.push('fundamentoIva');
   const section={producto:'productos',proveedor:'proveedores',lote:'lotes',inventario:'movimientos',zona:'entregas'}[entity],missing=required.filter(key=>values[key]===undefined);
   if(['lote','inventario'].includes(entity)&&values.producto!==undefined){
@@ -90,6 +92,7 @@ export function interpretAdminCommand(text,products){
   }
   if(/^(?:pon|poner|publica|publicar|activa|activar|crea|crear|sube|subir)\b/.test(value)&&/\b(?:promocion|promo|descuento|oferta)\b/.test(value)){
     const found=findProduct(original,products);if(!found.product)return found;
+    if(found.product.soloConsulta)return needsDetails('Este producto está publicado solo para consulta. Registra sus datos comerciales y activa la venta antes de preparar promociones.');
     const percentageMatch=value.match(/(?:^|\s)(\d{1,3})\s*%/),until=value.match(/\bhasta(?:\s+el)?\s+(\d{4}-\d{2}-\d{2})\b/);
     if(!percentageMatch||Number(percentageMatch[1])<1||Number(percentageMatch[1])>85)return needsDetails('Dime el porcentaje de descuento entero, entre 1 % y 85 %.');
     if(!until||!realDay(until[1])||until[1]<ecuadorCommandDay(Date.now()))return needsDetails('Dime una fecha final real de hoy o futura en formato AAAA-MM-DD (hora de Ecuador).');

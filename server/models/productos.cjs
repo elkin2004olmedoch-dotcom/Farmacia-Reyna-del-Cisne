@@ -5,6 +5,7 @@ const {discountWhere,effectivePrice,priceLots}=require('./prices.cjs');
 const fiscal=require('./fiscal.cjs');
 const {trackedStock,serializable}=require('./inventario.cjs');
 const {allowsPromotion}=require('../../frontend/models/pharmacy-policy.js');
+const {sections}=require('../../frontend/models/catalog-sections.js');
 const search=require('./catalog-search.cjs');
 const recommended=[{createdAt:'asc'},{id:'asc'}];
 async function publicProducts(ids,now,tax){
@@ -13,9 +14,10 @@ async function publicProducts(ids,now,tax){
   const byId=new Map(products.map(product=>[product.id,effectivePrice(product,product.promociones,now,tax.tarifaGeneral)]));
   return ids.map(id=>byId.get(id)).filter(Boolean);
 }
-function validatePvp(product) {
-  if(!allowsPromotion(product) && Number(product.descuentoPorcentaje)>0)throw new AppError(422,'PHARMACY_PROMOTION_RESTRICTED','Los productos bajo receta, control especial o biológicos no admiten publicidad ni descuentos promocionales.');
-  if(product.tipoProducto==='medicamento' && (!product.pvpMaximo || !product.registroSanitario || !product.laboratorio || !product.presentacion))throw new AppError(422,'MEDICATION_METADATA','El medicamento requiere PVP impreso, registro sanitario, laboratorio y presentación.');
+function validatePvp(product,requireSalePrice=true) {
+  if(!allowsPromotion(product) && Number(product.descuentoPorcentaje)>0)throw new AppError(422,'PHARMACY_PROMOTION_RESTRICTED','Este producto no admite publicidad ni descuentos promocionales en su estado actual.');
+  if(requireSalePrice && !product.soloConsulta && Number(product.precio)<=0)throw new AppError(422,'COMMERCIAL_PRICE_REQUIRED','Registra un precio mayor que cero antes de habilitar la venta.');
+  if(!product.soloConsulta && product.tipoProducto==='medicamento' && (!product.pvpMaximo || !product.registroSanitario || !product.laboratorio || !product.presentacion))throw new AppError(422,'MEDICATION_METADATA','El medicamento requiere PVP impreso, registro sanitario, laboratorio y presentación.');
   if(product.pvpMaximo!=null && new Prisma.Decimal(product.precio).gt(product.pvpMaximo))throw new AppError(422,'PRICE_EXCEEDS_PVP','El precio no puede superar el PVP máximo impreso.');
 }
 module.exports = {
@@ -36,12 +38,17 @@ module.exports = {
     }else{
       // Only price inputs are materialized for matches; full public DTOs and lots
       // are loaded once for the selected page. Price policy remains centralized.
-      const rows=await db.$queryRaw`SELECT "id","precio","stock","activo","descuentoPorcentaje","requiereReceta","controlado","biologico","ivaCategoria" FROM "Producto" WHERE ${where} ORDER BY "createdAt" ASC,"id" ASC`;
+      const rows=await db.$queryRaw`SELECT "id","precio","stock","activo","soloConsulta","descuentoPorcentaje","requiereReceta","controlado","biologico","ivaCategoria" FROM "Producto" WHERE ${where} ORDER BY "createdAt" ASC,"id" ASC`;
       const promotions=rows.length?await db.promocion.findMany({where:discountWhere(now),select:{id:true,productoId:true,activa:true,vistaPrevia:true,descuentoPorcentaje:true,orden:true,inicio:true,fin:true}}):[];
       const campaigns=new Map();
       for(const promotion of promotions){if(!campaigns.has(promotion.productoId))campaigns.set(promotion.productoId,[]);campaigns.get(promotion.productoId).push(promotion);}
-      const prices=rows.map((row,index)=>({id:row.id,index,price:Number(effectivePrice(row,campaigns.get(row.id) || [],now,tax.tarifaGeneral).precio)}));
-      prices.sort((a,b)=>(sort==='low'?a.price-b.price:b.price-a.price) || a.index-b.index);
+      const prices=rows.map((row,index)=>({id:row.id,index,soloConsulta:Boolean(row.soloConsulta),price:Number(effectivePrice(row,campaigns.get(row.id) || [],now,tax.tarifaGeneral).precio)}));
+      prices.sort((a,b)=>{
+        const consultationOrder=Number(a.soloConsulta)-Number(b.soloConsulta);
+        if(consultationOrder)return consultationOrder;
+        if(a.soloConsulta)return a.index-b.index;
+        return (sort==='low'?a.price-b.price:b.price-a.price) || a.index-b.index;
+      });
       total=prices.length;ids=prices.slice((page-1)*pageSize,page*pageSize).map(row=>row.id);
     }
     return {items:await publicProducts(ids,now,tax),total,page,pageSize};
@@ -62,9 +69,10 @@ module.exports = {
     return {items:await publicProducts(rows.map(row=>row.id),now,tax),aproximadas};
   },
   async filters(){
-    const [labs,presentations]=await db.$transaction([db.producto.groupBy({by:['laboratorio'],where:{activo:true,laboratorio:{not:null}}}),db.producto.groupBy({by:['presentacion'],where:{activo:true,presentacion:{not:null}}})]);
+    const [labs,presentations,categories]=await db.$transaction([db.producto.groupBy({by:['laboratorio'],where:{activo:true,laboratorio:{not:null}}}),db.producto.groupBy({by:['presentacion'],where:{activo:true,presentacion:{not:null}}}),db.producto.groupBy({by:['categoria'],where:{activo:true},_count:{_all:true}})]);
     const values=(rows,field)=>[...new Set(rows.map(row=>row[field].trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
-    return {laboratorios:values(labs,'laboratorio'),presentaciones:values(presentations,'presentacion')};
+    const counts=new Map(categories.map(row=>[row.categoria,row._count._all]));
+    return {laboratorios:values(labs,'laboratorio'),presentaciones:values(presentations,'presentacion'),categorias:sections.map(section=>({...section,total:counts.get(section.id)||0}))};
   },
   async find(id) {const now=new Date();const [product,tax]=await Promise.all([db.producto.findFirst({where:{id,activo:true},include:{lotes:priceLots(now),promociones:{where:discountWhere(now)}}}),fiscal.current(db,now)]);return product?effectivePrice(product,product.promociones,now,tax.tarifaGeneral):null;},
   async create(data,actorId){validatePvp(data);return db.$transaction(async tx=>{const product=await tx.producto.create({data});if(product.stock>0)await tx.movimientoInventario.create({data:{productoId:product.id,actorId,tipo:'entrada',cantidad:product.stock,motivo:'Stock inicial registrado en el catálogo'}});return product;},serializable);},
@@ -74,7 +82,7 @@ module.exports = {
       if(!current)throw new AppError(404,'NOT_FOUND','El producto no está disponible.');
       const merged={...current,...data};
       if(merged.stock<trackedStock(current))throw new AppError(409,'TRACKED_STOCK','El stock no puede bajar de las unidades registradas por lote. Usa un ajuste de inventario.');
-      validatePvp(merged);
+      validatePvp(merged,current.soloConsulta || Number(merged.precio)!==Number(current.precio));
       if(merged.ivaCategoria==='cero' && (!merged.fundamentoIva || merged.fundamentoIva.trim().length<8))throw new AppError(422,'IVA_JUSTIFICATION','Registra el fundamento legal de la tarifa de IVA 0 %.');
       const updatedAt=new Date(Math.max(Date.now(),current.updatedAt.getTime()+1));
       const updated=await tx.producto.updateMany({where:{id,activo:true,...(expectedUpdatedAt?{updatedAt:new Date(expectedUpdatedAt)}:{updatedAt:current.updatedAt})},data:{...data,updatedAt}});

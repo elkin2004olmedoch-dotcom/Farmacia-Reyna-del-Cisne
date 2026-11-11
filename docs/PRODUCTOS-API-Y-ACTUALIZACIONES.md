@@ -53,6 +53,20 @@ El panel visible comprueba cada dos segundos POST `/api/auth/registro-pendiente`
 
 El formulario abandona la comprobación al cerrarse y evita consultas simultáneas. Recargar la página pierde el marcador en memoria y permite continuar con el inicio de sesión habitual. El enlace de correo mantiene su confirmación explícita y uso único.
 
+## Secciones y referencias para consulta
+
+El registro compartido de `frontend/models/catalog-sections.js` define las 16 secciones y conserva los códigos `bienestar`, `cuidado` y `bebe`. El recurso `GET /api/productos/filtros` añade `categorias` con identificador, nombre, descripción, imagen y total de referencias activas. `GET /api/productos?categoria=<identificador>` combina la sección con búsqueda, laboratorio, presentación, orden y paginación. Los totales incluyen las fichas para consulta.
+
+La migración `202611100017_catalog_sections` añade `Producto.soloConsulta` con valor predeterminado `false` en ambos motores. Las 48 referencias nuevas se incorporan con `soloConsulta=true` y valores técnicos cero de precio y stock. La tienda muestra **Consultar precio y disponibilidad**. El carrito, Goti, favoritos, comparación y recompra respetan el estado. La creación de pedidos devuelve `409 PRODUCT_CONSULTATION_ONLY` antes de reservar existencias o registrar un pago. Las campañas y los avisos de stock bajo aplican sus filtros correspondientes.
+
+Para habilitar una referencia, administración registra precio positivo y existencias, completa los datos farmacéuticos exigidos por el tipo de producto y desactiva **Solo consulta**. Las restricciones de receta, control, biológicos y conservación se comprueban por separado. La edición mantiene el control de versión. Un producto histórico con precio cero conserva sus datos y permite actualizar campos descriptivos. Su compra continúa sujeta a un precio comercial válido.
+
+`data/catalogo-ampliado.json` contiene las referencias y sus reclasificaciones iniciales. `data/fuentes-catalogo-ampliado.json` documenta las fuentes, las fotografías y sus hashes. Los medicamentos seleccionados incluyen registro, principio activo, concentración y referencia al listado ecuatoriano de venta libre. Las presentaciones regionales, el envase anterior de TENA y las diferencias de referencia de FUTURO se identifican en el manifiesto. [Listado OTC de ARCSA](https://www.controlsanitario.gob.ec/wp-content/plugins/download-monitor/download.php?force=1&id=15468).
+
+`scripts/sync-catalog.cjs` aplica la ampliación una sola vez mediante el marcador `catalogo-secciones-v1`, dentro de una transacción serializable. Incorpora identificadores nuevos y reclasifica únicamente registros cuyo nombre y categoría coinciden con los antecedentes documentados, con versión monotónica. Los precios y cantidades existentes se conservan. Los reintentos recuperan la operación completa y las ediciones posteriores conservan su prioridad. La carga espera el marcador del catálogo inicial cuando la base está pendiente de importar.
+
+`npm run setup` y `npm run setup:production` ejecutan esa sincronización después de las migraciones. El flujo de producción conserva `SKIP_INITIAL_SEED=true` para la base existente. Las pruebas verifican la incorporación de 48 referencias sobre 18 iniciales, repetición, concurrencia, reversión, activación y preservación de cambios en SQLite y PostgreSQL temporales.
+
 ## Verificación reproducible
 
 Las suites utilizan bases temporales y datos sintéticos. Se añadieron regresiones para PATCH, permisos, CSRF, versiones concurrentes, fechas omitidas, advertencias, migración histórica, IVA vigente, importación, restauración, continuación de registro y actualización visible entre sesiones independientes.

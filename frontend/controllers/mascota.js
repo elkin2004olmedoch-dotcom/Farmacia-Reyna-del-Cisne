@@ -58,7 +58,7 @@ export async function mascotaController({administration=false,courier=false,comm
   let lastCartCount=cartCount();
   const quickQuestions={
     home:[['¿Qué productos tienen?','productos'],['¿Cómo hago mi pedido?','carrito'],['¿Dónde queda la farmacia?','ubicacion']],
-    catalog:[['Buscar un producto','productos'],['Ver cuidado personal','categoria:cuidado'],['Ver mamá y bebé','categoria:bebe'],['Comparar productos','comparar']],
+    catalog:[['Buscar un producto','productos'],['Explorar secciones','secciones'],['Comparar productos','comparar']],
     product:[['¿Qué información tiene este producto?','detalle'],['¿Cómo agrego al carrito?','agregar'],['¿Puedo comparar alternativas?','comparar']],
     promotions:[['¿Cómo aplican los descuentos?','promociones'],['Ver productos en oferta','productos'],['Consultar disponibilidad','whatsapp']],
     compare:[['¿Qué debo comparar?','comparar'],['Buscar otro producto','productos'],['Revisar mi carrito','carrito']],
@@ -85,6 +85,7 @@ export async function mascotaController({administration=false,courier=false,comm
     for(const [label,intent] of options){const button=document.createElement('button');button.type='button';button.setAttribute('data-quick-question',intent);button.textContent=label;button.addEventListener('click',()=>runQuickQuestion(intent));nav.append(button);}
   }
   function runQuickQuestion(intent){
+    if(intent==='secciones'){location.href='index.html#servicios';return;}
     if(intent.startsWith('categoria:')){location.href=`catalogo.html?category=${encodeURIComponent(intent.split(':')[1])}`;return;}
     if(intent==='agregar'){const target=document.querySelector('#detail-add-button, #detail-add-form, [data-add]');target?.scrollIntoView({behavior:'smooth',block:'center'});target?.focus();}
     if(intent==='carrito'){const target=document.querySelector('.shop-cart');target?.setAttribute('aria-label','Abrir mi carrito');}
@@ -152,7 +153,9 @@ export async function mascotaController({administration=false,courier=false,comm
     if(/completo mi pedido|pedido/.test(normalized)&&context==='checkout')return{state:'review',text:'Primero revisa las cantidades del carrito y pulsa «Continuar» para completar tus datos y coordinar el pedido con la farmacia.',actions:[{label:'Revisar productos y cantidades',href:'#checkout-items'},{label:'Continuar',href:'#checkout-next'},whatsapp]};
     if(/creo una cuenta|necesito una cuenta/.test(normalized)&&context==='account')return{state:'review',text:'La cuenta de esta tienda te permite conservar tus datos y revisar los pedidos vinculados. Pulsa «Crear cuenta» en esta pantalla para registrarte.',actions:[{label:'Crear cuenta',href:'#show-register'},{label:'Iniciar sesión',href:'#login-panel'}]};
     if(/revisar el estado|estado de mis pedidos/.test(normalized)&&context==='orders')return{state:'review',text:'En esta sección aparece el estado de tus pedidos cuando iniciaste sesión con la cuenta usada al comprarlos. Si necesitas coordinar la entrega, escribe a la farmacia.',actions:[{label:'Ver mis pedidos',href:'#orders-list'},whatsapp]};
-    if(/categor|cuidado personal|mama y bebe/.test(normalized)&&context==='catalog')return{state:'review',text:'Puedes filtrar el catálogo por categoría y ordenar por precio. También puedes buscar por nombre o descripción.',actions:[{label:'Ir a filtros',href:'#contenido'}]};
+    const section=globalThis.Farmacia.catalogSections.sections.find(item=>normalized.includes(item.nombre.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es')));
+    if(section)return{state:'review',text:section.descripcion,actions:[{label:'Ver '+section.nombre,href:'catalogo.html?category='+encodeURIComponent(section.id)}]};
+    if(/categor|secciones/.test(normalized)&&context==='catalog')return{state:'review',text:'Puedes filtrar el catálogo por categoría y ordenar por precio. También puedes buscar por nombre o descripción.',actions:[{label:'Ir a filtros',href:'#contenido'}]};
     if(/horario|abren|cierran|hora/.test(normalized))return{state:'review',text:'La farmacia atiende de lunes a sábado, de 08:00 a 19:00. Puedes confirmar la atención por WhatsApp antes de visitarnos.',actions:[{label:'Ver ubicación',href:'index.html#ubicacion'},whatsapp]};
     if(/whatsapp|telefono|contact|ubicacion|direccion/.test(normalized))return{state:'waving',text:'Puedes escribir a la farmacia al +593 97 927 5988. Allí te ayudarán a confirmar disponibilidad, pago y entrega.',actions:[whatsapp,{label:'Ver ubicación',href:'index.html#ubicacion'}]};
     if(/mis pedidos|estado.{0,15}pedido|seguir.{0,15}pedido/.test(normalized))return{state:'review',text:'En Mis pedidos puedes revisar tus compras y seguir su estado. Inicia sesión con la cuenta con la que confirmaste el pedido.',actions:[{label:'Ver mis pedidos',href:'pedidos.html'},{label:'Ir a mi cuenta',href:'cuenta.html'}]};

@@ -4,9 +4,9 @@ const {transaction}=require('./sesiones-moviles.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 const prices=require('./prices.cjs');
 const fiscal=require('./fiscal.cjs');
-const {requiresProfessionalReview}=require('../../frontend/models/pharmacy-policy.js');
+const {allowsPurchase}=require('../../frontend/models/pharmacy-policy.js');
 const addressSelect={id:true,alias:true,provincia:true,ciudad:true,direccion:true,codigoPostal:true,createdAt:true,updatedAt:true};
-const productSelect={id:true,nombre:true,precio:true,stock:true,imagen:true,alt:true,activo:true,requiereReceta:true,controlado:true,biologico:true,cadenaFrio:true,descuentoPorcentaje:true,ivaCategoria:true};
+const productSelect={id:true,nombre:true,precio:true,stock:true,imagen:true,alt:true,activo:true,soloConsulta:true,requiereReceta:true,controlado:true,biologico:true,cadenaFrio:true,descuentoPorcentaje:true,ivaCategoria:true};
 const productPricing=now=>({...productSelect,promociones:{where:prices.discountWhere(now),select:{id:true,activa:true,vistaPrevia:true,descuentoPorcentaje:true,orden:true,inicio:true,fin:true}},lotes:prices.priceLots(now)});
 const missing=()=>{throw new AppError(404,'NOT_FOUND','No se encontró el registro.');};
 module.exports={
@@ -35,11 +35,12 @@ module.exports={
   const now=new Date(),purchase=await db.pedido.findFirst({where:{id,userId},select:{id:true,detalles:{orderBy:{id:'asc'},select:{productoId:true,nombreProducto:true,cantidad:true,precioUnitario:true,producto:{select:productPricing(now)}}}}});if(!purchase)missing();
   const items=purchase.detalles.map(line=>{
    const product=prices.effectivePrice(line.producto,undefined,now),incidencias=[];
-   if(!product.activo)incidencias.push('RETIRADO');if(requiresProfessionalReview(product))incidencias.push('RESTRINGIDO');
-   if(product.stock<line.cantidad)incidencias.push('STOCK_INSUFICIENTE');
+   if(!product.activo)incidencias.push('RETIRADO');
+   if(product.soloConsulta)incidencias.push('SOLO_CONSULTA');else if(!allowsPurchase(product))incidencias.push('RESTRINGIDO');
+   if(!product.soloConsulta && product.stock<line.cantidad)incidencias.push('STOCK_INSUFICIENTE');
    const precioAnteriorCentavos=Math.round(Number(line.precioUnitario)*100),precioActualCentavos=Math.round(Number(product.precio)*100);
-   if(precioAnteriorCentavos!==precioActualCentavos)incidencias.push('PRECIO_CAMBIO');
-   return {productoId:line.productoId,nombre:product.nombre,cantidadSolicitada:line.cantidad,cantidadPermitida:incidencias.some(code=>['RETIRADO','RESTRINGIDO'].includes(code))?0:Math.min(line.cantidad,product.stock,99),stock:product.stock,precioAnteriorCentavos,precioActualCentavos,incidencias};
+   if(!product.soloConsulta && precioAnteriorCentavos!==precioActualCentavos)incidencias.push('PRECIO_CAMBIO');
+   return {productoId:line.productoId,nombre:product.nombre,soloConsulta:product.soloConsulta,cantidadSolicitada:line.cantidad,cantidadPermitida:incidencias.some(code=>['RETIRADO','RESTRINGIDO','SOLO_CONSULTA'].includes(code))?0:Math.min(line.cantidad,product.stock,99),stock:product.stock,precioAnteriorCentavos,precioActualCentavos,incidencias};
   });
   return {pedidoId:purchase.id,items};
  },

@@ -1,7 +1,7 @@
 import {catalog} from '../models/catalog.js';
 import {productImageUrl} from '../config.js';
+import {price} from '../views/common.js';
 
-const currency=new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'});
 
 // Manual selection keeps Enter useful for the full catalogue and avoids choosing a medicine for the user.
 export function predictiveSearch(input,{filters=()=>({})}={}) {
@@ -39,8 +39,8 @@ export function predictiveSearch(input,{filters=()=>({})}={}) {
         const copy=document.createElement('span');copy.className='predictive-copy';
         const name=document.createElement('strong');name.textContent=product.nombre;
         const meta=document.createElement('small');meta.textContent=[product.presentacion,product.laboratorio].filter(Boolean).join(' · ');
-        const price=document.createElement('span');price.className='predictive-price';price.textContent=currency.format(Number(product.precio));
-        copy.append(name,meta);link.append(image,copy,price);option.append(link);list.append(option);
+        const amount=document.createElement('span');amount.className='predictive-price';amount.textContent=price(product);
+        copy.append(name,meta);link.append(image,copy,amount);option.append(link);list.append(option);
       }
       panel.hidden=false;input.setAttribute('aria-expanded','true');status.textContent=(result.aproximadas?note.textContent+' ':'')+items.length+' sugerencias disponibles.';
     }catch(error){if(current===version && error.name!=='AbortError'){close();status.textContent='No se pudieron cargar sugerencias. Puedes buscar con Enter.';}}

@@ -2,6 +2,7 @@ const {body,param,query,validationResult,matchedData} = require('express-validat
 const {AppError} = require('./errors.cjs');
 const {validImagePathAsync:validImagePath}=require('./imagevalidation.cjs');
 const ec = require('../../frontend/models/ecuador.js');
+const {ids:sectionIds}=require('../../frontend/models/catalog-sections.js');
 async function validImage(value){if(!await validImagePath(value))throw new Error('Selecciona una imagen existente o una imagen subida desde el panel.');return true;}
 const plain = value => typeof value==='string' ? value.normalize('NFC').replace(/<[^>]*>/g,'').replace(/[<>\x00-\x1f]/g,'').trim() : value;
 const text = (field,min,max) => body(field).isString().bail().customSanitizer(plain).isLength({min,max});
@@ -29,15 +30,15 @@ const catalogScalars=(req,res,next)=>{
   if(Object.entries(req.query).some(([key,value])=>fields.includes(key.split('[')[0]) && (key.includes('[') || typeof value!=='string')))throw new AppError(422,'VALIDATION_ERROR','Usa un único valor de texto por filtro.');
   next();
 };
-const catalogFilters=[query('categoria').optional().isString().bail().isIn(['bienestar','cuidado','bebe']),...['laboratorio','presentacion'].map(field=>query(field).optional().isString().bail().customSanitizer(plain).isLength({max:120}))];
+const catalogFilters=[query('categoria').optional().isString().bail().isIn(sectionIds),...['laboratorio','presentacion'].map(field=>query(field).optional().isString().bail().customSanitizer(plain).isLength({max:120}))];
 const catalog=[catalogScalars,query('q').optional().isString().bail().customSanitizer(plain).isLength({max:100}),...catalogFilters,query('sort').optional().isString().bail().isIn(['recommended','low','high']),...pagination];
 const suggestions=[catalogScalars,query('q').isString().bail().customSanitizer(plain).isLength({min:2,max:100}),...catalogFilters,validated];
 const pharmacyFields=['descuentoPorcentaje','ivaCategoria','fundamentoIva','tipoProducto','codigoInterno','codigoBarras','laboratorio','principioActivo','concentracion','presentacion','registroSanitario','requiereReceta','controlado','biologico','cadenaFrio','stockMinimo','pvpMaximo'];
-const productFields=['nombre','precio','stock','categoria','descripcion','advertencias','imagen','alt',...pharmacyFields];
+const productFields=['nombre','precio','stock','categoria','descripcion','advertencias','imagen','alt','soloConsulta',...pharmacyFields];
 function nullableText(field,max,min=1){return body(field).optional().custom(value=>value===null || typeof value==='string').bail().customSanitizer(plain).custom(value=>value===null || value.length>=min && value.length<=max);}
 function validGtin(value){if(value===null)return true;if(typeof value!=='string' || !/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(value) || /^(\d)\1+$/.test(value))return false;const digits=[...value].reverse().map(Number);const sum=digits.slice(1).reduce((total,digit,index)=>total+digit*(index%2===0?3:1),0);return (10-sum%10)%10===digits[0];}
 const pharmacyRules=()=>[
- ...['controlado','biologico','cadenaFrio'].map(field=>body(field).optional().isBoolean({strict:true})),
+ ...['controlado','biologico','cadenaFrio','soloConsulta'].map(field=>body(field).optional().isBoolean({strict:true})),
  body('descuentoPorcentaje').optional().isInt({min:0,max:85}).bail().custom(v=>typeof v==='number').withMessage('El descuento debe ser un número entero entre 0 y 85 %.'),
  body('ivaCategoria').optional().isIn(['general','cero']),
  nullableText('fundamentoIva',300,8),
@@ -49,7 +50,7 @@ const pharmacyRules=()=>[
  body('requiereReceta').optional().isBoolean({strict:true}),body('stockMinimo').optional().isInt({min:0,max:100000}).bail().custom(v=>typeof v==='number').withMessage('El stock mínimo debe ser un entero entre 0 y 100000.'),
  body('pvpMaximo').optional().custom(v=>v===null || typeof v==='number' && Number.isFinite(v) && v>0 && v<=100000 && Math.abs(v*100-Math.round(v*100))<1e-8).withMessage('El PVP máximo debe ser un valor positivo en USD con hasta dos decimales.'),
 ];
-const productRules=()=>[text('nombre',2,120),body('precio').isFloat({min:0,max:100000}).bail().custom(value=>typeof value==='number' && Math.abs(value*100-Math.round(value*100))<1e-8).withMessage('El precio debe ser un número con máximo dos decimales.'),body('stock').isInt({min:0,max:100000}).bail().custom(value=>typeof value==='number').toInt(),body('categoria').isIn(['bienestar','cuidado','bebe']),text('descripcion',2,500),body('imagen').isString().bail().custom(validImage).withMessage('Selecciona una imagen local existente o una imagen subida desde el panel.'),text('alt',2,250),nullableText('advertencias',1000)];
+const productRules=()=>[text('nombre',2,120),body('precio').isFloat({min:0,max:100000}).bail().custom(value=>typeof value==='number' && Math.abs(value*100-Math.round(value*100))<1e-8).withMessage('El precio debe ser un número con máximo dos decimales.'),body('stock').isInt({min:0,max:100000}).bail().custom(value=>typeof value==='number').toInt(),body('categoria').isString().bail().isIn(sectionIds),text('descripcion',2,500),body('imagen').isString().bail().custom(validImage).withMessage('Selecciona una imagen local existente o una imagen subida desde el panel.'),text('alt',2,250),nullableText('advertencias',1000)];
 const product=[only(productFields),...productRules(),...pharmacyRules()];
 const productUpdate=[only([...productFields,'esperadoUpdatedAt']),...productRules(),...pharmacyRules(),timestamp('esperadoUpdatedAt',true)];
 const productPatch=[only([...productFields,'esperadoUpdatedAt']),(req,res,next)=>{if(!Object.keys(req.body).some(key=>productFields.includes(key)))throw new AppError(422,'EMPTY_PATCH','Cambia al menos un campo del producto.');next();},...productRules().map(rule=>rule.optional()),...pharmacyRules().map(rule=>rule.optional()),timestamp('esperadoUpdatedAt')];

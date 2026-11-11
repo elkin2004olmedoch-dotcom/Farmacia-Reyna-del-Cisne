@@ -6,6 +6,7 @@ import {watchUpdates,preserveFocus} from './updates.js';
 import {predictiveSearch} from './predictive-search.js';
 import {connectFavorites} from './customer-account.js';
 import {reviewsController} from './reviews.js';
+import '../models/catalog-sections.js';
 const selected=()=>{try{return JSON.parse(sessionStorage.getItem('farmacia-mvc-comparacion') || '[]').filter(id=>typeof id==='string').slice(0,4);}catch(_){return [];}};
 function actions(target) {
   connectFavorites(target);
@@ -36,7 +37,7 @@ export async function catalogController() {
   function readRoute(){
     const route=new URLSearchParams(location.search);
     fields.q.value=(route.get('q') || '').slice(0,100);
-    fields.category.value=['bienestar','cuidado','bebe'].includes(route.get('category'))?route.get('category'):'todos';
+    fields.category.value=globalThis.Farmacia.catalogSections.find(route.get('category'))?route.get('category'):'todos';
     fields.sort.value=['low','high'].includes(route.get('sort'))?route.get('sort'):'recommended';
     for(const key of ['laboratorio','presentacion']){
       const value=(route.get(key)||'').slice(0,120);
@@ -101,7 +102,7 @@ export async function catalogController() {
 }
 export async function productController() {
   const id=new URLSearchParams(location.search).get('id');if(!id)throw new Error('Selecciona un producto desde el catálogo.');let product=await catalog.find(id);const target=document.getElementById('product-detail');
-  function render(){const quantity=document.getElementById('detail-quantity')?.value || '1';preserveFocus(target,()=>{productView(product);document.getElementById('detail-quantity').value=quantity;});document.title=product.nombre+' | Farmacia Reina del Cisne';}
+  function render(){const quantity=document.getElementById('detail-quantity')?.value || '1';preserveFocus(target,()=>{productView(product);const field=document.getElementById('detail-quantity');if(field)field.value=quantity;});document.title=product.nombre+' | Farmacia Reina del Cisne';}
   render();connectFavorites(target);reviewsController(id);
   target.addEventListener('click',event=>{const quantity=document.getElementById('detail-quantity');const button=event.target.closest('[data-quantity]');if(button)quantity.value=Math.min(Number(quantity.max),Math.max(1,Number(quantity.value)+Number(button.dataset.quantity)));if(event.target.closest('#zoom-product')){const dialog=document.getElementById('image-dialog');const image=dialog.querySelector('img');image.src=target.querySelector('#zoom-product img').src;image.alt=product.alt || product.nombre;dialog.showModal();}});
   target.addEventListener('submit',async event=>{event.preventDefault();const quantity=Number(document.getElementById('detail-quantity').value);const button=event.target.querySelector('[type=submit]');const wasFocused=document.activeElement===button;busy(button,true);try{product=await catalog.find(id);cart.add(product,quantity);message(`${product.nombre} se añadió al carrito.`);}catch(error){message(error.message,true);}finally{render();if(wasFocused && !document.querySelector('dialog[open]'))document.getElementById('detail-add-button')?.focus();}});

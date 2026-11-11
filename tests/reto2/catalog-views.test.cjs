@@ -47,6 +47,28 @@ test('catálogo vacío explica cómo recuperar resultados',async()=>{
   assert.match(target.innerHTML,/No encontramos productos/);assert.match(target.innerHTML,/restablece los filtros/);assert.match(target.innerHTML,/href="catalogo.html"/);
 });
 
+test('referencias de consulta ocultan importes técnicos, stock y compra en tarjeta, ficha y comparación',async()=>{
+  const {productCard,productView,comparisonView}=await views;
+  const item={...product(),soloConsulta:true,precio:0,stock:0};
+  for(const html of [productCard(item),detail(productView,item)]){
+    assert.match(html,/Consultar precio y disponibilidad/);
+    assert.match(html,/href="index.html#contacto"/);
+    assert.doesNotMatch(html,/data-add=|detail-add-form|detail-quantity|\b0 unidades|Agotado|agotado|\$0|20% de descuento|incluye IVA|PVP máximo impreso/);
+  }
+  const saved=Object.getOwnPropertyDescriptor(globalThis,'document'),targets={};
+  Object.defineProperty(globalThis,'document',{configurable:true,value:{getElementById:id=>targets[id]??=( {innerHTML:''})}});
+  try{comparisonView([item],[item.id]);assert.match(targets.comparison.innerHTML,/Consultar precio y disponibilidad/);assert.doesNotMatch(targets.comparison.innerHTML,/\$0|\b0 unidades/);}
+  finally{if(saved)Object.defineProperty(globalThis,'document',saved);else delete globalThis.document;}
+});
+
+test('favoritos y recompra conservan el precio histórico y ocultan valores comerciales pendientes',async()=>{
+  const {favoritesList,reorderView}=await import(pathToFileURL(path.join(root,'frontend/views/customer-account.js')).href);
+  const target={innerHTML:''};favoritesList(target,[{producto:{...product(),activo:true,soloConsulta:true,precio:17}}]);
+  assert.match(target.innerHTML,/Consultar precio y disponibilidad/);assert.doesNotMatch(target.innerHTML,/17[,.]00/);
+  reorderView(target,{items:[{productoId:'catalog-test',nombre:'Referencia consultable',soloConsulta:true,stock:5,cantidadPermitida:0,precioAnteriorCentavos:800,precioActualCentavos:1700,incidencias:['SOLO_CONSULTA']}]},{});
+  assert.match(target.innerHTML,/Antes: \$8[,.]00/);assert.match(target.innerHTML,/Consultar precio y disponibilidad/);assert.match(target.innerHTML,/value="0" disabled/);assert.doesNotMatch(target.innerHTML,/17[,.]00/);
+});
+
 test('el catálogo prioriza sólo tres fotos y reserva la prioridad alta para la primera',async()=>{
   const {catalogView}=await views,target={innerHTML:''},items=Array.from({length:6},(_,index)=>({...product(),id:'foto-'+index}));
   catalogView(items,target,{prioritizeImages:true});const images=target.innerHTML.match(/<img\b[^>]+>/g);

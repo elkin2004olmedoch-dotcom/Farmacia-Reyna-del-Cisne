@@ -67,7 +67,7 @@ export function cartDrawerController(){
         const removed=undo;if(!removed)return;
         const product=await catalog.find(removed.id);
         if(savedSession!==sessionVersion || undo!==removed)return;
-        if(globalThis.Farmacia.pharmacyPolicy.requiresProfessionalReview(product))throw new Error('Este producto requiere atención profesional. Consulta con la farmacia.');
+        if(!globalThis.Farmacia.pharmacyPolicy.allowsPurchase(product))throw new Error(globalThis.Farmacia.pharmacyPolicy.restrictionReason(product));
         products=products.filter(item=>item.id!==product.id);products.push(product);
         cart.add(product,removed.quantity);undoAdded=product;undo=null;status('Producto recuperado. Revisa la disponibilidad antes de comprar.');focusId='drawer-plus-'+product.id;
         return;
@@ -77,7 +77,7 @@ export function cartDrawerController(){
       const quantity=cart.read()[id];if(quantity===undefined)return;
       const next=quantity+(button.hasAttribute('data-drawer-plus')?1:-1);
       if(next<1 || next>99 || next>product.stock && next>=quantity)throw new Error('La cantidad supera las unidades disponibles.');
-      if(globalThis.Farmacia.pharmacyPolicy.requiresProfessionalReview(product))throw new Error('Este producto requiere atención profesional. Retíralo y consulta con la farmacia.');
+      if(!globalThis.Farmacia.pharmacyPolicy.allowsPurchase(product))throw new Error(globalThis.Farmacia.pharmacyPolicy.restrictionReason(product));
       cart.update(id,next);status('Cantidad y total actualizados.');
     }catch(error){status(error.message,true);}
     finally{
