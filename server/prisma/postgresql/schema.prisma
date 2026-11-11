@@ -15,6 +15,7 @@ model Producto {
   stock       Int      @default(0)
   categoria   String
   descripcion String
+  advertencias String?
   imagen      String
   alt         String
   activo      Boolean  @default(true)
@@ -60,6 +61,7 @@ model Usuario {
   emailVerificationRequired Boolean @default(false)
   createdAt    DateTime @default(now())
   emailVerification EmailVerification?
+  registroPendiente RegistroPendiente?
   pedidos      Pedido[]
   cambiosPedidos PedidoEstado[]
   entregas Entrega[]
@@ -164,6 +166,7 @@ model Promocion {
   inicio      DateTime?
   fin         DateTime?
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 }
 
 model PedidoEstado {
@@ -432,6 +435,7 @@ model PagoPractica {
 }
 
 model SesionWeb {
+ registroPendiente RegistroPendiente?
  id String @id @default(uuid())
  usuarioId String
  usuario Usuario @relation(fields:[usuarioId],references:[id],onDelete:Restrict,onUpdate:Cascade)
@@ -534,4 +538,23 @@ model EntregaIncidencia {
   updatedAt DateTime @updatedAt
   @@index([entregaId,createdAt])
   @@index([actorId])
+}
+
+model RegistroPendiente {
+ usuarioId String @id
+ usuario Usuario @relation(fields:[usuarioId],references:[id],onDelete:Restrict,onUpdate:Cascade)
+ email String
+ secretHash String @unique
+ tokenVersion Int
+ tokenEpoch String?
+ createdAt DateTime @default(now())
+ expiresAt DateTime
+ consumedAt DateTime?
+ sessionId String? @unique
+ session SesionWeb? @relation(fields:[sessionId],references:[id],onDelete:SetNull,onUpdate:Cascade)
+}
+
+model RevisionCatalogo {
+ id String @id
+ token String
 }

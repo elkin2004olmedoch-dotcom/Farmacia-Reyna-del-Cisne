@@ -2,8 +2,10 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
-const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','adminMfa','sesionWeb','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','pagoPractica','direccionGuardada','favorito','resenaProducto','entregaIncidencia','auditoriaAdmin','semilla']);
-const privateActions=new Set(['emailVerification','passwordReset','sesionWeb','adminMfa']);
+const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','adminMfa','sesionWeb','registroPendiente','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','pagoPractica','direccionGuardada','favorito','resenaProducto','entregaIncidencia','auditoriaAdmin','semilla','revisionCatalogo']);
+// The destination keeps its own trigger-maintained catalog marker.
+const countedModels=MODELS.filter(model=>model!=='revisionCatalogo');
+const privateActions=new Set(['emailVerification','passwordReset','sesionWeb','adminMfa','registroPendiente']);
 const INITIAL_FISCAL=Object.freeze({id:'iva-general-inicial',tarifaGeneral:15,inicioVigencia:'2024-04-01T05:00:00.000Z',referenciaNormativa:'Ley de Régimen Tributario Interno, art. 65; Decreto Ejecutivo 198; Circular SRI NAC-DGECCGC25-00000006 (vigencia 2026).',actorId:null});
 const INITIAL_DEFAULTS=Object.freeze({
   configuracionFiscal:INITIAL_FISCAL,
@@ -49,8 +51,13 @@ async function readSnapshot(source){
   // All reads share one SQLite snapshot, even if the local application is open.
   return source.$transaction(async tx=>{
     const snapshot={};
-    // Verification links do not cross environments; read only IDs to count and check their owners.
-    for(const model of MODELS)snapshot[model]=await tx[model].findMany(privateActions.has(model)?{select:{usuarioId:true,...(model==='sesionWeb'?{id:true}:{})}}:undefined);
+    // Transient browser capabilities do not cross environments; read only owner IDs.
+    for(const model of MODELS){
+      let options;
+      if(privateActions.has(model))options={select:{usuarioId:true,...(model==='sesionWeb'?{id:true}:{})}};
+      if(model==='revisionCatalogo')options={select:{id:true}};
+      snapshot[model]=await tx[model].findMany(options);
+    }
     return snapshot;
   },{maxWait:10000,timeout:120000});
 }
@@ -59,11 +66,12 @@ function assertSnapshotRelations(snapshot){
   const ids={};
   for(const model of MODELS){
     if(!Array.isArray(snapshot[model]))fail('SOURCE_DATA','La base local no contiene todas las entidades esperadas.');
-    const keys=snapshot[model].map(row=>['emailVerification','passwordReset','adminMfa'].includes(model)?row.usuarioId:row.id);
+    const keys=snapshot[model].map(row=>privateActions.has(model)&&model!=='sesionWeb'?row.usuarioId:row.id);
     ids[model]=new Set(keys);
     if(ids[model].size!==snapshot[model].length || keys.some(id=>typeof id!=='string' || !id))fail('SOURCE_DATA','La base local contiene identificadores inválidos.');
   }
   const valid=snapshot.emailVerification.every(row=>ids.usuario.has(row.usuarioId))
+    && snapshot.registroPendiente.every(row=>ids.usuario.has(row.usuarioId))
     && snapshot.direccionGuardada.every(row=>ids.usuario.has(row.userId))
     && snapshot.favorito.every(row=>ids.usuario.has(row.userId)&&ids.producto.has(row.productoId))
     && snapshot.resenaProducto.every(row=>{
@@ -132,7 +140,7 @@ async function inspectUploadFiles(references,{frontendRoot=path.join(ROOT,'front
 }
 async function targetCounts(tx){
   const counts={};
-  for(const model of MODELS)counts[model]=await tx[model].count();
+  for(const model of countedModels)counts[model]=await tx[model].count();
   return counts;
 }
 function sameTimestamp(first,second){
@@ -140,7 +148,7 @@ function sameTimestamp(first,second){
 }
 async function assertEmpty(tx,counts){
   const reject=()=>fail('TARGET_NOT_EMPTY','La base PostgreSQL debe estar vacía, incluida Semilla. Sólo se admiten los defaults técnicos intactos de IVA y Puerto Quito creados por migración; ningún dato propio se sobrescribe.');
-  if(MODELS.some(model=>counts[model]!==0 && (!INITIAL_DEFAULTS[model] || counts[model]>(NATIONAL_DEFAULTS[model]?2:1))) || counts.zonaEntrega!==counts.zonaEntregaTarifa)reject();
+  if(countedModels.some(model=>counts[model]!==0 && (!INITIAL_DEFAULTS[model] || counts[model]>(NATIONAL_DEFAULTS[model]?2:1))) || counts.zonaEntrega!==counts.zonaEntregaTarifa)reject();
   const defaults={};
   for(const [model,expected] of Object.entries(INITIAL_DEFAULTS)){
     if(!counts[model])continue;
@@ -159,7 +167,7 @@ async function migrate({source,target,apply=false,frontendRoot,storage,inspectIm
   const snapshot=await readSnapshot(source);
   assertSnapshotRelations(snapshot);
   const references=collectUploads(snapshot);
-  const origin=Object.fromEntries(MODELS.map(model=>[model,snapshot[model].length]));
+  const origin=Object.fromEntries(countedModels.map(model=>[model,snapshot[model].length]));
   const destination=await target.$transaction(async tx=>{const counts=await targetCounts(tx);await assertEmpty(tx,counts);return counts;},TRANSACTION_OPTIONS);
   const summary={modo:apply?'aplicar':'simulacion',origen:origin,destino:destination,imagenes:references.length,firmasCifradas:snapshot.configuracionEmisor.filter(row=>row.certificadoCifrado).length,verificacionesCorreoDescartadas:snapshot.emailVerification.length};
   if(!apply)return summary;
@@ -183,7 +191,7 @@ async function migrate({source,target,apply=false,frontendRoot,storage,inspectIm
         }
       }
       for(const model of MODELS){
-        if(privateActions.has(model))continue;
+        if(privateActions.has(model)||model==='revisionCatalogo')continue;
         const rows=snapshot[model];
         for(let offset=0;offset<rows.length;offset+=500)await tx[model].createMany({data:rows.slice(offset,offset+500)});
       }

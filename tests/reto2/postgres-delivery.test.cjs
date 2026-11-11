@@ -158,25 +158,34 @@ test('PostgreSQL aislado: migraciones, API, entrega, fiscalidad, permisos e impo
   const sourceUrl='file:'+path.join(directory,'source.db').replaceAll('\\','/');migrate('sqlite',sourceUrl);
   const source=new (require('@prisma/client').PrismaClient)({datasources:{db:{url:sourceUrl}}});clients.push(source);
   const {migrate:transfer,targetCounts,readSnapshot,MODELS}=require('../../scripts/migrate-cloud.cjs');
+  const discarded=new Set(['emailVerification','passwordReset','adminMfa','sesionWeb','registroPendiente','revisionCatalogo']);
   // The preceding API exercise supplies real synthetic relation graphs and decimals.
   const synthetic=await readSnapshot(db);
   await source.$transaction(async tx=>{
    await tx.zonaEntregaTarifa.deleteMany();await tx.zonaEntrega.deleteMany();await tx.configuracionFiscal.deleteMany();
-   for(const model of MODELS)if(synthetic[model].length)await tx[model].createMany({data:synthetic[model]});
+   for(const model of MODELS)if(!discarded.has(model)&&synthetic[model].length)await tx[model].createMany({data:synthetic[model]});
   });
   const stamp=new Date('2024-02-03T04:05:06.789Z');
   const nextVersion=synthetic.zonaEntrega.find(zone=>zone.id==='puerto-quito').version+1;
   await source.zonaEntrega.update({where:{id:'puerto-quito'},data:{tarifaCentavos:230,version:nextVersion,createdAt:stamp,updatedAt:stamp}});
   await source.zonaEntregaTarifa.create({data:{zonaEntregaId:'puerto-quito',version:nextVersion,tarifaCentavos:230,ivaCategoria:'general',createdAt:stamp}});
   await source.facturaPedido.create({data:{pedidoId:order.id,ambiente:'1',emisorRuc:sriFixture.emitter.ruc,establecimiento:'001',puntoEmision:'001',fechaEmision:stamp,snapshot:JSON.stringify(snapshot),xmlBorrador:'<factura-sintetica-sin-validez/>'}});
+  const user=await source.usuario.findFirst();
+  await source.registroPendiente.create({data:{usuarioId:user.id,email:user.email,secretHash:'e'.repeat(64),tokenVersion:user.tokenVersion,expiresAt:new Date(Date.now()+3600000)}});
   const baseline=await targetCounts(target.client);assert.equal(baseline.zonaEntrega,2);assert.equal(baseline.zonaEntregaTarifa,2);
   assert.deepEqual((await target.client.zonaEntrega.findMany({select:{id:true},orderBy:{id:'asc'}})).map(zone=>zone.id),['ecuador-nacional','puerto-quito']);
   const report=await transfer({source,target:target.client,apply:true});assert.equal(report.destino.zonaEntregaTarifa,synthetic.zonaEntregaTarifa.length+1);
   assert.equal(report.destino.entrega,1);assert.equal(report.destino.facturaPedido,1);
-  for(const model of MODELS){
+  for(const model of MODELS.filter(model=>!discarded.has(model))){
    const normalize=rows=>JSON.parse(JSON.stringify(rows)).sort((a,b)=>a.id.localeCompare(b.id));
    assert.deepEqual(normalize(await target.client[model].findMany()),normalize(await source[model].findMany()),model+' must preserve its exact snapshot');
   }
+  assert.equal(report.origen.registroPendiente,1);assert.equal(report.destino.registroPendiente,0);
+  assert.equal(await target.client.registroPendiente.count(),0);
+  assert.equal(await target.client.revisionCatalogo.count(),1);
+  const marker=await target.client.revisionCatalogo.findUnique({where:{id:'catalogo'}});
+  await target.client.producto.update({where:{id:product.id},data:{nombre:'Producto importado editado'}});
+  assert.notEqual((await target.client.revisionCatalogo.findUnique({where:{id:'catalogo'}})).token,marker.token);
   await assert.rejects(()=>transfer({source,target:target.client,apply:true}),e=>e.code==='TARGET_NOT_EMPTY');
  });
  t.diagnostic('Synthetic PostgreSQL artifacts retained in '+directory);

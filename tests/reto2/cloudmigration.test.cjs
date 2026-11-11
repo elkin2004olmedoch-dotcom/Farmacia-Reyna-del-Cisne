@@ -26,6 +26,8 @@ function fixture(uploaded=false){
   const updatedAt=new Date('2024-02-03T04:05:06.789Z');
   return {
     direccionGuardada:[],favorito:[],resenaProducto:[],entregaIncidencia:[],adminMfa:[],auditoriaAdmin:[],passwordReset:[{usuarioId:'cliente-original',tokenHash:'b'.repeat(64)}],sesionWeb:[{id:'web-original',usuarioId:'cliente-original',secretHash:'d'.repeat(64)}],pagoPractica:[],
+    registroPendiente:[{usuarioId:'cliente-original',email:privateEmail,secretHash:'e'.repeat(64)}],
+    revisionCatalogo:[{id:'catalogo',token:'f'.repeat(32)}],
     usuario:[{id:'cliente-original',nombre:'Cliente privado',email:privateEmail,telefono:'0979275988',passwordHash:privateHash,role:'user',tokenVersion:7,activo:false,emailVerifiedAt:null,emailVerificationRequired:true,createdAt},{id:'repartidor-original',nombre:'Repartidor privado',email:'repartidor@example.ec',telefono:'0979275988',passwordHash:privateHash,role:'repartidor',tokenVersion:1,activo:true,emailVerifiedAt:updatedAt,emailVerificationRequired:false,createdAt}],
     emailVerification:[{usuarioId:'cliente-original',email:privateEmail,tokenHash:privateVerificationHash,createdAt,expiresAt:updatedAt}],
     sesionMovil:[{id:'sesion-movil-original',usuarioId:'repartidor-original',tokenVersion:1,secretHash:'a'.repeat(64),previousSecretHash:null,expiresAt:new Date('2030-01-01T00:00:00Z'),revokedAt:createdAt,createdAt,updatedAt}],
@@ -36,7 +38,7 @@ function fixture(uploaded=false){
     entrega:[{id:'entrega-original',pedidoId:'pedido-original',repartidorId:'repartidor-original',estado:'entregada',version:4,gpsVersion:3,asignadaAt:createdAt,salidaAt:createdAt,llegadaAt:updatedAt,finalizadaAt:updatedAt,latitud:null,longitud:null,precision:null,registradaAt:null,recibidaAt:null,createdAt,updatedAt}],
     pago:[{id:'pago-original',pedidoId:'pedido-original',proveedor:'payphone',entorno:'sandbox',estado:'revision',moneda:'USD',totalCentavos:2719,sinIvaCentavos:2719,baseIvaCentavos:0,ivaCentavos:0,paymentId:null,providerTransactionId:null,urlPago:null,confirmacionIniciadaAt:null,confirmadaAt:null,revisionMotivo:'prueba_sintetica',createdAt,updatedAt}],
     pedidoDetalle:[{id:'detalle-original',pedidoId:'pedido-original',productoId:'producto-original',nombreProducto:'Alcohol anterior',cantidad:2,precioUnitario:new Prisma.Decimal('12.34567'),precioOriginal:new Prisma.Decimal('15.12345'),descuentoPorcentaje:18}],
-    promocion:[{id:'promocion-original',titulo:'Promoción',descripcion:'Descripción',etiqueta:'Promo',productoId:'producto-original',activa:true,vistaPrevia:false,descuentoPorcentaje:18,imagen:uploaded?reference:null,alt:null,orden:4,inicio:createdAt,fin:updatedAt,createdAt}],
+    promocion:[{id:'promocion-original',titulo:'Promoción',descripcion:'Descripción',etiqueta:'Promo',productoId:'producto-original',activa:true,vistaPrevia:false,descuentoPorcentaje:18,imagen:uploaded?reference:null,alt:null,orden:4,inicio:createdAt,fin:updatedAt,createdAt,updatedAt:new Date('1970-01-01T00:00:00.000Z')}],
     pedidoEstado:[{id:'historial-original',pedidoId:'pedido-original',anterior:'pendiente',estado:'entregado',actorId:'cliente-original',createdAt}],
     semilla:[{id:'catalogo-inicial-v1',createdAt}],
     configuracionFiscal:[{...INITIAL_FISCAL,inicioVigencia:new Date(INITIAL_FISCAL.inicioVigencia),createdAt,updatedAt}],
@@ -59,7 +61,7 @@ function technicalDefaults(){
 }
 function sourceClient(snapshot){
   let transactions=0;const reads=[];
-  const tx=Object.fromEntries(MODELS.map(model=>[model,{findMany:async options=>{reads.push(model);if(['emailVerification','passwordReset','sesionWeb','adminMfa'].includes(model)){const select={usuarioId:true,...(model==='sesionWeb'?{id:true}:{})};assert.deepEqual(options,{select});return snapshot[model].map(row=>Object.fromEntries(Object.keys(select).map(key=>[key,row[key]])));}return snapshot[model];}}]));
+  const tx=Object.fromEntries(MODELS.map(model=>[model,{findMany:async options=>{reads.push(model);if(['emailVerification','passwordReset','sesionWeb','adminMfa','registroPendiente','revisionCatalogo'].includes(model)){const select=model==='revisionCatalogo'?{id:true}:{usuarioId:true,...(model==='sesionWeb'?{id:true}:{})};assert.deepEqual(options,{select});return snapshot[model].map(row=>Object.fromEntries(Object.keys(select).map(key=>[key,row[key]])));}return snapshot[model];}}]));
   return {$transaction:async fn=>{transactions++;return fn(tx);},$disconnect:async()=>{},get transactions(){return transactions;},reads};
 }
 function targetClient({initial={},failOn,beforeTransaction}={}){
@@ -88,7 +90,7 @@ function targetClient({initial={},failOn,beforeTransaction}={}){
   };
   return target;
 }
-const emptyCounts=()=>Object.fromEntries(MODELS.map(model=>[model,0]));
+const emptyCounts=()=>Object.fromEntries(MODELS.filter(model=>model!=='revisionCatalogo').map(model=>[model,0]));
 test('el importador cubre todos los modelos Prisma y no omite futuras entidades de farmacia',async()=>{
  const schema=await fs.readFile(path.resolve(__dirname,'../../server/prisma/schema.prisma'),'utf8');
  const names=[...schema.matchAll(/^model (\w+) \{/gm)].map(match=>match[1][0].toLowerCase()+match[1].slice(1));
@@ -101,6 +103,21 @@ test('verificaciones se cuentan sin transferir hashes y los usuarios conservan e
  assert.equal(target.state.usuario[0].emailVerificationRequired,true);assert.equal(target.state.usuario[0].emailVerifiedAt,null);assert.equal(target.state.usuario[1].emailVerificationRequired,false);assert.equal(target.state.usuario[1].emailVerifiedAt.toISOString(),snapshot.usuario[1].emailVerifiedAt.toISOString());
  assert.deepEqual(snapshot.emailVerification[0].tokenHash,privateVerificationHash);assert.ok(!JSON.stringify(result).includes(privateVerificationHash));assert.ok(!JSON.stringify(result).includes(privateEmail));
  const broken=fixture();broken.emailVerification[0].usuarioId='usuario-inexistente';await assert.rejects(migrate({source:sourceClient(broken),target:targetClient(),apply:true}),error=>error.code==='SOURCE_RELATIONS');
+});
+
+test('el importador descarta la continuación de registro y conserva el marcador técnico del destino',async()=>{
+ const snapshot=fixture(),marker={id:'catalogo',token:'a'.repeat(32)},target=targetClient({initial:{revisionCatalogo:[marker]}});
+ const result=await migrate({source:sourceClient(snapshot),target,apply:true});
+ assert.equal(result.origen.registroPendiente,1);
+ assert.equal(result.destino.registroPendiente,0);
+ assert.deepEqual(target.state.registroPendiente,[]);
+ assert.deepEqual(target.state.revisionCatalogo,[marker]);
+ assert.equal(Object.hasOwn(result.origen,'revisionCatalogo'),false);
+ assert.equal(Object.hasOwn(result.destino,'revisionCatalogo'),false);
+ const printed=JSON.stringify(result);
+ for(const value of ['e'.repeat(64),'f'.repeat(32),marker.token,privateEmail])assert.equal(printed.includes(value),false);
+ const invalid=fixture();invalid.registroPendiente[0].usuarioId='usuario-ausente';
+ await assert.rejects(migrate({source:sourceClient(invalid),target:targetClient()}),error=>error.code==='SOURCE_RELATIONS');
 });
 
 test('se trasladan sesiones antes de sus entregas y se rechazan referencias incompletas',async()=>{
@@ -197,18 +214,19 @@ test('la simulación consulta un snapshot único y muestra solo cantidades sin e
 test('la transferencia conserva datos de negocio y usuarios e invalida enlaces transitorios de correo',async()=>{
   const snapshot=fixture(),source=sourceClient(snapshot),target=targetClient();
   const result=await migrate({source,target,apply:true});
-  const ephemeral=['emailVerification','passwordReset','sesionWeb'];
+  const ephemeral=['emailVerification','passwordReset','sesionWeb','registroPendiente','revisionCatalogo'];
   assert.equal(result.modo,'aplicar');assert.deepEqual(target.writes,MODELS.filter(model=>!ephemeral.includes(model)&&snapshot[model].length));assert.equal(target.transactions,2);
   for(const model of MODELS)assert.deepEqual(target.state[model],ephemeral.includes(model)?[]:snapshot[model]);
   assert.equal(target.state.usuario[0].passwordHash,privateHash);assert.equal(target.state.usuario[0].tokenVersion,7);
   assert.strictEqual(target.state.producto[0].precio,snapshot.producto[0].precio);assert.equal(target.state.producto[0].precio.toString(),'12.34567');
   assert.strictEqual(target.state.pedido[0].createdAt,snapshot.pedido[0].createdAt);assert.equal(target.state.pedido[0].updatedAt.toISOString(),'2024-02-03T04:05:06.789Z');
+  assert.equal(target.state.promocion[0].updatedAt.toISOString(),'1970-01-01T00:00:00.000Z');
   assert.ok(target.options.every(options=>options.isolationLevel==='Serializable'));
   assert.equal(target.state.configuracionEmisor[0].certificadoCifrado,snapshot.configuracionEmisor[0].certificadoCifrado);
   assert.equal(target.state.facturaPedido[0].snapshot,snapshot.facturaPedido[0].snapshot);
 });
 test('una sola fila existente en cualquier entidad, incluida Semilla, bloquea la importación sin borrados',async()=>{
-  for(const model of MODELS){
+  for(const model of MODELS.filter(model=>model!=='revisionCatalogo')){
     const existing={id:'registro-existente'};const target=targetClient({initial:{[model]:[existing]}});let uploads=0;
     await assert.rejects(migrate({source:sourceClient(fixture(true)),target,apply:true,storage:{isCloudStorage:()=>true,uploadCloudImage:async()=>{uploads++;}}}),error=>error instanceof MigrationError && error.code==='TARGET_NOT_EMPTY');
     assert.equal(target.state[model][0],existing);assert.deepEqual(target.writes,[]);assert.equal(uploads,0);
@@ -271,4 +289,36 @@ test('el CLI exige conexiones por entorno y una base SQLite existente; nunca ace
   const result=await runCli({root,env,log:message=>logs.push(message),createClients:async config=>{assert.equal(config.sourceUrl,url);assert.equal(config.targetUrl,env.TARGET_DATABASE_URL);return {source,target};},argv:[]});
   assert.equal(result.modo,'simulacion');assert.equal(disconnected,2);assert.equal(logs.length,1);for(const privateValue of ['secreto',privateHash,privateEmail,file])assert.ok(!logs.join('').includes(privateValue));
   assert.ok(!safeError(new Error(env.TARGET_DATABASE_URL+' '+privateHash)).includes('secreto'));
+});
+
+test('importación en bases temporales conserva versiones antiguas y los triggers del catálogo',async t=>{
+ const fixture=require('./email-api-fixture.cjs').createFixture();
+ const {PrismaClient}=require('@prisma/client');
+ const {execFileSync}=require('node:child_process');
+ const root=path.resolve(__dirname,'../..'),directory=path.join(fixture.directory,'import-target');
+ let target;
+ t.after(async()=>{if(target)await target.$disconnect();await fixture.close();});
+ await fs.mkdir(directory);
+ const schema=path.join(directory,'schema.prisma');
+ await fs.copyFile(path.join(root,'server/prisma/schema.prisma'),schema);
+ await fs.cp(path.join(root,'server/prisma/migrations'),path.join(directory,'migrations'),{recursive:true});
+ const url='file:'+path.join(directory,'target.db').replaceAll('\\','/');
+ execFileSync(process.execPath,[path.join(root,'node_modules/prisma/build/index.js'),'migrate','deploy','--schema',schema],{cwd:directory,env:{...process.env,DATABASE_URL:url},stdio:'pipe',windowsHide:true});
+ target=new PrismaClient({datasources:{db:{url}}});
+ const product=await fixture.db.producto.findFirst({where:{activo:true}});
+ const original=await fixture.db.promocion.create({data:{titulo:'Promoción histórica',descripcion:'Registro anterior a la versión API',etiqueta:'Prueba',productoId:product.id,activa:false,updatedAt:new Date('1970-01-01T00:00:00.000Z')}});
+ const user=await fixture.db.usuario.findFirst();
+ await fixture.db.registroPendiente.create({data:{usuarioId:user.id,email:user.email,secretHash:'e'.repeat(64),tokenVersion:user.tokenVersion,expiresAt:new Date(Date.now()+3600000)}});
+ await fixture.db.revisionCatalogo.update({where:{id:'catalogo'},data:{token:'f'.repeat(32)}});
+ const result=await migrate({source:fixture.db,target,apply:true});
+ assert.equal(result.origen.registroPendiente,1);
+ assert.equal(await target.registroPendiente.count(),0);
+ assert.equal(await fixture.db.registroPendiente.count(),1);
+ assert.equal((await target.promocion.findUnique({where:{id:original.id}})).updatedAt.toISOString(),'1970-01-01T00:00:00.000Z');
+ assert.equal(await target.revisionCatalogo.count(),1);
+ const importedMarker=await target.revisionCatalogo.findUnique({where:{id:'catalogo'}});
+ assert.notEqual(importedMarker.token,'f'.repeat(32));
+ await target.producto.update({where:{id:product.id},data:{nombre:'Producto importado actualizado'}});
+ assert.notEqual((await target.revisionCatalogo.findUnique({where:{id:'catalogo'}})).token,importedMarker.token);
+ assert.equal(Object.hasOwn(result.destino,'revisionCatalogo'),false);
 });

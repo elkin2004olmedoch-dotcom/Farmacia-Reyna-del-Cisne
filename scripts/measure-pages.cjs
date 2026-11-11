@@ -5,6 +5,7 @@ const http=require('node:http');
 const {performance}=require('node:perf_hooks');
 const {createHash,randomBytes}=require('node:crypto');
 const {execFileSync}=require('node:child_process');
+const {trackNetwork,settleNetwork}=require('./browser-network.cjs');
 
 const root=path.resolve(__dirname,'..');
 function argumentsFor(args){
@@ -96,6 +97,7 @@ async function measure(options){
       const base=variant==='coupled'?apiOrigin:staticOrigin;
       const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
       const page=await context.newPage(),requests=new Map(),pageErrors=[],navigationErrors=[],traceEvents=[];let blockedThirdParty=0,documentReceived=false,documentNetwork=null;
+      trackNetwork(page);
       const allowed=new Set([apiOrigin,staticOrigin]);
       const describeUrl=value=>{try{const url=new URL(value,base);return allowed.has(url.origin)?{origin:url.origin===apiOrigin?'api':'static',path:url.pathname}:{origin:'blocked',path:null};}catch(_){return {origin:'unknown',path:null};}};
       await context.route('**/*',route=>{if(allowed.has(new URL(route.request().url()).origin))return route.continue();blockedThirdParty++;return route.abort();});
@@ -145,7 +147,7 @@ async function measure(options){
         navigation=page.goto(base+'/',{waitUntil:'load',timeout:windowMs}).catch(error=>{navigationErrors.push(error.name==='TimeoutError'?'NAVIGATION_TIMEOUT':'NAVIGATION_FAILED');});
         if(scenario==='active'){
           await navigation;
-          try{await page.waitForFunction(()=>globalThis.pagesMeasurement && globalThis.pagesMeasurement.productsReadyMs!==null && globalThis.pagesMeasurement.menuReadyMs!==null,{},{timeout:20000});await page.waitForLoadState('networkidle',{timeout:20000});}
+          try{await page.waitForFunction(()=>globalThis.pagesMeasurement && globalThis.pagesMeasurement.productsReadyMs!==null && globalThis.pagesMeasurement.menuReadyMs!==null,{},{timeout:20000});await settleNetwork(page,{timeout:20000});}
           catch(error){navigationErrors.push(error.name==='TimeoutError'?'READINESS_TIMEOUT':'READINESS_FAILED');}
         }else await wait(windowMs);
         // A pending navigation may never create an execution context. Do not evaluate a missing document.

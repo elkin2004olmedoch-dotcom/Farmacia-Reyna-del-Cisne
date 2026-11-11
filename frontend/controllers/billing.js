@@ -45,11 +45,23 @@ function issuesFor(form){
 }
 export function billingController(){
   const area=document.getElementById('admin-billing');let config,result,page=1,loading=false,requestId=0;
-  async function refresh(){const id=++requestId,requested=page;const loaded=await billing.invoices(requested);if(id!==requestId || requested!==page || !area.isConnected || area.hidden)return;result=loaded;preserveFocus(document.getElementById('billing-table'),()=>invoicesView(result));}
+  const emitting=new Set();
+  function emissionControls(){
+    for(const invoiceId of emitting){const button=area.querySelector(`[data-invoice-emit="${CSS.escape(invoiceId)}"]`);if(button)busy(button,true);}
+  }
+  async function refresh(){
+    const id=++requestId,requested=page;const loaded=await billing.invoices(requested);
+    if(id!==requestId || requested!==page || !area.isConnected || area.hidden)return;
+    result=loaded;
+    preserveFocus(document.getElementById('billing-table'),()=>{
+      invoicesView(result);
+      emissionControls();
+    });
+  }
   async function render({silent=false}={}){
     if(silent){if(!loading && config)await refresh();return;}
     const id=++requestId;loading=true;area.setAttribute('aria-busy','true');area.innerHTML='<p class="admin-card admin-empty" role="status">Cargando facturación electrónica…</p>';
-    try{const loaded=await Promise.all([billing.configuration(),billing.invoices(page)]);if(id!==requestId || !area.isConnected)return;[config,result]=loaded;billingView(config,result);configurationStatus(config);const pedido=new URLSearchParams(location.search).get('pedido');if(uuid(pedido))document.getElementById('billing-draft-form').elements.pedidoId.value=pedido;if(config.capacidades?.opensslDisponible===false){document.getElementById('billing-certificate-info').textContent+=' El servidor requiere OpenSSL para importar la firma. Contacta al responsable de la instalación.';document.querySelector('#billing-certificate-form [type=submit]').disabled=true;}}
+    try{const loaded=await Promise.all([billing.configuration(),billing.invoices(page)]);if(id!==requestId || !area.isConnected)return;[config,result]=loaded;billingView(config,result);emissionControls();configurationStatus(config);const pedido=new URLSearchParams(location.search).get('pedido');if(uuid(pedido))document.getElementById('billing-draft-form').elements.pedidoId.value=pedido;if(config.capacidades?.opensslDisponible===false){document.getElementById('billing-certificate-info').textContent+=' El servidor requiere OpenSSL para importar la firma. Contacta al responsable de la instalación.';document.querySelector('#billing-certificate-form [type=submit]').disabled=true;}}
     catch(error){area.innerHTML='<p class="admin-card admin-empty">No se pudo cargar la facturación. Vuelve a seleccionar Facturación SRI para intentar nuevamente.</p>';throw error;}
     finally{loading=false;area.removeAttribute('aria-busy');}
   }
@@ -72,13 +84,23 @@ export function billingController(){
   });
   area.addEventListener('click',async event=>{
     const button=event.target.closest('button');if(!button || button.type==='submit' && button.closest('form') || button.disabled)return;const wasFocused=document.activeElement===button;
+    const emissionId=button.dataset.invoiceEmit;
+    if(emissionId && emitting.has(emissionId))return;
+    if(emissionId)emitting.add(emissionId);
+    const actionAttribute=['data-invoice-emit','data-invoice-xml','data-invoice-ride'].find(attribute=>button.hasAttribute(attribute));
+    const actionSelector=actionAttribute?`[${actionAttribute}="${CSS.escape(button.getAttribute(actionAttribute))}"]`:null;
     try{
       if(button.id==='billing-prev' || button.id==='billing-next'){page+=button.id==='billing-next'?1:-1;await refresh();return;}
       if(button.id==='billing-refresh'){await refresh();message('Comprobantes actualizados.');return;}
       const id=button.dataset.invoiceEmit || button.dataset.invoiceXml || button.dataset.invoiceRide;if(!id)return;
       if(button.dataset.invoiceEmit){const invoice=result.items.find(item=>item.id===id);const production=invoice.ambiente==='2';if(!await confirmAction(production?'¿Firmar y enviar esta factura real al SRI en producción? Verifica el pedido y la identificación del comprador.':'¿Firmar y enviar esta factura al ambiente de pruebas del SRI? No tendrá validez tributaria.'))return;busy(button,true);const saved=await billing.emit(id,production);await refresh();document.getElementById('billing-emission-status').textContent=`Estado: ${invoiceStates[saved.estado] || saved.estado}. ${saved.mensaje || ''}`;document.getElementById('billing-refresh').focus();}
       else{busy(button,true);await downloadInvoice(id,button.dataset.invoiceXml?'xml':'ride');message('Comprobante descargado.');}
-    }catch(error){message(error.message,true);}finally{if(button.isConnected){busy(button,false);if(wasFocused)button.focus();}}
+    }catch(error){message(error.message,true);}finally{
+      if(emissionId)emitting.delete(emissionId);
+      let current=button;
+      if(!current.isConnected && actionSelector)current=area.querySelector(actionSelector);
+      if(current?.isConnected){busy(current,false);if(wasFocused)current.focus();}
+    }
   });
   return {render};
 }

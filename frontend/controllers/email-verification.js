@@ -28,9 +28,9 @@ export function connectVerificationResend(form=document.getElementById('verifica
 
 // Attach only while the pending panel is open. A signal never carries an identity.
 export function connectVerificationSession(panel,onVerified){
-  let connection=null,checking=false,queued=null,revision=0,expected='',lastFocusCheck=-Infinity;
+  let connection=null,checking=false,queued=null,revision=0,expected='',registrationId='',timer=null,lastFocusCheck=-Infinity;
   const normalize=value=>String(value || '').trim().toLowerCase();
-  function stop(){connection?.abort();connection=null;queued=null;expected='';}
+  function stop(){connection?.abort();connection=null;queued=null;expected='';registrationId='';clearInterval(timer);timer=null;}
   async function check(event,retry=false){
     if(!panel.isConnected || panel.hidden){stop();return;}
     if(!connection)return;
@@ -38,23 +38,25 @@ export function connectVerificationSession(panel,onVerified){
       if(event.key!==sessionSignalKey || event.storageArea!==localStorage || !event.newValue)return;
     }
     if(event.type!=='storage' && document.visibilityState==='hidden')return;
-    if(checking){revision++;queued=event;return;}
+    if(checking){if(event.type!=='timer'){revision++;queued=event;}return;}
     if(event.type!=='storage'){
       if(!retry && performance.now()-lastFocusCheck<1000)return;
       lastFocusCheck=performance.now();
     }
     const active=connection,matchingEmail=expected,request=++revision;checking=true;
     try{
-      const user=await auth.restore({accept:user=>request===revision && connection===active && !active.signal.aborted && panel.isConnected && !panel.hidden && normalize(user?.email)===matchingEmail});
+      const user=await auth.restore({registrationId,accept:user=>request===revision && connection===active && !active.signal.aborted && panel.isConnected && !panel.hidden && normalize(user?.email)===matchingEmail});
       if(user){stop();onVerified();}
     }catch{}finally{checking=false;if(queued && connection){const next=queued;queued=null;void check(next,true);}}
   }
-  function watch(email){
+  function watch(email,{registrationId:identifier}={}){
     stop();expected=normalize(email);lastFocusCheck=-Infinity;connection=new AbortController();
+    registrationId=typeof identifier==='string'&&/^[A-Za-z0-9_-]{43}$/.test(identifier)?identifier:'';
     const options={signal:connection.signal};
     window.addEventListener('storage',check,options);window.addEventListener('focus',check,options);
     window.addEventListener('pageshow',check,options);document.addEventListener('visibilitychange',check,options);
     window.addEventListener('pagehide',event=>{if(!event.persisted)stop();},options);
+    timer=setInterval(()=>{void check({type:'timer'});},2000);
   }
   return {watch,stop};
 }

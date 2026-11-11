@@ -27,6 +27,7 @@ export function productView(product) {
   const review=requiresProfessionalReview(product);
   const fields=[['Laboratorio o marca','laboratorio'],['Principio activo','principioActivo'],['Concentración','concentracion'],['Presentación','presentacion'],['Registro sanitario','registroSanitario']].filter(([,key])=>product[key]);
   const ficha=fields.length?`<section class="pharmaceutical-sheet" aria-labelledby="pharmaceutical-title"><h2 id="pharmaceutical-title">Información del producto</h2><dl>${fields.map(([label,key])=>`<div><dt>${label}</dt><dd>${escape(product[key])}</dd></div>`).join('')}</dl></section>`:'';
+  const warnings=typeof product.advertencias==='string' && product.advertencias.trim()?`<section class="product-description product-warnings" aria-labelledby="product-warnings-title"><h2 id="product-warnings-title">Advertencias de seguridad</h2><p class="shop-lead">${escape(product.advertencias)}</p></section>`:'';
   document.getElementById('product-detail').innerHTML=`<section class="product-detail-grid" aria-labelledby="product-title">
     <div class="product-detail-media"><button type="button" id="zoom-product" class="product-main-image" aria-label="Ampliar imagen de ${escape(product.nombre)}"><img data-product-image src="${escape(productImageUrl(product.imagen))}" alt="${escape(product.alt || product.nombre)}" width="600" height="600" fetchpriority="high"><span>Ampliar imagen ↗</span></button><a class="text-link product-back-link" href="catalogo.html">← Seguir explorando el catálogo</a></div>
     <div class="product-detail-copy"><p class="eyebrow">${escape(categoryLabel(product.categoria))}</p><h1 id="product-title">${escape(product.nombre)}</h1>${product.presentacion?`<p class="product-presentation">${escape(product.presentacion)}</p>`:''}
@@ -37,7 +38,7 @@ export function productView(product) {
       </div>
       <a class="text-link product-compare-link" href="comparar.html">Comparar productos →</a>${favoriteButton(product)}
     </div>
-  </section><div class="product-information">${product.descripcion?`<section class="product-description" aria-labelledby="product-description-title"><h2 id="product-description-title">Descripción</h2><p class="shop-lead">${escape(product.descripcion)}</p></section>`:''}${ficha}</div>`;
+  </section><div class="product-information">${product.descripcion?`<section class="product-description" aria-labelledby="product-description-title"><h2 id="product-description-title">Descripción</h2><p class="shop-lead">${escape(product.descripcion)}</p></section>`:''}${warnings}${ficha}</div>`;
 }
 export function promotionView(items) {
   items=items.filter(item=>allowsPromotion(item.producto));

@@ -2,6 +2,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const os=require('node:os');
 const {performance}=require('node:perf_hooks');
+const {trackNetwork,settleNetwork}=require('./browser-network.cjs');
 // Uses the existing test fixture: temporary SQLite/uploads; no production writes.
 const root=path.resolve(__dirname,'..');
 process.chdir(root);
@@ -26,12 +27,13 @@ const round=n=>Math.round(n*100)/100;
   try{
     for(const profile of ['local','10Mbps-40ms'])for(let sample=0;sample<3;sample++){
       const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});const page=await context.newPage();
+      trackNetwork(page);
       const errors=[];page.on('pageerror',e=>errors.push(e.message));
       const session=await context.newCDPSession(page);await session.send('Network.enable');await session.send('Network.setCacheDisabled',{cacheDisabled:true});
       if(profile!=='local')await session.send('Network.emulateNetworkConditions',{offline:false,latency:40,downloadThroughput:1250000,uploadThroughput:625000});
       await page.addInitScript(()=>{globalThis.measuredLcp=null;new PerformanceObserver(list=>{for(const entry of list.getEntries())globalThis.measuredLcp={startTime:entry.startTime,size:entry.size,tag:entry.element?.tagName,url:entry.url};}).observe({type:'largest-contentful-paint',buffered:true});});
       await page.goto(base,{waitUntil:'load',timeout:60000});await page.locator('#featured-products article').first().waitFor();
-      await page.waitForFunction(()=>globalThis.FarmaciaMascota?.getStatus().availableStates.length>0);await page.waitForLoadState('networkidle');
+      await page.waitForFunction(()=>globalThis.FarmaciaMascota?.getStatus().availableStates.length>0);await settleNetwork(page);
       const metrics=await page.evaluate(()=>{const nav=performance.getEntriesByType('navigation')[0];return {ttfbMs:nav.responseStart-nav.requestStart,htmlMs:nav.responseEnd-nav.startTime,fcpMs:performance.getEntriesByName('first-contentful-paint')[0]?.startTime,lcp:globalThis.measuredLcp,loadMs:nav.loadEventEnd,resources:performance.getEntriesByType('resource').map(r=>({url:r.name.replace(location.origin,''),durationMs:r.duration,transferBytes:r.transferSize,decodedBytes:r.decodedBodySize,initiator:r.initiatorType})),cards:document.querySelectorAll('#featured-products article').length};});
       samples.push({profile,sample,...metrics,errors});await context.close();
       console.log(JSON.stringify({profile,sample,ttfbMs:round(metrics.ttfbMs),fcpMs:round(metrics.fcpMs),lcpMs:round(metrics.lcp?.startTime),requests:metrics.resources.length,transferBytes:metrics.resources.reduce((s,r)=>s+r.transferBytes,0)}));

@@ -74,3 +74,29 @@ test('retirar ubicación permite completar el DELETE al cerrar sin cookies ni re
   await request('/entregas/entrega-sintetica/ubicacion',{method:'DELETE',keepalive:true});
   assert.equal(calls,1);assert.equal(options.keepalive,true);assert.equal(options.method,'DELETE');assert.equal(options.credentials,'same-origin');
 });
+
+test('un registro todavía pendiente consulta sólo su permiso y conserva la sesión visible',async()=>{
+  const {auth}=await import('../../frontend/models/auth.js'),seen=[];
+  global.fetch=async url=>{seen.push(url);return Response.json({data:{verified:false}},{status:202});};
+  assert.equal(await auth.restore({registrationId:'r'.repeat(43),accept:()=>true}),null);
+  assert.deepEqual(seen,['/api/auth/registro-pendiente']);
+});
+
+test('un permiso de registro ausente comprueba la cookie sin renovar ni emitir sesión vencida',async()=>{
+  const {auth}=await import('../../frontend/models/auth.js'),{events}=await import('../../frontend/models/events.js'),seen=[];
+  let expired=0;const count=()=>expired++;events.addEventListener('session:expired',count);
+  global.fetch=async url=>{seen.push(url);return url.endsWith('/registro-pendiente')?new Response(null,{status:204}):Response.json({error:{message:'Sin sesión.'}},{status:401});};
+  try{
+    await assert.rejects(auth.restore({registrationId:'r'.repeat(43),accept:()=>true}),error=>error.status===401);
+    assert.deepEqual(seen,['/api/auth/registro-pendiente','/api/auth/me']);assert.equal(expired,0);
+  }finally{events.removeEventListener('session:expired',count);}
+});
+
+test('una comprobación de registro interrumpida permite reintentar dentro del minuto de recuperación',async t=>{
+  const {auth}=await import('../../frontend/models/auth.js');let finished=false;
+  global.fetch=async(url,{signal})=>new Promise((_,reject)=>signal.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError')),{once:true}));
+  t.mock.timers.enable({apis:['setTimeout']});
+  const result=auth.restore({registrationId:'r'.repeat(43),accept:()=>true}).then(()=>null,error=>error).then(value=>{finished=true;return value;});
+  t.mock.timers.tick(10000);await tick();assert.equal(finished,true,'el permiso debe poder reintentarse antes de que venza su recuperación de un minuto');
+  assert.match((await result).message,/tardando|tiempo/i);
+});

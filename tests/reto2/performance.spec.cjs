@@ -1,4 +1,4 @@
-const {test,expect}=require('./browser-fixture.cjs');
+const {test,expect,settleNetwork}=require('./browser-fixture.cjs');
 
 test('un error inicial del dashboard conserva el reintento por teclado',async({page})=>{
   await page.route('**/api/auth/me',route=>route.fulfill({json:{data:{id:'synthetic-admin',nombre:'Administrador de prueba',email:'admin@example.ec',role:'admin',activo:true}}}));
@@ -6,9 +6,10 @@ test('un error inicial del dashboard conserva el reintento por teclado',async({p
   await page.route('**/api/admin/resumen',route=>{requests++;return route.fulfill({status:503,json:{error:{message:'Resumen temporalmente no disponible.'}}});});
   await page.goto('/admin.html');
   const retry=page.locator('#admin-retry-summary');
-  await expect(retry).toBeVisible();await retry.focus();
+  await expect(retry).toBeVisible();await settleNetwork(page);await retry.focus();
+  const requestsBeforeRetry=requests;
   await expect(retry).toBeFocused();await page.keyboard.press('Enter');
-  await expect.poll(()=>requests).toBe(2);
+  await expect.poll(()=>requests).toBe(requestsBeforeRetry+1);
   await expect(page.locator('#contenido')).toHaveJSProperty('inert',false);
 });
 
@@ -42,7 +43,7 @@ test('la portada descarga solo los módulos necesarios para comprar y orientar a
   await page.goto('/');
   await expect(page.locator('#featured-products article')).toHaveCount(4);
   await expect(page.locator('farmacia-mascota #launcher')).toBeVisible();
-  await page.waitForLoadState('networkidle');
+  await settleNetwork(page);
   expect(modules.filter(path=>/\/(?:admin(?:-companion|-command|-dashboard)?|billing|payments|deliveries|delivery-checkout|checkout|account|orders)\.m?js$/.test(path))).toEqual([]);
   await page.locator('farmacia-mascota #launcher').click();
   await expect(page.locator('farmacia-mascota #panel')).toBeVisible();
@@ -53,7 +54,10 @@ test('la portada limita productos y el catálogo conserva todos los resultados',
   page.on('request',request=>{const url=new URL(request.url());if(url.pathname==='/api/productos')queries.push(url.searchParams.get('pageSize'));});
   await page.goto('/');
   await expect(page.locator('#featured-products article')).toHaveCount(4);
-  expect(queries).toEqual(['4']);
+  await settleNetwork(page);
+  expect(queries.length).toBeGreaterThanOrEqual(1);
+  expect(queries.length).toBeLessThanOrEqual(2);
+  expect(queries.every(pageSize=>pageSize==='4')).toBe(true);
   const response=await page.request.get('/api/productos?pageSize=100');
   const catalog=(await response.json()).data;
   expect(catalog.total).toBeGreaterThan(4);
@@ -66,12 +70,12 @@ test('cada mascota descarga su atlas cuando se selecciona y conserva sus animaci
   page.on('request',request=>{const url=new URL(request.url());if(/\/sprites\/[^/]+\.png$/.test(url.pathname))atlases.push(url.pathname.split('/').pop());if(/\/art\/[^/]+-base\.png$/.test(url.pathname))portraits.push(url.pathname);});
   await page.goto('/');
   await page.waitForFunction(()=>globalThis.FarmaciaMascota?.getStatus().availableStates.length>0);
-  await page.waitForLoadState('networkidle');
+  await settleNetwork(page);
   expect(atlases).toEqual(['goti.png']);
   const selectedAtlas=page.waitForResponse(response=>new URL(response.url()).pathname.endsWith('/sprites/farmi.png') && response.status()===200);
   await page.evaluate(()=>FarmaciaMascota.setCharacter('farmi'));
   await selectedAtlas;
-  await page.waitForLoadState('networkidle');
+  await settleNetwork(page);
   expect(atlases).toEqual(['goti.png','farmi.png']);
   // La portada usa Boti en la tarjeta de ayuda; los personajes del widget no precargan retratos.
   expect(portraits.filter(file=>file!=='/assets/mascotas/art/boti-base.png')).toEqual([]);

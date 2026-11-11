@@ -189,3 +189,27 @@ test('un despertar durante una consulta anónima conserva un reintento sin depen
     expect(held.count).toBe(1);held.release();await expect(page).toHaveURL(/\/checkout\.html$/,{timeout:5000});
   }finally{held.release();}
 });
+
+test('la pestaña pendiente visible reconoce una sesión nueva aunque no reciba eventos del navegador',async({page,context})=>{
+  const state=await mockSession(context);await pendingAccount(page);await setSession(context,state);
+  await expect(page).toHaveURL(/\/checkout\.html$/,{timeout:5000});
+});
+
+test('la confirmación en un navegador separado continúa solamente el registro original',async({page,context,browser})=>{
+  const state=await mockSession(context),registrationId='r'.repeat(43);let confirmed=false,checks=0;
+  await context.route('**/api/auth/register',route=>route.fulfill({status:202,json:{ok:true,data:{requiresEmailVerification:true,registrationId,message:'Revisa tu correo para confirmar la cuenta.'}}}));
+  await context.route('**/api/auth/registro-pendiente',route=>{
+    checks++;expect(route.request().postDataJSON()).toEqual({registrationId});
+    if(!confirmed)return route.fulfill({status:202,json:{ok:true,data:{verified:false}}});
+    state.user=user;
+    return route.fulfill({headers:{'set-cookie':'synthetic-session=verified; Path=/; HttpOnly; SameSite=Strict'},json:{ok:true,data:{verified:true,usuario:user}}});
+  });
+  await pendingAccount(page);const separate=await browser.newContext();
+  try{
+    await separate.route('**/api/auth/me',route=>route.fulfill({status:401,json:{ok:false,error:{message:'Sin sesión.'}}}));
+    await separate.route('**/api/auth/verify-email',route=>{confirmed=true;return route.fulfill({json:{ok:true,data:{verified:true}}});});
+    const confirmation=await separate.newPage();await confirmation.goto('http://localhost:3300/confirmar-correo#token='+token);await confirmation.locator('#verification-submit').click();
+    await expect(page).toHaveURL(/\/checkout\.html$/,{timeout:5000});expect(checks).toBeGreaterThan(0);
+    const storage=await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}));expect(storage).not.toContain(registrationId);
+  }finally{await separate.close();}
+});

@@ -1,4 +1,4 @@
-const {test,expect}=require('./browser-fixture.cjs');
+const {test,expect,settleNetwork}=require('./browser-fixture.cjs');
 const AxeBuilder=require('@axe-core/playwright').default;
 const {randomUUID}=require('node:crypto');
 
@@ -64,7 +64,7 @@ test('una respuesta tardía de seguimiento no vuelve a mostrar el mapa tras canc
   try{
     await openOrders(page,data.user);await page.locator('[data-order-map="'+data.order.id+'"]').click();await fetched;
     const cancelled=await request.put('/api/pedidos/'+data.order.id+'/estado',{headers:data.headers,data:{estado:'cancelado',esperadoUpdatedAt:data.order.updatedAt}});expect(cancelled.status()).toBe(200);
-    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(page.locator('.order-card')).toContainText('Pedido cancelado');release();await page.waitForLoadState('networkidle');await expect(page.locator('iframe')).toHaveCount(0);await expect(page.locator('[data-order-map]')).toHaveCount(0);
+    await page.evaluate(()=>window.dispatchEvent(new Event('focus')));await expect(page.locator('.order-card')).toContainText('Pedido cancelado');release();await settleNetwork(page);await expect(page.locator('iframe')).toHaveCount(0);await expect(page.locator('[data-order-map]')).toHaveCount(0);
   }finally{release();await data.cleanup();}
 });
 

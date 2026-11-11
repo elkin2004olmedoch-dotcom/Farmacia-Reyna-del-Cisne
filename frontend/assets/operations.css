@@ -22,6 +22,27 @@
 .admin-page .admin-editor-dialog { border:1px solid var(--operations-border); border-radius:12px; background:#fffaf1; }
 .admin-page .admin-page-heading h1 { color:var(--operations-wine); text-wrap:balance; }
 .admin-page .table-scroll { border:1px solid var(--operations-border); border-radius:10px; background:var(--operations-paper); overscroll-behavior:contain; }
+.admin-page .admin-product-total { color:var(--operations-wine); font-size:20px; font-weight:650; font-variant-numeric:tabular-nums; }
+.admin-page .admin-product-total:not([hidden]) + .admin-live-label { display:none; }
+.admin-page .admin-records[data-section="productos"] .admin-toolbar { padding-block:14px; border-block:1px solid var(--operations-border); }
+.admin-page .admin-products-table :is(th,td) { min-width:0; }
+.admin-page .admin-products-table th:first-child { width:16%; }
+.admin-page .admin-products-table td:first-child { color:var(--admin-muted); font-size:11px; }
+.admin-page .admin-products-table td:nth-child(2) { color:var(--operations-wine); font-weight:650; }
+.admin-page .admin-product-stock { display:block; margin-top:4px; color:var(--admin-muted); font-size:11px; font-weight:400; font-variant-numeric:tabular-nums; }
+.admin-page .admin-products-table :is(th,td):nth-child(4) { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.admin-page .admin-products-table :is(th,td):last-child { width:180px; text-align:right; white-space:nowrap; }
+.admin-page .admin-products-table td .text-link { padding:8px; margin:0; border:1px solid var(--operations-border); border-radius:6px; }
+.admin-page .admin-products-table td .text-link + .text-link { margin-left:8px; }
+.admin-page .admin-products-table [data-delete] { color:#8c1d2c; }
+.admin-page .admin-records[data-section="productos"] .pagination { justify-content:space-between; padding-block:14px; border-bottom:1px solid var(--operations-border); font-variant-numeric:tabular-nums; }
+@media(max-width:700px) {
+  .admin-page .admin-products-table :is(th,td) { padding:12px; }
+  .admin-page .admin-products-table :is(th,td):first-child { min-width:90px; }
+  .admin-page .admin-products-table :is(th,td):nth-child(2) { min-width:150px; }
+  .admin-page .admin-products-table :is(th,td):nth-child(3) { min-width:110px; }
+  .admin-page .admin-records[data-section="productos"] .pagination { justify-content:center; }
+}
 
 body[data-page="deliveries"] .operations-heading { margin:12px 0 30px; max-width:900px; }
 body[data-page="deliveries"] .operations-heading h1 { margin:10px 0 16px; color:var(--operations-wine); font-size:clamp(30px,4vw,42px); font-weight:650; line-height:1.18; text-wrap:balance; }

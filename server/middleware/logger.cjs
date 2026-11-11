@@ -5,9 +5,12 @@ const timedRoutes=new Set(['/','/index.html','/api/salud','/api/productos','/api
 const adminWrites=new Map([
   ['POST /api/auth/mfa/enable','security.mfa.enable'],['POST /api/auth/mfa/disable','security.mfa.disable'],
   ['POST /api/productos','product.create'],['PUT /api/productos/:id','product.update'],['DELETE /api/productos/:id','product.delete'],
+  ['PATCH /api/productos/:id','product.update'],
   ['POST /api/promociones','promotion.create'],['PUT /api/promociones/:id','promotion.update'],['DELETE /api/promociones/:id','promotion.delete'],
+  ['PATCH /api/promociones/:id','promotion.update'],
   ['POST /api/admin/imagenes','image.upload'],['POST /api/admin/configuracion/fiscal','fiscal.configuration.create'],
   ['POST /api/admin/proveedores','supplier.create'],['PUT /api/admin/proveedores/:id','supplier.update'],
+  ['PATCH /api/admin/proveedores/:id','supplier.update'],['DELETE /api/admin/proveedores/:id','supplier.deactivate'],
   ['POST /api/admin/lotes','inventory.lot.create'],['POST /api/admin/inventario/ajustes','inventory.adjust'],
   ['PUT /api/pedidos/:id/estado','order.status.update'],
   ['POST /api/pedidos/:id/pago/payphone','payment.start'],

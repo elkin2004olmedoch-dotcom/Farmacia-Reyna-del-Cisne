@@ -1,13 +1,13 @@
 // Fixed upstream, generated at build time. No proxy destination comes from the browser.
 const upstream='https://farmacia-reina-del-cisne.onrender.com';
 const allowedHeaders=['Accept','Content-Type','Authorization','X-Farmacia-Web','Origin'];
-const cookies=new Set(['__Host-farmacia-access','__Host-farmacia-refresh']);
-if(/^http:\/\/(?:127\.0\.0\.1|localhost):\d+$/.test(upstream))for(const name of ['farmacia-access','farmacia-refresh'])cookies.add(name);
+const cookies=new Set(['__Host-farmacia-access','__Host-farmacia-refresh','__Host-farmacia-registro']);
+if(/^http:\/\/(?:127\.0\.0\.1|localhost):\d+$/.test(upstream))for(const name of ['farmacia-access','farmacia-refresh','farmacia-registro'])cookies.add(name);
 export function createProxy(send=fetch){return async(request,env)=>{
  const url=new URL(request.url);
  if(!url.pathname.startsWith('/api/'))return env.ASSETS.fetch(request);
  const error=(status,message)=>Response.json({ok:false,error:{message}},{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
- if(!['GET','HEAD','POST','PUT','DELETE','OPTIONS'].includes(request.method))return error(405,'Método no permitido.');
+ if(!['GET','HEAD','POST','PUT','PATCH','DELETE','OPTIONS'].includes(request.method))return error(405,'Método no permitido.');
  const origin=request.headers.get('Origin');
  if(origin&&origin!==url.origin)return error(403,'Origen no autorizado.');
  if(url.pathname.includes('\\')||/%(?:2f|5c|2e)/i.test(url.pathname))return error(400,'Ruta inválida.');
