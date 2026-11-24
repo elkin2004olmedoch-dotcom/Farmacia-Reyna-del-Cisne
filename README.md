@@ -5,6 +5,8 @@
 | Enlace | Qué puedes ver |
 | --- | --- |
 | [Abrir la farmacia del aula](https://farmacia-reina-del-cisne-aula.onrender.com/index.html) | Portada pública para presentar el catálogo, comprar e iniciar sesión como cliente o administrador. |
+| [Buscar productos en administración](https://farmacia-reina-del-cisne-aula.onrender.com/admin.html?tabla=productos) | Busca por nombre en todo el catálogo. Requiere acceso administrativo. |
+| [Compras por lote](https://farmacia-reina-del-cisne-aula.onrender.com/admin.html?tabla=lotes) | Elige el producto y el proveedor para consultar el costo y registrar la entrada. |
 | [Kárdex del aula](https://farmacia-reina-del-cisne-aula.onrender.com/admin.html?tabla=kardex) | Entradas, salidas y saldo por producto. Requiere acceso administrativo. |
 | [Frontend · frontend/](./frontend/) | Plantillas de las pantallas y generador del sitio. |
 | [Código del navegador · src/](./src/) | HTML publicado, estilos, modelos, vistas y controladores del cliente. |
@@ -16,12 +18,13 @@ Tienda y gestión farmacéutica con sede en Puerto Quito y cobertura configurabl
 
 La cobertura nacional comienza con envío gratuito; Puerto Quito conserva su tarifa local. Si no se localiza el destino, el checkout selecciona retiro y exige confirmar nuevamente. La ventana de tarjetas valida datos sintéticos sin efectuar cobros. [Pagos y cobertura nacional](docs/PAGOS-Y-COBERTURA-NACIONAL.md).
 
-## Abrir la aplicación
+## Abrir la tienda principal
 
-- [Tienda](https://farmacia-reyna-del-cisne-pruebas.pages.dev/): catálogo, carrito y compra desde el navegador.
-- [Administración](https://farmacia-reyna-del-cisne-pruebas.pages.dev/admin): productos, usuarios y configuración; requiere rol admin.
-- [Entregas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/entregas): requiere cuenta de administrador o repartidor.
-- [Pago de pedidos](https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos): abre un pedido desde **Mis pedidos** para consultar su importe y coordinar el pago con la farmacia.
+- [Tienda en Render](https://farmacia-reina-del-cisne.onrender.com/index.html)
+- [Administración de productos](https://farmacia-reina-del-cisne.onrender.com/admin.html?tabla=productos)
+- [Entregas para administradores y repartidores](https://farmacia-reina-del-cisne.onrender.com/entregas.html)
+- [Mis pedidos y opciones de pago](https://farmacia-reina-del-cisne.onrender.com/pedidos.html)
+- [Versión de pruebas en Cloudflare Pages](https://farmacia-reyna-del-cisne-pruebas.pages.dev/)
 
 Los accesos privados se entregan fuera del repositorio. El proyecto funciona desde el navegador; los instaladores, APK y proyectos nativos se retiraron el 23 de noviembre de 2026.
 
