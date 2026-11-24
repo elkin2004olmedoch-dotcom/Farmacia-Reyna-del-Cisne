@@ -8,6 +8,14 @@ module.exports={
  async updateSupplier(req,res){const {id,esperadoUpdatedAt,...data}=req.input;res.json({ok:true,data:await suppliers.update(id,data,esperadoUpdatedAt??req.resourceVersion)});},
  async removeSupplier(req,res){await suppliers.remove(req.input.id,req.input.esperadoUpdatedAt);res.status(204).end();},
  async lots(req,res){res.json({ok:true,data:await inventory.listLots(req.input)});},
+ async purchasePrice(req,res){
+  const {productoId,proveedorId}=req.input;
+  const lot=await inventory.lastPurchasePrice(productoId,proveedorId);
+  const tariff=req.app.locals.tarifaAula;
+  const initial=tariff?.proveedorId===proveedorId?tariff.precios.get(productoId):undefined;
+  res.json({ok:true,data:lot?{costoUnitario:lot.costoUnitario,origen:'ultima-compra'}:
+   {costoUnitario:initial??null,origen:initial!=null?'tarifa-aula':null}});
+ },
  async createLot(req,res){res.status(201).json({ok:true,data:await inventory.createLot(req.input,req.user.id)});},
  async movements(req,res){res.json({ok:true,data:await inventory.listMovements(req.input)});},
  async adjust(req,res){res.status(201).json({ok:true,data:await inventory.adjust(req.input,req.user.id)});},

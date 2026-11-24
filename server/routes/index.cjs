@@ -82,6 +82,7 @@ module.exports=config=> {
   router.patch('/admin/proveedores/:id',auth,admin,V.id,...resourcePatch.supplierPatch,inventory.updateSupplier);
   router.delete('/admin/proveedores/:id',auth,admin,V.id,...resourcePatch.versionOnly,inventory.removeSupplier);
   router.get('/admin/lotes',auth,admin,...V.inventoryPagination,inventory.lots);
+  router.get('/admin/lotes/precio-compra',auth,admin,...V.purchasePrice,inventory.purchasePrice);
   router.post('/admin/lotes',auth,admin,...V.lot,V.validated,inventory.createLot);
   router.get('/admin/inventario/movimientos',auth,admin,...V.inventoryPagination,inventory.movements);
   router.post('/admin/inventario/ajustes',auth,admin,...V.adjustment,V.validated,inventory.adjust);

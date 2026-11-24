@@ -56,9 +56,11 @@ test('proveedores ecuatorianos, lotes y movimientos comparten stock con clientes
   await row.locator('[data-purchase]').click();
   await expect(page.locator('#lot-productoId')).toHaveValue('solar');
   await expect(page.locator('#lot-proveedorId')).toHaveValue(lot.proveedorId);
+  await expect(page.locator('#lot-costoUnitario')).toHaveValue('4.25');
   await page.locator('#lot-numero').fill('OTRO-'+suffix);
   await page.locator('#lot-vencimiento').fill(lot.vencimiento);
   await page.locator('#lot-cantidad').fill('2');
+  await expect(page.locator('#lot-total')).toContainText('8,50');
   await page.locator('#lot-costoUnitario').fill('4.10');
   await expect(page.locator('#lot-total')).toContainText('8,20');
   await page.locator('#lot-form [type=submit]').click();

@@ -18,6 +18,21 @@ before(async()=>{
 });
 after(()=>fixture.close());
 
+test('precio automático por producto y proveedor toma la última recepción y respeta un costo cero',async()=>{
+ const vendor=await supplier(),pair={productoId:product.id,proveedorId:vendor.id};
+ const endpoint='/api/admin/lotes/precio-compra';
+ await api.get(endpoint).query(pair).expect(401);
+ await authorize(api.get(endpoint),user).query(pair).expect(403);
+ const price=async query=>(await authorize(api.get(endpoint)).query(query).expect(200)).body.data;
+ assert.equal((await price(pair)).costoUnitario,null);
+ for(const [index,cost] of [3.25,0].entries()){
+  await authorize(api.post('/api/admin/lotes')).send({...pair,numero:'precio-'+index,cantidad:1,vencimiento:'2090-01-01',costoUnitario:cost}).expect(201);
+  assert.deepEqual(await price(pair),{costoUnitario:String(cost),origen:'ultima-compra'});
+ }
+ assert.equal((await price({...pair,proveedorId:randomUUID()})).costoUnitario,null);
+ assert.equal((await price({...pair,productoId:randomUUID()})).costoUnitario,null);
+});
+
 test('el producto conserva su proveedor habitual en administración y lo omite en el catálogo público',async()=>{
  const saved=await supplier();
  const values={nombre:'Artículo abastecido',precio:2,stock:3,categoria:'cuidado',descripcion:'Artículo para control de abastecimiento',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase de prueba'};

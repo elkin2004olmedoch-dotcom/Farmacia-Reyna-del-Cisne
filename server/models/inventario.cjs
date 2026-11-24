@@ -9,6 +9,9 @@ const serializable={isolationLevel:Prisma.TransactionIsolationLevel.Serializable
 function ecuadorDay(now=new Date()){return new Date(now.getTime()-5*60*60*1000).toISOString().slice(0,10);}
 function sellableStock(product,now=new Date()) {return Math.max(0,product.stock-(product.lotes || []).filter(lot=>lot.vencimiento<ecuadorDay(now)).reduce((sum,lot)=>sum+lot.stock,0));}
 const trackedStock=product=>(product.lotes || []).reduce((sum,lot)=>sum+lot.stock,0);
+function lastPurchasePrice(productoId,proveedorId){
+ return db.lote.findFirst({where:{productoId,proveedorId},orderBy:[{createdAt:'desc'},{id:'desc'}],select:{costoUnitario:true}});
+}
 function purchaseDetails(lot,cantidadRecibida){
  const costoTotalCentavos=cantidadRecibida==null?null:lot.costoUnitario.mul(100).round().mul(cantidadRecibida).toNumber();
  return {...lot,cantidadRecibida,costoTotalCentavos};
@@ -95,4 +98,4 @@ async function restore(tx,details,pedidoId,actorId) {
   if(remaining>0)await tx.movimientoInventario.create({data:{productoId:line.productoId,pedidoId,actorId,tipo:'devolucion',cantidad:remaining,motivo:'Devolución sin lote por cancelación del pedido'}});
  }
 }
-module.exports={ecuadorDay,sellableStock,trackedStock,listLots,listMovements,createLot,adjust,reserve,saleMovements,restore,serializable,movementSelect,movementDto};
+module.exports={ecuadorDay,sellableStock,trackedStock,lastPurchasePrice,listLots,listMovements,createLot,adjust,reserve,saleMovements,restore,serializable,movementSelect,movementDto};

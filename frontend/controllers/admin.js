@@ -61,6 +61,30 @@ export async function adminController() {
     document.getElementById('lot-total').textContent=valid?money(cantidad.valueAsNumber*Math.round(costoUnitario.valueAsNumber*100)):'—';
   }
   forms.lotes.addEventListener('input',showPurchaseTotal);
+  let priceRequest=0;
+  const priceHint=document.getElementById('lot-costoUnitario-help');
+  priceHint.setAttribute('role','status');
+  forms.lotes.elements.costoUnitario.addEventListener('input',()=>{
+    priceRequest++;
+    priceHint.textContent='';
+  });
+  async function loadPurchasePrice(){
+    const {productoId,proveedorId,costoUnitario}=forms.lotes.elements;
+    const seq=++priceRequest;
+    costoUnitario.value='';
+    showPurchaseTotal();
+    if(!productoId.value || !proveedorId.value){priceHint.textContent='Selecciona el producto y el proveedor para consultar el precio.';return;}
+    priceHint.textContent='Consultando precio de compra…';
+    try{
+      const price=await administration.purchasePrice(productoId.value,proveedorId.value);
+      if(seq!==priceRequest || !auth.isAdmin)return;
+      if(price.costoUnitario==null){priceHint.textContent='Primera compra con este proveedor. Ingresa el precio acordado.';return;}
+      costoUnitario.value=Number(price.costoUnitario).toFixed(2);
+      priceHint.textContent=price.origen==='ultima-compra'?'Último precio pagado a este proveedor.':'Tarifa inicial de Distribuidora del aula.';
+      showPurchaseTotal();
+    }catch(error){if(seq===priceRequest && auth.isAdmin)priceHint.textContent='No se pudo consultar el precio. Puedes ingresar el de la factura.';}
+  }
+  forms.lotes.elements.proveedorId.addEventListener('change',loadPurchasePrice);
   function pharmaceuticalRequired(){const form=forms.productos;form.elements.fundamentoIva.required=form.elements.ivaCategoria.value==='cero';for(const key of ['precio','stock'])form.elements[key].required=!form.elements.soloConsulta.checked;for(const key of ['pvpMaximo','laboratorio','presentacion','registroSanitario'])form.elements[key].required=form.elements.tipoProducto.value==='medicamento'&&!form.elements.soloConsulta.checked;}
   function errors(form,issues){
     if(!auth.isAdmin || !form.isConnected)return false;
@@ -175,7 +199,11 @@ export async function adminController() {
       const supplier=form.elements.proveedorId,product=form.elements.productoId;
       const available=new Set(suppliers.items.filter(item=>item.activo).map(item=>item.id));
       const preferred=new Map(choices.map(item=>[item.id,item.proveedorId]));
-      product.onchange=()=>{const selected=preferred.get(product.value);supplier.value=available.has(selected)?selected:'';};
+      product.onchange=()=>{
+        const selected=preferred.get(product.value);
+        supplier.value=available.has(selected)?selected:available.size===1?available.values().next().value:'';
+        void loadPurchasePrice();
+      };
       product.onchange();
       form.elements.vencimiento.min=ecuadorToday();
       showPurchaseTotal();
@@ -287,8 +315,12 @@ export async function adminController() {
     const form=forms[section];
     for(const [key,value] of Object.entries(values)){const field=form.elements.namedItem(key);if(!field || value==null)continue;if(field.type==='checkbox')field.checked=Boolean(value);else field.value=String(value);}
     if(section==='lotes' && values.productoId && values.proveedorId===undefined)form.elements.productoId.dispatchEvent(new Event('change'));
-    if(section==='lotes' && values.proveedorId===null)form.elements.proveedorId.value='';
-    if(section==='lotes')showPurchaseTotal();
+    if(section==='lotes'){
+      if(values.proveedorId===null)form.elements.proveedorId.value='';
+      if(values.costoUnitario!=null){
+        priceRequest++;form.elements.costoUnitario.value=String(values.costoUnitario);priceHint.textContent='';showPurchaseTotal();
+      }else if(values.proveedorId!==undefined)void loadPurchasePrice();
+    }
     if(section==='productos')pharmaceuticalRequired();
     if(section==='promociones')promotionEditorState(form);
     if(section==='movimientos')await loadMovementLots();
@@ -296,7 +328,7 @@ export async function adminController() {
   }
   const refresh=watchUpdates(()=>render({silent:true}),{canRefresh:()=>auth.isAdmin && !document.querySelector('dialog[open]') && !document.querySelector('#admin-area [aria-busy=true]')});
   adminCompanionController({refresh,navigate,openEditor});
-  dialog.addEventListener('close',()=>{lotRequest++;openingId++;forms.usuarios.elements.password.value='';productImage.reset();promoImage.reset();if(!auth.isAdmin || !dialog.isConnected)return;(previousFocus?.isConnected?previousFocus:document.getElementById('admin-create'))?.focus();void refresh();});
+  dialog.addEventListener('close',()=>{lotRequest++;priceRequest++;openingId++;forms.usuarios.elements.password.value='';productImage.reset();promoImage.reset();if(!auth.isAdmin || !dialog.isConnected)return;(previousFocus?.isConnected?previousFocus:document.getElementById('admin-create'))?.focus();void refresh();});
   stateDialog.addEventListener('close',()=>{if(!auth.isAdmin || !stateDialog.isConnected)return;if(stateFocus?.isConnected)stateFocus.focus();void refresh();});
   if(new URLSearchParams(location.search).get('crear')==='1' && editableSections.includes(name) && result && auth.isAdmin)await open();
 }
