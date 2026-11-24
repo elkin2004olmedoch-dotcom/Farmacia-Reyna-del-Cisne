@@ -24,6 +24,7 @@ module.exports=function createApp(settings=require('./config.cjs')()) {
   app.post('/api/admin/imagenes',authenticate(settings),roles('admin'),rateLimit({windowMs:60*1000,limit:10,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'IMAGE_RATE_LIMIT','Espera un minuto antes de subir más imágenes.'))}),express.json({limit:'3mb',strict:true}),require('./middleware/imagevalidation.cjs').imageValidation,require('./controllers/imagenes.cjs'));
   app.use('/api',require('./routes/sri.cjs')(settings));
   app.use('/api',express.json({limit:'32kb',strict:true}));
+  app.post('/api/goti/consulta',rateLimit({windowMs:60000,limit:10,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'GOTI_LIMIT','Espera un minuto para hacer otra consulta.'))}),require('./controllers/consulta-goti.cjs').createConsultation());
   app.use('/api',require('./routes/index.cjs')(settings));
   app.use('/api',require('./routes/entregas.cjs')(settings));
   app.use('/api',require('./routes/pagos.cjs')(settings));
