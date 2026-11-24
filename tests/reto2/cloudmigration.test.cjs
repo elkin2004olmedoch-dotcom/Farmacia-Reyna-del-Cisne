@@ -31,7 +31,7 @@ function fixture(uploaded=false){
     usuario:[{id:'cliente-original',nombre:'Cliente privado',email:privateEmail,telefono:'0979275988',passwordHash:privateHash,role:'user',tokenVersion:7,activo:false,emailVerifiedAt:null,emailVerificationRequired:true,createdAt},{id:'repartidor-original',nombre:'Repartidor privado',email:'repartidor@example.ec',telefono:'0979275988',passwordHash:privateHash,role:'repartidor',tokenVersion:1,activo:true,emailVerifiedAt:updatedAt,emailVerificationRequired:false,createdAt}],
     emailVerification:[{usuarioId:'cliente-original',email:privateEmail,tokenHash:privateVerificationHash,createdAt,expiresAt:updatedAt}],
     sesionMovil:[{id:'sesion-movil-original',usuarioId:'repartidor-original',tokenVersion:1,secretHash:'a'.repeat(64),previousSecretHash:null,expiresAt:new Date('2030-01-01T00:00:00Z'),revokedAt:createdAt,createdAt,updatedAt}],
-    producto:[{id:'producto-original',nombre:'Alcohol',precio:new Prisma.Decimal('12.34567'),stock:9,categoria:'Salud',descripcion:'Descripción',imagen:uploaded?reference:'assets/images/producto-alcohol-antiseptico.svg',alt:'Alcohol',activo:true,createdAt,updatedAt}],
+    producto:[{id:'producto-original',proveedorId:'proveedor-original',nombre:'Alcohol',precio:new Prisma.Decimal('12.34567'),stock:9,categoria:'Salud',descripcion:'Descripción',imagen:uploaded?reference:'assets/images/producto-alcohol-antiseptico.svg',alt:'Alcohol',activo:true,createdAt,updatedAt}],
     pedido:[{id:'pedido-original',userId:'cliente-original',total:new Prisma.Decimal('27.19134'),subtotalProductos:new Prisma.Decimal('24.69134'),costoEnvioCentavos:250,envioIvaPorcentaje:15,envioBaseImponible:new Prisma.Decimal('2.17'),envioIvaMonto:new Prisma.Decimal('0.33'),zonaEntregaId:'puerto-quito',latitudEntrega:null,longitudEntrega:null,ubicacionEntregaAceptadaAt:null,estado:'entregado',entrega:'delivery',nombre:'Nombre privado',email:privateEmail,telefono:'0979275988',documento:'••••••0400',provincia:'Pichincha',ciudad:'Puerto Quito',direccion:'Domicilio privado',codigoPostal:'170101',requestKey:'solicitud-original',fingerprint:'huella-privada',createdAt,updatedAt}],
     zonaEntrega:[{id:'puerto-quito',nombre:'Cobertura administrada',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:250,ivaCategoria:'general',fundamentoIva:null,activa:true,version:2,createdAt,updatedAt}],
     zonaEntregaTarifa:[{id:'puerto-quito-inicial',zonaEntregaId:'puerto-quito',version:1,tarifaCentavos:null,ivaCategoria:'general',fundamentoIva:null,actorId:null,createdAt},{id:'tarifa-original',zonaEntregaId:'puerto-quito',version:2,tarifaCentavos:250,ivaCategoria:'general',fundamentoIva:null,actorId:'cliente-original',createdAt:updatedAt}],
@@ -106,7 +106,9 @@ const emptyCounts=()=>Object.fromEntries(MODELS.filter(model=>model!=='revisionC
 test('el importador cubre todos los modelos Prisma y no omite futuras entidades de farmacia',async()=>{
  const schema=await fs.readFile(path.resolve(__dirname,'../../server/prisma/schema.prisma'),'utf8');
  const names=[...schema.matchAll(/^model (\w+) \{/gm)].map(match=>match[1][0].toLowerCase()+match[1].slice(1));
- assert.deepEqual([...MODELS].sort(),names.sort());
+ // La migración siembra Rol y el alta de Usuario genera UsuarioRol en el destino.
+ assert.deepEqual([...MODELS,'rol','usuarioRol'].sort(),names.sort());
+ assert.ok(MODELS.indexOf('proveedor')<MODELS.indexOf('producto'));
 });
 
 test('verificaciones se cuentan sin transferir hashes y los usuarios conservan el bloqueo o su fecha verificada',async()=>{

@@ -3,7 +3,7 @@ const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
 // Rol is installed by migration and UsuarioRol is populated when each user is inserted.
-const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','adminMfa','adminMfaRecuperacion','sesionWeb','registroPendiente','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','movimientoLote','facturaPedido','entrega','pago','pagoPractica','direccionGuardada','favorito','resenaProducto','entregaIncidencia','auditoriaAdmin','semilla','revisionCatalogo']);
+const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','adminMfa','adminMfaRecuperacion','sesionWeb','registroPendiente','sesionMovil','proveedor','producto','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','movimientoLote','facturaPedido','entrega','pago','pagoPractica','direccionGuardada','favorito','resenaProducto','entregaIncidencia','auditoriaAdmin','semilla','revisionCatalogo']);
 // The destination keeps its own trigger-maintained catalog marker.
 const countedModels=MODELS.filter(model=>model!=='revisionCatalogo');
 const privateActions=new Set(['emailVerification','passwordReset','sesionWeb','adminMfa','adminMfaRecuperacion','registroPendiente']);
@@ -92,6 +92,7 @@ function assertSnapshotRelations(snapshot){
     && snapshot.promocion.every(row=>ids.producto.has(row.productoId))
     && snapshot.pedidoEstado.every(row=>ids.pedido.has(row.pedidoId) && ids.usuario.has(row.actorId))
     && snapshot.configuracionFiscal.every(row=>row.actorId==null || ids.usuario.has(row.actorId))
+    && snapshot.producto.every(row=>row.proveedorId==null || ids.proveedor.has(row.proveedorId))
     && snapshot.lote.every(row=>ids.producto.has(row.productoId) && (row.proveedorId==null || ids.proveedor.has(row.proveedorId)))
     && snapshot.pedidoDetalleLote.every(row=>{
       const detail=snapshot.pedidoDetalle.find(detail=>detail.id===row.detalleId),lot=snapshot.lote.find(lot=>lot.id===row.loteId);

@@ -18,6 +18,23 @@ before(async()=>{
 });
 after(()=>fixture.close());
 
+test('el producto conserva su proveedor habitual en administración y lo omite en el catálogo público',async()=>{
+ const saved=await supplier();
+ const values={nombre:'Artículo abastecido',precio:2,stock:3,categoria:'cuidado',descripcion:'Artículo para control de abastecimiento',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase de prueba'};
+ await authorize(api.post('/api/productos')).send({...values,proveedorId:randomUUID()}).expect(422);
+ const created=(await authorize(api.post('/api/productos')).send({...values,proveedorId:saved.id}).expect(201)).body.data;
+ const read=async()=>(await authorize(api.get('/api/admin/tablas/productos/'+created.id)).expect(200)).body.data.item;
+ assert.equal((await read()).proveedorNombre,saved.nombre);
+ assert.equal(Object.hasOwn((await api.get('/api/productos/'+created.id).expect(200)).body.data,'proveedorId'),false);
+ await db.proveedor.update({where:{id:saved.id},data:{activo:false}});
+ await authorize(api.post('/api/productos')).send({...values,proveedorId:saved.id}).expect(422);
+ const url='/api/productos/'+created.id;
+ await authorize(api.put(url)).send({...values,proveedorId:saved.id,esperadoUpdatedAt:created.updatedAt}).expect(200);
+ const current=await read();assert.equal(current.proveedorId,saved.id);
+ await authorize(api.patch(url)).send({proveedorId:null,esperadoUpdatedAt:current.updatedAt}).expect(200);
+ assert.equal((await read()).proveedorId,null);
+});
+
 test('la ficha privada del proveedor exige administrador y devuelve 404 para un id ausente',async()=>{
  const saved=await supplier(),url='/api/admin/proveedores/'+saved.id;
  await api.get(url).expect(401);

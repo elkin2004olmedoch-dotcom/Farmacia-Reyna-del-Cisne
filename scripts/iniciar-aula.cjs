@@ -36,6 +36,7 @@ async function start(){
     const admin=await db.usuario.findUniqueOrThrow({where:{email:env.ADMIN_EMAIL},select:{id:true,tokenVersion:true}});
     await require('../server/models/entregas.cjs').saveZone('puerto-quito',{tarifaCentavos:0,esperadoVersion:localZone.version},admin);
   }
+  await db.proveedor.create({data:{nombre:'Distribuidora del aula',ruc:'0102030400001',email:'proveedor@aula.invalid',telefono:'+593990000000',direccion:'Bodega de práctica del aula'}});
   await db.usuario.create({data:{nombre:'Cliente',username:'cliente',email:'cliente@aula.invalid',telefono:'0990000000',role:'user',passwordHash:customerHash}});
   const app=express();
   app.post('/api/auth/register',(_req,res)=>res.status(403).json({ok:false,error:{code:'CLASS_ACCOUNTS',message:'Entra con la cuenta de cliente asignada.'}}));

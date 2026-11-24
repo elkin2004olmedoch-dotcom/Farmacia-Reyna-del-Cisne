@@ -38,6 +38,9 @@ model Producto {
   biologico Boolean @default(false)
   cadenaFrio Boolean @default(false)
   stockMinimo Int @default(5)
+  proveedorId String?
+  proveedor Proveedor? @relation(fields: [proveedorId], references: [id], onDelete: Restrict)
+  @@index([proveedorId])
   pvpMaximo Decimal?
   lotes Lote[]
   movimientos MovimientoInventario[]
@@ -221,6 +224,7 @@ model ConfiguracionFiscal {
 }
 
 model Proveedor {
+  productos Producto[]
   id String @id @default(uuid())
   nombre String
   ruc String @unique

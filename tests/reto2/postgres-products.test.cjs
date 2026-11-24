@@ -27,7 +27,11 @@ test('PostgreSQL aislado conserva relaciones y comprueba PATCH, advertencias, re
  const tables=await db.$queryRaw`SELECT relname,relrowsecurity FROM pg_class WHERE relname IN ('RegistroPendiente','RevisionCatalogo')`;assert.equal(tables.length,2);assert.ok(tables.every(row=>row.relrowsecurity));
  for(const role of ['anon','authenticated']){await db.$executeRawUnsafe('GRANT USAGE ON SCHEMA public TO "'+role+'"');await db.$executeRawUnsafe('GRANT SELECT ON "RegistroPendiente","RevisionCatalogo" TO "'+role+'"');await db.$transaction(async tx=>{await tx.$executeRawUnsafe('SET LOCAL ROLE "'+role+'"');assert.equal((await tx.$queryRaw`SELECT * FROM "RegistroPendiente"`).length,0);assert.equal((await tx.$queryRaw`SELECT * FROM "RevisionCatalogo"`).length,0);});}
  const consultation={nombre:'Consulta PostgreSQL',precio:0,stock:0,categoria:'medicamentos',tipoProducto:'medicamento',soloConsulta:true,descripcion:'Referencia sintética para consulta',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase sintético'};
- const reference=(await request.post('/api/productos').set(headers).send(consultation).expect(201)).body.data;
+ const reference=(await request.post('/api/productos').set(headers).send({...consultation,proveedorId:supplier.id}).expect(201)).body.data;
+ assert.equal(reference.proveedorId,supplier.id);
+ const stored=(await request.get('/api/admin/tablas/productos/'+reference.id).set(headers).expect(200)).body.data.item;
+ assert.equal(stored.proveedorNombre,'Proveedor actualizado');
+ await assert.rejects(db.producto.update({where:{id:reference.id},data:{proveedorId:randomUUID()}}),{code:'P2003'});
  assert.equal(reference.soloConsulta,true);assert.equal(reference.registroSanitario,null);
  const categories=(await request.get('/api/productos/filtros').expect(200)).body.data.categorias;
  assert.equal(categories.length,16);assert.equal(categories.find(section=>section.id==='medicamentos').total,await db.producto.count({where:{activo:true,categoria:'medicamentos'}}));

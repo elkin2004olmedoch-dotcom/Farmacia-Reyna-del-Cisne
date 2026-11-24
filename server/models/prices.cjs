@@ -19,7 +19,7 @@ function effectivePrice(product,promotions=product.promociones || [],now=new Dat
   const originalCents=new Prisma.Decimal(product.precio).mul(100).toDecimalPlaces(0).toNumber();
   const cents=Math.round(originalCents*(100-percentage)/100);
   if(!Number.isSafeInteger(originalCents) || !Number.isSafeInteger(cents))throw new RangeError('El precio supera el rango de centavos admitido.');
-  const {promociones,lotes,...values}=product;
+  const {promociones,lotes,proveedorId,...values}=product;
   const ivaPorcentaje=product.ivaCategoria==='cero'?0:generalRate;
   return {...values,stock:sellableStock(product,now),precioOriginal:new Prisma.Decimal(originalCents).div(100),precio:new Prisma.Decimal(cents).div(100),descuentoDirecto:direct,descuentoPorcentaje:percentage,promocionId:promotion?.id || null,...inclusiveTax(cents,ivaPorcentaje)};
 }

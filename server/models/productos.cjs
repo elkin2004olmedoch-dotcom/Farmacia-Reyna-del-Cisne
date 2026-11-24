@@ -20,6 +20,10 @@ function validatePvp(product,requireSalePrice=true) {
   if(!product.soloConsulta && product.tipoProducto==='medicamento' && (!product.pvpMaximo || !product.registroSanitario || !product.laboratorio || !product.presentacion))throw new AppError(422,'MEDICATION_METADATA','El medicamento requiere PVP impreso, registro sanitario, laboratorio y presentación.');
   if(product.pvpMaximo!=null && new Prisma.Decimal(product.precio).gt(product.pvpMaximo))throw new AppError(422,'PRICE_EXCEEDS_PVP','El precio no puede superar el PVP máximo impreso.');
 }
+async function validateSupplier(tx,id){
+  if(id && !await tx.proveedor.findFirst({where:{id,activo:true},select:{id:true}}))
+    throw new AppError(422,'SUPPLIER_UNAVAILABLE','Selecciona un proveedor activo.',[{field:'proveedorId',message:'El proveedor ya no está disponible.'}]);
+}
 module.exports = {
   revision:()=>db.revisionCatalogo.findUnique({where:{id:'catalogo'},select:{token:true}}),
   async list({page=1,pageSize=50,sort='recommended',...filters}) {
@@ -75,11 +79,12 @@ module.exports = {
     return {laboratorios:values(labs,'laboratorio'),presentaciones:values(presentations,'presentacion'),categorias:sections.map(section=>({...section,total:counts.get(section.id)||0}))};
   },
   async find(id) {const now=new Date();const [product,tax]=await Promise.all([db.producto.findFirst({where:{id,activo:true},include:{lotes:priceLots(now),promociones:{where:discountWhere(now)}}}),fiscal.current(db,now)]);return product?effectivePrice(product,product.promociones,now,tax.tarifaGeneral):null;},
-  async create(data,actorId){validatePvp(data);return db.$transaction(async tx=>{const product=await tx.producto.create({data});if(product.stock>0)await tx.movimientoInventario.create({data:{productoId:product.id,actorId,tipo:'entrada',cantidad:product.stock,motivo:'Stock inicial registrado en el catálogo'}});return product;},serializable);},
+  async create(data,actorId){validatePvp(data);return db.$transaction(async tx=>{await validateSupplier(tx,data.proveedorId);const product=await tx.producto.create({data});if(product.stock>0)await tx.movimientoInventario.create({data:{productoId:product.id,actorId,tipo:'entrada',cantidad:product.stock,motivo:'Stock inicial registrado en el catálogo'}});return product;},serializable);},
   async update(id,data,expectedUpdatedAt,actorId) {
     return db.$transaction(async tx=> {
       const current=await tx.producto.findFirst({where:{id,activo:true},include:{lotes:true}});
       if(!current)throw new AppError(404,'NOT_FOUND','El producto no está disponible.');
+      if(data.proveedorId!==current.proveedorId)await validateSupplier(tx,data.proveedorId);
       const merged={...current,...data};
       if(merged.stock<trackedStock(current))throw new AppError(409,'TRACKED_STOCK','El stock no puede bajar de las unidades registradas por lote. Usa un ajuste de inventario.');
       validatePvp(merged,current.soloConsulta || Number(merged.precio)!==Number(current.precio));

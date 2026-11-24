@@ -19,7 +19,7 @@ const companionTables=[...editableSections,'pedidos','zonas','entregas'];
 const companionRecordId=/^[a-z0-9][a-z0-9-]{0,79}$/;
 function productValues(form){
   const fields=Object.fromEntries(Array.from(new FormData(form),([key,value])=>[key,typeof value==='string'?value.trim():value]));
-  const optionalFields=['codigoInterno','codigoBarras','laboratorio','principioActivo','concentracion','presentacion','registroSanitario','fundamentoIva','advertencias'];
+  const optionalFields=['proveedorId','codigoInterno','codigoBarras','laboratorio','principioActivo','concentracion','presentacion','registroSanitario','fundamentoIva','advertencias'];
   const flags=['requiereReceta','controlado','biologico','cadenaFrio','soloConsulta'];
   return {
     ...fields,
@@ -142,7 +142,7 @@ export async function adminController() {
   }
   async function open(record){
     const id=++openingId;const section=name;const opener=document.activeElement;const choices=['promociones','lotes','movimientos'].includes(section)?(await catalog.all()).filter(product=>section!=='promociones'||globalThis.Farmacia.pharmacyPolicy.allowsPromotion(product)):[];
-    const suppliers=section==='lotes'?await administration.suppliers():null;
+    const suppliers=['productos','lotes'].includes(section)?await administration.suppliers():null;
     if(section==='usuarios' && record)record=await administration.user(record.id);
     if(id!==openingId || name!==section || !auth.isAdmin || !dialog.isConnected)return;
     editing=record?.id || null;editingVersion=record?.updatedAt || null;previousFocus=opener;
@@ -150,6 +150,13 @@ export async function adminController() {
     const form=forms[section];if(!form)return;
     if(choices.length || ['promociones','lotes','movimientos'].includes(section))populate(form.elements.productoId,choices);
     if(section==='lotes')populate(form.elements.proveedorId,suppliers.items.filter(s=>s.activo),{empty:'Sin proveedor'});
+    if(section==='productos'){
+      const available=suppliers.items.filter(s=>s.activo || s.id===record?.proveedorId);
+      const field=form.elements.proveedorId;
+      populate(field,available,{empty:'Sin asignar',label:s=>s.nombre+(s.activo?'':' (inactivo)')});
+      field.setAttribute('aria-describedby','product-proveedorId-error product-supplier-help');
+      document.getElementById('product-supplier-help').textContent=available.some(s=>s.activo)?'':'Registra un proveedor en Administración → Proveedores para poder seleccionarlo.';
+    }
     editorView(form,record);errors(form,{});document.getElementById('editor-status').textContent='';
     if(section==='productos'){productImage.reset();pharmaceuticalRequired();editingValues=productValues(form);}
     if(section==='promociones'){promoImage.reset();promotionEditorState(form);}
