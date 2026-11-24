@@ -16,7 +16,8 @@ for(const args of steps)execFileSync(process.execPath,args,{env:process.env,stdi
 const settings={...require('../../server/config.cjs')(),testAuthLimit:200,testApiLimit:2000};
 require('./geocoder-fixture.cjs')();
 const createApp=require('../../server/app.cjs'),db=require('../../server/models/db.cjs'),{Prisma}=require('../../server/models/prisma-client.cjs');
-const models=Prisma.dmmf.datamodel.models,remaining=[...models],ordered=[];
+// The role catalog is fixed and inserting each user regenerates its assignment.
+const models=Prisma.dmmf.datamodel.models.filter(model=>!['Rol','UsuarioRol'].includes(model.name)),remaining=[...models],ordered=[];
 while(remaining.length){const next=remaining.find(model=>!remaining.some(child=>child.fields.some(field=>field.kind==='object'&&field.type===model.name&&field.relationFromFields?.length)));if(!next)throw new Error('Revisa las relaciones del fixture temporal.');ordered.push(next.name[0].toLowerCase()+next.name.slice(1));remaining.splice(remaining.indexOf(next),1);}
 let runtime=createApp(settings),baseline;
 const app=require('express')();

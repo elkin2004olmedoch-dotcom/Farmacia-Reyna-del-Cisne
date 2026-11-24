@@ -55,6 +55,7 @@ model Usuario {
   telefono     String
   passwordHash String
   role         String   @default("user")
+  asignacionRol UsuarioRol?
   tokenVersion Int      @default(0)
   tokenEpoch String?
   activo       Boolean  @default(true)
@@ -78,6 +79,24 @@ model Usuario {
   cambiosTarifa ZonaEntregaTarifa[]
   configuracionesFiscales ConfiguracionFiscal[]
   movimientos MovimientoInventario[]
+
+  @@unique([id, role])
+}
+
+model Rol {
+  id           String @id
+  nombre       String @unique
+  asignaciones UsuarioRol[]
+}
+
+model UsuarioRol {
+  usuarioId String @id
+  rolId     String
+  usuario   Usuario @relation(fields: [usuarioId, rolId], references: [id, role], onDelete: Cascade, onUpdate: Cascade)
+  rol       Rol @relation(fields: [rolId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([usuarioId, rolId])
+  @@index([rolId])
 }
 
 model EmailVerification {

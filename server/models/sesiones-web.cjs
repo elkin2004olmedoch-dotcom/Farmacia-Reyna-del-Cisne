@@ -4,7 +4,7 @@ const db=require('./db.cjs');
 const {transaction}=require('./sesiones-moviles.cjs');
 const users=require('./usuarios.cjs');
 const {AppError}=require('../middleware/errors.cjs');
-const withUser={usuario:{select:{...users.publicFields,tokenVersion:true,tokenEpoch:true}}};
+const withUser={usuario:{select:users.sessionFields}};
 const hash=value=>createHash('sha256').update(value).digest('hex');
 const equal=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 const active=(row,now=new Date())=>row&&!row.revokedAt&&row.expiresAt>now&&row.usuario.activo&&row.tokenVersion===row.usuario.tokenVersion;

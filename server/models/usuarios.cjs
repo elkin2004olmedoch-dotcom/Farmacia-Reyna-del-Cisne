@@ -1,5 +1,6 @@
 const db = require('./db.cjs');
 const publicFields = {id:true,nombre:true,email:true,username:true,telefono:true,role:true,activo:true,emailVerifiedAt:true,emailVerificationRequired:true,createdAt:true,updatedAt:true};
+const sessionFields={...publicFields,tokenVersion:true,tokenEpoch:true,asignacionRol:{select:{rolId:true}}};
 module.exports = {
   findByEmail:email=>db.usuario.findUnique({where:{email}}),
   findByLogin:identifier=>db.usuario.findUnique({where:identifier.includes('@')?{email:identifier}:{username:identifier}}),
@@ -11,6 +12,6 @@ module.exports = {
     await require('./sesiones-moviles.cjs').revokeTx(tx,{usuarioId:id});
     await tx.sesionWeb.updateMany({where:{usuarioId:id,revokedAt:null},data:{revokedAt:new Date()}});return user;
   }),
-  publicFields,
+  publicFields,sessionFields,
   publicUser:user=>Object.fromEntries(Object.keys(publicFields).filter(key=>key in user).map(key=>[key,user[key]])),
 };

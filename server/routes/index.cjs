@@ -86,6 +86,8 @@ module.exports=config=> {
   router.get('/admin/inventario/movimientos',auth,admin,...V.inventoryPagination,inventory.movements);
   router.post('/admin/inventario/ajustes',auth,admin,...V.adjustment,V.validated,inventory.adjust);
   router.get('/admin/recursos',auth,admin,adminTables.resources);
+  router.get('/admin/roles',auth,admin,...V.pagination,adminTables.listResource('roles'));
+  router.get('/admin/usuarios-roles',auth,admin,...V.pagination,adminTables.listResource('usuario-rol'));
   router.post('/admin/usuarios',auth,admin,...userValidation.create,adminUsers.create);
   router.get('/admin/usuarios/:id',auth,admin,V.id,V.validated,adminUsers.find);
   router.put('/admin/usuarios/:id',auth,admin,V.id,...userValidation.update,adminUsers.update);

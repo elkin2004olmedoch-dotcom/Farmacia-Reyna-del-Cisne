@@ -17,6 +17,8 @@ function resource(key,label,model,columns,{select,manage,options,format}={}){
  };
 }
 const resources=[
+ resource('roles','Roles','Rol',[['id','Código'],['nombre','Nombre']]),
+ resource('usuario-rol','Roles de usuarios','UsuarioRol',[['usuarioId','ID del usuario'],['rolId','Código del rol']],{manage:'admin.html?tabla=usuarios'}),
  resource('productos','Productos','Producto',[['id','ID'],['nombre','Nombre'],['categoria','Categoría'],['precio','Precio base'],['stock','Stock registrado'],['soloConsulta','Solo consulta'],['activo','Activo']],{select:scalarSelect(productFields),manage:'admin.html?tabla=productos'}),
  resource('usuarios','Usuarios','Usuario',[['id','ID'],['nombre','Nombre'],['username','Usuario'],['role','Rol'],['activo','Activo'],['emailVerifiedAt','Correo confirmado'],['createdAt','Creación'],['updatedAt','Versión']],{manage:'admin.html?tabla=usuarios'}),
  resource('verificaciones-correo','Verificaciones de correo','EmailVerification',[['usuarioId','Usuario'],['createdAt','Creación'],['expiresAt','Vencimiento']]),

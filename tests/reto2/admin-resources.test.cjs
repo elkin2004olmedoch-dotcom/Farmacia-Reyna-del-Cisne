@@ -8,6 +8,27 @@ const headers=user=>({Authorization:'Bearer '+jwt.sign({version:user.tokenVersio
 const admin=async()=>headers(await db.usuario.findFirst({where:{role:'admin',activo:true}}));
 after(()=>db.$disconnect());
 
+test('la asignación única conserva los permisos y cambia por la API administrativa',async()=>{
+ const auth=await admin();
+ const customer=await db.usuario.create({data:{nombre:'Cliente Roles',email:randomUUID()+'@example.ec',telefono:'+593991234567',passwordHash:'synthetic'}});
+ const before=headers(customer);
+ for(const url of ['/api/admin/roles','/api/admin/usuarios-roles']){
+  await request.get(url).expect(401);
+  await request.get(url).set(before).expect(403);
+ }
+ const catalog=(await request.get('/api/admin/roles').set(auth).expect(200)).body.data;
+ assert.deepEqual(catalog.items.map(item=>item.id),['admin','repartidor','user']);
+ const assignment='/api/admin/tablas/usuario-rol/'+customer.id;
+ assert.equal((await request.get(assignment).set(auth).expect(200)).body.data.item.rolId,'user');
+ await request.patch('/api/admin/usuarios/'+customer.id).set(auth).send({role:'repartidor',esperadoUpdatedAt:customer.updatedAt.toISOString()}).expect(200);
+ await request.get('/api/auth/me').set(before).expect(401);
+ assert.deepEqual((await request.get(assignment).set(auth).expect(200)).body.data.item,{usuarioId:customer.id,rolId:'repartidor'});
+ await assert.rejects(db.usuarioRol.update({where:{usuarioId:customer.id},data:{rolId:'admin'}}));
+ await assert.rejects(db.usuarioRol.delete({where:{usuarioId:customer.id}}));
+ await db.usuario.delete({where:{id:customer.id}});
+ assert.equal(await db.usuarioRol.count({where:{usuarioId:customer.id}}),0);
+});
+
 test('los recursos administrativos cubren cada modelo Prisma y exigen administrador',async()=>{
  await request.get('/api/admin/recursos').expect(401);
  const customer=await db.usuario.create({data:{nombre:'Cliente Recursos',email:randomUUID()+'@example.ec',telefono:'+593991234567',passwordHash:'synthetic'}});

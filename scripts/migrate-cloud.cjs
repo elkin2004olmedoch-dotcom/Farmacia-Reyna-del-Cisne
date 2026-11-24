@@ -2,6 +2,7 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
+// Rol is installed by migration and UsuarioRol is populated when each user is inserted.
 const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','adminMfa','adminMfaRecuperacion','sesionWeb','registroPendiente','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','movimientoLote','facturaPedido','entrega','pago','pagoPractica','direccionGuardada','favorito','resenaProducto','entregaIncidencia','auditoriaAdmin','semilla','revisionCatalogo']);
 // The destination keeps its own trigger-maintained catalog marker.
 const countedModels=MODELS.filter(model=>model!=='revisionCatalogo');

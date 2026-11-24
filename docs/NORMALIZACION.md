@@ -1,5 +1,17 @@
 # Normalización y conservación de datos
 
+## Roles y permisos
+
+Cada cuenta tiene un rol efectivo. `Rol(id, nombre)` contiene los tres códigos reconocidos por la aplicación: `user` (Cliente), `admin` (Administrador) y `repartidor`. `UsuarioRol(usuarioId, rolId)` identifica la asignación por la clave primaria `usuarioId`. Varios usuarios pueden compartir un rol. La autorización consulta la asignación vigente antes de permitir una operación.
+
+| Forma normal | Aplicación a estas dos tablas |
+| --- | --- |
+| 1FN | Cada columna contiene un solo valor. Una cuenta tiene una sola fila de asignación. |
+| 2FN | Las claves primarias son simples: el nombre depende del código de rol y el rol asignado depende del identificador de usuario. |
+| 3FN | El nombre del rol pertenece al catálogo. La asignación sólo referencia el rol y el usuario, sin copiar nombres, correos o descripciones. |
+
+Por compatibilidad con los clientes y procesos existentes se conserva el código `Usuario.role`. La migración copia todas las asignaciones actuales. Al crear una cuenta, un disparador crea su asignación. La clave foránea compuesta mantiene ambos códigos iguales cuando cambia el rol. El cambio se realiza desde la API administrativa de usuarios, que comprueba la versión del registro, protege al último administrador y revoca las sesiones afectadas.
+
 El núcleo comercial relaciona Usuario, Pedido, PedidoDetalle y Producto mediante claves primarias y foráneas. El correo del usuario es único. La pareja pedido/producto identifica una línea de compra y evita duplicarla. La pareja usuario/clave de solicitud identifica un reintento de la misma confirmación.
 
 Los atributos de Pedido y PedidoDetalle describen la compra registrada. Nombre del producto, precio, descuento, impuestos y dirección son valores históricos. Su dependencia es con la compra y su línea, y una edición posterior del catálogo o del perfil conserva esos valores.
