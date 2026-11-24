@@ -56,6 +56,7 @@ test('guardar solo cambios usa PATCH con versión y el guardado completo conserv
   await page.goto('/admin.html?tabla=productos');
   const row=page.locator('#admin-table tbody tr').first();
   await row.locator('[data-edit]').click();
+  await expect(page.locator('#product-form')).toBeVisible();
   const name=await page.locator('#product-nombre').inputValue();
   const productId=await row.locator('[data-edit]').getAttribute('data-edit');
   const writes=[];
