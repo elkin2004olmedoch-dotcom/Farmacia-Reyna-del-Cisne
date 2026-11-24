@@ -41,7 +41,8 @@ async function prepare(buyer,{classroom=false}={}){
  if(!ec.matchesDeliveryZone(zone,buyer))throw problem('DELIVERY_OUTSIDE_COVERAGE','Selecciona una cobertura activa para tu dirección en Ecuador.');
  if(zone.tarifaCentavos===null)throw problem('DELIVERY_RATE_PENDING','La tarifa todavía no está definida. Puedes elegir retiro en farmacia.');
  if(buyer.consienteUbicacion===true&&ec.ecuadorPoint(buyer.latitudEntrega,buyer.longitudEntrega))return {latitud:buyer.latitudEntrega,longitud:buyer.longitudEntrega};
- if(classroom && normalize(buyer.province)==='azuay' && normalize(buyer.city)==='cuenca' && normalize(buyer.address).length>=8)
+ // The classroom completes deliveries from the validated written address.
+ if(classroom && !ec.validateBuyer({address:buyer.address}).address)
    return {fuente:'direccion-escrita'};
  try{const point=await module.exports.resolve({direccion:buyer.address,ciudad:buyer.city,provincia:buyer.province});return ec.ecuadorPoint(point.latitud,point.longitud)?point:null;}
  catch(error){if(['ADDRESS_NOT_FOUND','ADDRESS_AMBIGUOUS','GEOCODING_UNAVAILABLE','GEOCODING_BUSY'].includes(error.code))return null;throw error;}
