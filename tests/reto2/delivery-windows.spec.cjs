@@ -186,8 +186,9 @@ test('administración configura reparto, cliente consulta mapa voluntario y repa
       Object.defineProperty(navigator,'geolocation',{configurable:true,value:{watchPosition(callback){window.testGps.callback=callback;return 7;},clearWatch(){window.testGps.cleared++;}}});
     });
     await signedIn(courierPage,courierAuth.token,'/cuenta.html');
-    // Mi cuenta conserva el perfil editable del personal; Mis entregas abre su bandeja.
-    await courierPage.getByRole('link',{name:'Mis entregas',exact:true}).first().click();
+    // The operational view remains available by direct URL while its navigation is hidden.
+    await expect(courierPage.getByRole('link',{name:'Mis entregas',exact:true})).toHaveCount(0);
+    await courierPage.goto('/entregas.html');
     await expect(courierPage).toHaveURL(/\/entregas\.html$/);await expect(courierPage.locator('#delivery-admin')).toBeHidden();
     const card=courierPage.locator('[data-delivery]').filter({hasText:order.id.slice(0,8)});await expect(card).toBeVisible();await expect(card.locator('a[href^="tel:"]')).toHaveCount(0);await expect(card.getByRole('button',{name:'Ver ruta en la app'})).toBeVisible();
     expect(await courierPage.evaluate(()=>window.testGps.callback)).toBeNull();
