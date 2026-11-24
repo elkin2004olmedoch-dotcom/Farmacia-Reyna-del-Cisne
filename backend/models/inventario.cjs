@@ -34,6 +34,30 @@ async function listMovements({page,pageSize,productoId}) {
  const [items,total]=await db.$transaction([db.movimientoInventario.findMany({where,select:movementSelect,orderBy:[{createdAt:'desc'},{id:'asc'}],skip:(page-1)*pageSize,take:pageSize}),db.movimientoInventario.count({where})]);
  return {items:items.map(movementDto),total,page,pageSize};
 }
+async function kardex({id,page,pageSize}){
+ return db.$transaction(async tx=>{
+  const producto=await tx.producto.findUnique({where:{id},select:{id:true,nombre:true,stock:true}});
+  if(!producto)throw new AppError(404,'NOT_FOUND','No se encontró el producto.');
+  const groups=await tx.movimientoInventario.groupBy({by:['tipo'],where:{productoId:id},_sum:{cantidad:true},_count:{_all:true}});
+  let saldoInicial=producto.stock,total=0;
+  for(const group of groups){
+   const entradas=['entrada','devolucion'].includes(group.tipo);
+   saldoInicial-=entradas?group._sum.cantidad:-group._sum.cantidad;
+   total+=group._count._all;
+  }
+  // La ventana se evalúa antes de paginar, de modo que el saldo continúa entre páginas.
+  const rows=await tx.$queryRaw`SELECT m."id",m."createdAt",m."tipo",m."motivo",l."numero" AS "loteNumero",
+    CASE WHEN m."tipo" IN ('entrada','devolucion') THEN m."cantidad" ELSE 0 END AS entradas,
+    CASE WHEN m."tipo" IN ('salida','venta') THEN m."cantidad" ELSE 0 END AS salidas,
+    SUM(CASE WHEN m."tipo" IN ('entrada','devolucion') THEN m."cantidad" ELSE -m."cantidad" END)
+      OVER (ORDER BY m."createdAt",m."id" ROWS UNBOUNDED PRECEDING) AS acumulado
+    FROM "MovimientoInventario" m LEFT JOIN "MovimientoLote" ml ON ml."movimientoId"=m."id"
+    LEFT JOIN "Lote" l ON l."id"=ml."loteId" WHERE m."productoId"=${id}
+    ORDER BY m."createdAt" DESC,m."id" DESC LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}`;
+  const items=rows.map(({acumulado,entradas,salidas,...row})=>({...row,entradas:Number(entradas),salidas:Number(salidas),saldo:saldoInicial+Number(acumulado)}));
+  return {producto,saldoInicial,items,total,page,pageSize};
+ },serializable);
+}
 async function findProduct(tx,id){const product=await tx.producto.findFirst({where:{id,activo:true},include:{lotes:true}});if(!product)throw new AppError(404,'NOT_FOUND','El producto no está disponible.');return product;}
 async function createLot({productoId,numero,vencimiento,cantidad,costoUnitario,proveedorId},actorId) {
  return db.$transaction(async tx=> {
@@ -98,4 +122,4 @@ async function restore(tx,details,pedidoId,actorId) {
   if(remaining>0)await tx.movimientoInventario.create({data:{productoId:line.productoId,pedidoId,actorId,tipo:'devolucion',cantidad:remaining,motivo:'Devolución sin lote por cancelación del pedido'}});
  }
 }
-module.exports={ecuadorDay,sellableStock,trackedStock,lastPurchasePrice,listLots,listMovements,createLot,adjust,reserve,saleMovements,restore,serializable,movementSelect,movementDto};
+module.exports={ecuadorDay,sellableStock,trackedStock,lastPurchasePrice,listLots,listMovements,kardex,createLot,adjust,reserve,saleMovements,restore,serializable,movementSelect,movementDto};

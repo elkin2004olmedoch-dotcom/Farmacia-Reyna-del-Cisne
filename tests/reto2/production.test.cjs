@@ -92,7 +92,7 @@ test('preparación usa el cliente separado, migraciones y seed; no imprime secre
   assert.deepEqual(calls[1][1].slice(1, 3), ['migrate', 'deploy']);
   assert.deepEqual(calls[2][1], ['backend/prisma/seed.cjs']);
   assert.deepEqual(calls[3][1], ['scripts/sync-catalog.cjs']);
-  assert.deepEqual(calls[4][1], ['scripts/build-frontend.cjs']);
+  assert.deepEqual(calls[4][1], ['frontend/build-frontend.cjs']);
   assert.equal(calls[0][2].env.HOST, '0.0.0.0');
   assert.equal(calls[0][2].stdio, 'pipe');
   const output = messages.join('\n');

@@ -53,7 +53,7 @@ Cargar el mapa comparte el punto con OpenStreetMap; abrir Google Maps comparte e
 
 ## Capas y contrato
 
-La presentación conserva HTML/CSS/JavaScript y MVC: `src/models/payments.js` consume la API, `views/payments.js` representa el resumen y `controllers/payments.js` coordina interacción y navegación. `scripts/build-frontend.cjs` genera la pantalla. Express mantiene rutas, validación y JWT en `backend/routes/pagos.cjs`, adaptación HTTP en `controllers/pagos.cjs` y reglas/transacciones en `models/pagos.cjs`; `models/payphone.cjs` limita configuración, destino y llamadas al proveedor. PrismaClient se reutiliza mediante `models/db.cjs`.
+La presentación conserva HTML/CSS/JavaScript y MVC: `src/models/payments.js` consume la API, `views/payments.js` representa el resumen y `controllers/payments.js` coordina interacción y navegación. `frontend/build-frontend.cjs` genera la pantalla. Express mantiene rutas, validación y JWT en `backend/routes/pagos.cjs`, adaptación HTTP en `controllers/pagos.cjs` y reglas/transacciones en `models/pagos.cjs`; `models/payphone.cjs` limita configuración, destino y llamadas al proveedor. PrismaClient se reutiliza mediante `models/db.cjs`.
 
 Todas las respuestas JSON conservan `{ok:true,data:...}` o el error común de la API.
 

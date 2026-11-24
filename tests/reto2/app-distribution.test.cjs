@@ -17,6 +17,6 @@ test('Pages publica la farmacia para navegador sin instaladores ni descargas nat
   assert.doesNotMatch(fs.readFileSync(path.join(output,'_headers'),'utf8'),/package-archive|\.apk|webmanifest/);
 });
 test('la fuente conserva la web y retira el proyecto nativo y su workflow',()=>{
-  for(const file of ['mobile','.github/workflows/verify-mobile.yml','src/descargas','scripts/templates/install.cjs'])assert.equal(fs.existsSync(path.resolve(file)),false,file);
+  for(const file of ['mobile','.github/workflows/verify-mobile.yml','src/descargas','frontend/templates/install.cjs'])assert.equal(fs.existsSync(path.resolve(file)),false,file);
   for(const file of ['src/controllers/deliveries.js','src/controllers/route-map.js','src/controllers/mascota.js'])assert.ok(fs.existsSync(path.resolve(file)),file);
 });

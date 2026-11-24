@@ -18,5 +18,6 @@ module.exports={
  },
  async createLot(req,res){res.status(201).json({ok:true,data:await inventory.createLot(req.input,req.user.id)});},
  async movements(req,res){res.json({ok:true,data:await inventory.listMovements(req.input)});},
+ async kardex(req,res){res.json({ok:true,data:await inventory.kardex(req.input)});},
  async adjust(req,res){res.status(201).json({ok:true,data:await inventory.adjust(req.input,req.user.id)});},
 };

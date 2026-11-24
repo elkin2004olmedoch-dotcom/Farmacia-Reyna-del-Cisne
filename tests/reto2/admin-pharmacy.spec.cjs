@@ -67,6 +67,10 @@ test('proveedores ecuatorianos, lotes y movimientos comparten stock con clientes
   await expect(page.locator('#editor-dialog')).toBeHidden();
   await expect(row.locator('[data-product-stock]')).toHaveText(String(before.stock+5));
   expect((await (await page.request.get('/api/productos/solar')).json()).data.stock).toBe(before.stock+5);
+  await page.goto('/admin.html?tabla=kardex&producto=solar');
+  await expect(page.locator('#kardex-producto')).toHaveValue('solar');
+  await expect(page.locator('#kardex-resumen')).toContainText('Stock actual: '+(before.stock+5));
+  await expect(page.locator('#admin-table tbody tr').filter({hasText:'OTRO-'+suffix}).locator('td').last()).toHaveText(String(before.stock+5));
   await page.goto('/admin.html?tabla=movimientos');await expect(page.locator('#admin-create')).toBeEnabled();await page.locator('#admin-create').focus();await page.keyboard.press('Enter');await page.locator('#movement-productoId').selectOption('solar');await expect(page.locator('#movement-loteId')).toBeEnabled();await page.locator('#movement-loteId').selectOption(lot.id);await page.locator('#movement-tipo').selectOption('salida');await page.locator('#movement-cantidad').fill('1');await page.locator('#movement-motivo').fill('Salida de una unidad por comprobación en tests');
   const movementResponse=page.waitForResponse(res=>res.request().method()==='POST' && new URL(res.url()).pathname==='/api/admin/inventario/ajustes');await page.locator('#movement-form [type=submit]').click();expect((await movementResponse).status()).toBe(201);await expect(page.locator('#editor-dialog')).toBeHidden();expect((await (await page.request.get('/api/productos/solar')).json()).data.stock).toBe(before.stock+4);await expect(page.locator('#admin-table')).toContainText('Salida de una unidad por comprobación');
 });

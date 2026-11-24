@@ -2,7 +2,7 @@
 
 - Implementa solo lo solicitado con el mínimo código limpio, seguro y mantenible. Reutiliza funciones y componentes; evita duplicados, reescrituras completas, archivos triviales y patrones innecesarios.
 - Conserva HTML, CSS y JavaScript, Node.js/Express y Prisma 6. No agregues dependencias sin una necesidad justificada ni cambies tecnologías sin motivo técnico; React, Vue, Angular y Tailwind requieren autorización.
-- Consulta `README.md`, `package.json` y la documentación existente antes de actuar. Distingue la tienda estática histórica de la aplicación MVC en `src/` y `backend/`; revisa `scripts/build-frontend.cjs` antes de editar HTML generado. No modifiques checkouts anidados ni artefactos de entrega fuera del alcance.
+- Consulta `README.md`, `package.json` y la documentación existente antes de actuar. Distingue la tienda estática histórica de la aplicación MVC en `src/` y `backend/`; revisa `frontend/build-frontend.cjs` antes de editar HTML generado. No modifiques checkouts anidados ni artefactos de entrega fuera del alcance.
 - Verifica el destino real de despliegue y su configuración antes de recomendar cambios de hosting o conexiones; no presupongas Vercel.
 - Antes de cambiar persistencia, revisa ambos esquemas y sus migraciones en `backend/prisma/` y `backend/prisma/postgresql/`, el proveedor activo, relaciones, restricciones, consultas e índices. SQLite local y PostgreSQL tienen diferencias; conserva su compatibilidad.
 - No elimines tablas, columnas ni datos sin autorización. No ejecutes migraciones destructivas automáticamente ni pruebes con datos de producción. Usa bases temporales y transacciones cuando la consistencia lo requiera; conserva la reutilización de PrismaClient.

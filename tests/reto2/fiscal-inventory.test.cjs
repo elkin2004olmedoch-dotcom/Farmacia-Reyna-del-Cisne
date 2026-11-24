@@ -115,6 +115,14 @@ test('ingreso por lote conserva stock previo y registra costo, vencimiento y mov
  await request.post('/api/admin/inventario/ajustes').set('Authorization',auth(adminToken)).send({productoId:created.id,loteId:lot.id,tipo:'salida',cantidad:2,motivo:'Salida posterior a la compra'}).expect(201);
  const page=(await request.get('/api/admin/lotes?productoId='+created.id).set('Authorization',auth(adminToken)).expect(200)).body.data;
  assert.deepEqual([page.items[0].stock,page.items[0].cantidadRecibida,page.items[0].costoTotalCentavos],[3,5,1075]);
+ const path='/api/admin/kardex/'+created.id;
+ await request.get(path).expect(401);
+ await request.get(path).set('Authorization',auth(userToken)).expect(403);
+ const ledger=(await request.get(path+'?pageSize=1').set('Authorization',auth(adminToken)).expect(200)).body.data;
+ assert.deepEqual([ledger.saldoInicial,ledger.total,ledger.producto.stock],[0,3,6]);
+ assert.deepEqual([ledger.items[0].salidas,ledger.items[0].saldo,ledger.items[0].loteNumero],[2,6,'LOTE-01']);
+ const earlier=(await request.get(path+'?pageSize=1&page=2').set('Authorization',auth(adminToken)).expect(200)).body.data;
+ assert.deepEqual([earlier.items[0].entradas,earlier.items[0].saldo],[5,8]);
 });
 test('lotes y ajustes rechazan vencimientos imposibles, vencidos, cantidades negativas y saldos de otro producto',async()=> {
  const created=await product({stock:3}),other=await product({stock:1});

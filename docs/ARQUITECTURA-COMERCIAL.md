@@ -6,7 +6,7 @@ La aplicación conserva tres capas y el stack HTML/CSS/JavaScript, Node.js/Expre
 
 | Capa | Responsabilidad |
 | --- | --- |
-| Presentación | src/controllers coordina eventos y estado; models centraliza HTTP y reglas de interfaz; views renderiza contenido y mensajes. El HTML se genera desde scripts/templates y scripts/build-frontend.cjs. |
+| Presentación | src/controllers coordina eventos y estado; models centraliza HTTP y reglas de interfaz; views renderiza contenido y mensajes. El HTML se genera desde frontend/templates y frontend/build-frontend.cjs. |
 | Aplicación | backend/routes y middleware validan sesión, rol y entradas; controllers adapta HTTP; models aplica reglas farmacéuticas, importes, inventario, pedidos, entregas y facturación. |
 | Persistencia | PrismaClient reutilizado y esquemas/migraciones separados en backend/prisma y backend/prisma/postgresql. Las transacciones preservan consistencia de stock, pedido y factura. |
 

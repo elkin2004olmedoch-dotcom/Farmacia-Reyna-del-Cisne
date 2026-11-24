@@ -16,6 +16,7 @@ export const administration={
   fiscal:()=>request('/admin/configuracion/fiscal'),
   saveFiscal:values=>request('/admin/configuracion/fiscal',{method:'POST',body:values}),
   suppliers:()=>allPages('/admin/proveedores'),
+  kardex:(productoId,page)=>request('/admin/kardex/'+encodeURIComponent(productoId)+'?page='+page+'&pageSize=20'),
   purchasePrice:(productoId,proveedorId)=>request('/admin/lotes/precio-compra?'+new URLSearchParams({productoId,proveedorId})),
   lots:productoId=>allPages('/admin/lotes', '&productoId='+encodeURIComponent(productoId)),
   saveSupplier:(values,id)=>request('/admin/proveedores'+(id?'/'+encodeURIComponent(id):''),{method:id?'PUT':'POST',body:values}),

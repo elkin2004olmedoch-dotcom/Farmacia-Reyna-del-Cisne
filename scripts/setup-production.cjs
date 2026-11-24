@@ -63,7 +63,7 @@ function runSetup({env = process.env, run = spawnSync, logger = console} = {}) {
   if (productionEnv.SKIP_INITIAL_SEED !== 'true') steps.push(['Preparar catálogo y administrador', ['backend/prisma/seed.cjs']]);
   if (productionEnv.ADMIN_USERNAME) steps.push(['Configurar acceso administrativo', ['scripts/provision-admin.cjs']]);
   steps.push(['Incorporar referencias verificadas para consulta', ['scripts/sync-catalog.cjs']]);
-  steps.push(['Generar frontend', ['scripts/build-frontend.cjs']]);
+  steps.push(['Generar frontend', ['frontend/build-frontend.cjs']]);
   for (const [label, args] of steps) {
     logger.info(label + '…');
     // Prisma may print database connection details. Keep child output private.

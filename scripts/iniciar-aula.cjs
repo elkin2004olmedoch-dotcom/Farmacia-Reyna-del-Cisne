@@ -43,9 +43,7 @@ async function start(){
   const pharmacy=require('../backend/app.cjs')();
   pharmacy.locals.classroom=true;
   // Tarifario académico para la primera compra del catálogo inicial del aula.
-  const products=await db.producto.findMany({where:{activo:true},select:{id:true,categoria:true}});
-  const coursePrices={'proteccion-solar':6.40,'equipos-medicos':12.50,'primeros-auxilios':1.25};
-  pharmacy.locals.tarifaAula={proveedorId:supplier.id,precios:new Map(products.map(p=>[p.id,coursePrices[p.categoria]??2.15]))};
+  pharmacy.locals.tarifaAula={proveedorId:supplier.id,precios:new Map(Object.entries(require('../data/tarifario-aula.json')))};
   app.use(pharmacy);
   const server=require('node:http').createServer(app);
   const {listen,createShutdown}=require('../backend/lifecycle.cjs');

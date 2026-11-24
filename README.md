@@ -5,7 +5,9 @@
 | Enlace | Qué puedes ver |
 | --- | --- |
 | [Abrir la farmacia del aula](https://farmacia-reina-del-cisne-aula.onrender.com/index.html) | Portada pública para presentar el catálogo, comprar e iniciar sesión como cliente o administrador. |
-| [Código del frontend · src/](./src/) | Pantallas, estilos y JavaScript que usa el navegador. |
+| [Kárdex del aula](https://farmacia-reina-del-cisne-aula.onrender.com/admin.html?tabla=kardex) | Entradas, salidas y saldo por producto. Requiere acceso administrativo. |
+| [Frontend · frontend/](./frontend/) | Plantillas de las pantallas y generador del sitio. |
+| [Código del navegador · src/](./src/) | HTML publicado, estilos, modelos, vistas y controladores del cliente. |
 | [Código del backend · backend/](./backend/) | Servidor Express, rutas de la API, permisos y acceso a la base de datos. |
 | [Abrir Supabase](https://supabase.com/dashboard/org/chodapgnhwgcvaszlngq) | Panel de la organización. Selecciona el proyecto de la farmacia para consultar sus tablas y relaciones. Requiere acceso a la organización. |
 | [Abrir el servicio de la farmacia en Render](https://dashboard.render.com/web/srv-db5sg2ss728c738t3n6g) | Panel del backend principal con el estado y el historial de despliegues. Requiere acceso al servicio. |
@@ -29,15 +31,16 @@ Tres capas: presentación HTML/CSS/JavaScript, aplicación Node.js/Express y per
 
 | Ruta | Uso |
 | --- | --- |
+| frontend/ | Plantillas HTML y generador de las pantallas |
 | src/ | Aplicación MVC publicada, catálogo, compra y administración |
 | backend/ | API REST, autenticación JWT, roles y reglas de negocio |
 | backend/prisma/ | Esquema y migraciones SQLite |
 | backend/prisma/postgresql/ | Esquema y migraciones PostgreSQL |
-| scripts/ | Generación de vistas, distribución y comprobaciones |
+| scripts/ | Preparación de entornos, distribución y comprobaciones |
 | tests/ | Pruebas con datos sintéticos y bases temporales |
 | assets/, js/ y HTML de raíz | Antecedente académico conservado para test:reto1 |
 
-El HTML de src/ se genera desde scripts/build-frontend.cjs y scripts/templates/. Cloudflare publica únicamente la salida de scripts/build-pages.cjs; Render mantiene la API existente. [Arquitectura comercial](docs/ARQUITECTURA-COMERCIAL.md).
+El HTML de src/ se genera desde frontend/build-frontend.cjs y frontend/templates/. Cloudflare publica únicamente la salida de scripts/build-pages.cjs; Render mantiene la API existente. [Arquitectura comercial](docs/ARQUITECTURA-COMERCIAL.md).
 
 La ubicación pública y el enlace de retiro usan el mismo marcador de Consulab compartido por el titular, definido en `src/models/pharmacy.js`. Abrir **Visítanos** carga el mapa; cerrar la sección lo descarga. Se mantienen los colores vino, rojo y crema. [Revisión y preparación del Reto 2](docs/REVISION-RETO-2-2026-11-03.md).
 
