@@ -1,5 +1,6 @@
 const ASSETS=new URL('../assets/mascotas/',import.meta.url);
 import {classifyMascotaQuestion} from './mascota-scope.mjs';
+import {socialReply,serviceReply,productQuestion,asksAboutLastProduct} from '../models/conversacion.mjs';
 import {createCustomerCommandExecutor} from './customer-command.mjs';
 import {companionControls,disableCompanionControls} from './companion-controls.js';
 import {catalog} from '../models/catalog.js';
@@ -183,6 +184,8 @@ export async function mascotaController({administration=false,courier=false,comm
   async function send(text,display,consult=false){
     if(commandBusy)return;
     const message=String(text||'').trim().slice(0,administration?3000:180);if(!message)return;
+    const social=socialReply(message,staff);
+    if(social){append(display||message,'user');find('#input').value='';append(social);setState('waving');return;}
     if(!consult)disableCompanionControls(root);
     clearTimeout(replyTimer);requestVersion+=1;const version=requestVersion;
     root.querySelectorAll('.message.thinking').forEach(node=>node.remove());
@@ -206,9 +209,23 @@ export async function mascotaController({administration=false,courier=false,comm
       const medical=!staff&&classifyMascotaQuestion(message,knownProductNames())==='medical';
       if(medical)await executeCustomer('cancelar');
       const customerSession=auth.user;
-      const result=medical?null:await executeCustomer(message);
+      const info=!staff&&!medical?serviceReply(message,previousTopic):null;
+      const product=!staff&&!medical&&!info?(previousTopic==='producto' && asksAboutLastProduct(message)?reference:productQuestion(message)):null;
+      const result=medical?null:await executeCustomer(product?'buscar '+product:message);
       if(!staff&&result?.visualSummary?.kind==='orders'&&auth.user!==customerSession){pending.remove();append('Tu sesión cambió. Abre tu cuenta para consultar tus pedidos.');setState('waiting');return;}
-      if(result){pending.remove();companionControls(append(result.text),result,send);setState('review');return;}
+      if(result){
+        const matches=result.visualSummary?.items;
+        previousTopic=product && matches?.length===1?'producto':null;
+        reference=previousTopic==='producto'?matches[0].nombre:null;
+        if(reference){
+          const item=matches[0];
+          if(item.soloConsulta||item.restricted)result.text='Encontré '+item.nombre+'. Revisa su ficha para consultar las condiciones de compra.';
+          else if(item.precio!=null)result.text=item.nombre+' cuesta $'+item.precio.toFixed(2)+(item.stock>0?' y está disponible.':'. Por ahora está agotado.');
+        }
+        pending.remove();companionControls(append(result.text),result,send);setState('review');return;
+      }
+      if(info){previousTopic=info.tema;pending.remove();append(info.texto);setState('review');return;}
+      previousTopic=null;reference=null;
     }catch(error){pending.remove();append(consult?(error.name==='TimeoutError'||error.name==='TypeError'?'No hubo conexión. Puedes seguir usando Órdenes y ayuda.':error.message):administration?'No pude guardar el cambio: '+error.message:error.message||'No se pudo completar la consulta. Inténtalo nuevamente.');setState('waiting');return;}
     finally{commandBusy=false;if(staff){find('#input').disabled=false;find('#form [type=submit]').disabled=false;if(!find('#panel').hidden)find('#input').focus();}}
     replyTimer=setTimeout(()=>{

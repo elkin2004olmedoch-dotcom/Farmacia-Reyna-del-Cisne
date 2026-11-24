@@ -14,7 +14,7 @@ test('interpreta dos temas coloquiales y solo devuelve información propia',asyn
     return generated({temas:['horario','entrega'],texto:'Dato inventado'});
   }});
   const reply=await run(consult,'ñaño, ¿hasta qué hora atienden y hacen envíos?');
-  assert.equal(reply.origen,'gemini');assert.match(reply.texto,/19:00/);assert.match(reply.texto,/checkout/);assert.doesNotMatch(reply.texto,/inventado/);
+  assert.equal(reply.origen,'gemini');assert.match(reply.texto,/19:00/);assert.match(reply.texto,/dirección/);assert.doesNotMatch(reply.texto,/inventado/);
 });
 test('consulta el precio público actual y conserva la restricción al repreguntar',async()=>{
   const item={id:'p1',nombre:'Gel',stock:2,precio:1.4};
@@ -28,6 +28,15 @@ test('datos sensibles y preguntas clínicas reconocidas se resuelven antes de ll
   let calls=0;const consult=createConsultation({key:'test',fetcher:async()=>{calls++;}});
   for(const question of ['mi correo es a@example.ec','mi cédula es 1234567890','¿qué dosis tomo?'])assert.equal((await run(consult,question)).origen,'local');
   assert.equal(calls,0);
+});
+test('saluda, responde a un agradecimiento y recuerda el horario en una repregunta',async()=>{
+  const consult=createConsultation({key:''});
+  assert.match((await run(consult,'¡Buenas tardes, Goti!')).texto,/Hola/);
+  const first=await run(consult,'¿Atienden y hacen entregas a domicilio?');
+  assert.match(first.texto,/19:00/);assert.match(first.texto,/domicilio/);
+  const thanks=await run(consult,'Gracias, pana',{temaAnterior:first.tema});
+  assert.match(thanks.texto,/Con gusto/);
+  assert.match((await run(consult,'¿Y el domingo?',{temaAnterior:thanks.tema})).texto,/domingo queda fuera/);
 });
 test('cuota, red y respuestas no admitidas recuperan la ayuda local',async()=>{
   for(const fetcher of [()=>generated({temas:['update-product']}),()=>new Response(null,{status:429}),()=>Promise.reject(Error('offline'))]){

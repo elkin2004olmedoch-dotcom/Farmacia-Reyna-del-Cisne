@@ -1,6 +1,7 @@
 const {restrictionReason}=require('../../frontend/models/pharmacy-policy.js');
 const {pharmacy}=require('../../frontend/models/pharmacy.js');
 const {AppError}=require('../middleware/errors.cjs');
+const {socialReply,serviceReply,productQuestion,asksAboutLastProduct}=require('../../frontend/models/conversacion.mjs');
 
 // The model selects topics. Only the pharmacy supplies statements, prices and availability.
 const answers={
@@ -43,7 +44,8 @@ function localPlan(question,previous){
   const value=fold(question);
   const found=rules.filter(([,match])=>match.test(value)).map(([topic])=>topic);
   if(found.length)return {temas:found.slice(0,3)};
-  const query=value.match(/(?:cuanto (?:vale|cuesta)|a como (?:esta|sale)|tienen|venden|busco)\s+(?:(?:el|la|los|las)\s+)?([\p{L}\d -]{2,60})/u)?.[1]?.trim();
+  if(previous==='producto'&&asksAboutLastProduct(question))return {temas:['producto']};
+  const query=productQuestion(question);
   if(query)return {temas:['producto'],producto:query};
   return {temas:[/^(?:[¿?¡! ]*y\b|entonces\b)/.test(value)&&previous?previous:'otro']};
 }
@@ -72,7 +74,11 @@ function createConsultation({key=process.env.GEMINI_API_KEY,model=process.env.GE
     const reply=(text,topic,source)=>res.json({data:{texto:text,tema:topic,origen:source,referencia:nextReference}});
     if(privateData.test(fold(question)))return reply('Para cuidar tus datos, pregunta sin incluir nombres, identificadores, teléfonos, claves ni direcciones.','otro','local');
     if(health.test(fold(question)))return reply(answers.salud,'salud','local');
+    const social=socialReply(question);
+    if(social){nextReference=referencia||null;return reply(social,previous||'otro','local');}
+    const service=serviceReply(question,previous);
     let plan=localPlan(question,previous),source='local';
+    if(service && plan.temas[0]==='otro')plan={temas:service.temas};
     if(Date.now()>=renewAt){renewAt=Date.now()+86400000;remaining=200;}
     if(key&&remaining>0&&/^gemini-[a-z0-9.-]+$/.test(model)){
       remaining--;
@@ -81,6 +87,10 @@ function createConsultation({key=process.env.GEMINI_API_KEY,model=process.env.GE
     }
     const paragraphs=[];
     for(const topic of new Set(plan.temas)){
+      if(service?.temas.includes(topic)){
+        if(!paragraphs.includes(service.texto))paragraphs.push(service.texto);
+        continue;
+      }
       if(topic!=='producto'){paragraphs.push(answers[topic]);continue;}
       const query=typeof plan.producto==='string'?plan.producto.trim():'';
       let items,aproximadas=false;
@@ -89,7 +99,10 @@ function createConsultation({key=process.env.GEMINI_API_KEY,model=process.env.GE
       else{paragraphs.push('¿Cuál es el nombre del producto que buscas?');continue;}
       if(!items.length){paragraphs.push('No encontré esa referencia en el catálogo. ¿Con qué otro nombre la conoces?');continue;}
       if(items.length===1)nextReference=items[0].id;
-      paragraphs.push((aproximadas?'Coincidencias aproximadas del catálogo:':'En el catálogo:')+'\n'+items.slice(0,3).map(p=>p.nombre+' · '+(restrictionReason(p)||('$'+Number(p.precio).toFixed(2)+(p.stock>0?' · disponible':' · agotado')))).join('\n'));
+      if(items.length===1&&!aproximadas){
+        const item=items[0],restriction=restrictionReason(item);
+        paragraphs.push(restriction?item.nombre+' — '+restriction:item.nombre+' cuesta $'+Number(item.precio).toFixed(2)+(item.stock>0?' y está disponible.':'. Por ahora está agotado.'));
+      }else paragraphs.push((aproximadas?'Encontré estas opciones parecidas:':'Encontré estas opciones:')+'\n'+items.slice(0,3).map(p=>p.nombre+' · '+(restrictionReason(p)||('$'+Number(p.precio).toFixed(2)+(p.stock>0?' · disponible':' · agotado')))).join('\n'));
     }
     return reply(paragraphs.join('\n\n'),nextReference?'producto':plan.temas[0],source);
   };

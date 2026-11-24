@@ -11,4 +11,8 @@ test('Goti responde a una pregunta coloquial en la tienda y conserva las órdene
   await goti.getByRole('combobox',{name:'Modo',exact:true}).selectOption('local');
   await goti.locator('#input').fill('hola');await goti.locator('#input').press('Enter');
   await expect(goti.getByRole('log')).toContainText('Puedo guiarte');
+  for(const [question,expected] of [['Gracias, pana','Con gusto'],['¿Atienden y hacen entregas a domicilio?','hacemos entregas'],['¿Y el domingo?','domingo queda fuera']]){
+    await goti.locator('#input').fill(question);await goti.locator('#input').press('Enter');
+    await expect(goti.getByRole('log')).toContainText(expected);
+  }
 });

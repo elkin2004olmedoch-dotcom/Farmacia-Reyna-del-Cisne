@@ -4,6 +4,8 @@ Preparación del 23 de noviembre de 2026 para presentar los retos 1 y 2 juntos. 
 
 ## Para abrir en la universidad
 
+Para practicar con dos cuentas compartidas, usa el enlace del aula que te entregó el titular. La ventana normal puede tener la sesión del cliente y una ventana privada la del administrador. El aula crea una base SQLite temporal con su propio catálogo al arrancar. Utiliza datos ficticios en los pedidos. Su pago de práctica no cobra y sus correos están desactivados. La tienda principal mantiene sus cuentas verificadas y su base PostgreSQL.
+
 | Minuto | Qué mostrar | Qué explicar |
 | --- | --- | --- |
 | 0–1 | [Catálogo](https://farmacia-reyna-del-cisne-pruebas.pages.dev/catalogo) y [ficha de Ensure Advance](https://farmacia-reyna-del-cisne-pruebas.pages.dev/producto?id=vitaminas) | «En el Reto 1 construí el catálogo y el carrito. En el Reto 2 conecté esa interfaz a una API con usuarios, inventario y pedidos persistentes». Busca Ensure, abre la ficha y añade una unidad. |
