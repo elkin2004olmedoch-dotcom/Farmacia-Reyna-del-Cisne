@@ -3,7 +3,25 @@ const {Prisma}=require('../../server/models/prisma-client.cjs');
 const AxeBuilder=require('@axe-core/playwright').default;
 async function adminPage(page,request,table){const token=await apiToken(request,'admin-browser@example.ec','AdminBrowser2026!');await page.addInitScript(token=>sessionStorage.setItem('farmacia-mvc-token',token),token);await page.goto('/admin.html?tabla='+table);await expect(page.locator('#admin-area')).toBeVisible();return token;}
 
-test('el administrador consulta todos los recursos y conserva la selección y paginación en la URL',async({page,request})=>{
+test('la vista completa permite consultar cada modelo sin enlaces operativos y conserva la tabla al recargar',async({page,request})=>{
+  const token=await adminPage(page,request,'datos&vista=completa');
+  const response=await request.get('/api/admin/recursos',{headers:{Authorization:'Bearer '+token}});
+  const resources=(await response.json()).data;
+  const select=page.getByLabel('Tabla de datos',{exact:true});
+  await expect(select.locator('option')).toHaveCount(Prisma.dmmf.datamodel.models.length);
+  for(const resource of resources){
+    await select.selectOption(resource.key);
+    await expect(page.locator('#admin-resource-title')).toHaveText(resource.label);
+    await expect(page.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');
+    await expect(page.locator('#admin-table caption,#admin-table .shop-empty')).toBeVisible();
+    await expect(page.locator('#admin-resource-actions a')).toHaveCount(0);
+  }
+  await page.reload();
+  await expect(select).toHaveValue(resources.at(-1).key);
+  await expect(select.locator('option')).toHaveCount(resources.length);
+});
+
+test('el administrador consulta los recursos habituales y conserva la selección y paginación en la URL',async({page,request})=>{
   const token=await adminPage(page,request,'datos');
   const response=await request.get('/api/admin/recursos',{headers:{Authorization:'Bearer '+token}});expect(response.status()).toBe(200);
   const resources=(await response.json()).data;

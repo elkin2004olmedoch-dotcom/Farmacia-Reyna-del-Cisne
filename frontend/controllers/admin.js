@@ -49,7 +49,8 @@ export async function adminController() {
   const query=new URLSearchParams(location.search),requested=query.get('tabla'),requestedRecord=query.get('registro');
   let name=[...editableSections,'pedidos','usuarios','detalles','auditoria','fiscal','facturacion','datos',...(['zonas','entregas'].includes(requested)&&requestedRecord?['zonas','entregas']:[])].includes(requested)?requested:requested?'productos':'dashboard',page=/^[1-9]\d*$/.test(query.get('page') || '')?Math.min(100000,Number(query.get('page'))):1,result,editing=null,editingVersion=null,editingValues=null,summarySnapshot='',requestId=0,openingId=0,previousFocus=null,stateFocus=null,lotRequest=0;
   let resourceKey=query.get('recurso') || 'productos',resources=null;
-  const routeQuery=()=>new URLSearchParams({tabla:name,...(name==='datos'?{recurso:resourceKey}:{}),page:String(page)});
+  const fullInventory=requested==='datos' && query.get('vista')==='completa';
+  const routeQuery=()=>new URLSearchParams({tabla:name,...(name==='datos'?{recurso:resourceKey}:{}),page:String(page),...(name==='datos' && fullInventory?{vista:'completa'}:{})});
   const dialog=document.getElementById('editor-dialog');const forms=Object.fromEntries(Object.entries(sectionForms).map(([section,id])=>[section,document.getElementById(id)]));
   const productImage=imageController(forms.productos,'product');const promoImage=imageController(forms.promociones,'promotion');
   const stateDialog=document.getElementById('order-state-dialog');const stateForm=document.getElementById('order-state-form');let stateOrder=null;
@@ -105,7 +106,13 @@ export async function adminController() {
     table.setAttribute('aria-busy','true');if(!silent){result=null;table.innerHTML='<p class="shop-empty" role="status">Cargando registros…</p>';create.disabled=true;for(const button of ['admin-prev','admin-next'])document.getElementById(button).disabled=true;}
     try{
       if(tableName==='datos'){
-        resources ||= (await administration.resources()).filter(item=>!['configuracion-emisor','secuencias-factura','facturas','entregas','sesiones-moviles','incidencias-entrega'].includes(item.key)).map(item=>({...item,actions:item.actions.filter(action=>!action.href.startsWith('entregas.html'))}));
+        if(!resources){
+          const available=await administration.resources();
+          const hidden=['configuracion-emisor','secuencias-factura','facturas','entregas','sesiones-moviles','incidencias-entrega'];
+          resources=fullInventory ? available.map(item=>({...item,actions:[]})) : available
+            .filter(item=>!hidden.includes(item.key))
+            .map(item=>({...item,actions:item.actions.filter(action=>!action.href.startsWith('entregas.html'))}));
+        }
         if(id!==requestId || !auth.isAdmin)return;
         if(!resources.some(resource=>resource.key===resourceKey))resourceKey=resources[0].key;
         if(!silent){resourceView(resources,resourceKey);history.replaceState(null,'','admin.html?'+routeQuery());}
