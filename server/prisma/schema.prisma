@@ -51,6 +51,7 @@ model Usuario {
   id           String   @id @default(uuid())
   nombre       String
   email        String   @unique
+  username     String?  @unique
   telefono     String
   passwordHash String
   role         String   @default("user")
@@ -60,6 +61,7 @@ model Usuario {
   emailVerifiedAt DateTime?
   emailVerificationRequired Boolean @default(false)
   createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
   emailVerification EmailVerification?
   registroPendiente RegistroPendiente?
   pedidos      Pedido[]
@@ -223,7 +225,7 @@ model Lote {
   proveedor Proveedor? @relation(fields: [proveedorId], references: [id], onDelete: Restrict)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  movimientos MovimientoInventario[]
+  movimientos MovimientoLote[]
   detalles PedidoDetalleLote[]
   @@unique([productoId, numero])
   @@index([productoId, vencimiento])
@@ -233,8 +235,7 @@ model MovimientoInventario {
   id String @id @default(uuid())
   productoId String
   producto Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
-  loteId String?
-  lote Lote? @relation(fields: [loteId], references: [id], onDelete: Restrict)
+  movimientoLote MovimientoLote?
   actorId String?
   actor Usuario? @relation(fields: [actorId], references: [id], onDelete: SetNull)
   pedidoId String?
@@ -244,6 +245,14 @@ model MovimientoInventario {
   motivo String
   createdAt DateTime @default(now())
   @@index([productoId, createdAt])
+}
+
+model MovimientoLote {
+  movimientoId String @id
+  movimiento MovimientoInventario @relation(fields:[movimientoId],references:[id],onDelete:Cascade,onUpdate:Cascade)
+  loteId String
+  lote Lote @relation(fields:[loteId],references:[id],onDelete:Restrict,onUpdate:Cascade)
+  @@index([loteId])
 }
 
 model PedidoDetalleLote {
@@ -466,11 +475,21 @@ model AdminMfa {
  enabled Boolean @default(false)
  setupExpiresAt DateTime?
  lastCounter Int @default(-1)
- recoveryHashes String @default("[]")
+ recuperaciones AdminMfaRecuperacion[]
  challengeHash String?
  challengeUntil DateTime?
  failedAttempts Int @default(0)
  blockedUntil DateTime?
+}
+
+model AdminMfaRecuperacion {
+ id String @id @default(uuid())
+ usuarioId String
+ adminMfa AdminMfa @relation(fields:[usuarioId],references:[usuarioId],onDelete:Cascade,onUpdate:Cascade)
+ hash String
+ createdAt DateTime @default(now())
+ usedAt DateTime?
+ @@unique([usuarioId,hash])
 }
 
 model AuditoriaAdmin {

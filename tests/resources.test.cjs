@@ -25,9 +25,9 @@ test('HTML apunta a scripts, imágenes y estilos locales existentes', () => {
   }
 });
 
-test('la caché offline incluye las ocho páginas y todos sus recursos locales', () => {
-  const context = { self: { addEventListener() {} }, URL };
-  vm.runInNewContext(fs.readFileSync('service-worker.js','utf8') + '\nthis.files = APP_FILES;',context);
-  for (const file of context.files) assert.ok(fs.existsSync(file),file);
-  for (const file of ['index.html','catalogo.html','producto.html','comparar.html','cuenta.html','checkout.html','pedidos.html','ayuda.html','assets/shop.css','js/shop.js','js/commerce.js']) assert.ok(context.files.includes(file),file);
+test('el worker histórico retirado deja que las páginas y API se carguen desde la red', () => {
+  const handlers={};
+  vm.runInNewContext(fs.readFileSync('service-worker.js','utf8'),{self:{addEventListener:(name,listener)=>{handlers[name]=listener;}}});
+  assert.equal(handlers.fetch,undefined);
+  assert.equal(typeof handlers.activate,'function');
 });

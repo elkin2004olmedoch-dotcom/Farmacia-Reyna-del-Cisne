@@ -1,2 +1,6 @@
 const tables=require('../models/admin.cjs');
-module.exports=async function(req,res) {res.json({ok:true,data:await tables(req.input)});};
+async function list(req,res){res.json({ok:true,data:await tables(req.input)});}
+module.exports=Object.assign(list,{
+ resources(req,res){res.json({ok:true,data:tables.resources()});},
+ async find(req,res){res.json({ok:true,data:await tables.find(req.input.tabla,req.input.id)});},
+});

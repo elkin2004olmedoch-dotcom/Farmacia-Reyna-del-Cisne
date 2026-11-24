@@ -1,5 +1,5 @@
 /* Identidad compartida por administración y reparto; la tienda conserva su propio alcance. */
-:is(body.admin-page,body.admin-install-page,body[data-page="deliveries"]) {
+:is(body.admin-page,body[data-page="deliveries"]) {
   --admin-bg:#fffaf1; --admin-panel:#fffdf8; --admin-border:#dfcdb8; --admin-muted:#65534b; --admin-sidebar-bg:#fff3df;
   --surface:#fffaf1; --soft:#fff3df; --line:#dfcdb8;
   --operations-paper:#fffdf8; --operations-cream:#fff3df; --operations-wine:#681e2a; --operations-border:#dfcdb8;
@@ -30,6 +30,9 @@
 .admin-page .admin-products-table td:first-child { color:var(--admin-muted); font-size:11px; }
 .admin-page .admin-products-table td:nth-child(2) { color:var(--operations-wine); font-weight:650; }
 .admin-page .admin-product-stock { display:block; margin-top:4px; color:var(--admin-muted); font-size:11px; font-weight:400; font-variant-numeric:tabular-nums; }
+.admin-resource-controls { display:grid; gap:12px; margin-block:16px; }
+.admin-resource-controls select { width:100%; min-height:44px; padding:10px; border:1px solid var(--operations-border); border-radius:6px; color:var(--ink); background:var(--operations-paper); }
+.admin-resource-controls :is(h3,p) { margin:0; overflow-wrap:anywhere; }
 .admin-page .admin-products-table :is(th,td):nth-child(4) { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
 .admin-page .admin-products-table :is(th,td):last-child { width:180px; text-align:right; white-space:nowrap; }
 .admin-page .admin-products-table td .text-link { padding:8px; margin:0; border:1px solid var(--operations-border); border-radius:6px; }

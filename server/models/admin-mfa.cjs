@@ -10,20 +10,22 @@ async function password(user,value){if(typeof value!=='string'||Buffer.byteLengt
 async function revoke(tx,user){await tx.usuario.update({where:{id:user.id},data:{tokenVersion:{increment:1}}});await tx.sesionWeb.updateMany({where:{usuarioId:user.id,revokedAt:null},data:{revokedAt:new Date()}});await require('./sesiones-moviles.cjs').revokeTx(tx,{usuarioId:user.id});return {...user,tokenVersion:user.tokenVersion+1};}
 async function setup(actor,value,config){
  await password(await current(db,actor),value);const secret=new OTP.Secret({size:20}).base32;
- await transaction(async tx=>{await current(tx,actor);const old=await tx.adminMfa.findUnique({where:{usuarioId:actor.id}});if(old?.enabled)throw new AppError(409,'MFA_ENABLED','El segundo factor ya está activo.');const data={secretCipher:crypt.encrypt({secret},key(config)),enabled:false,setupExpiresAt:new Date(Date.now()+10*60000),lastCounter:-1,recoveryHashes:'[]'};await tx.adminMfa.upsert({where:{usuarioId:actor.id},create:{usuarioId:actor.id,...data},update:data});});
+ await transaction(async tx=>{await current(tx,actor);const old=await tx.adminMfa.findUnique({where:{usuarioId:actor.id}});if(old?.enabled)throw new AppError(409,'MFA_ENABLED','El segundo factor ya está activo.');const data={secretCipher:crypt.encrypt({secret},key(config)),enabled:false,setupExpiresAt:new Date(Date.now()+10*60000),lastCounter:-1,failedAttempts:0,blockedUntil:null,challengeHash:null,challengeUntil:null};await tx.adminMfa.upsert({where:{usuarioId:actor.id},create:{usuarioId:actor.id,...data},update:data});await tx.adminMfaRecuperacion.updateMany({where:{usuarioId:actor.id,usedAt:null},data:{usedAt:new Date()}});});
  return {secret,expiresInSeconds:600};
 }
 async function consume(tx,row,code,config,{recovery=true}={}){
  const now=Date.now();if(!row||row.blockedUntil&&row.blockedUntil.getTime()>now)return false;
- let hashes;try{hashes=JSON.parse(row.recoveryHashes);}catch{return false;}
- if(recovery&&typeof code==='string'&&/^[a-f0-9]{20}$/.test(code)&&hashes.includes(digest(code))){await tx.adminMfa.update({where:{usuarioId:row.usuarioId},data:{recoveryHashes:JSON.stringify(hashes.filter(v=>v!==digest(code))),failedAttempts:0,blockedUntil:null}});return true;}
+ if(recovery&&typeof code==='string'&&/^[a-f0-9]{20}$/.test(code)){
+  const consumed=await tx.adminMfaRecuperacion.updateMany({where:{usuarioId:row.usuarioId,hash:digest(code),usedAt:null},data:{usedAt:new Date(now)}});
+  if(consumed.count===1){await tx.adminMfa.update({where:{usuarioId:row.usuarioId},data:{failedAttempts:0,blockedUntil:null}});return true;}
+ }
  const secret=crypt.decrypt(row.secretCipher,key(config)).secret,totp=tokenFor(secret),delta=/^\d{6}$/.test(code||'')?totp.validate({token:code,window:1,timestamp:now,afterCounter:row.lastCounter}):null;
  if(delta!==null){await tx.adminMfa.update({where:{usuarioId:row.usuarioId},data:{lastCounter:Math.floor(now/30000)+delta,failedAttempts:0,blockedUntil:null}});return true;}
  const attempts=row.failedAttempts+1;await tx.adminMfa.update({where:{usuarioId:row.usuarioId},data:{failedAttempts:attempts,blockedUntil:attempts>=5?new Date(now+15*60000):null}});return false;
 }
 async function enable(actor,code,config){
  const codes=Array.from({length:8},()=>randomBytes(10).toString('hex'));
- const user=await transaction(async tx=>{const user=await current(tx,actor),row=await tx.adminMfa.findUnique({where:{usuarioId:actor.id}});if(!row||row.enabled||!row.setupExpiresAt||row.setupExpiresAt<Date.now())return null;if(!await consume(tx,row,code,config,{recovery:false}))return null;await tx.adminMfa.update({where:{usuarioId:actor.id},data:{enabled:true,setupExpiresAt:null,recoveryHashes:JSON.stringify(codes.map(digest))}});return revoke(tx,user);});
+ const user=await transaction(async tx=>{const user=await current(tx,actor),row=await tx.adminMfa.findUnique({where:{usuarioId:actor.id}});if(!row||row.enabled||!row.setupExpiresAt||row.setupExpiresAt<Date.now())return null;if(!await consume(tx,row,code,config,{recovery:false}))return null;await tx.adminMfaRecuperacion.updateMany({where:{usuarioId:actor.id,usedAt:null},data:{usedAt:new Date()}});await tx.adminMfaRecuperacion.createMany({data:codes.map(code=>({usuarioId:actor.id,hash:digest(code)}))});await tx.adminMfa.update({where:{usuarioId:actor.id},data:{enabled:true,setupExpiresAt:null}});return revoke(tx,user);});
  if(!user)fail();return {user,recoveryCodes:codes};
 }
 async function challenge(user,config){
@@ -35,5 +37,5 @@ async function login(value,code,config){
  let claims;try{claims=jwt.verify(value,config.secret,{algorithms:['HS256'],issuer:'farmacia-reina',audience:'farmacia-mfa'});}catch{fail();}
  const result=await transaction(async tx=>{const row=await tx.adminMfa.findUnique({where:{usuarioId:claims.sub}}),user=await tx.usuario.findUnique({where:{id:claims.sub}});if(!row?.enabled||!user?.activo||user.role!=='admin'||user.tokenVersion!==claims.version||row.challengeHash!==digest(claims.jti)||row.challengeUntil<Date.now())return null;if(!await consume(tx,row,code,config))return null;await tx.adminMfa.update({where:{usuarioId:user.id},data:{challengeHash:null,challengeUntil:null}});return user;});if(!result)fail();return result;
 }
-async function disable(actor,value,code,config){await password(await current(db,actor),value);const result=await transaction(async tx=>{const user=await current(tx,actor),row=await tx.adminMfa.findUnique({where:{usuarioId:actor.id}});if(!row?.enabled||!await consume(tx,row,code,config))return null;await tx.adminMfa.delete({where:{usuarioId:actor.id}});return revoke(tx,user);});if(!result)fail();return result;}
+async function disable(actor,value,code,config){await password(await current(db,actor),value);const result=await transaction(async tx=>{const user=await current(tx,actor),row=await tx.adminMfa.findUnique({where:{usuarioId:actor.id}});if(!row?.enabled||!await consume(tx,row,code,config))return null;await tx.adminMfaRecuperacion.updateMany({where:{usuarioId:actor.id,usedAt:null},data:{usedAt:new Date()}});await tx.adminMfa.update({where:{usuarioId:actor.id},data:{enabled:false,setupExpiresAt:null,challengeHash:null,challengeUntil:null}});return revoke(tx,user);});if(!result)fail();return result;}
 module.exports={setup,enable,disable,challenge,login,status:async id=>({enabled:Boolean((await db.adminMfa.findUnique({where:{usuarioId:id},select:{enabled:true}}))?.enabled)})};

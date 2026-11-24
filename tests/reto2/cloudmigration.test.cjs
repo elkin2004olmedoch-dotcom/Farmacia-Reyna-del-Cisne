@@ -25,7 +25,7 @@ function fixture(uploaded=false){
   const createdAt=new Date('2024-01-02T03:04:05.123Z');
   const updatedAt=new Date('2024-02-03T04:05:06.789Z');
   return {
-    direccionGuardada:[],favorito:[],resenaProducto:[],entregaIncidencia:[],adminMfa:[],auditoriaAdmin:[],passwordReset:[{usuarioId:'cliente-original',tokenHash:'b'.repeat(64)}],sesionWeb:[{id:'web-original',usuarioId:'cliente-original',secretHash:'d'.repeat(64)}],pagoPractica:[],
+    direccionGuardada:[],favorito:[],resenaProducto:[],entregaIncidencia:[],adminMfa:[],adminMfaRecuperacion:[],auditoriaAdmin:[],passwordReset:[{usuarioId:'cliente-original',tokenHash:'b'.repeat(64)}],sesionWeb:[{id:'web-original',usuarioId:'cliente-original',secretHash:'d'.repeat(64)}],pagoPractica:[],
     registroPendiente:[{usuarioId:'cliente-original',email:privateEmail,secretHash:'e'.repeat(64)}],
     revisionCatalogo:[{id:'catalogo',token:'f'.repeat(32)}],
     usuario:[{id:'cliente-original',nombre:'Cliente privado',email:privateEmail,telefono:'0979275988',passwordHash:privateHash,role:'user',tokenVersion:7,activo:false,emailVerifiedAt:null,emailVerificationRequired:true,createdAt},{id:'repartidor-original',nombre:'Repartidor privado',email:'repartidor@example.ec',telefono:'0979275988',passwordHash:privateHash,role:'repartidor',tokenVersion:1,activo:true,emailVerifiedAt:updatedAt,emailVerificationRequired:false,createdAt}],
@@ -45,12 +45,24 @@ function fixture(uploaded=false){
     proveedor:[{id:'proveedor-original',nombre:'Proveedor privado',ruc:'0102030400001',email:privateEmail,telefono:'+593979275988',direccion:'Domicilio privado',activo:true,createdAt,updatedAt}],
     lote:[{id:'lote-original',productoId:'producto-original',numero:'LOTE-01',vencimiento:'2035-12-31',stock:2,costoUnitario:new Prisma.Decimal('2.15'),proveedorId:'proveedor-original',createdAt,updatedAt}],
     pedidoDetalleLote:[{id:'asignacion-original',detalleId:'detalle-original',loteId:'lote-original',cantidad:1}],
-    movimientoInventario:[{id:'movimiento-original',productoId:'producto-original',loteId:'lote-original',actorId:'cliente-original',pedidoId:'pedido-original',tipo:'venta',cantidad:1,motivo:'Reserva original del pedido',createdAt}],
+    movimientoInventario:[{id:'movimiento-original',productoId:'producto-original',actorId:'cliente-original',pedidoId:'pedido-original',tipo:'venta',cantidad:1,motivo:'Reserva original del pedido',createdAt}],
+    movimientoLote:[{movimientoId:'movimiento-original',loteId:'lote-original'}],
     configuracionEmisor:[{id:'principal',ruc:'0102030400001',razonSocial:'Farmacia privada',nombreComercial:'Farmacia',direccionMatriz:'Domicilio privado',direccionEstablecimiento:'Domicilio privado',establecimiento:'001',puntoEmision:'001',ambiente:'1',obligadoContabilidad:false,softwarePropio:true,rucProveedorSoftware:null,certificadoCifrado:'v1.material-cifrado-sintetico-no-publicable',certificadoVenceEn:new Date('2035-12-31T05:00:00Z'),certificadoRuc:'0102030400001',createdAt,updatedAt}],
     secuenciaFactura:[{id:'contador-original',emisorRuc:'0102030400001',ambiente:'1',establecimiento:'001',puntoEmision:'001',ultimo:7}],
     facturaPedido:[{id:'factura-original',pedidoId:'pedido-original',estado:'AUTORIZADA',ambiente:'1',emisorRuc:'0102030400001',establecimiento:'001',puntoEmision:'001',secuencial:7,claveAcceso:'1'.repeat(49),fechaEmision:createdAt,snapshot:JSON.stringify({pedidoId:'pedido-original',comprador:{identificacionComprador:'0102030400'}}),xmlBorrador:'<factura/>',xmlFirmado:'<factura-firmada/>',xmlAutorizado:'<factura-firmada/>',numeroAutorizacion:'1'.repeat(49),fechaAutorizacion:createdAt,mensajes:'[]',ultimoError:null,procesandoHasta:null,intentos:1,createdAt,updatedAt}]
   };
 }
+
+test('transferir descarta códigos MFA revocados y rechaza un segundo factor activo',async()=>{
+ const snapshot=fixture();
+ snapshot.adminMfa=[{usuarioId:'cliente-original',enabled:false,secretCipher:'synthetic-private-mfa'}];
+ snapshot.adminMfaRecuperacion=[{id:'recovery-one',usuarioId:'cliente-original',hash:'a'.repeat(64)},{id:'recovery-two',usuarioId:'cliente-original',hash:'b'.repeat(64)}];
+ const target=targetClient();await migrate({source:sourceClient(snapshot),target,apply:true});
+ assert.deepEqual(target.state.adminMfa,[]);assert.deepEqual(target.state.adminMfaRecuperacion,[]);
+ assert.doesNotMatch(JSON.stringify(target.state),/synthetic-private-mfa/);
+ snapshot.adminMfa[0].enabled=true;
+ await assert.rejects(migrate({source:sourceClient(snapshot),target:targetClient(),apply:true}),error=>error.code==='SOURCE_MFA_ACTIVE');
+});
 function technicalDefaults(){
  const createdAt=new Date('2026-10-28T10:00:00.123Z');
  return {
@@ -61,7 +73,7 @@ function technicalDefaults(){
 }
 function sourceClient(snapshot){
   let transactions=0;const reads=[];
-  const tx=Object.fromEntries(MODELS.map(model=>[model,{findMany:async options=>{reads.push(model);if(['emailVerification','passwordReset','sesionWeb','adminMfa','registroPendiente','revisionCatalogo'].includes(model)){const select=model==='revisionCatalogo'?{id:true}:{usuarioId:true,...(model==='sesionWeb'?{id:true}:{})};assert.deepEqual(options,{select});return snapshot[model].map(row=>Object.fromEntries(Object.keys(select).map(key=>[key,row[key]])));}return snapshot[model];}}]));
+  const tx=Object.fromEntries(MODELS.map(model=>[model,{findMany:async options=>{reads.push(model);if(['emailVerification','passwordReset','sesionWeb','adminMfa','adminMfaRecuperacion','registroPendiente','revisionCatalogo'].includes(model)){const select=model==='revisionCatalogo'?{id:true}:{usuarioId:true,...(['sesionWeb','adminMfaRecuperacion'].includes(model)?{id:true}:{}),...(model==='adminMfa'?{enabled:true}:{})};assert.deepEqual(options,{select});return snapshot[model].map(row=>Object.fromEntries(Object.keys(select).map(key=>[key,row[key]])));}return snapshot[model];}}]));
   return {$transaction:async fn=>{transactions++;return fn(tx);},$disconnect:async()=>{},get transactions(){return transactions;},reads};
 }
 function targetClient({initial={},failOn,beforeTransaction}={}){
@@ -214,7 +226,7 @@ test('la simulación consulta un snapshot único y muestra solo cantidades sin e
 test('la transferencia conserva datos de negocio y usuarios e invalida enlaces transitorios de correo',async()=>{
   const snapshot=fixture(),source=sourceClient(snapshot),target=targetClient();
   const result=await migrate({source,target,apply:true});
-  const ephemeral=['emailVerification','passwordReset','sesionWeb','registroPendiente','revisionCatalogo'];
+  const ephemeral=['emailVerification','passwordReset','sesionWeb','adminMfa','adminMfaRecuperacion','registroPendiente','revisionCatalogo'];
   assert.equal(result.modo,'aplicar');assert.deepEqual(target.writes,MODELS.filter(model=>!ephemeral.includes(model)&&snapshot[model].length));assert.equal(target.transactions,2);
   for(const model of MODELS)assert.deepEqual(target.state[model],ephemeral.includes(model)?[]:snapshot[model]);
   assert.equal(target.state.usuario[0].passwordHash,privateHash);assert.equal(target.state.usuario[0].tokenVersion,7);

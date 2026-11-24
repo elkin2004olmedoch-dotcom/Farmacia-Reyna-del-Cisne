@@ -1,6 +1,6 @@
 import {administration,adminFormIssues,ecuadorDateTime,ecuadorToday} from '../models/admin.js';
 import {catalog} from '../models/catalog.js';
-import {tableView,editorView,promotionEditorState,adminSectionView,orderStateView,fiscalView} from '../views/admin.js';
+import {tableView,resourceView,editorView,promotionEditorState,adminSectionView,orderStateView,fiscalView} from '../views/admin.js';
 import {promotionPublication} from '../models/promotion-publication.js';
 import {message,busy,formErrors} from '../views/common.js';
 import {confirmAction} from './dialog.js';
@@ -13,8 +13,8 @@ import {billingController} from './billing.js';
 import {adminCompanionController} from './admin-companion.js';
 import {ZONE_FORM_DRAFT,deliveries} from '../models/deliveries.js';
 
-const editableSections=['productos','promociones','proveedores','lotes','movimientos'];
-const sectionForms={productos:'product-form',promociones:'promotion-form',proveedores:'supplier-form',lotes:'lot-form',movimientos:'movement-form'};
+const editableSections=['productos','promociones','proveedores','lotes','movimientos','usuarios'];
+const sectionForms={productos:'product-form',promociones:'promotion-form',proveedores:'supplier-form',lotes:'lot-form',movimientos:'movement-form',usuarios:'user-form'};
 const companionTables=[...editableSections,'pedidos','zonas','entregas'];
 const companionRecordId=/^[a-z0-9][a-z0-9-]{0,79}$/;
 function productValues(form){
@@ -47,7 +47,9 @@ export async function adminController() {
   if(!requireUser('admin.html',true))return;
   document.getElementById('admin-area').hidden=false;
   const query=new URLSearchParams(location.search),requested=query.get('tabla'),requestedRecord=query.get('registro');
-  let name=[...editableSections,'pedidos','usuarios','detalles','auditoria','fiscal','facturacion',...(['zonas','entregas'].includes(requested)&&requestedRecord?['zonas','entregas']:[])].includes(requested)?requested:requested?'productos':'dashboard',page=/^[1-9]\d*$/.test(query.get('page') || '')?Math.min(100000,Number(query.get('page'))):1,result,editing=null,editingVersion=null,editingValues=null,summarySnapshot='',requestId=0,openingId=0,previousFocus=null,stateFocus=null,lotRequest=0;
+  let name=[...editableSections,'pedidos','usuarios','detalles','auditoria','fiscal','facturacion','datos',...(['zonas','entregas'].includes(requested)&&requestedRecord?['zonas','entregas']:[])].includes(requested)?requested:requested?'productos':'dashboard',page=/^[1-9]\d*$/.test(query.get('page') || '')?Math.min(100000,Number(query.get('page'))):1,result,editing=null,editingVersion=null,editingValues=null,summarySnapshot='',requestId=0,openingId=0,previousFocus=null,stateFocus=null,lotRequest=0;
+  let resourceKey=query.get('recurso') || 'productos',resources=null;
+  const routeQuery=()=>new URLSearchParams({tabla:name,...(name==='datos'?{recurso:resourceKey}:{}),page:String(page)});
   const dialog=document.getElementById('editor-dialog');const forms=Object.fromEntries(Object.entries(sectionForms).map(([section,id])=>[section,document.getElementById(id)]));
   const productImage=imageController(forms.productos,'product');const promoImage=imageController(forms.promociones,'promotion');
   const stateDialog=document.getElementById('order-state-dialog');const stateForm=document.getElementById('order-state-form');let stateOrder=null;
@@ -102,11 +104,17 @@ export async function adminController() {
     const table=document.getElementById('admin-table');const create=document.getElementById('admin-create');
     table.setAttribute('aria-busy','true');if(!silent){result=null;table.innerHTML='<p class="shop-empty" role="status">Cargando registros…</p>';create.disabled=true;for(const button of ['admin-prev','admin-next'])document.getElementById(button).disabled=true;}
     try{
-      const loaded=loadedResult||await administration.table(tableName,tablePage);
+      if(tableName==='datos'){
+        resources ||= await administration.resources();
+        if(id!==requestId || !auth.isAdmin)return;
+        if(!resources.some(resource=>resource.key===resourceKey))resourceKey=resources[0].key;
+        if(!silent){resourceView(resources,resourceKey);history.replaceState(null,'','admin.html?'+routeQuery());}
+      }
+      const loaded=loadedResult||await (tableName==='datos'?administration.resourceTable(resourceKey,tablePage):administration.table(tableName,tablePage));
       if(id!==requestId || !auth.isAdmin || (silent && document.querySelector('dialog[open]')))return;
       const lastPage=Math.max(1,Math.ceil(loaded.total/loaded.pageSize));
-      if(tableName==='productos' && tablePage>lastPage){
-        page=lastPage;const route=new URLSearchParams(location.search);route.set('tabla',tableName);route.set('page',String(page));
+      if(['productos','datos'].includes(tableName) && tablePage>lastPage){
+        page=lastPage;const route=new URLSearchParams(location.search);route.set('tabla',tableName);route.set('page',String(page));if(tableName==='datos')route.set('recurso',resourceKey);
         history.replaceState(null,'','admin.html?'+route);await render({silent});return;
       }
       if(!silent || JSON.stringify(loaded)!==JSON.stringify(result)){result=loaded;preserveFocus(table,()=>tableView(tableName,loaded));}
@@ -128,6 +136,7 @@ export async function adminController() {
   async function open(record){
     const id=++openingId;const section=name;const opener=document.activeElement;const choices=['promociones','lotes','movimientos'].includes(section)?(await catalog.all()).filter(product=>section!=='promociones'||globalThis.Farmacia.pharmacyPolicy.allowsPromotion(product)):[];
     const suppliers=section==='lotes'?await administration.suppliers():null;
+    if(section==='usuarios' && record)record=await administration.user(record.id);
     if(id!==openingId || name!==section || !auth.isAdmin || !dialog.isConnected)return;
     editing=record?.id || null;editingVersion=record?.updatedAt || null;previousFocus=opener;
     for(const [key,form] of Object.entries(forms))form.hidden=key!==section;
@@ -144,7 +153,8 @@ export async function adminController() {
   document.getElementById('admin-create').addEventListener('click',()=>open().catch(error=>message(error.message,true)));
   document.getElementById('admin-dashboard').addEventListener('click',async event=>{if(!event.target.closest('#admin-retry-summary'))return;try{message('');await render();}catch(error){message(error.message,true);}});
   document.getElementById('admin-table-choice').addEventListener('change',async event=>{name=event.target.value;page=1;history.replaceState(null,'','admin.html?tabla='+name);try{await render();}catch(error){message(error.message,true);}});
-  for(const [id,offset] of [['admin-prev',-1],['admin-next',1]])document.getElementById(id).addEventListener('click',async()=>{page+=offset;history.replaceState(null,'','admin.html?tabla='+name+'&page='+page);try{await render();}catch(error){message(error.message,true);}});
+  for(const [id,offset] of [['admin-prev',-1],['admin-next',1]])document.getElementById(id).addEventListener('click',async()=>{page+=offset;history.replaceState(null,'','admin.html?'+routeQuery());try{await render();}catch(error){message(error.message,true);}});
+  document.getElementById('admin-resource-select').addEventListener('change',async event=>{resourceKey=event.target.value;page=1;history.replaceState(null,'','admin.html?'+routeQuery());try{await render();}catch(error){message(error.message,true);}});
   forms.productos.elements.ivaCategoria.addEventListener('change',pharmaceuticalRequired);
   forms.productos.elements.tipoProducto.addEventListener('change',pharmaceuticalRequired);
   forms.productos.elements.soloConsulta.addEventListener('change',pharmaceuticalRequired);
@@ -176,10 +186,11 @@ export async function adminController() {
     }
     else if(section==='promociones')values={...fields,imagen:fields.imagen || null,alt:fields.imagen?fields.alt:null,descuentoPorcentaje:Number(fields.descuentoPorcentaje),activa:form.elements.activa.checked,vistaPrevia:form.elements.vistaPrevia.checked,orden:Number(fields.orden),inicio:ecuadorDateTime(fields.inicio),fin:ecuadorDateTime(fields.fin)};
     else if(section==='proveedores')values={...fields,activo:form.elements.activo.checked};
+    else if(section==='usuarios'){values={...fields,username:fields.username?globalThis.Farmacia.validation.normalizeUsername(fields.username):null,activo:form.elements.activo.checked};if(!fields.password)delete values.password;if(editing)values.esperadoUpdatedAt=editingVersion;}
     else if(section==='lotes')values={...fields,cantidad:Number(fields.cantidad),costoUnitario:Number(fields.costoUnitario),proveedorId:fields.proveedorId || null};
     else values={...fields,loteId:fields.loteId || null,cantidad:Number(fields.cantidad)};
     if(editing && ['promociones','proveedores'].includes(section))values.esperadoUpdatedAt=editingVersion;
-    const save={productos:()=>partial?administration.patchProduct(values,editing):administration.saveProduct(values,editing),promociones:()=>administration.savePromotion(values,editing),proveedores:()=>administration.saveSupplier(values,editing),lotes:()=>administration.saveLot(values),movimientos:()=>administration.saveMovement(values)}[section];
+    const save={productos:()=>partial?administration.patchProduct(values,editing):administration.saveProduct(values,editing),promociones:()=>administration.savePromotion(values,editing),proveedores:()=>administration.saveSupplier(values,editing),lotes:()=>administration.saveLot(values),movimientos:()=>administration.saveMovement(values),usuarios:()=>administration.saveUser(values,editing)}[section];
     const submit=partial?document.getElementById('product-save-changes'):form.querySelector('[type=submit]');const locked=Array.from(form.elements).filter(control=>!control.disabled && control!==submit);for(const control of locked)control.disabled=true;busy(submit,true);for(const button of dialog.querySelectorAll('[data-editor-close]'))button.disabled=true;status.textContent='';let serverIssues;
     try{await save();if(!auth.isAdmin || !dialog.isConnected)return;dialog.close();await render();if(auth.isAdmin){message(section==='promociones'?promotionPublication(values).message:'Cambios guardados en la farmacia.');document.getElementById('admin-create')?.focus();}}
     catch(error){status.textContent=error.message;serverIssues=Object.fromEntries((error.details || []).map(issue=>[issue.field,issue.message]));}
@@ -224,7 +235,7 @@ export async function adminController() {
     if(!auth.isAdmin)throw new Error('Inicia sesión nuevamente como administrador.');
     if(document.querySelector('dialog[open]'))throw new Error('Termina o cierra el formulario abierto antes de cambiar de sección.');
     if(section==='entregas'){location.assign('entregas.html');return;}
-    if(![...editableSections,'dashboard','pedidos','usuarios','detalles','fiscal','facturacion'].includes(section))throw new Error('Esa sección no está disponible.');
+    if(![...editableSections,'dashboard','pedidos','usuarios','detalles','fiscal','facturacion','datos'].includes(section))throw new Error('Esa sección no está disponible.');
     name=section;page=1;history.replaceState(null,'',section==='dashboard'?'admin.html':'admin.html?tabla='+section);await render();
     document.getElementById('contenido').focus();
   }
@@ -246,7 +257,7 @@ export async function adminController() {
   }
   const refresh=watchUpdates(()=>render({silent:true}),{canRefresh:()=>auth.isAdmin && !document.querySelector('dialog[open]') && !document.querySelector('#admin-area [aria-busy=true]')});
   adminCompanionController({refresh,navigate,openEditor});
-  dialog.addEventListener('close',()=>{lotRequest++;openingId++;productImage.reset();promoImage.reset();if(!auth.isAdmin || !dialog.isConnected)return;(previousFocus?.isConnected?previousFocus:document.getElementById('admin-create'))?.focus();void refresh();});
+  dialog.addEventListener('close',()=>{lotRequest++;openingId++;forms.usuarios.elements.password.value='';productImage.reset();promoImage.reset();if(!auth.isAdmin || !dialog.isConnected)return;(previousFocus?.isConnected?previousFocus:document.getElementById('admin-create'))?.focus();void refresh();});
   stateDialog.addEventListener('close',()=>{if(!auth.isAdmin || !stateDialog.isConnected)return;if(stateFocus?.isConnected)stateFocus.focus();void refresh();});
   if(new URLSearchParams(location.search).get('crear')==='1' && editableSections.includes(name) && result && auth.isAdmin)await open();
 }

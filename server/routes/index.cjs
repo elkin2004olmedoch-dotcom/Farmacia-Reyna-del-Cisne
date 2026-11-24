@@ -1,6 +1,5 @@
 const {Router}=require('express');
 const {rateLimit}=require('express-rate-limit');
-const {query}=require('express-validator');
 const {authenticate,roles,mobile}=require('../middleware/auth.cjs');
 const V=require('../middleware/validation.cjs');
 const {AppError}=require('../middleware/errors.cjs');
@@ -14,6 +13,10 @@ module.exports=config=> {
   const fiscal=require('../controllers/fiscal.cjs');
   const inventory=require('../controllers/inventario.cjs');
   const resourcePatch=require('../middleware/resourcepatch.cjs');
+  const adminTables=require('../controllers/admin.cjs');
+  const adminResources=require('../middleware/admin-resource-validation.cjs');
+  const adminUsers=require('../controllers/admin-users.cjs');
+  const userValidation=require('../middleware/admin-user-validation.cjs');
   const authLimit=process.env.NODE_ENV==='test' && !config.production && Number.isInteger(config.testAuthLimit) && config.testAuthLimit>0?config.testAuthLimit:20;
   const limiter=rateLimit({windowMs:15*60*1000,limit:authLimit,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Demasiados intentos. Espera unos minutos.'))});
   const web=require('../models/sesiones-web.cjs');
@@ -82,7 +85,14 @@ module.exports=config=> {
   router.post('/admin/lotes',auth,admin,...V.lot,V.validated,inventory.createLot);
   router.get('/admin/inventario/movimientos',auth,admin,...V.inventoryPagination,inventory.movements);
   router.post('/admin/inventario/ajustes',auth,admin,...V.adjustment,V.validated,inventory.adjust);
-  router.get('/admin/tablas',auth,admin,query('tabla').isIn(['productos','usuarios','pedidos','detalles','promociones']),...V.pagination,require('../controllers/admin.cjs'));
+  router.get('/admin/recursos',auth,admin,adminTables.resources);
+  router.post('/admin/usuarios',auth,admin,...userValidation.create,adminUsers.create);
+  router.get('/admin/usuarios/:id',auth,admin,V.id,V.validated,adminUsers.find);
+  router.put('/admin/usuarios/:id',auth,admin,V.id,...userValidation.update,adminUsers.update);
+  router.patch('/admin/usuarios/:id',auth,admin,V.id,...userValidation.patch,adminUsers.update);
+  router.delete('/admin/usuarios/:id',auth,admin,V.id,...userValidation.remove,adminUsers.remove);
+  router.get('/admin/tablas',auth,admin,adminResources.tableQuery,adminResources.table,...V.pagination,adminTables);
+  router.get('/admin/tablas/:tabla/:id',auth,admin,adminResources.resource,V.id,V.validated,adminTables.find);
   router.get('/admin/auditoria',auth,admin,...V.pagination,async(req,res)=>res.json({ok:true,data:await require('../models/admin-audit.cjs').list(req.input)}));
   router.get('/admin/resumen',auth,admin,require('../controllers/admin-summary.cjs'));
   router.use(require('./resenas.cjs')(config));
