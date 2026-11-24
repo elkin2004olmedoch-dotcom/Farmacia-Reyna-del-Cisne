@@ -2,6 +2,33 @@
 
 Preparación del 23 de noviembre de 2026 para presentar los retos 1 y 2 juntos. La aplicación utiliza HTML, CSS y JavaScript, Express y Prisma 6.19.3. PostgreSQL en Supabase es la base publicada; SQLite conserva la ejecución local reproducible. El título y objetivo del enunciado permiten otro motor relacional. Su frase interna sobre SQL Server se explica declarando esta elección.
 
+## Para abrir en la universidad
+
+| Minuto | Qué mostrar | Qué explicar |
+| --- | --- | --- |
+| 0–1 | [Catálogo](https://farmacia-reyna-del-cisne-pruebas.pages.dev/catalogo) y [ficha de Ensure Advance](https://farmacia-reyna-del-cisne-pruebas.pages.dev/producto?id=vitaminas) | «En el Reto 1 construí el catálogo y el carrito. En el Reto 2 conecté esa interfaz a una API con usuarios, inventario y pedidos persistentes». Busca Ensure, abre la ficha y añade una unidad. |
+| 1–2 | Carrito y [compra](https://farmacia-reyna-del-cisne-pruebas.pages.dev/checkout) | Cambia la cantidad y recarga. La imagen, la cantidad y el subtotal se conservan. Intenta continuar sin sesión y enseña la solicitud de ingreso. |
+| 2–3 | [Cuenta](https://farmacia-reyna-del-cisne-pruebas.pages.dev/cuenta) y [Mis pedidos](https://farmacia-reyna-del-cisne-pruebas.pages.dev/pedidos) | Abre la grabación de la compra para mostrar el pago de práctica y la entrega hasta «Entregado». El total se calcula en el servidor. Pedido y detalles se guardan juntos. |
+| 3–5 | [Administración de productos](https://farmacia-reyna-del-cisne-pruebas.pages.dev/admin?tabla=productos) y [pedidos de los clientes](https://farmacia-reyna-del-cisne-pruebas.pages.dev/admin?tabla=pedidos) | Inicia sesión en otra ventana con tu cuenta administrativa. Muestra el formulario de producto y la lista de pedidos. Para crear, editar y dar de baja usa el ZIP con su base local. En Goti escribe «actualizar productos», selecciona uno y cancela la propuesta para mostrar la confirmación. |
+| 5–6 | [Consulta completa de tablas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/admin?tabla=datos&vista=completa) | Tras iniciar sesión como administrador, abre este enlace. Selecciona Productos, Pedidos y Detalles. El producto identifica qué se compró y el detalle conserva cantidad y precio pagado. La consulta completa abarca los 34 modelos con los campos autorizados. |
+| 6–7 | [API del producto](https://farmacia-reyna-del-cisne-pruebas.pages.dev/api/productos/vitaminas), [salud](https://farmacia-reyna-del-cisne-pruebas.pages.dev/api/salud) y [pedidos protegidos](https://farmacia-reyna-del-cisne-pruebas.pages.dev/api/pedidos) | Abre los pedidos protegidos en una ventana privada sin sesión. En Red del navegador muestra el 401. La prueba automatizada cubre el 403 del cliente autenticado que intenta crear un producto. |
+
+La [publicación para clase](https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/releases/tag/defensa-reto2-2026-11-24) reúne el ZIP, el video y la evidencia de la revisión. Descarga el ZIP y el video antes de entrar al aula. Abre el enlace de salud antes de tu turno para darle tiempo al servicio gratuito de Render.
+
+### Las siete pruebas que pide el docente
+
+| Prueba mínima | Evidencia que puedes enseñar |
+| --- | --- |
+| Login admin obtiene JWT | En [pruebas de API](../tests/reto2/api.test.cjs), el primer caso inicia sesión y verifica el JWT firmado. En la exposición basta mostrar que el caso pasó, sin proyectar el token. |
+| Admin crea un producto | La misma suite comprueba la respuesta 201. En [pruebas de navegador](../tests/reto2/frontend.spec.cjs), el administrador crea, edita y da de baja desde el panel. |
+| Cliente no puede crear productos | El caso de rol comprueba 403 con un JWT de cliente válido. La petición sin sesión recibe 401. |
+| El catálogo consume la API | La lista pública y la ficha muestran la misma referencia. En la pestaña Red filtra por `productos` y muestra una respuesta GET. |
+| El carrito persiste | El caso de catálogo y persistencia recarga la página antes de comprar y verifica el contenido guardado. También puedes reproducirlo en la tienda. |
+| La compra persiste en la base | El caso de pedido consulta la base con Prisma y verifica el total, la cantidad, el precio unitario y el descuento de stock. Repetir la solicitud conserva el mismo pedido. |
+| El admin ve todos los pedidos | El caso de separación de usuarios prueba que otro cliente no ve el pedido y que el administrador sí accede al listado global. |
+
+Si te preguntan por seguridad, señala un control por riesgo en el [README](../README.md#tres-riesgos-owasp-y-sus-mitigaciones). Para preguntas sobre tablas, abre la [normalización](NORMALIZACION.md). Las [diez auditorías](AUDITORIAS-Y-DEFENSA-GOTI.md) tienen el caso, el resultado documentado y su alcance.
+
 ## Recorrido recomendado
 
 1. **Cliente.** Abrir la tienda, buscar un producto con precio y stock, consultar su ficha y añadirlo. Mostrar imagen, cantidades y total del carrito; recargar para demostrar persistencia. Las referencias «Consultar precio y disponibilidad» requieren completar sus datos comerciales antes de venderse.
