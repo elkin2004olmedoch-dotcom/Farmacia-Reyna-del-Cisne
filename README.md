@@ -180,7 +180,7 @@ Para repetir las comprobaciones de API mínimas, después de instalar dependenci
 
 Se revisa un solo proyecto, un repositorio y la misma farmacia publicada. El entregable obligatorio es un único ZIP integrado `Reto2_Olmedo_Elkin.zip`, generado con `powershell -File scripts/crear-reto2.ps1 -Nombre Reto2_Olmedo_Elkin.zip`. Incluye frontend, backend, migraciones, pruebas y documentación; excluye .env, bases, respaldos, certificados y dependencias instaladas. La aplicación MVC conserva y amplía el catálogo, carrito, identidad, accesibilidad y navegación del trabajo inicial, incorporando API, persistencia relacional, autenticación y permisos.
 
-Las [diez auditorías y el guion de siete minutos](docs/AUDITORIAS-Y-DEFENSA-GOTI.md) incluyen los enlaces para exponer. La [guía del recorrido conjunto](docs/RECORRIDO-RETOS-1-Y-2.md) indica qué mostrar como cliente, administrador y repartidor, las órdenes de la mascota y cómo repetir la grabación con `npm run test:journey`. El recorrido usa una base temporal y desactiva correos y cobros comerciales; las capturas y videos se guardan como evidencias locales, fuera del repositorio.
+Las [diez auditorías del Reto 2](docs/AUDITORIAS-RETO-2.md) siguen la rúbrica del docente. El [guion de defensa](docs/DEFENSA-RETO-2.md) reúne los enlaces para exponer. Goti es un adelanto del Reto 3. La [guía del recorrido conjunto](docs/RECORRIDO-RETOS-1-Y-2.md) indica qué mostrar como cliente, administrador y repartidor, las órdenes de la mascota y cómo repetir la grabación con `npm run test:journey`. El recorrido usa una base temporal y desactiva correos y cobros comerciales; las capturas y videos se guardan como evidencias locales, fuera del repositorio.
 
 | Contenido | Dónde comprobarlo en el mismo proyecto |
 | --- | --- |

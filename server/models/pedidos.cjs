@@ -8,7 +8,7 @@ const inventory=require('./inventario.cjs');
 const {allowsPurchase,restrictionReason}=require('../../frontend/models/pharmacy-policy.js');
 const include={pagoPractica:true,detalles:{include:{lotes:true}},historial:{orderBy:[{createdAt:'asc'},{id:'asc'}]}};
 const transitions={pendiente:['confirmado','cancelado'],confirmado:['preparado','cancelado'],preparado:['entregado','cancelado'],entregado:[],cancelado:[]};
-async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTotalCentavos},{actor}={}) {
+async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTotalCentavos},{actor,classroom=false}={}) {
   const payments=require('./pagos.cjs');
   if(payments.practiceAvailable()&&!pago)throw new AppError(409,'CHECKOUT_PAYMENT_REQUIRED','Completa el pago antes de confirmar la compra.');
   if(pago&&(!payments.practiceAvailable()||!payments.validPractice(pago)))throw new AppError(422,'CHECKOUT_PAYMENT_INVALID','El método de pago no está disponible.');
@@ -22,7 +22,7 @@ async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTota
   let destination=null;
   if(comprador.delivery==='delivery'){
     const prior=await db.pedido.findUnique({where:{userId_requestKey:{userId,requestKey:claveSolicitud}},include});if(prior)return same(prior);
-    destination=await require('./geocoding.cjs').prepare(comprador);
+    destination=await require('./geocoding.cjs').prepare(comprador,{classroom:classroom&&Boolean(pago)});
     if(!destination)throw new AppError(409,'DELIVERY_PICKUP_REQUIRED','No pudimos localizar el destino. Seleccionamos retiro en farmacia; revisa el total y confirma nuevamente.');
   }
   for(let attempt=0;attempt<3;attempt++) {
@@ -36,7 +36,8 @@ async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTota
         const now=new Date();
         const products=await tx.producto.findMany({where:{id:{in:sorted.map(item=>item.productoId)},activo:true},include:{lotes:true,promociones:{where:discountWhere(now)}}});
         const tax=await fiscal.current(tx,now);
-        const shipping=await require('./entregas.cjs').shippingSnapshot(tx,comprador,tax,now,destination);
+        const point=destination?.fuente==='direccion-escrita'?null:destination;
+        const shipping=await require('./entregas.cjs').shippingSnapshot(tx,comprador,tax,now,point);
         const automatic=Boolean(pago)&&process.env.PRACTICE_FULFILLMENT_ENABLED!=='false';
         if(automatic){shipping.latitudEntrega=null;shipping.longitudEntrega=null;}
         let cents=0,baseCents=0,ivaCents=0;const details=[];

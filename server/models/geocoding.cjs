@@ -35,12 +35,14 @@ function createGeocoder({fetch=globalThis.fetch,now=Date.now}={}){
  }
  return {resolve:search};
 }
-async function prepare(buyer){
+async function prepare(buyer,{classroom=false}={}){
  const ec=require('../../frontend/models/ecuador.js');
  const zone=typeof buyer.zonaEntregaId==='string'?await require('./db.cjs').zonaEntrega.findUnique({where:{id:buyer.zonaEntregaId}}):null;
  if(!ec.matchesDeliveryZone(zone,buyer))throw problem('DELIVERY_OUTSIDE_COVERAGE','Selecciona una cobertura activa para tu dirección en Ecuador.');
  if(zone.tarifaCentavos===null)throw problem('DELIVERY_RATE_PENDING','La tarifa todavía no está definida. Puedes elegir retiro en farmacia.');
  if(buyer.consienteUbicacion===true&&ec.ecuadorPoint(buyer.latitudEntrega,buyer.longitudEntrega))return {latitud:buyer.latitudEntrega,longitud:buyer.longitudEntrega};
+ if(classroom && normalize(buyer.province)==='azuay' && normalize(buyer.city)==='cuenca' && normalize(buyer.address).length>=8)
+   return {fuente:'direccion-escrita'};
  try{const point=await module.exports.resolve({direccion:buyer.address,ciudad:buyer.city,provincia:buyer.province});return ec.ecuadorPoint(point.latitud,point.longitud)?point:null;}
  catch(error){if(['ADDRESS_NOT_FOUND','ADDRESS_AMBIGUOUS','GEOCODING_UNAVAILABLE','GEOCODING_BUSY'].includes(error.code))return null;throw error;}
 }
