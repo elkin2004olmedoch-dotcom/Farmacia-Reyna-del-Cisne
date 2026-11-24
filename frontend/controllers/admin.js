@@ -140,11 +140,16 @@ export async function adminController() {
     try{const data=await administration.lots(productId);if(id!==lotRequest || !auth.isAdmin)return;populate(select,data.items,{empty:'Existencias sin lote',label:lot=>`${lot.numero} · ${lot.stock} unidades · vence ${lot.vencimiento.slice(0,10)}`});status.textContent=data.items.length?'Selecciona el lote correspondiente o las existencias sin lote.':'Este producto todavía no tiene lotes registrados.';select.disabled=false;submit.disabled=false;}
     catch(error){if(id!==lotRequest || !auth.isAdmin)return;status.textContent=error.message;message(error.message,true);}
   }
-  async function open(record){
-    const id=++openingId;const section=name;const opener=document.activeElement;const choices=['promociones','lotes','movimientos'].includes(section)?(await catalog.all()).filter(product=>section!=='promociones'||globalThis.Farmacia.pharmacyPolicy.allowsPromotion(product)):[];
+  async function open(record,purchaseProduct){
+    const origin=name,section=purchaseProduct?'lotes':name;
+    const id=++openingId,opener=document.activeElement;
+    let choices=[];
+    if(purchaseProduct)choices=[purchaseProduct];
+    else if(section==='lotes')choices=(await administration.products()).filter(product=>product.activo);
+    else if(['promociones','movimientos'].includes(section))choices=(await catalog.all()).filter(product=>section!=='promociones'||globalThis.Farmacia.pharmacyPolicy.allowsPromotion(product));
     const suppliers=['productos','lotes'].includes(section)?await administration.suppliers():null;
     if(section==='usuarios' && record)record=await administration.user(record.id);
-    if(id!==openingId || name!==section || !auth.isAdmin || !dialog.isConnected)return;
+    if(id!==openingId || name!==origin || !auth.isAdmin || !dialog.isConnected)return;
     editing=record?.id || null;editingVersion=record?.updatedAt || null;previousFocus=opener;
     for(const [key,form] of Object.entries(forms))form.hidden=key!==section;
     const form=forms[section];if(!form)return;
@@ -160,7 +165,17 @@ export async function adminController() {
     editorView(form,record);errors(form,{});document.getElementById('editor-status').textContent='';
     if(section==='productos'){productImage.reset();pharmaceuticalRequired();editingValues=productValues(form);}
     if(section==='promociones'){promoImage.reset();promotionEditorState(form);}
-    if(section==='lotes')form.elements.vencimiento.min=ecuadorToday();
+    if(section==='lotes'){
+      const supplier=form.elements.proveedorId,product=form.elements.productoId;
+      const available=new Set(suppliers.items.filter(item=>item.activo).map(item=>item.id));
+      const preferred=new Map(choices.map(item=>[item.id,item.proveedorId]));
+      product.onchange=()=>{const selected=preferred.get(product.value);supplier.value=available.has(selected)?selected:'';};
+      product.onchange();
+      form.elements.vencimiento.min=ecuadorToday();
+      supplier.required=Boolean(purchaseProduct);
+      form.querySelector('label[for="lot-proveedorId"]').textContent=purchaseProduct?'Proveedor de la compra':'Proveedor (opcional)';
+      if(purchaseProduct)document.getElementById('editor-title').textContent='Registrar compra a proveedor';
+    }
     dialog.showModal();form.querySelector('input:not([type=hidden]),select,textarea')?.focus();
     if(section==='movimientos')await loadMovementLots();
   }
@@ -180,8 +195,8 @@ export async function adminController() {
   forms.movimientos.elements.productoId.addEventListener('change',()=>void loadMovementLots());
   document.getElementById('admin-table').addEventListener('click',async event=>{
     const button=event.target.closest('button');if(!button)return;
-    const row=result?.items.find(row=>row.id===(button.dataset.edit || button.dataset.delete || button.dataset.orderState));if(!row)return;
-    try{if(button.dataset.orderState){stateFocus=button;stateOrder=row;orderStateView(row);stateDialog.showModal();stateForm.querySelector('select').focus();}else if(button.dataset.edit)await open(row);else if(button.dataset.delete && await confirmAction(`¿Eliminar ${row.nombre || row.titulo}? Los productos vendidos se conservan en el historial.`)){busy(button,true);await (name==='productos'?administration.removeProduct(row.id):administration.removePromotion(row.id));await render();if(auth.isAdmin){document.getElementById('admin-create')?.focus();message('Registro eliminado.');}}}catch(error){message(error.message,true);}finally{if(button.isConnected)busy(button,false);}
+    const row=result?.items.find(row=>row.id===(button.dataset.edit || button.dataset.delete || button.dataset.orderState || button.dataset.purchase));if(!row)return;
+    try{if(button.dataset.purchase){await open(undefined,row);}else if(button.dataset.orderState){stateFocus=button;stateOrder=row;orderStateView(row);stateDialog.showModal();stateForm.querySelector('select').focus();}else if(button.dataset.edit)await open(row);else if(button.dataset.delete && await confirmAction(`¿Eliminar ${row.nombre || row.titulo}? Los productos vendidos se conservan en el historial.`)){busy(button,true);await (name==='productos'?administration.removeProduct(row.id):administration.removePromotion(row.id));await render();if(auth.isAdmin){document.getElementById('admin-create')?.focus();message('Registro eliminado.');}}}catch(error){message(error.message,true);}finally{if(button.isConnected)busy(button,false);}
   });
   async function saveEditor(section,form,event,partial=false){
     event.preventDefault();if(!auth.isAdmin || !form.isConnected || form.querySelector('button[aria-busy=true]'))return;
@@ -206,7 +221,7 @@ export async function adminController() {
     if(editing && ['promociones','proveedores'].includes(section))values.esperadoUpdatedAt=editingVersion;
     const save={productos:()=>partial?administration.patchProduct(values,editing):administration.saveProduct(values,editing),promociones:()=>administration.savePromotion(values,editing),proveedores:()=>administration.saveSupplier(values,editing),lotes:()=>administration.saveLot(values),movimientos:()=>administration.saveMovement(values),usuarios:()=>administration.saveUser(values,editing)}[section];
     const submit=partial?document.getElementById('product-save-changes'):form.querySelector('[type=submit]');const locked=Array.from(form.elements).filter(control=>!control.disabled && control!==submit);for(const control of locked)control.disabled=true;busy(submit,true);for(const button of dialog.querySelectorAll('[data-editor-close]'))button.disabled=true;status.textContent='';let serverIssues;
-    try{await save();if(!auth.isAdmin || !dialog.isConnected)return;dialog.close();await render();if(auth.isAdmin){message(section==='promociones'?promotionPublication(values).message:'Cambios guardados en la farmacia.');document.getElementById('admin-create')?.focus();}}
+    try{await save();if(!auth.isAdmin || !dialog.isConnected)return;dialog.close();await render();if(auth.isAdmin){message(section==='lotes'?'Lote registrado. Se actualizaron las existencias del producto.':section==='promociones'?promotionPublication(values).message:'Cambios guardados en la farmacia.');document.getElementById('admin-create')?.focus();}}
     catch(error){status.textContent=error.message;serverIssues=Object.fromEntries((error.details || []).map(issue=>[issue.field,issue.message]));}
     finally{for(const control of locked)control.disabled=false;busy(submit,false);for(const button of dialog.querySelectorAll('[data-editor-close]'))button.disabled=false;if(serverIssues)errors(form,serverIssues);}
   }
@@ -264,6 +279,8 @@ export async function adminController() {
     await navigate(section);await open(record);
     const form=forms[section];
     for(const [key,value] of Object.entries(values)){const field=form.elements.namedItem(key);if(!field || value==null)continue;if(field.type==='checkbox')field.checked=Boolean(value);else field.value=String(value);}
+    if(section==='lotes' && values.productoId && values.proveedorId===undefined)form.elements.productoId.dispatchEvent(new Event('change'));
+    if(section==='lotes' && values.proveedorId===null)form.elements.proveedorId.value='';
     if(section==='productos')pharmaceuticalRequired();
     if(section==='promociones')promotionEditorState(form);
     if(section==='movimientos')await loadMovementLots();

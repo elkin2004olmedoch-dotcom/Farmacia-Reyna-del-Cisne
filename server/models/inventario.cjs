@@ -25,7 +25,7 @@ async function createLot({productoId,numero,vencimiento,cantidad,costoUnitario,p
   await findProduct(tx,productoId);
   if(proveedorId && !await tx.proveedor.findFirst({where:{id:proveedorId,activo:true}}))throw new AppError(422,'SUPPLIER_UNAVAILABLE','Selecciona un proveedor activo.');
   if(vencimiento<ecuadorDay())throw new AppError(422,'LOT_EXPIRED','No puedes ingresar un lote vencido.');
-  const changed=await tx.producto.updateMany({where:{id:productoId,activo:true,stock:{lte:100000-cantidad}},data:{stock:{increment:cantidad}}});
+  const changed=await tx.producto.updateMany({where:{id:productoId,activo:true,stock:{lte:100000-cantidad}},data:{stock:{increment:cantidad},...(proveedorId?{proveedorId}:{})}});
   if(changed.count!==1)throw new AppError(409,'STOCK_LIMIT','El stock máximo permitido por producto es 100000 unidades.');
   const lot=await tx.lote.create({data:{productoId,numero,vencimiento,stock:cantidad,costoUnitario,proveedorId:proveedorId || null},include:relation});
   await tx.movimientoInventario.create({data:movementData({productoId,loteId:lot.id,actorId,tipo:'entrada',cantidad,motivo:'Ingreso de lote '+numero})});

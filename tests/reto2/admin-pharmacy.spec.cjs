@@ -49,8 +49,22 @@ test('proveedores ecuatorianos, lotes y movimientos comparten stock con clientes
   await page.locator('#lot-numero').fill('LOTE-'+suffix);await page.locator('#lot-cantidad').fill('3');await page.locator('#lot-costoUnitario').fill('4.25');await page.locator('#lot-vencimiento').fill('2020-01-01');await page.locator('#lot-form [type=submit]').click();await expect(page.locator('#lot-vencimiento')).toHaveAttribute('aria-invalid','true');
   await page.locator('#lot-vencimiento').fill(new Date(Date.now()+365*86400000).toISOString().slice(0,10));const lotResponse=page.waitForResponse(res=>res.request().method()==='POST' && new URL(res.url()).pathname==='/api/admin/lotes');await page.locator('#lot-form [type=submit]').click();const savedLot=await lotResponse;expect(savedLot.status()).toBe(201);const lot=(await savedLot.json()).data;await expect(page.locator('#editor-dialog')).toBeHidden();
   expect((await (await page.request.get('/api/productos/solar')).json()).data.stock).toBe(before.stock+3);
+  await page.goto('/admin.html?tabla=productos&registro=solar');
+  const row=page.locator('#admin-table tr').filter({has:page.locator('[data-purchase="solar"]')});
+  await expect(row).toContainText(supplierName);
+  await row.locator('[data-purchase]').click();
+  await expect(page.locator('#lot-productoId')).toHaveValue('solar');
+  await expect(page.locator('#lot-proveedorId')).toHaveValue(lot.proveedorId);
+  await page.locator('#lot-numero').fill('OTRO-'+suffix);
+  await page.locator('#lot-vencimiento').fill(lot.vencimiento);
+  await page.locator('#lot-cantidad').fill('2');
+  await page.locator('#lot-costoUnitario').fill('4.10');
+  await page.locator('#lot-form [type=submit]').click();
+  await expect(page.locator('#editor-dialog')).toBeHidden();
+  await expect(row.locator('[data-product-stock]')).toHaveText(String(before.stock+5));
+  expect((await (await page.request.get('/api/productos/solar')).json()).data.stock).toBe(before.stock+5);
   await page.goto('/admin.html?tabla=movimientos');await expect(page.locator('#admin-create')).toBeEnabled();await page.locator('#admin-create').focus();await page.keyboard.press('Enter');await page.locator('#movement-productoId').selectOption('solar');await expect(page.locator('#movement-loteId')).toBeEnabled();await page.locator('#movement-loteId').selectOption(lot.id);await page.locator('#movement-tipo').selectOption('salida');await page.locator('#movement-cantidad').fill('1');await page.locator('#movement-motivo').fill('Salida de una unidad por comprobación en tests');
-  const movementResponse=page.waitForResponse(res=>res.request().method()==='POST' && new URL(res.url()).pathname==='/api/admin/inventario/ajustes');await page.locator('#movement-form [type=submit]').click();expect((await movementResponse).status()).toBe(201);await expect(page.locator('#editor-dialog')).toBeHidden();expect((await (await page.request.get('/api/productos/solar')).json()).data.stock).toBe(before.stock+2);await expect(page.locator('#admin-table')).toContainText('Salida de una unidad por comprobación');
+  const movementResponse=page.waitForResponse(res=>res.request().method()==='POST' && new URL(res.url()).pathname==='/api/admin/inventario/ajustes');await page.locator('#movement-form [type=submit]').click();expect((await movementResponse).status()).toBe(201);await expect(page.locator('#editor-dialog')).toBeHidden();expect((await (await page.request.get('/api/productos/solar')).json()).data.stock).toBe(before.stock+4);await expect(page.locator('#admin-table')).toContainText('Salida de una unidad por comprobación');
 });
 
 test('tarifas de IVA con vigencia de Ecuador, historial accesible y teclado en 320, 768 y 1920 px',async({page},testInfo)=>{
