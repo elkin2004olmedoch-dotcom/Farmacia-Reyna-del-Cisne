@@ -135,7 +135,10 @@ Las rutas tienen prefijo /api. Las operaciones privadas reciben Authorization: B
 | POST /api/pedidos/:id/cancelacion | user/admin propietario | 200: cancelación pendiente/confirmada o reintento seguro; exige esperadoUpdatedAt y conserva conciliación de pagos/facturas |
 | GET /api/pedidos/mis-pedidos | user/admin | 200: pedidos del usuario autenticado |
 | GET /api/pedidos | admin | 200: todos los pedidos, paginados |
-| GET /api/admin/recursos | admin | 200: descriptores de las 34 tablas y sus columnas autorizadas |
+| GET /api/admin/recursos | admin | Descriptores de tablas y columnas autorizadas |
+| GET /api/admin/roles | admin | Catálogo paginado de roles reconocidos |
+| GET /api/admin/usuarios-roles | admin | Asignaciones vigentes paginadas, con usuarioId y rolId |
+| GET /api/admin/tablas/usuario-rol/:id | admin | Rol de una cuenta por su identificador de usuario |
 | GET /api/admin/tablas?tabla=productos&page=1&pageSize=10 | admin | 200: consulta paginada de cualquiera de los recursos registrados |
 | GET /api/admin/tablas/:tabla/:id | admin | 200: registro autorizado; 404 si no existe |
 | POST /api/admin/usuarios | admin | 201: cuenta validada, con rol y usuario opcional |
@@ -143,7 +146,7 @@ Las rutas tienen prefijo /api. Las operaciones privadas reciben Authorization: B
 | PUT/PATCH /api/admin/usuarios/:id | admin | 200: cambio con esperadoUpdatedAt; 409 ante versión desactualizada |
 | DELETE /api/admin/usuarios/:id | admin | 204: baja lógica y cierre de sesiones; protege al último administrador |
 
-El panel permite CRUD de productos, gestión de usuarios y consulta de las 34 tablas mediante **Configuración y datos**. Las tablas de seguridad son de lectura limitada: no publican hashes, secretos MFA, tokens, XML ni certificados. Cada entidad conserva sus operaciones de negocio: los pedidos cambian de estado, el inventario se ajusta con movimientos y las sesiones se revocan.
+El panel permite CRUD de productos, gestión de usuarios y consulta de las 36 tablas mediante **Configuración y datos**. Las tablas de seguridad son de lectura limitada: no publican hashes, secretos MFA, tokens, XML ni certificados. Cada entidad conserva sus operaciones de negocio: los pedidos cambian de estado, el inventario se ajusta con movimientos y las sesiones se revocan.
 
 Los dos esquemas conservan las mismas entidades y relaciones. [Normalización y dependencias funcionales](docs/NORMALIZACION.md). El título y el objetivo del enunciado permiten otro motor relacional: PostgreSQL/Supabase es el motor publicado; SQLite sirve para desarrollo. Se declara esta elección ante la frase interna que menciona únicamente SQL Server.
 
