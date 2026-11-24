@@ -64,7 +64,7 @@ En administración, escribe **actualizar** para elegir productos, promociones, p
 
 En la tienda, escribe **buscar productos** o **buscar Gel** para elegir producto y cantidad. La mascota pide confirmar antes de agregar, quitar o vaciar el carrito, vuelve a consultar precio y disponibilidad y solicita otra confirmación si cambia el precio. **Comprar** abre el checkout después de confirmar; no crea pedidos ni procesa pagos desde el chat. Las consultas médicas mantienen la derivación al farmacéutico.
 
-Los cambios confirmados usan las mismas APIs que los formularios. La tienda visible recibe avisos del catálogo mediante una conexión compartida de eventos y conserva la recuperación por foco y las consultas periódicas. Los editores abiertos conservan su contenido. Los asistentes son locales y de órdenes definidas: no usan servicios externos de IA. La conversación no se guarda.
+Los cambios confirmados usan las mismas APIs que los formularios. La tienda visible recibe avisos del catálogo mediante una conexión compartida de eventos y conserva la recuperación por foco y las consultas periódicas. Los editores abiertos conservan su contenido. El modo Órdenes y ayuda procesa las acciones en la farmacia. El modo voluntario **Preguntar con Gemini** envía la pregunta general al backend para interpretar su tema en español. La farmacia responde con sus datos públicos y el catálogo vigente. Evita incluir datos personales o clínicos. Configura GEMINI_API_KEY en Render y, opcionalmente, GEMINI_MODEL. Si el proveedor falla, se usa la ayuda local.
 
 ## Desarrollo y pruebas
 
@@ -94,7 +94,7 @@ Antes de la migración 019, `setup:production` puede exigir un respaldo lógico 
 
 No se incluyen claves, contraseñas de acceso, certificados, respaldos ni capturas con sesiones. .env, .publish/ y las salidas de pruebas están excluidos de Git. La administración exige autorización en la API, también cuando una URL se escribe directamente.
 
-Goti procesa órdenes locales del panel, sin API de IA. El seguimiento y el reparto muestran el mapa y la ruta dentro de la web de la farmacia. SRI exige configuración y certificado privados. [Entregas](docs/ENTREGAS-Y-PRIVACIDAD.md) y [seguridad de publicación](docs/SEGURIDAD_DESPLIEGUE.md).
+Goti procesa órdenes locales del panel y ofrece consultas informativas con Gemini. El seguimiento y el reparto muestran el mapa y la ruta dentro de la web de la farmacia. SRI exige configuración y certificado privados. [Entregas](docs/ENTREGAS-Y-PRIVACIDAD.md) y [seguridad de publicación](docs/SEGURIDAD_DESPLIEGUE.md).
 
 El pago se coordina con la farmacia desde el pedido registrado; elegir un método, pedir un enlace o imprimir el comprobante no acredita el pago. PayPhone permanece desactivado mientras faltan la cuenta comercial y sus credenciales; no se han verificado transacciones reales ni de pruebas contra el proveedor. No se contrataron servicios ni se activaron cobros. [Pagos](docs/PAGOS-Y-PAYPHONE.md).
 
@@ -178,7 +178,7 @@ Para repetir las comprobaciones de API mínimas, después de instalar dependenci
 
 Se revisa un solo proyecto, un repositorio y la misma farmacia publicada. El entregable obligatorio es un único ZIP integrado `Reto2_Olmedo_Elkin.zip`, generado con `powershell -File scripts/crear-reto2.ps1 -Nombre Reto2_Olmedo_Elkin.zip`. Incluye frontend, backend, migraciones, pruebas y documentación; excluye .env, bases, respaldos, certificados y dependencias instaladas. La aplicación MVC conserva y amplía el catálogo, carrito, identidad, accesibilidad y navegación del trabajo inicial, incorporando API, persistencia relacional, autenticación y permisos.
 
-La [guía del recorrido conjunto](docs/RECORRIDO-RETOS-1-Y-2.md) indica qué mostrar como cliente, administrador y repartidor, las órdenes de la mascota y cómo repetir la grabación con `npm run test:journey`. El recorrido usa una base temporal y desactiva correos y cobros comerciales; las capturas y videos se guardan como evidencias locales, fuera del repositorio.
+Las [diez auditorías y el guion de siete minutos](docs/AUDITORIAS-Y-DEFENSA-GOTI.md) incluyen los enlaces para exponer. La [guía del recorrido conjunto](docs/RECORRIDO-RETOS-1-Y-2.md) indica qué mostrar como cliente, administrador y repartidor, las órdenes de la mascota y cómo repetir la grabación con `npm run test:journey`. El recorrido usa una base temporal y desactiva correos y cobros comerciales; las capturas y videos se guardan como evidencias locales, fuera del repositorio.
 
 | Contenido | Dónde comprobarlo en el mismo proyecto |
 | --- | --- |

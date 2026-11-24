@@ -15,7 +15,7 @@ test('el asistente local del panel actualiza productos y publica promociones par
   const companion=page.locator('farmacia-admin-companion');
   await expect(companion).toHaveCount(1);
   await companion.getByRole('button',{name:'Abrir asistente administrativo'}).click();
-  await expect(companion.getByRole('log',{name:'Asistente de administración'})).toContainText('no uso IA externa');
+  await expect(companion.getByRole('log',{name:'Asistente de administración'})).toContainText('Tus órdenes se procesan en el panel');
   const issues=(await new AxeBuilder({page}).include('farmacia-admin-companion').withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze()).violations;
   expect(issues.map(issue=>({id:issue.id,targets:issue.nodes.map(node=>node.target)}))).toEqual([]);
 

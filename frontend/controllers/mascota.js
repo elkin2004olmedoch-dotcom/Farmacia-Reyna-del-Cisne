@@ -5,6 +5,7 @@ import {companionControls,disableCompanionControls} from './companion-controls.j
 import {catalog} from '../models/catalog.js';
 import {cart} from '../models/cart.js';
 import {auth} from '../models/auth.js';
+import {apiUrl} from '../config.js';
 // Order data and its module load only when the customer asks for that summary.
 const orders={mine:(...args)=>import('../models/orders.js').then(module=>module.orders.mine(...args))};
 import {events} from '../models/events.js';
@@ -27,7 +28,7 @@ function remember(key,value){try{localStorage.setItem(key,value);}catch(_){}}
 function cartCount(){try{const mvc=JSON.parse(localStorage.getItem('farmacia-mvc-carrito')||'{}');const local=JSON.parse(localStorage.getItem('farmacia-reina-cart')||'{}');return [...Object.values(mvc),...Object.values(local?.items||{})].reduce((sum,value)=>sum+(Number.isInteger(value)&&value>0?value:0),0);}catch(_){return 0;}}
 function pageContext(){const path=location.pathname.split('/').pop()||'index.html',page=document.body.dataset.page,section=location.hash.slice(1),map={'index.html':page==='home'?'home':'home','catalogo.html':'catalog','producto.html':'product','comparar.html':'compare','checkout.html':'checkout','cuenta.html':'account','pedidos.html':'orders','ayuda.html':'help','pagos.html':'payments'};if(path==='index.html'&&['servicios','promos','ubicacion','contacto','featured-title'].includes(section))return section==='promos'?'promotions':section==='ubicacion'||section==='contacto'?'contact':'home';return map[path]||({'home':'home','catalog':'catalog','product':'product','compare':'compare','checkout':'checkout','account':'account','orders':'orders','help':'help','payments':'payments'}[page]||'home');}
 
-/** A small, local store-navigation helper. Messages never leave this module. */
+/** Order commands stay local. General questions use the server only in consultation mode. */
 export async function mascotaController({administration=false,courier=false,command,questions,greeting,onMount}={}){
   const staff=administration||courier;
   const tag=administration?'farmacia-admin-companion':'farmacia-mascota';
@@ -42,6 +43,17 @@ export async function mascotaController({administration=false,courier=false,comm
   template.innerHTML=`<div class="companion"><section class="panel" id="panel" aria-labelledby="title" hidden><header><div><span class="eyebrow">${courier?"TU ASISTENTE DE REPARTO":administration?"ASISTENTE LOCAL DE LA FARMACIA":"TU COMPAÑERO DE FARMACIA"}</span><h2 id="title">Goti te acompaña</h2><p>${courier?"Pedidos, rutas y entrega":administration?"Catálogo, pedidos y entregas":"Ayuda para navegar y preparar tu compra"}</p></div><button class="close" id="close" aria-label="Cerrar ayuda" type="button">×</button></header><div class="preferences"><label>Compañero<select id="character"><option value="farmi">Farmi</option><option value="boti">Boti</option><option value="goti">Goti</option></select></label></div><div class="messages" id="messages" role="log" tabindex="0" aria-label="${courier?"Ayuda de reparto":administration?"Asistente de administración":"Ayuda de la farmacia"}" aria-live="polite"></div><nav class="shortcuts" id="shortcuts" aria-label="Preguntas rápidas de esta sección"></nav><form id="form"><label for="input" class="sr-only">¿Qué necesitas?</label><input id="input" maxlength="${administration?3000:180}" autocomplete="off" placeholder="${administration?"Ej. actualiza precio de…":"¿Qué necesitas?"}" required><button type="submit" aria-label="Enviar consulta">↑</button></form><p class="local-note">${courier?"Ayuda de tus entregas · tus mensajes no se guardan":administration?"Los cambios usan tu sesión y requieren confirmación":"Guía local de la tienda · tus mensajes no se envían"}</p></section><div class="bubble" id="bubble" role="status" hidden></div><button class="avatar" id="avatar" type="button" aria-label="Haz saltar a Goti"><canvas id="canvas" width="192" height="208" aria-hidden="true"></canvas></button><button class="launcher" id="launcher" type="button" aria-label="${courier?"Abrir ayuda de reparto":administration?"Abrir asistente administrativo":"Abrir ayuda de la farmacia"}" aria-expanded="false" aria-controls="panel"><span class="online" aria-hidden="true"></span><span id="launcher-label">${courier?"Ayuda de reparto":administration?"Ayuda administrativa":"¿Te ayudo?"}</span><span aria-hidden="true">↗</span></button></div>`;
   root.append(template.content.cloneNode(true));document.body.append(host);
   const find=selector=>root.querySelector(selector);
+  const modeLabel=document.createElement('label'),mode=document.createElement('select');
+  modeLabel.textContent='Modo';
+  mode.add(new Option('Órdenes y ayuda','local'));
+  mode.add(new Option('Preguntar con Gemini','consulta'));
+  modeLabel.append(mode);find('.preferences').append(modeLabel);
+  const note=find('.local-note'),localNote=note.textContent;
+  let previousTopic=null,reference=null;
+  mode.addEventListener('change',()=>{
+    previousTopic=null;reference=null;
+    note.textContent=mode.value==='consulta'?'Google interpreta esta pregunta. Usa solo consultas generales, sin datos personales ni de salud.':localNote;
+  });
   const canvas=find('#canvas');let context;try{context=canvas.getContext('2d');}catch{context=null;}
   // SVG keeps the same atlas and animation usable when Canvas is unavailable.
   const ns='http://www.w3.org/2000/svg',fallback=document.createElementNS(ns,'svg'),crop=document.createElementNS(ns,'svg'),portrait=document.createElementNS(ns,'image');
@@ -168,10 +180,10 @@ export async function mascotaController({administration=false,courier=false,comm
   const clearPrivate=()=>{for(const card of root.querySelectorAll('.companion-order'))card.closest('.message')?.remove();};
   if(!staff){events.addEventListener('session:expired',clearPrivate);events.addEventListener('session:changed',clearPrivate);}
   let commandBusy=false;
-  async function send(text,display){
+  async function send(text,display,consult=false){
     if(commandBusy)return;
     const message=String(text||'').trim().slice(0,administration?3000:180);if(!message)return;
-    disableCompanionControls(root);
+    if(!consult)disableCompanionControls(root);
     clearTimeout(replyTimer);requestVersion+=1;const version=requestVersion;
     root.querySelectorAll('.message.thinking').forEach(node=>node.remove());
     append(display||message,'user');find('#input').value='';
@@ -180,13 +192,24 @@ export async function mascotaController({administration=false,courier=false,comm
     commandBusy=true;
     if(staff){find('#input').disabled=true;find('#form [type=submit]').disabled=true;}
     try{
+      if(consult){
+        if(message.length>300)throw Error('Escribe tu pregunta en un máximo de 300 caracteres.');
+        const response=await fetch(apiUrl('/goti/consulta'),{method:'POST',credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(15000),headers:{'Content-Type':'application/json'},body:JSON.stringify({pregunta:message,temaAnterior:previousTopic,referencia:reference})});
+        if(!response.ok)throw Error(response.status===429?'Espera un minuto antes de volver a preguntar.':'La consulta no está disponible. Puedes usar Órdenes y ayuda.');
+        const {data}=await response.json();
+        if(mode.value==='consulta'){previousTopic=data.tema;reference=data.referencia;}
+        pending.remove();
+        const item=append(data.texto),source=document.createElement('small');
+        source.textContent=data.origen==='gemini'?'Consulta interpretada con Gemini':'Respondió la guía local';
+        item.append(source);setState('review');return;
+      }
       const medical=!staff&&classifyMascotaQuestion(message,knownProductNames())==='medical';
       if(medical)await executeCustomer('cancelar');
       const customerSession=auth.user;
       const result=medical?null:await executeCustomer(message);
       if(!staff&&result?.visualSummary?.kind==='orders'&&auth.user!==customerSession){pending.remove();append('Tu sesión cambió. Abre tu cuenta para consultar tus pedidos.');setState('waiting');return;}
       if(result){pending.remove();companionControls(append(result.text),result,send);setState('review');return;}
-    }catch(error){pending.remove();append(administration?'No pude guardar el cambio: '+error.message:error.message||'No se pudo completar la consulta. Inténtalo nuevamente.');setState('waiting');return;}
+    }catch(error){pending.remove();append(consult?(error.name==='TimeoutError'||error.name==='TypeError'?'No hubo conexión. Puedes seguir usando Órdenes y ayuda.':error.message):administration?'No pude guardar el cambio: '+error.message:error.message||'No se pudo completar la consulta. Inténtalo nuevamente.');setState('waiting');return;}
     finally{commandBusy=false;if(staff){find('#input').disabled=false;find('#form [type=submit]').disabled=false;if(!find('#panel').hidden)find('#input').focus();}}
     replyTimer=setTimeout(()=>{
       if(version!==requestVersion)return;pending.remove();const response=answer(message);append(response.text,'bot',response.actions);
@@ -228,7 +251,7 @@ export async function mascotaController({administration=false,courier=false,comm
   find('#avatar').addEventListener('pointerleave',()=>{offset=0;});
   find('#character').addEventListener('change',event=>setCharacter(event.target.value));
   document.addEventListener('visibilitychange',()=>{lastTime=0;});
-  find('#form').addEventListener('submit',event=>{event.preventDefault();send(find('#input').value);});
+  find('#form').addEventListener('submit',event=>{event.preventDefault();send(find('#input').value,undefined,mode.value==='consulta');});
   refreshQuickQuestions();
   if(administration)document.getElementById('admin-table-choice')?.addEventListener('change',refreshQuickQuestions);
   const questionObserver=new MutationObserver(()=>{const next=contextSignature();if(next!==currentSignature||find('#shortcuts').children.length===0)refreshQuickQuestions();});
