@@ -9,10 +9,22 @@ const serializable={isolationLevel:Prisma.TransactionIsolationLevel.Serializable
 function ecuadorDay(now=new Date()){return new Date(now.getTime()-5*60*60*1000).toISOString().slice(0,10);}
 function sellableStock(product,now=new Date()) {return Math.max(0,product.stock-(product.lotes || []).filter(lot=>lot.vencimiento<ecuadorDay(now)).reduce((sum,lot)=>sum+lot.stock,0));}
 const trackedStock=product=>(product.lotes || []).reduce((sum,lot)=>sum+lot.stock,0);
+function purchaseDetails(lot,cantidadRecibida){
+ const costoTotalCentavos=cantidadRecibida==null?null:lot.costoUnitario.mul(100).round().mul(cantidadRecibida).toNumber();
+ return {...lot,cantidadRecibida,costoTotalCentavos};
+}
 async function listLots({page,pageSize,productoId}) {
  const where=productoId?{productoId}:{};
  const [items,total]=await db.$transaction([db.lote.findMany({where,include:relation,orderBy:[{vencimiento:'asc'},{id:'asc'}],skip:(page-1)*pageSize,take:pageSize}),db.lote.count({where})]);
- return {items,total,page,pageSize};
+ // El ingreso original conserva la cantidad comprada después de ventas y ajustes.
+ const receipts=items.length?await db.$queryRaw`SELECT ml."loteId", MIN(m."cantidad") AS cantidad
+   FROM "MovimientoLote" ml JOIN "MovimientoInventario" m ON m."id"=ml."movimientoId"
+   JOIN "Lote" l ON l."id"=ml."loteId" AND l."productoId"=m."productoId"
+   WHERE ml."loteId" IN (${Prisma.join(items.map(lot=>lot.id))})
+     AND m."tipo"='entrada' AND m."motivo"=('Ingreso de lote ' || l."numero")
+   GROUP BY ml."loteId" HAVING COUNT(*)=1`:[];
+ const quantities=new Map(receipts.map(row=>[row.loteId,Number(row.cantidad)]));
+ return {items:items.map(lot=>purchaseDetails(lot,quantities.get(lot.id)??null)),total,page,pageSize};
 }
 async function listMovements({page,pageSize,productoId}) {
  const where=productoId?{productoId}:{};
@@ -29,7 +41,7 @@ async function createLot({productoId,numero,vencimiento,cantidad,costoUnitario,p
   if(changed.count!==1)throw new AppError(409,'STOCK_LIMIT','El stock máximo permitido por producto es 100000 unidades.');
   const lot=await tx.lote.create({data:{productoId,numero,vencimiento,stock:cantidad,costoUnitario,proveedorId:proveedorId || null},include:relation});
   await tx.movimientoInventario.create({data:movementData({productoId,loteId:lot.id,actorId,tipo:'entrada',cantidad,motivo:'Ingreso de lote '+numero})});
-  return lot;
+  return purchaseDetails(lot,cantidad);
  },serializable);
 }
 async function adjust({productoId,loteId,tipo,cantidad,motivo},actorId) {

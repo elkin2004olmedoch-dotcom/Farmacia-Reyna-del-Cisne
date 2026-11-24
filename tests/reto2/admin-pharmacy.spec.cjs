@@ -46,6 +46,7 @@ test('proveedores ecuatorianos, lotes y movimientos comparten stock con clientes
   const supplierRow=page.locator('#admin-table tbody tr').filter({hasText:supplierName});await expect(supplierRow.locator('[data-delete]')).toHaveCount(0);
   await page.goto('/admin.html?tabla=lotes');await expect(page.locator('#admin-create')).toBeEnabled();await page.locator('#admin-create').click();await page.locator('#lot-productoId').selectOption('solar');await page.locator('#lot-proveedorId').selectOption({label:supplierName});
   const beforeResponse=await page.request.get('/api/productos/solar');const before=(await beforeResponse.json()).data;
+  await expect(page.locator('#lot-total')).toHaveText('—');
   await page.locator('#lot-numero').fill('LOTE-'+suffix);await page.locator('#lot-cantidad').fill('3');await page.locator('#lot-costoUnitario').fill('4.25');await page.locator('#lot-vencimiento').fill('2020-01-01');await page.locator('#lot-form [type=submit]').click();await expect(page.locator('#lot-vencimiento')).toHaveAttribute('aria-invalid','true');
   await page.locator('#lot-vencimiento').fill(new Date(Date.now()+365*86400000).toISOString().slice(0,10));const lotResponse=page.waitForResponse(res=>res.request().method()==='POST' && new URL(res.url()).pathname==='/api/admin/lotes');await page.locator('#lot-form [type=submit]').click();const savedLot=await lotResponse;expect(savedLot.status()).toBe(201);const lot=(await savedLot.json()).data;await expect(page.locator('#editor-dialog')).toBeHidden();
   expect((await (await page.request.get('/api/productos/solar')).json()).data.stock).toBe(before.stock+3);
@@ -59,6 +60,7 @@ test('proveedores ecuatorianos, lotes y movimientos comparten stock con clientes
   await page.locator('#lot-vencimiento').fill(lot.vencimiento);
   await page.locator('#lot-cantidad').fill('2');
   await page.locator('#lot-costoUnitario').fill('4.10');
+  await expect(page.locator('#lot-total')).toContainText('8,20');
   await page.locator('#lot-form [type=submit]').click();
   await expect(page.locator('#editor-dialog')).toBeHidden();
   await expect(row.locator('[data-product-stock]')).toHaveText(String(before.stock+5));

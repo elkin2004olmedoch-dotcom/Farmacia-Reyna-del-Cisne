@@ -111,6 +111,10 @@ test('ingreso por lote conserva stock previo y registra costo, vencimiento y mov
  assert.equal((await db.producto.findUnique({where:{id:created.id}})).stock,8);
  const movements=(await request.get('/api/admin/inventario/movimientos?productoId='+created.id).set('Authorization',auth(adminToken)).expect(200)).body.data;
  assert.equal(movements.total,2);assert.ok(movements.items.some(row=>row.loteId===lot.id && row.cantidad===5 && row.tipo==='entrada'));
+ assert.equal(lot.costoTotalCentavos,1075);
+ await request.post('/api/admin/inventario/ajustes').set('Authorization',auth(adminToken)).send({productoId:created.id,loteId:lot.id,tipo:'salida',cantidad:2,motivo:'Salida posterior a la compra'}).expect(201);
+ const page=(await request.get('/api/admin/lotes?productoId='+created.id).set('Authorization',auth(adminToken)).expect(200)).body.data;
+ assert.deepEqual([page.items[0].stock,page.items[0].cantidadRecibida,page.items[0].costoTotalCentavos],[3,5,1075]);
 });
 test('lotes y ajustes rechazan vencimientos imposibles, vencidos, cantidades negativas y saldos de otro producto',async()=> {
  const created=await product({stock:3}),other=await product({stock:1});

@@ -2,7 +2,7 @@ import {administration,adminFormIssues,ecuadorDateTime,ecuadorToday} from '../mo
 import {catalog} from '../models/catalog.js';
 import {tableView,resourceView,editorView,promotionEditorState,adminSectionView,orderStateView,fiscalView} from '../views/admin.js';
 import {promotionPublication} from '../models/promotion-publication.js';
-import {message,busy,formErrors} from '../views/common.js';
+import {message,busy,formErrors,money} from '../views/common.js';
 import {confirmAction} from './dialog.js';
 import {requireUser} from './layout.js';
 import {auth} from '../models/auth.js';
@@ -55,6 +55,12 @@ export async function adminController() {
   const productImage=imageController(forms.productos,'product');const promoImage=imageController(forms.promociones,'promotion');
   const stateDialog=document.getElementById('order-state-dialog');const stateForm=document.getElementById('order-state-form');let stateOrder=null;
   const billing=billingController();
+  function showPurchaseTotal(){
+    const {cantidad,costoUnitario}=forms.lotes.elements;
+    const valid=cantidad.value!=='' && costoUnitario.value!=='' && cantidad.validity.valid && costoUnitario.validity.valid;
+    document.getElementById('lot-total').textContent=valid?money(cantidad.valueAsNumber*Math.round(costoUnitario.valueAsNumber*100)):'—';
+  }
+  forms.lotes.addEventListener('input',showPurchaseTotal);
   function pharmaceuticalRequired(){const form=forms.productos;form.elements.fundamentoIva.required=form.elements.ivaCategoria.value==='cero';for(const key of ['precio','stock'])form.elements[key].required=!form.elements.soloConsulta.checked;for(const key of ['pvpMaximo','laboratorio','presentacion','registroSanitario'])form.elements[key].required=form.elements.tipoProducto.value==='medicamento'&&!form.elements.soloConsulta.checked;}
   function errors(form,issues){
     if(!auth.isAdmin || !form.isConnected)return false;
@@ -172,6 +178,7 @@ export async function adminController() {
       product.onchange=()=>{const selected=preferred.get(product.value);supplier.value=available.has(selected)?selected:'';};
       product.onchange();
       form.elements.vencimiento.min=ecuadorToday();
+      showPurchaseTotal();
       supplier.required=Boolean(purchaseProduct);
       form.querySelector('label[for="lot-proveedorId"]').textContent=purchaseProduct?'Proveedor de la compra':'Proveedor (opcional)';
       if(purchaseProduct)document.getElementById('editor-title').textContent='Registrar compra a proveedor';
@@ -281,6 +288,7 @@ export async function adminController() {
     for(const [key,value] of Object.entries(values)){const field=form.elements.namedItem(key);if(!field || value==null)continue;if(field.type==='checkbox')field.checked=Boolean(value);else field.value=String(value);}
     if(section==='lotes' && values.productoId && values.proveedorId===undefined)form.elements.productoId.dispatchEvent(new Event('change'));
     if(section==='lotes' && values.proveedorId===null)form.elements.proveedorId.value='';
+    if(section==='lotes')showPurchaseTotal();
     if(section==='productos')pharmaceuticalRequired();
     if(section==='promociones')promotionEditorState(form);
     if(section==='movimientos')await loadMovementLots();

@@ -31,6 +31,10 @@ test('PostgreSQL aislado conserva relaciones y comprueba PATCH, advertencias, re
  assert.equal(reference.proveedorId,supplier.id);
  const stored=(await request.get('/api/admin/tablas/productos/'+reference.id).set(headers).expect(200)).body.data.item;
  assert.equal(stored.proveedorNombre,'Proveedor actualizado');
+ const lotInput={productoId:product.id,proveedorId:supplier.id,numero:'COMPRA-PG',vencimiento:'2090-01-01',cantidad:3,costoUnitario:1.15};
+ await request.post('/api/admin/lotes').set(headers).send(lotInput).expect(201);
+ const lots=(await request.get('/api/admin/lotes?productoId='+product.id).set(headers).expect(200)).body.data.items;
+ assert.equal(lots.find(lot=>lot.numero==='COMPRA-PG').costoTotalCentavos,345);
  await assert.rejects(db.producto.update({where:{id:reference.id},data:{proveedorId:randomUUID()}}),{code:'P2003'});
  assert.equal(reference.soloConsulta,true);assert.equal(reference.registroSanitario,null);
  const categories=(await request.get('/api/productos/filtros').expect(200)).body.data.categorias;
