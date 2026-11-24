@@ -1,12 +1,22 @@
 const db=require('./db.cjs');
 const resources=require('./admin-resources.cjs');
+const {nameContains}=require('./catalog-search.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 function selected(name){const resource=resources.find(name);if(!resource)throw new AppError(422,'INVALID_RESOURCE','Selecciona un recurso administrativo válido.');return resource;}
 const delegate=resource=>db[resource.model[0].toLowerCase()+resource.model.slice(1)];
 const options=resource=>resource.options?resource.options():{select:resource.select};
 const format=(resource,row)=>resource.format?resource.format(row):row;
-async function list({tabla,page,pageSize}) {
+async function list({tabla,page,pageSize,q}) {
  const resource=selected(tabla),model=delegate(resource);
+ if(resource.key==='productos' && q){
+  const filter=nameContains(q);
+  return db.$transaction(async tx=>{
+   const [{total}]=await tx.$queryRaw`SELECT COUNT(*) AS total FROM "Producto" WHERE ${filter}`;
+   const ids=await tx.$queryRaw`SELECT id FROM "Producto" WHERE ${filter} ORDER BY id LIMIT ${pageSize} OFFSET ${(page-1)*pageSize}`;
+   const items=await tx.producto.findMany({...options(resource),where:{id:{in:ids.map(row=>row.id)}},orderBy:{id:'asc'}});
+   return {items:items.map(row=>format(resource,row)),total:Number(total),page,pageSize,resource:resources.descriptor(resource)};
+  });
+ }
  const [items,total]=await db.$transaction([model.findMany({...options(resource),skip:(page-1)*pageSize,take:pageSize,orderBy:{[resource.primaryKey]:'asc'}}),model.count()]);
  return {items:items.map(row=>format(resource,row)),total,page,pageSize,resource:resources.descriptor(resource)};
 }

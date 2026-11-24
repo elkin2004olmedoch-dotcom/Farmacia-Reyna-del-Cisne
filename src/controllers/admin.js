@@ -49,9 +49,12 @@ export async function adminController() {
   const query=new URLSearchParams(location.search),requested=query.get('tabla'),requestedRecord=query.get('registro');
   let name=[...editableSections,'pedidos','usuarios','detalles','auditoria','fiscal','facturacion','datos','kardex',...(['zonas','entregas'].includes(requested)&&requestedRecord?['zonas','entregas']:[])].includes(requested)?requested:requested?'productos':'dashboard',page=/^[1-9]\d*$/.test(query.get('page') || '')?Math.min(100000,Number(query.get('page'))):1,result,editing=null,editingVersion=null,editingValues=null,summarySnapshot='',requestId=0,openingId=0,previousFocus=null,stateFocus=null,lotRequest=0;
   let kardexId=query.get('producto')||'';
+  const searchField=document.getElementById('admin-product-search');
+  searchField.value=name==='productos' && !requestedRecord?(query.get('q') || '').slice(0,120):'';
+  let searchTimer;
   let resourceKey=query.get('recurso') || 'productos',resources=null;
   const fullInventory=requested==='datos' && query.get('vista')==='completa';
-  const routeQuery=()=>new URLSearchParams({tabla:name,...(name==='kardex'?{producto:kardexId}:{}),...(name==='datos'?{recurso:resourceKey}:{}),page:String(page),...(name==='datos' && fullInventory?{vista:'completa'}:{})});
+  const routeQuery=()=>new URLSearchParams({tabla:name,...(name==='kardex'?{producto:kardexId}:{}),...(name==='datos'?{recurso:resourceKey}:{}),page:String(page),...(name==='productos' && searchField.value.trim()?{q:searchField.value.trim()}:{}),...(name==='datos' && fullInventory?{vista:'completa'}:{})});
   const dialog=document.getElementById('editor-dialog');const forms=Object.fromEntries(Object.entries(sectionForms).map(([section,id])=>[section,document.getElementById(id)]));
   const productImage=imageController(forms.productos,'product');const promoImage=imageController(forms.promociones,'promotion');
   const stateDialog=document.getElementById('order-state-dialog');const stateForm=document.getElementById('order-state-form');let stateOrder=null;
@@ -161,7 +164,7 @@ export async function adminController() {
           history.replaceState(null,'','admin.html?'+routeQuery());
         }
         loaded=kardexId?await administration.kardex(kardexId,tablePage):{items:[],total:0,page:1,pageSize:20};
-      }else if(!loaded)loaded=await (tableName==='datos'?administration.resourceTable(resourceKey,tablePage):administration.table(tableName,tablePage));
+      }else if(!loaded)loaded=await (tableName==='datos'?administration.resourceTable(resourceKey,tablePage):administration.table(tableName,tablePage,searchField.value.trim()));
       if(id!==requestId || !auth.isAdmin || (silent && document.querySelector('dialog[open]')))return;
       const lastPage=Math.max(1,Math.ceil(loaded.total/loaded.pageSize));
       if(['productos','datos'].includes(tableName) && tablePage>lastPage){
@@ -230,7 +233,14 @@ export async function adminController() {
   }
   document.getElementById('admin-create').addEventListener('click',()=>open().catch(error=>message(error.message,true)));
   document.getElementById('admin-dashboard').addEventListener('click',async event=>{if(!event.target.closest('#admin-retry-summary'))return;try{message('');await render();}catch(error){message(error.message,true);}});
-  document.getElementById('admin-table-choice').addEventListener('change',async event=>{name=event.target.value;page=1;history.replaceState(null,'','admin.html?tabla='+name);try{await render();}catch(error){message(error.message,true);}});
+  searchField.addEventListener('input',()=>{
+    clearTimeout(searchTimer);
+    requestId++;
+    page=1;
+    history.replaceState(null,'','admin.html?'+routeQuery());
+    searchTimer=setTimeout(()=>{if(name==='productos' && auth.isAdmin)render().catch(error=>message(error.message,true));},200);
+  });
+  document.getElementById('admin-table-choice').addEventListener('change',async event=>{name=event.target.value;page=1;searchField.value='';history.replaceState(null,'','admin.html?tabla='+name);try{await render();}catch(error){message(error.message,true);}});
   for(const [id,offset] of [['admin-prev',-1],['admin-next',1]])document.getElementById(id).addEventListener('click',async()=>{page+=offset;history.replaceState(null,'','admin.html?'+routeQuery());try{await render();}catch(error){message(error.message,true);}});
   document.getElementById('admin-resource-select').addEventListener('change',async event=>{resourceKey=event.target.value;page=1;history.replaceState(null,'','admin.html?'+routeQuery());try{await render();}catch(error){message(error.message,true);}});
   document.getElementById('kardex-producto').addEventListener('change',async event=>{
@@ -319,7 +329,7 @@ export async function adminController() {
     if(document.querySelector('dialog[open]'))throw new Error('Termina o cierra el formulario abierto antes de cambiar de sección.');
     if(section==='entregas'){location.assign('entregas.html');return;}
     if(![...editableSections,'dashboard','pedidos','usuarios','detalles','fiscal','facturacion','datos','kardex'].includes(section))throw new Error('Esa sección no está disponible.');
-    name=section;page=1;history.replaceState(null,'',section==='dashboard'?'admin.html':'admin.html?tabla='+section);await render();
+    name=section;page=1;searchField.value='';history.replaceState(null,'',section==='dashboard'?'admin.html':'admin.html?tabla='+section);await render();
     document.getElementById('contenido').focus();
   }
   async function openEditor(section,values={},record){

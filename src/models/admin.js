@@ -6,7 +6,7 @@ export const administration={
   resourceTable:(name,page=1)=>request(`/admin/tablas?tabla=${encodeURIComponent(name)}&page=${page}&pageSize=20`),
   user:id=>request('/admin/usuarios/'+encodeURIComponent(id)),
   saveUser:(values,id)=>request('/admin/usuarios'+(id?'/'+encodeURIComponent(id):''),{method:id?'PUT':'POST',body:values}),
-  table:(name,page=1)=>request(['proveedores','lotes','movimientos','auditoria'].includes(name)?`/admin/${name==='movimientos'?'inventario/movimientos':name}?page=${page}&pageSize=20`:`/admin/tablas?tabla=${encodeURIComponent(name)}&page=${page}&pageSize=20`),
+  table:(name,page=1,q='')=>request(['proveedores','lotes','movimientos','auditoria'].includes(name)?`/admin/${name==='movimientos'?'inventario/movimientos':name}?page=${page}&pageSize=20`:`/admin/tablas?tabla=${encodeURIComponent(name)}&page=${page}&pageSize=20${name==='productos' && q?'&q='+encodeURIComponent(q):''}`),
   async products(){const items=[];let page=1,total=Infinity;while(items.length<total){const data=await request(`/admin/tablas?tabla=productos&page=${page++}&pageSize=100`);items.push(...data.items);total=data.total;if(!data.items.length)break;}return items;},
   saveProduct:(values,id)=>request('/productos'+(id?'/'+encodeURIComponent(id):''),{method:id?'PUT':'POST',body:values}),
   patchProduct:(values,id)=>request('/productos/'+encodeURIComponent(id),{method:'PATCH',body:values}),

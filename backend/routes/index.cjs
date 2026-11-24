@@ -95,7 +95,7 @@ module.exports=config=> {
   router.put('/admin/usuarios/:id',auth,admin,V.id,...userValidation.update,adminUsers.update);
   router.patch('/admin/usuarios/:id',auth,admin,V.id,...userValidation.patch,adminUsers.update);
   router.delete('/admin/usuarios/:id',auth,admin,V.id,...userValidation.remove,adminUsers.remove);
-  router.get('/admin/tablas',auth,admin,adminResources.tableQuery,adminResources.table,...V.pagination,adminTables);
+  router.get('/admin/tablas',auth,admin,adminResources.tableQuery,adminResources.table,adminResources.productName,...V.pagination,adminTables);
   router.get('/admin/tablas/:tabla/:id',auth,admin,adminResources.resource,V.id,V.validated,adminTables.find);
   router.get('/admin/auditoria',auth,admin,...V.pagination,async(req,res)=>res.json({ok:true,data:await require('../models/admin-audit.cjs').list(req.input)}));
   router.get('/admin/resumen',auth,admin,require('../controllers/admin-summary.cjs'));

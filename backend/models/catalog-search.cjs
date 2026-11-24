@@ -10,13 +10,19 @@ function folded(expression){
 }
 const metadata={laboratorio:Prisma.sql`coalesce("laboratorio",'')`,presentacion:Prisma.sql`coalesce("presentacion",'')`};
 const searchable=folded(Prisma.sql`"nombre" || ' ' || "descripcion" || ' ' || coalesce("laboratorio",'') || ' ' || coalesce("principioActivo",'') || ' ' || coalesce("presentacion",'') || ' ' || coalesce("codigoInterno",'') || ' ' || coalesce("codigoBarras",'')`);
+function contains(expression,word){
+  const literal=word.replace(/[\\%_]/g,'\\$&');
+  return Prisma.sql`${expression} LIKE ${'%'+literal+'%'} ESCAPE ${'\\'}`;
+}
+function nameContains(q){
+  return contains(folded(Prisma.sql`"nombre"`),normalize(q));
+}
 function where({q,categoria,laboratorio,presentacion}={}){
   const terms=[Prisma.sql`"activo" = ${true}`];
   if(categoria)terms.push(Prisma.sql`"categoria" = ${categoria}`);
   for(const [field,value] of Object.entries({laboratorio,presentacion}))if(value)terms.push(Prisma.sql`${folded(metadata[field])} = ${normalize(value)}`);
   for(const word of normalize(q).split(/\s+/).filter(Boolean)){
-    const literal=word.replace(/[\\%_]/g,'\\$&');
-    terms.push(Prisma.sql`${searchable} LIKE ${'%'+literal+'%'} ESCAPE ${'\\'}`);
+    terms.push(contains(searchable,word));
   }
   return Prisma.join(terms,' AND ');
 }
@@ -32,4 +38,4 @@ function candidatePrefix(query){
   const prefix=query.slice(0,2);
   return Prisma.sql`(${words} LIKE ${prefix+'%'} OR ${words} LIKE ${'% '+prefix+'%'})`;
 }
-module.exports={where,normalize,nearWord,candidatePrefix};
+module.exports={where,normalize,nearWord,candidatePrefix,nameContains};

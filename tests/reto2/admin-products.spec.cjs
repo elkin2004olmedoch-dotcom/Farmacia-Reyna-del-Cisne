@@ -34,6 +34,17 @@ test('productos muestra ID, nombre, categoría y PVP con contador y navegación 
   await expect(page.locator('#admin-page-info')).toContainText('Página 2 de');
   await page.locator('#admin-prev').click();
   await expect(page.locator('#admin-page-info')).toContainText('Página 1 de');
+  const secondPage=await request.get('/api/admin/tablas?tabla=productos&page=2&pageSize=20',{headers});
+  const target=(await secondPage.json()).data.items[0];
+  const search=page.getByRole('searchbox',{name:'Buscar producto por nombre'});
+  await search.fill(target.nombre.normalize('NFD').replace(/\p{M}/gu,'').toUpperCase());
+  await expect(page.locator('#admin-table [data-edit="'+target.id+'"]')).toBeVisible();
+  await page.reload();
+  await expect(page.locator('#admin-table [data-edit="'+target.id+'"]')).toBeVisible();
+  await search.fill('%_');
+  await expect(page.locator('#admin-table')).toHaveText('No se encontraron productos con ese nombre.');
+  await search.fill('');
+  await expect(page.locator('#admin-product-total')).toHaveText(data.total+' productos');
   await page.goto('/admin.html?tabla=productos&page=2&registro='+data.items[0].id);
   await expect(page.locator('tr[data-companion-record="'+data.items[0].id+'"]').first()).toContainText(data.items[0].nombre);
   await page.goto('/admin.html?tabla=productos&page=999999');
