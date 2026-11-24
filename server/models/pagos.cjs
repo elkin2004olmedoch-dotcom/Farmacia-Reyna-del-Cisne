@@ -43,7 +43,7 @@ async function transaction(work) {
 }
 async function start(id,user) {
  // Authorize even when the provider is disabled, before revealing order details.
- await owned(db,id,user);if(practiceAvailable())throw new AppError(409,'PAYMENT_PRACTICE_MODE','El recorrido sin cobro real está activo. No se pueden iniciar cobros comerciales.');const config=provider.requireAvailable();
+ const order=await owned(db,id,user);if(order.pagoPractica?.recorridoAutomatico||practiceAvailable())throw new AppError(409,'PAYMENT_PRACTICE_MODE','El recorrido sin cobro real está activo. No se pueden iniciar cobros comerciales.');const config=provider.requireAvailable();
  const reserved=await transaction(async tx=>{
   const pedido=await owned(tx,id,user);
   if(pedido.pago) {

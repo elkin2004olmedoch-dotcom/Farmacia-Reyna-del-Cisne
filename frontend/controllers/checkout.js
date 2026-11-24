@@ -5,6 +5,8 @@ import {cart} from '../models/cart.js';
 import {cartPricing} from '../models/pricing.js';
 import {orders} from '../models/orders.js';
 import {payments} from '../models/payments.js';
+import {deliveries} from '../models/deliveries.js';
+import {recorridoView} from '../views/recorrido.js';
 import {paymentCardController} from './payment-card.js';
 import {cartView,confirmationView,ordersView} from '../views/orders.js';
 import {message,formErrors,busy} from '../views/common.js';
@@ -19,6 +21,20 @@ import {connectSavedAddresses,connectReorder} from './customer-account.js';
 import '../models/pharmacy-policy.js';
 const {allowsPurchase}=globalThis.Farmacia.pharmacyPolicy;
 export async function checkoutController() {
+  let following=null,lastStage='';
+  const confirmation=document.getElementById('order-confirmation');
+  function clearConfirmation(){following=null;confirmation.replaceChildren();confirmation.hidden=true;}
+  events.addEventListener('session:expired',clearConfirmation);
+  events.addEventListener('session:changed',clearConfirmation);
+  watchUpdates(async()=>{
+    const tracked=following;
+    if(!tracked||auth.user?.id!==tracked.userId)return;
+    const data=await deliveries.tracking(tracked.id);
+    if(following!==tracked||auth.user?.id!==tracked.userId||!data.recorrido)return;
+    const timeline=confirmation.querySelector('[data-purchase-journey]');
+    if(timeline&&lastStage!==data.recorrido.etiqueta){timeline.innerHTML=recorridoView(data.recorrido);lastStage=data.recorrido.etiqueta;}
+    if(data.recorrido.finalizado)following=null;
+  },{intervalMs:3000});
   connectReorder(document.getElementById('order-confirmation'));
   const updateReceipts=connectOrderReceipts(document.getElementById('order-confirmation'));
   const updateMaps=connectOrderMaps(document.getElementById('order-confirmation'));
@@ -83,7 +99,7 @@ export async function checkoutController() {
     const button=form.querySelector('[type=submit]');busy(button,true);
     try{if(values.delivery==='delivery'){message('Localizando el destino de tu pedido…');const result=await shipping.verify(values);if(result.delivery==='pickup'){shipping.pickup();message(result.message,false,true);return;}}let payment;if(practice){if(!['card','transfer'].includes(method))throw new Error('Selecciona tarjeta o transferencia.');if(method==='card'&&!cardWidget.brand){cardWidget.open();return;}const total=cart.total(products)+shipping.fee();if(!await confirmAction(`Revisa tu compra: ${new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(total/100)}. ${method==='card'?'Tarjeta':'Transferencia'} · Sin cobro real. ¿Pagar y confirmar?`))return;payment={pago:{metodo:method,...(method==='card'?{marca:cardWidget.brand}:{})},esperadoTotalCentavos:total};}
       if(JSON.stringify(cart.payload())!==cartSignature)throw new Error('Tu carrito cambió mientras revisabas la compra. Revisa el total y confirma de nuevo.');
-      const order=await orders.create(cart.payload(),values,payment);cardWidget?.clear();const images=new Map(products.map(product=>[product.id,product.imagen]));const confirmed={...order,metodoPreferido:method,detalles:order.detalles.map(line=>({...line,imagen:images.get(line.productoId)}))};cart.clear();form.reset();shipping.reset();confirmationView(confirmed);updateReceipts([confirmed]);updateMaps([confirmed]);message('Pedido registrado en la farmacia.');}
+      const order=await orders.create(cart.payload(),values,payment);cardWidget?.clear();const images=new Map(products.map(product=>[product.id,product.imagen]));const confirmed={...order,metodoPreferido:method,detalles:order.detalles.map(line=>({...line,imagen:images.get(line.productoId)}))};cart.clear();form.reset();shipping.reset();confirmationView(confirmed);if(confirmed.recorrido){following=confirmed;lastStage=confirmed.recorrido.etiqueta;history.replaceState(null,'','pedidos.html');}updateReceipts([confirmed]);updateMaps([confirmed]);message('Pedido registrado.');}
     catch(error){if(error.code==='DELIVERY_PICKUP_REQUIRED'){shipping.pickup();message(error.message,false,true);return;}message(error.message,true,true);if(error.status===401)requireUser();if(error.status===409){cardWidget?.clear();try{products=await catalog.all();await shipping.reload();render();}catch(refreshError){message(`${error.message} ${refreshError.message}`,true,true);}}}finally{busy(button,false);if(!document.getElementById('checkout-content').hidden)render();}
   });
   events.addEventListener('cart:changed',()=>{if(!document.getElementById('checkout-content').hidden)render();});

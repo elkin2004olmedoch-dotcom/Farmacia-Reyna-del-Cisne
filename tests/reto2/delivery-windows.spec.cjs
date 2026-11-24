@@ -91,8 +91,8 @@ test('pedidos de administración enlaza la asignación del pedido seleccionado a
   });
   await signedIn(page,data.admin.token,'/admin.html?tabla=pedidos');
   await page.locator('#admin-next').click();
-  const link=page.getByRole('link',{name:'Asignar repartidor',exact:true});await expect(link).toHaveAttribute('href','entregas.html?pedido='+order.id);
-  await link.click();await expect(page.locator('#delivery-order-select')).toHaveValue(order.id);
+  await expect(page.getByRole('link',{name:'Asignar repartidor',exact:true})).toHaveCount(0);
+  await page.goto('/entregas.html?pedido='+order.id);await expect(page.locator('#delivery-order-select')).toHaveValue(order.id);
   await expect(page.locator('#delivery-orders-info')).toContainText('Página 2');
   await expect(page.locator('#delivery-assignment-form [type=submit]')).toHaveText('Confirmar y asignar entrega');
   await page.context().clearCookies();await page.reload();

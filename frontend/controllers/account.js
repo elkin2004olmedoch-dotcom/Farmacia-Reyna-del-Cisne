@@ -14,7 +14,7 @@ export function accountController() {
   const next=new URLSearchParams(location.search).get('next');
   const destination=['checkout.html','pedidos.html','admin.html','entregas.html','pagos.html'].includes(next) || /^(seguimiento|pagos|entregas)\.html\?pedido=[a-zA-Z0-9_-]{1,100}$/.test(next)?next:null;
   const deliveryDestination=destination==='entregas.html' || destination?.startsWith('entregas.html?pedido=');
-  const continueToDestination=()=>{location.assign(auth.isAdmin?(deliveryDestination?destination:'admin.html'):auth.isCourier?(deliveryDestination?destination:'entregas.html'):destination || 'cuenta.html');};
+  const continueToDestination=()=>{location.assign(auth.isAdmin?(deliveryDestination?destination:'admin.html'):auth.isCourier?(deliveryDestination?destination:'cuenta.html'):destination || 'cuenta.html');};
   if(auth.user){
     accountView(auth.user);
     customerAccountController();

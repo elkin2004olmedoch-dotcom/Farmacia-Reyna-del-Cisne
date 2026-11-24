@@ -37,7 +37,7 @@ export function appendCompanionCards(target,summary,doc=document){
     if(summary.kind!=='orders'){const card=productCard(item);if(card)group.append(card);continue;}
     if(!recordId.test(item?.id||''))continue;
     const card=doc.createElement('article');card.className='companion-order';
-    card.append(text('strong','Pedido '+item.id.slice(0,8)),text('p','Estado: '+({pendiente:'Pendiente',confirmado:'Confirmado',preparado:'Preparado',entregado:'Entregado',cancelado:'Cancelado'}[item.estado]||'Por consultar')));
+    card.append(text('strong','Pedido '+item.id.slice(0,8)),text('p','Estado: '+({pendiente:'Pendiente',confirmado:'Confirmado',preparado:'Preparado',entregado:'Entregado',cancelado:'Cancelado'}[item.estado]||item.estado||'Por consultar')));
     for(const product of item.productos||[]){const line=productCard(product,true);if(line)card.append(line);}
     if(item.remaining>0)card.append(text('p',item.remaining+' productos más en Mis pedidos.'));
     const total=price(item.total);if(total!==null)card.append(text('p','Total registrado: '+money(total)));

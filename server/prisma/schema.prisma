@@ -434,6 +434,7 @@ model Pago {
 }
 
 model PagoPractica {
+  recorridoAutomatico Boolean @default(false)
   id String @id @default(uuid())
   pedidoId String @unique
   pedido Pedido @relation(fields:[pedidoId],references:[id],onDelete:Restrict)

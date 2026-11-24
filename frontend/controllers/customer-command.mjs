@@ -26,7 +26,7 @@ export function createCustomerCommandExecutor({catalog,cart,allowed=()=>true,nav
       const images=new Map();
       for(const id of new Set(own.flatMap(order=>(order.detalles||[]).slice(0,4).map(line=>line.productoId))))images.set(id,await findProduct(id));
       if(session()!==user)return account();
-      const items=own.map(order=>({id:order.id,estado:order.estado,total:order.total,remaining:Math.max(0,(order.detalles||[]).length-4),productos:(order.detalles||[]).slice(0,4).map(line=>({id:line.productoId,nombre:line.nombreProducto,precio:line.precioUnitario,cantidad:line.cantidad,imagen:line.imagen||images.get(line.productoId)?.imagen,alt:images.get(line.productoId)?.alt,presentacion:images.get(line.productoId)?.presentacion}))}));
+      const items=own.map(order=>({id:order.id,estado:order.recorrido?.etiqueta||order.estado,total:order.total,remaining:Math.max(0,(order.detalles||[]).length-4),productos:(order.detalles||[]).slice(0,4).map(line=>({id:line.productoId,nombre:line.nombreProducto,precio:line.precioUnitario,cantidad:line.cantidad,imagen:line.imagen||images.get(line.productoId)?.imagen,alt:images.get(line.productoId)?.alt,presentacion:images.get(line.productoId)?.presentacion}))}));
       return {text:items.length?'Tus pedidos más recientes. El precio mostrado es el registrado al comprar.':'Todavía no tienes pedidos en esta cuenta.',visualSummary:{kind:'orders',items},actions:[{label:'Ver mis pedidos',href:'pedidos.html'}]};
     }catch(error){if([401,403].includes(error.status)||session()!==user)return account();throw error;}
   }

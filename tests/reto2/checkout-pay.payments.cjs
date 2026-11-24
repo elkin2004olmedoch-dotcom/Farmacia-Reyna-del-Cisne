@@ -1,4 +1,26 @@
 const {test,expect}=require('@playwright/test'),{randomUUID}=require('node:crypto');
+test('cliente recibe su pedido a domicilio y encuentra el mismo resultado al recargar',async({page,request},testInfo)=>{
+ test.setTimeout(95000);
+ await setup(page,request);
+ await page.locator('#checkout-delivery').check();
+ await page.locator('#checkout-province').selectOption('Azuay');
+ await page.locator('#checkout-city').fill('Cuenca');
+ await page.locator('#checkout-address').fill('Av. Principal 123 y calle Central');
+ await page.locator('[name=paymentPreference][value=transfer]').check();
+ await expect(page.locator('#checkout-zone')).toHaveValue('ecuador-nacional');
+ await page.locator('#delivery-form [type=submit]').click();
+ await page.locator('#confirm-dialog [value=confirm]').click();
+ const panel=page.locator('[data-purchase-journey]');
+ await expect(panel.locator('[aria-current=step]')).toHaveText(/Confirmado/);
+ await expect(panel.locator('[aria-current=step]')).toHaveText(/En preparación/,{timeout:14000});
+ await expect(panel.locator('[aria-current=step]')).toHaveText(/En camino/,{timeout:16000});
+ await expect(panel.locator('[aria-current=step]')).toHaveText(/Entregado/,{timeout:21000});
+ await panel.scrollIntoViewIfNeeded();
+ await page.screenshot({path:testInfo.outputPath('pedido-entregado.png')});
+ await page.reload();
+ await expect(page.locator('#orders-list [aria-current=step]')).toHaveText(/Entregado/);
+ await expect(page.getByRole('button',{name:'Cancelar pedido'})).toHaveCount(0);
+});
 async function setup(page,request){
  const suffix=randomUUID(),email='pagoprimero-'+suffix+'@example.ec',user=(await (await request.post('/api/auth/register',{data:{nombre:'Cliente Pago',email,telefono:'0991234567',cedula:'0102030400',password:'PagoPrimero2026!'}})).json()).data;
  await page.request.post('/api/auth/web/exchange',{headers:{Authorization:'Bearer '+user.token,Origin:'http://localhost:3300','X-Farmacia-Web':'1'},data:{}});

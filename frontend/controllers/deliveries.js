@@ -23,12 +23,17 @@ export async function deliveriesController(){
   let seekOrder=requestedOrder && /^[a-zA-Z0-9_-]{1,100}$/.test(requestedOrder)?requestedOrder:null;
   if(!requireUser('entregas.html'+(seekOrder?'?pedido='+encodeURIComponent(seekOrder):'')))return;
   const admin=auth.user.role==='admin',courier=auth.user.role==='repartidor';
+  const coverageOnly=admin && new URLSearchParams(location.search).get('vista')==='cobertura';
   if(!admin && !courier){message('Esta ventana está disponible para administradores y repartidores.',true,true);return;}
   const heading=byId('delivery-page-title'),description=byId('delivery-page-description');
   if(heading)heading.textContent=admin?'Entregas y cobertura':'Mis entregas';
   if(description)description.textContent=admin?'Asigna pedidos, coordina repartidores y gestiona las tarifas de envío.':'Consulta tus pedidos, inicia el recorrido y sigue la ruta hasta cada destino.';
   const area=byId('deliveries-area'),list=byId('deliveries-list'),zoneForm=byId('delivery-zone-form'),courierForm=byId('courier-form'),assignment=byId('delivery-assignment-form');
   area.hidden=false;byId('delivery-admin').hidden=!admin;
+  if(coverageOnly){
+    heading.textContent='Cobertura y tarifas';description.textContent='Gestiona las zonas de entrega y sus precios.';
+    for(const section of [courierForm.closest('section'),assignment.closest('section'),list.closest('section')])section.hidden=true;
+  }
   let live=true,page=1,orderPage=1,requestId=0,ordersRequestId=0,working=false,listLoading=false,listPending=false,snapshot='',result={items:[]},zones=[],couriers=[],reassign=null,sharing=null,gpsGeneration=0;
   let orders=[],ordersSnapshot='',confirmingAssignment=false;
   let routeMap=null,routeId=null,routeGeneration=0,removeCompanion=null;
@@ -70,6 +75,7 @@ export async function deliveriesController(){
   window.addEventListener('pagehide',()=>{closeRoute();void stopGps({notice:false,drawList:false,keepalive:true});});
   byId('courier-route-close').addEventListener('click',()=>closeRoute(true));
   async function refreshList(){
+    if(coverageOnly)return;
     if(!live || working)return;if(listLoading){listPending=true;return;}listLoading=true;const id=++requestId,requested=page;
     try{
       const loaded=await deliveries.list(requested,byId('delivery-filter').value);
@@ -81,6 +87,7 @@ export async function deliveriesController(){
     }finally{listLoading=false;if(listPending && live && !working){listPending=false;await refreshList();}}
   }
   async function refreshOrders(requested=orderPage){
+    if(coverageOnly)return;
     const id=++ordersRequestId;let loaded;
     do{
       loaded=await administration.table('pedidos',requested);
@@ -96,7 +103,7 @@ export async function deliveriesController(){
     assignmentState();
   }
   async function metadata(){
-    const [loadedZones,loadedCouriers]=await Promise.all([deliveries.adminZones(),deliveries.couriers()]);
+    const [loadedZones,loadedCouriers]=await Promise.all([deliveries.adminZones(),coverageOnly?[]:deliveries.couriers()]);
     if(!live || !auth.user)return;zones=loadedZones;couriers=loadedCouriers;
     preserveFocus(byId('delivery-zones-list'),()=>zonesView(zones));
     preserveFocus(byId('couriers-list'),()=>couriersView(couriers));
@@ -235,7 +242,7 @@ export async function trackingController(){
   events.addEventListener('session:expired',expire);events.addEventListener('session:changed',()=>{if(!auth.user)expire();});
   async function refresh(){
     if(!live || running)return;running=true;const id=++requestId;
-    try{const loaded=await deliveries.tracking(pedido);if(!live || !auth.user || id!==requestId)return;data=loaded;const next=JSON.stringify(loaded);if(next!==snapshot){preserveFocus(content,()=>trackingView(data));snapshot=next;}renderLocation();}
+    try{const loaded=await deliveries.tracking(pedido);if(!live || !auth.user || id!==requestId)return;data=loaded;byId('tracking-location').closest('section').hidden=Boolean(data.recorrido);const next=JSON.stringify(loaded);if(next!==snapshot){preserveFocus(content,()=>trackingView(data));snapshot=next;}renderLocation();}
     catch(error){if(error.status===404 && live){data=null;content.replaceChildren();renderLocation();message('No se encontró un pedido disponible para tu cuenta.',true);}else throw error;}
     finally{running=false;}
   }
