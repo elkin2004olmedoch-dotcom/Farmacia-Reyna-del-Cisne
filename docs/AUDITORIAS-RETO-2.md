@@ -1,5 +1,7 @@
 # Reto 2 · Diez auditorías de la plataforma MVC
 
+[Abrir las diez auditorías en el navegador](https://farmacia-reto2-auditorias.onrender.com/). Elige una auditoría y pulsa **Siguiente paso** para recorrer la prueba. En **Ver evidencia de la ejecución** puedes inspeccionar el resultado registrado.
+
 Cada fila corresponde a un criterio de la [rúbrica del docente](REQUISITOS-RETO-2.txt). La columna central está redactada para copiarla en el cuaderno. La última columna permite mostrar cómo se comprobó cada resultado.
 
 | N.º | Auditoría y resultado | Evidencia |
