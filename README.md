@@ -1,5 +1,13 @@
 # Farmacia Reina del Cisne
 
+## Enlaces del proyecto
+
+| Enlace | Qué puedes ver |
+| --- | --- |
+| [Abrir la farmacia del aula](https://farmacia-reina-del-cisne-aula.onrender.com/index.html) | Portada pública para presentar el catálogo, comprar e iniciar sesión como cliente o administrador. |
+| [Abrir Supabase](https://supabase.com/dashboard/org/chodapgnhwgcvaszlngq) | Panel de la organización. Selecciona el proyecto de la farmacia para consultar sus tablas y relaciones. Requiere acceso a la organización. |
+| [Abrir el servicio de la farmacia en Render](https://dashboard.render.com/web/srv-db5sg2ss728c738t3n6g) | Panel del backend principal con el estado y el historial de despliegues. Requiere acceso al servicio. |
+
 Tienda y gestión farmacéutica con sede en Puerto Quito y cobertura configurable en Ecuador: catálogo, carrito, pedidos, administración y reparto. Conserva la identidad crema/vino, el logo y una mascota animada compartida por clientes y administración.
 
 La cobertura nacional comienza con envío gratuito; Puerto Quito conserva su tarifa local. Si no se localiza el destino, el checkout selecciona retiro y exige confirmar nuevamente. La ventana de tarjetas valida datos sintéticos sin efectuar cobros. [Pagos y cobertura nacional](docs/PAGOS-Y-COBERTURA-NACIONAL.md).
