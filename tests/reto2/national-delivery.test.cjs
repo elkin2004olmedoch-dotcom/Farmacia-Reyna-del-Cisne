@@ -30,6 +30,23 @@ test('cobertura valida las 24 provincias y rechaza puntos extranjeros y campos i
  await api.post('/api/entregas/verificar-destino').set(headers()).send({province:buyer.province,city:buyer.city,address:buyer.address,zonaEntregaId:buyer.zonaEntregaId,tarifaCentavos:0}).expect(422);
  const body=input();Object.assign(body.comprador,{latitudEntrega:40.7,longitudEntrega:-74,consienteUbicacion:true});await api.post('/api/pedidos').set(headers()).send(body).expect(422);
 });
+test('en el aula, Cuenca admite dirección escrita y guarda el pago sin coordenadas ni consentimiento GPS',async()=>{
+ const app=require('../../server/app.cjs')(fixture.config);
+ app.locals.classroom=true;
+ const classroom=require('supertest')(app),address='Parque Calderón, calle Sucre y Benigno Malo';
+ const prior=process.env.PAYMENT_PRACTICE_ENABLED;
+ process.env.PAYMENT_PRACTICE_ENABLED='true';
+ try{
+  geo.resolve=()=>assert.fail('La dirección del aula no requiere un proveedor de mapas');
+  const quote=await classroom.post('/api/entregas/verificar-destino').set(headers()).send({province:'Azuay',city:'Cuenca',address,zonaEntregaId:buyer.zonaEntregaId}).expect(200);
+  assert.equal(quote.body.data.delivery,'delivery');
+  const purchase={...input(),comprador:{...buyer,address},pago:{metodo:'transfer'},esperadoTotalCentavos:500};
+  const {body}=await classroom.post('/api/pedidos').set(headers()).send(purchase).expect(201);
+  const row=await db.pedido.findUniqueOrThrow({where:{id:body.data.id}});
+  assert.equal(row.direccion,address);assert.equal(row.entrega,'delivery');assert.equal(row.costoEnvioCentavos,0);
+  for(const key of ['latitudEntrega','longitudEntrega','ubicacionEntregaAceptadaAt'])assert.equal(row[key],null);
+ }finally{if(prior===undefined)delete process.env.PAYMENT_PRACTICE_ENABLED;else process.env.PAYMENT_PRACTICE_ENABLED=prior;}
+});
 test('administración cambia la tarifa nacional con versión e historial sin alterar pedidos ni tarifa local',async()=>{
  const model=require('../../server/models/entregas.cjs'),admin=await db.usuario.findFirst({where:{role:'admin'}}),before=await db.zonaEntrega.findUnique({where:{id:'puerto-quito'}}),zone=await db.zonaEntrega.findUnique({where:{id:'ecuador-nacional'}});
  const updated=await model.saveZone(zone.id,{nombre:zone.nombre,provincia:zone.provincia,canton:zone.canton,tarifaCentavos:300,ivaCategoria:'general',fundamentoIva:null,activa:true,esperadoVersion:zone.version},admin);

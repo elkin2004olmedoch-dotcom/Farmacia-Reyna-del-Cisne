@@ -1,4 +1,6 @@
-# Reto 2 · Diez auditorías y recorrido para la defensa
+# Archivo histórico de revisiones de la farmacia y de Goti
+
+Para la defensa y el cuaderno, consulta las [diez auditorías del proyecto para el Reto 2](AUDITORIAS-RETO-2.md). Goti corresponde al adelanto del Reto 3.
 
 El alcance es la tienda MVC, su API y la base relacional. Estas son revisiones internas y reproducibles. Las pruebas funcionales usan datos sintéticos. Puedes abrir cada archivo de la tabla y mostrar las condiciones que comprueba.
 

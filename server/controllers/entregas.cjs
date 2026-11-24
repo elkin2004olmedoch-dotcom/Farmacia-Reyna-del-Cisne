@@ -2,7 +2,11 @@ const model=require('../models/entregas.cjs');
 const send=(res,data,status=200)=>res.status(status).json({ok:true,data});
 module.exports={
  async zones(req,res){send(res,await model.zones());},
- async destination(req,res){const point=await require('../models/geocoding.cjs').prepare(req.input);send(res,{delivery:point?'delivery':'pickup',message:point?'Destino localizado.':'No pudimos localizar el destino. Seleccionamos retiro en farmacia, sin gastos de envío. Revisa y confirma nuevamente.'});},
+ async destination(req,res){
+  const destination=await require('../models/geocoding.cjs').prepare(req.input,{classroom:req.app.locals.classroom});
+  const message=destination?.fuente==='direccion-escrita'?'Dirección de entrega aceptada.':'Destino localizado.';
+  send(res,{delivery:destination?'delivery':'pickup',message:destination?message:'No pudimos localizar el destino. Seleccionamos retiro en farmacia, sin gastos de envío. Revisa y confirma nuevamente.'});
+ },
  async adminZones(req,res){send(res,await model.zones(true));},
  async createZone(req,res){send(res,await model.saveZone(null,req.input,req.user),201);},
  async updateZone(req,res){const {id,...input}=req.input;send(res,await model.saveZone(id,input,req.user));},
