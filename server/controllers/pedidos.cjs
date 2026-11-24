@@ -1,5 +1,6 @@
 const orders=require('../models/pedidos.cjs');
-const publicOrder=({requestKey,fingerprint,...order})=>order;
+const {recorridoCliente}=require('../models/recorrido-cliente.cjs');
+const publicOrder=({requestKey,fingerprint,...order})=>({...order,recorrido:recorridoCliente(order)});
 module.exports=config=>{
  const documents=require('../models/document-email.cjs').createDocumentEmail();
  return {

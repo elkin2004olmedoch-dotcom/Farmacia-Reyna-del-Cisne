@@ -21,10 +21,22 @@ test('administración concentra gestión diaria y mantiene herramientas avanzada
   const mobile=testInfo.project.name==='movil';if(mobile)await page.locator('#menu-button').click();
   let nav=page.locator(mobile?'#mobile-nav':'.admin-sidebar');
   await expect(nav.locator('[data-admin-section=productos]')).toBeVisible();await expect(nav.locator('[data-admin-section=pedidos]')).toBeVisible();
+  await expect(nav.getByRole('link',{name:'Facturación SRI'})).toHaveCount(0);
+  await expect(nav.getByRole('link',{name:'Cobertura y tarifas'})).toBeVisible();
   const advanced=nav.locator('.admin-advanced');await expect(advanced).toBeVisible();await expect(advanced).not.toHaveAttribute('open','');await expect(advanced.locator('[data-admin-section=fiscal]')).toBeHidden();
   const summary=advanced.locator('summary');await summary.focus();await page.keyboard.press('Enter');await expect(advanced.locator('[data-admin-section=fiscal]')).toBeVisible();
   if(mobile){await page.keyboard.press('Tab');await expect(advanced.locator('a').first()).toBeFocused();await page.keyboard.press('Escape');await expect(page.locator('#mobile-nav')).toBeHidden();}
   await page.goto('/admin.html?tabla=proveedores');await expect(page.locator('#admin-section-title')).toContainText('Proveedores');if(mobile)await page.locator('#menu-button').click();nav=page.locator(mobile?'#mobile-nav':'.admin-sidebar');
   await expect(nav.locator('.admin-advanced')).toHaveAttribute('open','');await expect(nav.locator('[data-admin-section=proveedores][aria-current=page]')).toBeVisible();
   expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations).toEqual([]);await page.screenshot({path:testInfo.outputPath('administracion-opciones-claras.png'),fullPage:true});
+});
+test('cobertura permite editar tarifas sin mostrar el panel de repartidores',async({page,request})=>{
+  const token=await apiToken(request,'admin-browser@example.ec','AdminBrowser2026!');
+  await page.request.post('/api/auth/web/exchange',{headers:{Authorization:'Bearer '+token,Origin:'http://localhost:3300','X-Farmacia-Web':'1'},data:{}});
+  await page.goto('/entregas.html?vista=cobertura');
+  await expect(page.getByRole('heading',{name:'Cobertura y tarifas'})).toBeVisible();
+  await expect(page.locator('#delivery-zones-list')).toContainText('Puerto Quito');
+  await expect(page.locator('#courier-form').locator('xpath=ancestor::section[1]')).toBeHidden();
+  await expect(page.locator('#delivery-assignment')).toBeHidden();
+  await expect(page.getByRole('heading',{name:'Bandeja de entregas'})).toBeHidden();
 });

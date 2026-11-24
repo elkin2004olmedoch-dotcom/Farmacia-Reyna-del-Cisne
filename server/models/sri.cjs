@@ -35,7 +35,8 @@ function createBilling({db=require('./db.cjs'),secret,transport=createTransport(
     const buyer=document.validateBuyer(input);const cfg=await configRaw();if(!cfg)throw new AppError(409,'EMITTER_REQUIRED','Completa los datos del emisor antes de preparar la factura.');
     const replay=prior=>{if(JSON.stringify(JSON.parse(prior.snapshot).comprador)!==JSON.stringify(buyer))throw new AppError(409,'INVOICE_BUYER_CONFLICT','Este pedido ya tiene una factura con otros datos del comprador. Revisa el borrador existente.');return {factura:publicInvoice(prior),replayed:true};};
     const prior=await db.facturaPedido.findUnique({where:{pedidoId:buyer.pedidoId}});if(prior)return replay(prior);
-    const order=await db.pedido.findUnique({where:{id:buyer.pedidoId},include:{detalles:true}});if(!order)throw new AppError(404,'ORDER_NOT_FOUND','El pedido no existe.');
+    const order=await db.pedido.findUnique({where:{id:buyer.pedidoId},include:{detalles:true,pagoPractica:{select:{recorridoAutomatico:true}}}});if(!order)throw new AppError(404,'ORDER_NOT_FOUND','El pedido no existe.');
+    if(order.pagoPractica?.recorridoAutomatico)throw new AppError(409,'PRACTICE_ORDER','Este pedido sólo admite el comprobante de compra.');
     const data=document.snapshot(order,buyer,Object.fromEntries(configFields.map(key=>[key,cfg[key]])));
     try{const row=await db.facturaPedido.create({data:{pedidoId:order.id,...series(cfg),snapshot:JSON.stringify(data),xmlBorrador:document.buildXml(data,null,null,now())}});return {factura:publicInvoice(row),replayed:false};}
     catch(error){if(error.code==='P2002'){const row=await db.facturaPedido.findUnique({where:{pedidoId:buyer.pedidoId}});if(row)return replay(row);}throw error;}

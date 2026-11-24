@@ -25,6 +25,22 @@ test('rechaza precio cambiado y datos bancarios inesperados sin persistencia par
  }
  assert.equal(await db.pedido.count(),count);assert.equal((await db.producto.findUnique({where:{id:product.id}})).stock,stock);
 });
+test('seguimiento automático respeta propiedad, avance, cancelación y cierre sin despacho',async()=>{
+ const input={...payload(),pago:{metodo:'transfer'},esperadoTotalCentavos:500};
+ const created=(await api.post('/api/pedidos').set(headers()).send(input).expect(201)).body.data;
+ assert.equal(created.recorrido.etiqueta,'Confirmado');
+ const path='/api/pedidos/'+created.id+'/seguimiento';
+ await api.get(path).expect(401);
+ const other=(await api.post('/api/auth/register').send({nombre:'Otra cuenta',email:'otra-cuenta@example.ec',telefono:buyer.phone,cedula:buyer.document,password:'OtraCuenta2026!'}).expect(201)).body.data;
+ await api.get(path).set({Authorization:'Bearer '+other.token}).expect(404);
+ await db.pagoPractica.update({where:{pedidoId:created.id},data:{createdAt:new Date(Date.now()-35000)}});
+ const tracked=(await api.get(path).set(headers()).expect(200)).body.data;
+ assert.equal(tracked.recorrido.etiqueta,'Retirado');assert.equal(tracked.entrega,null);
+ await api.post('/api/pedidos/'+created.id+'/cancelacion').set(headers()).send({esperadoUpdatedAt:created.updatedAt}).expect(409);
+ const second=(await api.post('/api/pedidos').set(headers()).send({...input,claveSolicitud:randomUUID()}).expect(201)).body.data;
+ await api.post('/api/pedidos/'+second.id+'/cancelacion').set(headers()).send({esperadoUpdatedAt:second.updatedAt}).expect(200);
+ assert.equal((await api.get('/api/pedidos/'+second.id+'/seguimiento').set(headers()).expect(200)).body.data.recorrido.etiqueta,'Cancelado');
+});
 test('listado de usuarios excluye correos y teléfono; perfil propio conserva datos necesarios',async()=>{
  const admin=(await api.post('/api/auth/login').send({email:'email-admin@example.ec',password:'SyntheticEmailAdmin2026!'}).expect(200)).body.data;
  const res=await api.get('/api/admin/tablas?tabla=usuarios&page=1&pageSize=20').set('Authorization','Bearer '+admin.token).expect(200);

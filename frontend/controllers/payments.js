@@ -42,13 +42,13 @@ export async function paymentsController(){
     if(!payment){const state=document.getElementById('payment-persisted-state');state.textContent='Pago por coordinar con la farmacia.';state.hidden=false;}
     if(payment){const state=document.getElementById('payment-persisted-state');const labels={creando:'La solicitud de pago se está preparando. Actualiza el estado antes de volver a intentar.',pendiente:'Solicitud pendiente. Continúa con la misma solicitud de PayPhone; no se ha confirmado un pago.',aprobado:payment.entorno==='sandbox'?'Prueba de PayPhone aprobada. No es un pago real del pedido.':'Pago verificado por PayPhone. La preparación y la entrega continúan por separado.',cancelado:'PayPhone informó una cancelación. Consulta con la farmacia antes de iniciar otro pago.',revision:'Este intento necesita revisión. Consulta con la farmacia; no vuelvas a pagar hasta conciliarlo.'};state.textContent=labels[payment.estado] || 'Consulta con la farmacia el estado del pago.';state.hidden=false;}
     form.hidden=practiceDone;practiceResult.hidden=!result;
-    if(result){document.getElementById('payment-practice-summary').textContent=`${result.metodo==='card'?(cards.brands[result.marca]||'Tarjeta'):'Transferencia'} · ${money(result.totalCentavos)}`;if(!payment){const state=document.getElementById('payment-persisted-state');state.textContent='El recorrido de práctica se completó. No se ha realizado un cobro ni una transferencia bancaria.';state.hidden=practiceDone;}}
+    if(result){document.getElementById('payment-practice-summary').textContent=`${result.metodo==='card'?(cards.brands[result.marca]||'Tarjeta'):'Transferencia'} · ${money(result.totalCentavos)}`;if(!payment){const state=document.getElementById('payment-persisted-state');state.textContent='Pago registrado · Sin cobro real.';state.hidden=practiceDone;}}
     document.getElementById('payment-legal-note').hidden=practice&&!payment;
     if(practice){
       document.getElementById('payment-mode').textContent='Sin cobro real';
       document.getElementById('payment-card-note').textContent='Visa, Mastercard y otras marcas. Reconocimiento de marca, sin cobro real.';
-      document.getElementById('payment-method-note').textContent=method==='manual'?'Habla con nuestro equipo para acordar el pago.':'El botón completa el recorrido de práctica sin mover dinero.';
-      document.getElementById('payment-transfer-intro').textContent='Completa el recorrido con el botón Pagar. No realices una transferencia bancaria para esta práctica.';
+      document.getElementById('payment-method-note').textContent=method==='manual'?'Habla con nuestro equipo para acordar el pago.':'Sin cobro real.';
+      document.getElementById('payment-transfer-intro').textContent='Selecciona Pagar para confirmar. No transfieras dinero.';
       if(method!=='manual')button.textContent='Pagar';
       if(!cardWidget)cardWidget=paymentCardController(practiceFields);
     }else{cardWidget?.destroy();cardWidget=null;practiceFields.replaceChildren();}

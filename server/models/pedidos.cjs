@@ -37,6 +37,8 @@ async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTota
         const products=await tx.producto.findMany({where:{id:{in:sorted.map(item=>item.productoId)},activo:true},include:{lotes:true,promociones:{where:discountWhere(now)}}});
         const tax=await fiscal.current(tx,now);
         const shipping=await require('./entregas.cjs').shippingSnapshot(tx,comprador,tax,now,destination);
+        const automatic=Boolean(pago)&&process.env.PRACTICE_FULFILLMENT_ENABLED!=='false';
+        if(automatic){shipping.latitudEntrega=null;shipping.longitudEntrega=null;}
         let cents=0,baseCents=0,ivaCents=0;const details=[];
         for(const item of sorted) {
           const product=products.find(product=>product.id===item.productoId);
@@ -57,7 +59,7 @@ async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTota
         cents+=shipping.costoEnvioCentavos;
         baseCents+=Math.round(Number(shipping.envioBaseImponible||0)*100);ivaCents+=Math.round(Number(shipping.envioIvaMonto||0)*100);
         if(pago&&cents!==esperadoTotalCentavos)throw new AppError(409,'CHECKOUT_TOTAL_CHANGED','El total cambió. Revisa productos y envío antes de pagar nuevamente.');
-        const pedido=await tx.pedido.create({data:{...(pago?{pagoPractica:{create:{metodo:pago.metodo,marca:pago.marca||null,totalCentavos:cents}}}:{}),userId,subtotalProductos,...shipping,total:new Prisma.Decimal(cents).div(100),baseImponible:new Prisma.Decimal(baseCents).div(100),ivaMonto:new Prisma.Decimal(ivaCents).div(100),requestKey:claveSolicitud,fingerprint,createdAt:now,updatedAt:now,entrega:comprador.delivery,nombre:comprador.name,email:comprador.email.toLowerCase(),telefono:require('../../frontend/models/ecuador.js').normalizePhone(comprador.phone),documento:'••••••'+comprador.document.slice(-4),provincia:comprador.delivery==='delivery'?comprador.province:null,ciudad:comprador.delivery==='delivery'?comprador.city:null,direccion:comprador.delivery==='delivery'?comprador.address:null,codigoPostal:comprador.delivery==='delivery'?comprador.postalCode || null:null,detalles:{create:details},historial:{create:{estado:'pendiente',actorId:userId,createdAt:now}}},include});
+        const pedido=await tx.pedido.create({data:{...(pago?{pagoPractica:{create:{recorridoAutomatico:automatic,createdAt:now,metodo:pago.metodo,marca:pago.marca||null,totalCentavos:cents}}}:{}),userId,subtotalProductos,...shipping,total:new Prisma.Decimal(cents).div(100),baseImponible:new Prisma.Decimal(baseCents).div(100),ivaMonto:new Prisma.Decimal(ivaCents).div(100),requestKey:claveSolicitud,fingerprint,createdAt:now,updatedAt:now,entrega:comprador.delivery,nombre:comprador.name,email:comprador.email.toLowerCase(),telefono:require('../../frontend/models/ecuador.js').normalizePhone(comprador.phone),documento:'••••••'+comprador.document.slice(-4),provincia:comprador.delivery==='delivery'?comprador.province:null,ciudad:comprador.delivery==='delivery'?comprador.city:null,direccion:comprador.delivery==='delivery'?comprador.address:null,codigoPostal:comprador.delivery==='delivery'?comprador.postalCode || null:null,detalles:{create:details},historial:{create:{estado:'pendiente',actorId:userId,createdAt:now}}},include});
         await inventory.saleMovements(tx,pedido.detalles,pedido.id,userId);
         await require('./entregas.cjs').autoAssign(tx,pedido);
         return {pedido,replayed:false};
@@ -98,6 +100,8 @@ async function updateStatusTx(tx,id,{estado,esperadoUpdatedAt,codigoEntrega},act
   }
   const current=await tx.pedido.findUnique({where:{id},include});
   if(!current || buyer && current.userId!==buyer.id)throw new AppError(404,'NOT_FOUND','No se encontró el pedido.');
+  const journey=require('./recorrido-cliente.cjs').recorridoCliente(current);
+  if(journey && (estado!=='cancelado'||(!journey.cancelado && journey.indice>=1)))throw new AppError(409,'AUTOMATIC_ORDER','El pedido ya sigue su recorrido. Consulta su estado en Mis pedidos.');
   // Repeating the same transition is safe and never returns stock twice.
   if(current.estado===estado)return {pedido:current,replayed:true};
   const expected=new Date(esperadoUpdatedAt);

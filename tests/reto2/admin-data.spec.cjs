@@ -8,13 +8,14 @@ test('el administrador consulta todos los recursos y conserva la selección y pa
   const response=await request.get('/api/admin/recursos',{headers:{Authorization:'Bearer '+token}});expect(response.status()).toBe(200);
   const resources=(await response.json()).data;
   expect(resources.map(resource=>resource.model).sort()).toEqual(Prisma.dmmf.datamodel.models.map(model=>model.name).sort());
-  const select=page.getByLabel('Tabla de datos',{exact:true});await expect(select.locator('option')).toHaveCount(resources.length);
-  for(const resource of resources){
+  const visibleResources=resources.filter(item=>!['configuracion-emisor','secuencias-factura','facturas','entregas','sesiones-moviles','incidencias-entrega'].includes(item.key));
+  const select=page.getByLabel('Tabla de datos',{exact:true});await expect(select.locator('option')).toHaveCount(visibleResources.length);
+  for(const resource of visibleResources){
     const loaded=page.waitForResponse(response=>response.url().includes('/api/admin/tablas?')&&new URL(response.url()).searchParams.get('tabla')===resource.key);
     await select.selectOption(resource.key);const response=await loaded;expect(response.status()).toBe(200);expect((await response.json()).data.resource.model).toBe(resource.model);
     await expect(page.locator('#admin-table')).not.toHaveAttribute('aria-busy','true');await expect(page.locator('#admin-table caption,#admin-table .shop-empty')).toBeVisible();await expect(page.locator('#admin-resource-title')).toHaveText(resource.label);await expect(page).toHaveURL(new RegExp('recurso='+resource.key+'(?:&|$)'));await expect(page.locator('#admin-create')).toBeHidden();
   }
-  await page.reload();await expect(select).toHaveValue(resources.at(-1).key);
+  await page.reload();await expect(select).toHaveValue(visibleResources.at(-1).key);
   await expect(page.locator('#admin-table')).not.toContainText('passwordHash');await expect(page.locator('#admin-table')).not.toContainText('secretHash');
   const products=page.waitForResponse(response=>response.url().includes('/api/admin/tablas?tabla=productos'));
   await select.selectOption('productos');const data=(await(await products).json()).data;

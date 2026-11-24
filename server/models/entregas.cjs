@@ -53,6 +53,7 @@ async function saveZone(id,input,user) {
 }
 const drivers=()=>db.usuario.findMany({where:{role:'repartidor'},select:driverSelect,orderBy:{nombre:'asc'}});
 async function autoAssign(tx,order){
+ if(order.pagoPractica?.recorridoAutomatico)return;
  if(order.entrega!=='delivery' || !['pendiente','confirmado','preparado'].includes(order.estado))return;
  const candidates=await tx.usuario.findMany({where:{role:'repartidor',activo:true},select:{id:true},take:2});
  if(candidates.length!==1)return;
@@ -131,7 +132,8 @@ function assertGpsOwner(e,user){
 async function assign({pedidoId,repartidorId,esperadoVersion},user){
  return transaction(async tx=>{
   await actor(tx,user,['admin']);
-  const order=await tx.pedido.findUnique({where:{id:pedidoId},select:orderSelect});if(!order)notFound();
+  const order=await tx.pedido.findUnique({where:{id:pedidoId},select:{...orderSelect,pagoPractica:{select:{recorridoAutomatico:true}}}});if(!order)notFound();
+  if(order.pagoPractica?.recorridoAutomatico)fail('AUTOMATIC_ORDER','Este pedido tiene seguimiento automático.');
   if(order.entrega!=='delivery'||!['confirmado','preparado'].includes(order.estado))fail('ORDER_NOT_DELIVERABLE','Solo se asignan pedidos a domicilio confirmados o preparados.');
   if(!await tx.usuario.findFirst({where:{id:repartidorId,role:'repartidor',activo:true},select:{id:true}}))fail('DRIVER_UNAVAILABLE','Selecciona un repartidor activo.');
   const old=await tx.entrega.findUnique({where:{pedidoId},include:deliveryInclude});
@@ -193,9 +195,9 @@ async function clearLocation(id,user){
  });
 }
 async function tracking(id,user){
- const p=await db.pedido.findFirst({where:{id,...(user.role==='admin'?{}:{userId:user.id})},select:{id:true,userId:true,estado:true,reparto:{include:{incidencias:deliveryInclude.incidencias}}}});if(!p)notFound();
+ const p=await db.pedido.findFirst({where:{id,...(user.role==='admin'?{}:{userId:user.id})},select:{id:true,userId:true,estado:true,entrega:true,pagoPractica:{select:{recorridoAutomatico:true,createdAt:true}},reparto:{include:{incidencias:deliveryInclude.incidencias}}}});if(!p)notFound();
  const e=p.reparto;
- return {pedidoId:p.id,estadoPedido:p.estado,entrega:e?{id:e.id,estado:e.estado,version:e.version,codigoRequerido:Boolean(e.codigoEntregaRequerido),...(p.userId===user.id&&ACTIVE.includes(e.estado)?{codigoEntrega:progress.code(e)}:{}),estimacion:progress.estimate(e),incidencias:e.incidencias,asignadaAt:e.asignadaAt,salidaAt:e.salidaAt,llegadaAt:e.llegadaAt,finalizadaAt:e.finalizadaAt,ubicacion:location(e)}:null};
+ return {pedidoId:p.id,estadoPedido:p.estado,recorrido:require('./recorrido-cliente.cjs').recorridoCliente(p),entrega:e?{id:e.id,estado:e.estado,version:e.version,codigoRequerido:Boolean(e.codigoEntregaRequerido),...(p.userId===user.id&&ACTIVE.includes(e.estado)?{codigoEntrega:progress.code(e)}:{}),estimacion:progress.estimate(e),incidencias:e.incidencias,asignadaAt:e.asignadaAt,salidaAt:e.salidaAt,llegadaAt:e.llegadaAt,finalizadaAt:e.finalizadaAt,ubicacion:location(e)}:null};
 }
 async function incidence(id,input,user){
  return transaction(async tx=>{

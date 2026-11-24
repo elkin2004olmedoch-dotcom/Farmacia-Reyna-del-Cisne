@@ -1,3 +1,4 @@
+import {recorridoView} from './recorrido.js';
 import {escape,money} from './common.js';
 import {mapsLocationUrl,embedMapUrl} from '../models/deliveries.js';
 
@@ -50,6 +51,7 @@ export function deliveriesView(result,{admin=false,sharingId=null}={}){
   deliveryPagination('deliveries',result);
 }
 export function trackingView(data){
+  if(data.recorrido){document.getElementById('tracking-content').innerHTML=recorridoView(data.recorrido);return;}
   const delivery=data.entrega,cancelled=data.estadoPedido==='cancelado' || delivery?.estado==='cancelada';
   const stages=[['asignada','Asignada','asignadaAt'],['en_camino','En camino','salidaAt'],['en_destino','En destino','llegadaAt'],['entregada','Entregada','finalizadaAt']];
   document.getElementById('tracking-content').innerHTML=`<h2>Pedido ${escape(data.pedidoId.slice(0,8))}</h2><p>Estado del pedido: <strong>${escape(orderLabels[data.estadoPedido] || data.estadoPedido)}</strong></p>${cancelled?'<p class="is-error">Pedido cancelado. El seguimiento finalizó.</p>':delivery?`<p>Entrega: <strong>${escape(deliveryLabels[delivery.estado] || delivery.estado)}</strong></p>`:'<p>La farmacia todavía no ha asignado un repartidor a este pedido.</p>'}${delivery?`<ol class="delivery-timeline" aria-label="Etapas de entrega">${stages.map(([key,label,date])=>`<li data-delivery-step="${key}"${!cancelled && delivery.estado===key?' aria-current="step"':''}><strong>${label}</strong><span>${delivery[date]?escape(when(delivery[date])):'Pendiente'}</span></li>`).join('')}</ol>`:''}`;

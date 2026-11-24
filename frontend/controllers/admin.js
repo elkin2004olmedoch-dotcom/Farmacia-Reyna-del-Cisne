@@ -105,7 +105,7 @@ export async function adminController() {
     table.setAttribute('aria-busy','true');if(!silent){result=null;table.innerHTML='<p class="shop-empty" role="status">Cargando registros…</p>';create.disabled=true;for(const button of ['admin-prev','admin-next'])document.getElementById(button).disabled=true;}
     try{
       if(tableName==='datos'){
-        resources ||= await administration.resources();
+        resources ||= (await administration.resources()).filter(item=>!['configuracion-emisor','secuencias-factura','facturas','entregas','sesiones-moviles','incidencias-entrega'].includes(item.key)).map(item=>({...item,actions:item.actions.filter(action=>!action.href.startsWith('entregas.html'))}));
         if(id!==requestId || !auth.isAdmin)return;
         if(!resources.some(resource=>resource.key===resourceKey))resourceKey=resources[0].key;
         if(!silent){resourceView(resources,resourceKey);history.replaceState(null,'','admin.html?'+routeQuery());}
