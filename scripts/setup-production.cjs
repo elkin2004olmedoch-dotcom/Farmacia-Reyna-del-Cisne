@@ -50,16 +50,18 @@ function productionEnvironment(input) {
   }
   if (!/^[a-z0-9][a-z0-9-]{1,62}$/.test(env.SUPABASE_STORAGE_BUCKET || '')) throw new Error('Configura SUPABASE_STORAGE_BUCKET con un nombre válido.');
   if (env.SKIP_INITIAL_SEED && !['true', 'false'].includes(env.SKIP_INITIAL_SEED)) throw new Error('SKIP_INITIAL_SEED debe ser true o false.');
+  require('./provision-admin.cjs').accessConfiguration(env);
+  require('./snapshot-postgres.cjs').configuration(env);
   return env;
 }
 
 function runSetup({env = process.env, run = spawnSync, logger = console} = {}) {
   const productionEnv = productionEnvironment(env);
-  const steps = [
-    ['Generar cliente PostgreSQL', ['node_modules/prisma/build/index.js', 'generate', '--schema', schema]],
-    ['Aplicar migraciones PostgreSQL', ['node_modules/prisma/build/index.js', 'migrate', 'deploy', '--schema', schema]]
-  ];
+  const steps = [['Generar cliente PostgreSQL', ['node_modules/prisma/build/index.js', 'generate', '--schema', schema]]];
+  if (productionEnv.MIGRATION_BACKUP_KEY) steps.push(['Verificar respaldo PostgreSQL previo', ['scripts/snapshot-postgres.cjs']]);
+  steps.push(['Aplicar migraciones PostgreSQL', ['node_modules/prisma/build/index.js', 'migrate', 'deploy', '--schema', schema]]);
   if (productionEnv.SKIP_INITIAL_SEED !== 'true') steps.push(['Preparar catálogo y administrador', ['server/prisma/seed.cjs']]);
+  if (productionEnv.ADMIN_USERNAME) steps.push(['Configurar acceso administrativo', ['scripts/provision-admin.cjs']]);
   steps.push(['Incorporar referencias verificadas para consulta', ['scripts/sync-catalog.cjs']]);
   steps.push(['Generar frontend', ['scripts/build-frontend.cjs']]);
   for (const [label, args] of steps) {

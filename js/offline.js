@@ -13,7 +13,7 @@
     global.clearTimeout(hideTimer);
     notice.hidden = false;
     if (!global.navigator.onLine) {
-      notice.textContent = 'Estás sin conexión. El catálogo, tu carrito y tus datos guardados siguen disponibles; para enviar el pedido por WhatsApp necesitas internet.';
+      notice.textContent = 'Estás sin conexión. Los datos del carrito se conservan en este navegador. Conéctate para continuar.';
       return;
     }
     notice.textContent = 'Conexión recuperada. Ya puedes enviar tu pedido por WhatsApp.';
@@ -23,14 +23,4 @@
   global.addEventListener('offline', updateConnection);
   global.addEventListener('online', updateConnection);
 
-  const scriptUrl = document.currentScript?.src;
-  const securePage = global.location.protocol === 'https:'
-    || ['localhost', '127.0.0.1'].includes(global.location.hostname);
-  if ('serviceWorker' in global.navigator && securePage && scriptUrl) {
-    const workerUrl = new URL('../service-worker.js', scriptUrl);
-    const scope = new URL('../', scriptUrl).pathname;
-    global.navigator.serviceWorker.register(workerUrl.href, { scope }).catch(() => {
-      // El sitio se puede seguir usando en línea aunque el navegador rechace la caché offline.
-    });
-  }
 })(globalThis);

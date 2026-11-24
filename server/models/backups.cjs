@@ -129,7 +129,12 @@ async function restoreBackup({from,targetDatabase=databaseFile(),backupRoot=BACK
       await stagedClient.$executeRawUnsafe('UPDATE "Usuario" SET "tokenVersion"="tokenVersion"+1,"tokenEpoch"=?',randomUUID());
       if(has('PasswordReset'))await stagedClient.$executeRawUnsafe('DELETE FROM "PasswordReset"');
       for(const table of ['SesionWeb','SesionMovil'])if(has(table))await stagedClient.$executeRawUnsafe(`UPDATE "${table}" SET "revokedAt"=CURRENT_TIMESTAMP`);
-      if(has('AdminMfa'))await stagedClient.$executeRawUnsafe('UPDATE "AdminMfa" SET "challengeHash"=NULL,"challengeUntil"=NULL,"recoveryHashes"=\'[]\',"lastCounter"=?,"setupExpiresAt"=CURRENT_TIMESTAMP',Math.floor(Date.now()/30000));
+      if(has('AdminMfa')){
+        const columns=await stagedClient.$queryRawUnsafe('PRAGMA table_info("AdminMfa")');
+        const legacyCodes=columns.some(column=>column.name==='recoveryHashes')?',"recoveryHashes"=\'[]\'':'';
+        await stagedClient.$executeRawUnsafe('UPDATE "AdminMfa" SET "challengeHash"=NULL,"challengeUntil"=NULL,"lastCounter"=?,"setupExpiresAt"=CURRENT_TIMESTAMP'+legacyCodes,Math.floor(Date.now()/30000));
+      }
+      if(has('AdminMfaRecuperacion'))await stagedClient.$executeRawUnsafe('UPDATE "AdminMfaRecuperacion" SET "usedAt"=? WHERE "usedAt" IS NULL',new Date());
       if(has('Entrega')){
         const columns=await stagedClient.$queryRawUnsafe('PRAGMA table_info("Entrega")'),present=name=>columns.some(column=>column.name===name);
         const estimateColumns=['estimadaDesde','estimadaHasta','estimadaCalculadaAt','estimadaFuente','estimadaGpsVersion','estimadaMuestraAt','estimadaVenceAt','estimadaRepartidorId'].filter(present).map(name=>`,"${name}"=NULL`).join('');

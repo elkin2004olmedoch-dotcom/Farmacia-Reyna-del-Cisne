@@ -27,10 +27,10 @@ test('las páginas públicas cargan las mascotas y sus sprites sin depender de R
   for(const file of ['frontend/controllers/mascota.js','frontend/assets/mascotas/widget.css','frontend/assets/mascotas/widget-responsive.css','frontend/assets/mascotas/sprites/manifest.json','frontend/assets/mascotas/sprites/goti.png','frontend/assets/mascotas/sprites/farmi.png','frontend/assets/mascotas/sprites/boti.png'])
     assert.ok(fs.existsSync(path.join(__dirname,'..',file)),`${file} se publica con Pages`);
 });
-test('activar la URL pública actualiza solo configuración y versión de caché sin publicar secretos',t=>{
+test('activar la URL pública actualiza la configuración sin reactivar una caché retirada',t=>{
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-public-site-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
   fs.mkdirSync(path.join(root,'data'));fs.writeFileSync(path.join(root,'service-worker.js'),"const CACHE_NAME = 'farmacia-reina-shell-v5-cloud-ready';\n");
   assert.throws(()=>configure(origin+'/ruta',root),/origen HTTPS exacto/);
   configure(origin,root);assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'data/deployment.json'),'utf8')),{appOrigin:origin});
-  assert.match(fs.readFileSync(path.join(root,'service-worker.js'),'utf8'),/farmacia-reina-shell-cloud-[a-f0-9]{12}/);
+  assert.equal(fs.readFileSync(path.join(root,'service-worker.js'),'utf8'),"const CACHE_NAME = 'farmacia-reina-shell-v5-cloud-ready';\n");
 });

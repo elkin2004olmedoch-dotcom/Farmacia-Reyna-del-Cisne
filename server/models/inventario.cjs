@@ -2,6 +2,9 @@ const db=require('./db.cjs');
 const {Prisma}=require('./prisma-client.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 const relation={producto:{select:{id:true,nombre:true}},proveedor:{select:{id:true,nombre:true}}};
+const movementSelect={id:true,productoId:true,actorId:true,pedidoId:true,tipo:true,cantidad:true,motivo:true,createdAt:true,producto:{select:{id:true,nombre:true}},movimientoLote:{select:{loteId:true,lote:{select:{id:true,numero:true}}}},actor:{select:{nombre:true,email:true}}};
+function movementDto({movimientoLote,...row}){return {...row,loteId:movimientoLote?.loteId??null,lote:movimientoLote?.lote??null};}
+function movementData({loteId,...row}){return {...row,...(loteId?{movimientoLote:{create:{loteId}}}:{})};}
 const serializable={isolationLevel:Prisma.TransactionIsolationLevel.Serializable,maxWait:10000,timeout:15000};
 function ecuadorDay(now=new Date()){return new Date(now.getTime()-5*60*60*1000).toISOString().slice(0,10);}
 function sellableStock(product,now=new Date()) {return Math.max(0,product.stock-(product.lotes || []).filter(lot=>lot.vencimiento<ecuadorDay(now)).reduce((sum,lot)=>sum+lot.stock,0));}
@@ -13,8 +16,8 @@ async function listLots({page,pageSize,productoId}) {
 }
 async function listMovements({page,pageSize,productoId}) {
  const where=productoId?{productoId}:{};
- const [items,total]=await db.$transaction([db.movimientoInventario.findMany({where,include:{producto:{select:{id:true,nombre:true}},lote:{select:{id:true,numero:true}},actor:{select:{nombre:true,email:true}}},orderBy:[{createdAt:'desc'},{id:'asc'}],skip:(page-1)*pageSize,take:pageSize}),db.movimientoInventario.count({where})]);
- return {items,total,page,pageSize};
+ const [items,total]=await db.$transaction([db.movimientoInventario.findMany({where,select:movementSelect,orderBy:[{createdAt:'desc'},{id:'asc'}],skip:(page-1)*pageSize,take:pageSize}),db.movimientoInventario.count({where})]);
+ return {items:items.map(movementDto),total,page,pageSize};
 }
 async function findProduct(tx,id){const product=await tx.producto.findFirst({where:{id,activo:true},include:{lotes:true}});if(!product)throw new AppError(404,'NOT_FOUND','El producto no está disponible.');return product;}
 async function createLot({productoId,numero,vencimiento,cantidad,costoUnitario,proveedorId},actorId) {
@@ -25,7 +28,7 @@ async function createLot({productoId,numero,vencimiento,cantidad,costoUnitario,p
   const changed=await tx.producto.updateMany({where:{id:productoId,activo:true,stock:{lte:100000-cantidad}},data:{stock:{increment:cantidad}}});
   if(changed.count!==1)throw new AppError(409,'STOCK_LIMIT','El stock máximo permitido por producto es 100000 unidades.');
   const lot=await tx.lote.create({data:{productoId,numero,vencimiento,stock:cantidad,costoUnitario,proveedorId:proveedorId || null},include:relation});
-  await tx.movimientoInventario.create({data:{productoId,loteId:lot.id,actorId,tipo:'entrada',cantidad,motivo:'Ingreso de lote '+numero}});
+  await tx.movimientoInventario.create({data:movementData({productoId,loteId:lot.id,actorId,tipo:'entrada',cantidad,motivo:'Ingreso de lote '+numero})});
   return lot;
  },serializable);
 }
@@ -42,7 +45,7 @@ async function adjust({productoId,loteId,tipo,cantidad,motivo},actorId) {
   if(tipo==='entrada')await tx.producto.update({where:{id:productoId},data:{stock:{increment:delta}}});
   if(lot)await tx.lote.update({where:{id:loteId},data:{stock:{increment:delta}}});
   if(tipo==='salida')await tx.producto.update({where:{id:productoId},data:{stock:{increment:delta}}});
-  return tx.movimientoInventario.create({data:{productoId,loteId:loteId || null,actorId,tipo,cantidad,motivo}});
+  return movementDto(await tx.movimientoInventario.create({data:movementData({productoId,loteId,actorId,tipo,cantidad,motivo}),include:{movimientoLote:true}}));
  },serializable);
 }
 async function reserve(tx,product,quantity,now) {
@@ -62,7 +65,7 @@ async function reserve(tx,product,quantity,now) {
 async function saleMovements(tx,details,pedidoId,actorId) {
  for(const line of details) {
   let remaining=line.cantidad;
-  for(const allocation of line.lotes || []) {remaining-=allocation.cantidad;await tx.movimientoInventario.create({data:{productoId:line.productoId,loteId:allocation.loteId,pedidoId,actorId,tipo:'venta',cantidad:allocation.cantidad,motivo:'Reserva de unidades del pedido'}});}
+  for(const allocation of line.lotes || []) {remaining-=allocation.cantidad;await tx.movimientoInventario.create({data:movementData({productoId:line.productoId,loteId:allocation.loteId,pedidoId,actorId,tipo:'venta',cantidad:allocation.cantidad,motivo:'Reserva de unidades del pedido'})});}
   if(remaining>0)await tx.movimientoInventario.create({data:{productoId:line.productoId,pedidoId,actorId,tipo:'venta',cantidad:remaining,motivo:'Reserva de unidades sin lote del pedido'}});
  }
 }
@@ -75,9 +78,9 @@ async function restore(tx,details,pedidoId,actorId) {
   for(const allocation of line.lotes || []) {
    remaining-=allocation.cantidad;
    await tx.lote.update({where:{id:allocation.loteId},data:{stock:{increment:allocation.cantidad}}});
-   await tx.movimientoInventario.create({data:{productoId:line.productoId,loteId:allocation.loteId,pedidoId,actorId,tipo:'devolucion',cantidad:allocation.cantidad,motivo:'Devolución por cancelación del pedido'}});
+   await tx.movimientoInventario.create({data:movementData({productoId:line.productoId,loteId:allocation.loteId,pedidoId,actorId,tipo:'devolucion',cantidad:allocation.cantidad,motivo:'Devolución por cancelación del pedido'})});
   }
   if(remaining>0)await tx.movimientoInventario.create({data:{productoId:line.productoId,pedidoId,actorId,tipo:'devolucion',cantidad:remaining,motivo:'Devolución sin lote por cancelación del pedido'}});
  }
 }
-module.exports={ecuadorDay,sellableStock,trackedStock,listLots,listMovements,createLot,adjust,reserve,saleMovements,restore,serializable};
+module.exports={ecuadorDay,sellableStock,trackedStock,listLots,listMovements,createLot,adjust,reserve,saleMovements,restore,serializable,movementSelect,movementDto};

@@ -116,7 +116,12 @@
   function matchesDeliveryZone(zone,buyer){return Boolean(zone&&zone.activa!==false&&(zone.alcance==='nacional'?provinces.includes(buyer.province)&&validName(buyer.city):place(zone.provincia)===place(buyer.province)&&place(zone.canton)===place(buyer.city)));}
   // Coarse input bounds for continental Ecuador and Galápagos; this is not a border survey.
   function ecuadorPoint(lat,lon){return typeof lat==='number'&&typeof lon==='number'&&Number.isFinite(lat)&&Number.isFinite(lon)&&((lat>=-5.1&&lat<=1.7&&lon>=-81.1&&lon<=-75.1)||(lat>=-1.7&&lat<=1.7&&lon>=-92.3&&lon<=-89.1));}
-  const api = { patterns, provinces, validName, validEmail, normalizePhone, validCedula, validRuc, validate, validateBuyer, validateRegistration, validateCheckout, cardBrand, luhn, validateCard, matchesDeliveryZone, ecuadorPoint };
+  function normalizeUsername(value){
+    if(typeof value!=='string')return null;
+    const username=value.trim().toLowerCase();
+    return /^[a-z][a-z0-9._-]{2,39}$/.test(username)?username:null;
+  }
+  const api = { patterns, provinces, validName, validEmail, normalizeUsername, normalizePhone, validCedula, validRuc, validate, validateBuyer, validateRegistration, validateCheckout, cardBrand, luhn, validateCard, matchesDeliveryZone, ecuadorPoint };
   (global.Farmacia ||= {}).validation = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(globalThis);

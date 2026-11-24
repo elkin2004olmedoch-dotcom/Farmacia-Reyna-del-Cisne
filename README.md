@@ -6,13 +6,12 @@ La cobertura nacional comienza con envío gratuito; Puerto Quito conserva su tar
 
 ## Abrir la aplicación
 
-- [Tienda](https://farmacia-reyna-del-cisne-pruebas.pages.dev/): catálogo y acceso a **Instalar aplicación** en el pie de página.
-- [Administración instalable en Windows](https://farmacia-reyna-del-cisne-pruebas.pages.dev/instalar-admin): Edge/Chrome normal y cuenta de administrador.
+- [Tienda](https://farmacia-reyna-del-cisne-pruebas.pages.dev/): catálogo, carrito y compra desde el navegador.
+- [Administración](https://farmacia-reyna-del-cisne-pruebas.pages.dev/admin): productos, usuarios y configuración; requiere rol admin.
 - [Entregas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/entregas): requiere cuenta de administrador o repartidor.
 - [Pago de pedidos](https://farmacia-reyna-del-cisne-pruebas.pages.dev/pagos): abre un pedido desde **Mis pedidos** para consultar su importe y coordinar el pago con la farmacia.
-- [Reparto Android de pruebas](https://farmacia-reyna-del-cisne-pruebas.pages.dev/descargas/reparto-0.4.0.apk).
 
-Los accesos privados se entregan fuera del repositorio. [Instalación de las apps](docs/APPS-E-INSTALACION.md).
+Los accesos privados se entregan fuera del repositorio. El proyecto funciona desde el navegador; los instaladores, APK y proyectos nativos se retiraron el 23 de noviembre de 2026.
 
 ## Arquitectura
 
@@ -20,11 +19,10 @@ Tres capas: presentación HTML/CSS/JavaScript, aplicación Node.js/Express y per
 
 | Ruta | Uso |
 | --- | --- |
-| frontend/ | Aplicación MVC publicada, instalación, catálogo y administración |
+| frontend/ | Aplicación MVC publicada, catálogo, compra y administración |
 | server/ | API REST, autenticación JWT, roles y reglas de negocio |
 | server/prisma/ | Esquema y migraciones SQLite |
 | server/prisma/postgresql/ | Esquema y migraciones PostgreSQL |
-| mobile/ | Aplicación nativa independiente de reparto Android/iPhone |
 | scripts/ | Generación de vistas, distribución y comprobaciones |
 | tests/ | Pruebas con datos sintéticos y bases temporales |
 | assets/, js/ y HTML de raíz | Antecedente académico conservado para test:reto1 |
@@ -78,7 +76,7 @@ npm run setup
 npm start
 ```
 
-Express sirve el frontend y la API en http://localhost:3000. Abre esa dirección para navegar y http://localhost:3000/cuenta.html para iniciar sesión. setup crea un .env privado con JWT_SECRET y contraseña administrativa aleatorios, genera Prisma, aplica migraciones SQLite y carga el catálogo inicial. Consulta ADMIN_EMAIL y ADMIN_PASSWORD en ese archivo local. El registro de la web crea cuentas user; el administrador inicial procede del seed.
+Express sirve el frontend y la API en http://localhost:3000. Abre esa dirección para navegar y http://localhost:3000/cuenta.html para iniciar sesión. setup crea un .env privado con JWT_SECRET y contraseña administrativa aleatorios, genera Prisma, aplica migraciones SQLite y carga el catálogo inicial. El acceso inicial acepta ADMIN_USERNAME o ADMIN_EMAIL y la contraseña ADMIN_PASSWORD de ese archivo local. ADMIN_USERNAME define un identificador breve opcional, sin cambiar el correo necesario para verificar cuentas y enviar comprobantes. El registro de la web crea cuentas user; el administrador inicial procede del seed.
 
 Este procedimiento es para una carpeta nueva y SQLite local: no debe ejecutarse con credenciales de producción ni para reemplazar una base existente. El despliegue PostgreSQL utiliza su esquema y variables privadas separados, como explica la [guía de despliegue](docs/DESPLIEGUE-GRATUITO.md). .env.example contiene únicamente ejemplos; los accesos de la web publicada se entregan por separado.
 
@@ -92,13 +90,15 @@ Los workflows de verificación se ejecutan manualmente desde Actions. No hay com
 
 La web usa sesiones persistentes revocables, renovación rotatoria, cookies HttpOnly y defensa CSRF. La API se solicita desde el mismo dominio con un proxy fijo de Pages al backend existente. **¿Olvidaste tu contraseña?** envía un enlace de un solo uso y cierra sesiones al cambiar la clave. [Sesiones y recuperación](docs/SESIONES-Y-RECUPERACION.md).
 
-No se incluyen claves, contraseñas de acceso, certificados, respaldos ni capturas con sesiones. .env, .publish/ y las salidas de pruebas están excluidos de Git. La administración exige autorización en la API; instalar una app no concede permisos.
+Antes de la migración 019, `setup:production` puede exigir un respaldo lógico de PostgreSQL cifrado con AES-256-GCM en un bucket privado separado. Comprueba su descarga e integridad antes de migrar y detiene el despliegue si falla. La clave permanece en variables privadas; no es un servicio de copias periódicas. [Alcance y recuperación del respaldo](docs/RESPALDO-POSTGRES.md).
 
-Farmi procesa órdenes locales del panel, sin API de IA. El seguimiento muestra un mapa voluntario y la app de reparto traza la ruta dentro de la farmacia. SRI exige configuración y certificado privados. [Entregas](docs/ENTREGAS-Y-PRIVACIDAD.md) y [seguridad de publicación](docs/SEGURIDAD_DESPLIEGUE.md).
+No se incluyen claves, contraseñas de acceso, certificados, respaldos ni capturas con sesiones. .env, .publish/ y las salidas de pruebas están excluidos de Git. La administración exige autorización en la API, también cuando una URL se escribe directamente.
+
+Goti procesa órdenes locales del panel, sin API de IA. El seguimiento y el reparto muestran el mapa y la ruta dentro de la web de la farmacia. SRI exige configuración y certificado privados. [Entregas](docs/ENTREGAS-Y-PRIVACIDAD.md) y [seguridad de publicación](docs/SEGURIDAD_DESPLIEGUE.md).
 
 El pago se coordina con la farmacia desde el pedido registrado; elegir un método, pedir un enlace o imprimir el comprobante no acredita el pago. PayPhone permanece desactivado mientras faltan la cuenta comercial y sus credenciales; no se han verificado transacciones reales ni de pruebas contra el proveedor. No se contrataron servicios ni se activaron cobros. [Pagos](docs/PAGOS-Y-PAYPHONE.md).
 
-La app nativa de reparto para iPhone requiere firma de Apple y pruebas físicas. Render Free puede suspenderse por inactividad; no acredita disponibilidad 24/7. El Reto 3 sigue pendiente del framework asignado.
+La ubicación web requiere permiso del usuario y un navegador activo; el seguimiento con la pantalla bloqueada depende del sistema y no está garantizado. Render Free puede suspenderse por inactividad. El Reto 3 sigue pendiente del framework asignado.
 
 ### Tres riesgos OWASP y sus mitigaciones
 
@@ -109,6 +109,8 @@ La app nativa de reparto para iPhone requiere firma de Apple y pruebas físicas.
 | Inyección y XSS | Listas de campos permitidos, validación/sanitización con express-validator, consultas Prisma parametrizadas y salida de texto escapada. Entradas inesperadas producen 422; errores centralizados no exponen stack en producción. [Validación](server/middleware/validation.cjs), [errores](server/middleware/errors.cjs) y [vistas](frontend/views/common.js). |
 
 CORS admite orígenes exactos, sin comodín en producción. Los formularios tienen labels, foco visible y mensajes accesibles; el catálogo, carrito y modales se operan con teclado. Las pruebas de navegador verifican accesibilidad, adaptación móvil y manejo de red/401/403/500. Los permisos no dependen de ocultar botones en la interfaz.
+
+Prisma permanece en 6.19.3. El override acotado de `@prisma/config` a `effect@3.22.1` corrige la [advisory de ReDoS de Effect](https://github.com/Effect-TS/effect/security/advisories/GHSA-7589-6fvf-x4pw), sin cambiar el framework ni añadir dependencias directas. Los resultados de auditoría corresponden a la fecha de ejecución y no garantizan ausencia futura de vulnerabilidades.
 
 La administración de productos incorpora la tabla y el editor de la referencia entregada, PVP, edición parcial con versión y advertencias opcionales. [Productos, APIs y actualización automática](docs/PRODUCTOS-API-Y-ACTUALIZACIONES.md).
 
@@ -131,9 +133,17 @@ Las rutas tienen prefijo /api. Las operaciones privadas reciben Authorization: B
 | POST /api/pedidos/:id/cancelacion | user/admin propietario | 200: cancelación pendiente/confirmada o reintento seguro; exige esperadoUpdatedAt y conserva conciliación de pagos/facturas |
 | GET /api/pedidos/mis-pedidos | user/admin | 200: pedidos del usuario autenticado |
 | GET /api/pedidos | admin | 200: todos los pedidos, paginados |
-| GET /api/admin/tablas?tabla=productos | admin | 200: consulta administrativa; también usuarios, pedidos, detalles y promociones |
+| GET /api/admin/recursos | admin | 200: descriptores de las 34 tablas y sus columnas autorizadas |
+| GET /api/admin/tablas?tabla=productos&page=1&pageSize=10 | admin | 200: consulta paginada de cualquiera de los recursos registrados |
+| GET /api/admin/tablas/:tabla/:id | admin | 200: registro autorizado; 404 si no existe |
+| POST /api/admin/usuarios | admin | 201: cuenta validada, con rol y usuario opcional |
+| GET /api/admin/usuarios/:id | admin | 200: datos editables, sin contraseña ni hash |
+| PUT/PATCH /api/admin/usuarios/:id | admin | 200: cambio con esperadoUpdatedAt; 409 ante versión desactualizada |
+| DELETE /api/admin/usuarios/:id | admin | 204: baja lógica y cierre de sesiones; protege al último administrador |
 
-El panel permite CRUD de productos y consulta de las cuatro tablas mínimas. Las entidades Producto, Usuario, Pedido y PedidoDetalle, sus relaciones, migraciones y seed están en ambos esquemas Prisma. El enunciado permite otro motor relacional: PostgreSQL/Supabase es el motor publicado; SQLite sirve para desarrollo.
+El panel permite CRUD de productos, gestión de usuarios y consulta de las 34 tablas mediante **Configuración y datos**. Las tablas de seguridad son de lectura limitada: no publican hashes, secretos MFA, tokens, XML ni certificados. Cada entidad conserva sus operaciones de negocio: los pedidos cambian de estado, el inventario se ajusta con movimientos y las sesiones se revocan.
+
+Los dos esquemas conservan las mismas entidades y relaciones. [Normalización y dependencias funcionales](docs/NORMALIZACION.md). El título y el objetivo del enunciado permiten otro motor relacional: PostgreSQL/Supabase es el motor publicado; SQLite sirve para desarrollo. Se declara esta elección ante la frase interna que menciona únicamente SQL Server.
 
 La web solicita JWT en cookies HttpOnly con `X-Farmacia-Web: 1` y origen autorizado; no expone el token a JavaScript. Clientes API pueden usar `Authorization: Bearer <JWT>`, como en los ejemplos siguientes. Con MFA, el desafío se completa en `/api/auth/mfa/login` antes de obtener acceso.
 
@@ -148,7 +158,7 @@ Content-Type: application/json
 {"email":"<ADMIN_EMAIL del fixture>","password":"<ADMIN_PASSWORD del fixture>"}
 ```
 
-Resultado comprobado: HTTP 200, data.token firmado y data.usuario.role igual a admin, sin passwordHash. Con ese token se prueba:
+El acceso por `username` se comprueba por separado en [admin-access.test.cjs](tests/reto2/admin-access.test.cjs), que crea un alias sintético. Resultado comprobado: HTTP 200, data.token firmado y data.usuario.role igual a admin, sin passwordHash. Con ese token se prueba:
 
 ```http
 POST /api/productos
@@ -162,11 +172,11 @@ Resultado comprobado: 201 y el registro en BD con stock 10. La misma solicitud c
 
 La suite también confirma el pedido de un user en BD, sus detalles, el descuento de stock y el acceso del admin a todos los pedidos. [frontend.spec.cjs](tests/reto2/frontend.spec.cjs) evidencia catálogo desde API, carrito persistente, login obligatorio, confirmación/vaciado y panel. [cross-origin.test.cjs](tests/reto2/cross-origin.test.cjs) comprueba CORS y [security-controls.test.cjs](tests/reto2/security-controls.test.cjs) refuerza roles e idempotencia.
 
-Para repetir las 26 comprobaciones de API mínimas, después de instalar dependencias y generar Prisma en la extracción nueva: node --test tests/reto2/api.test.cjs. El fixture crea una base temporal separada y no usa pedidos comerciales. La última ejecución local aprobó 26/26, sin omisiones.
+Para repetir las comprobaciones de API mínimas, después de instalar dependencias y generar Prisma en la extracción nueva: `node --test tests/reto2/api.test.cjs`. El fixture crea una base temporal separada y no usa pedidos comerciales. Los resultados de cada ejecución se documentan con su fecha y alcance.
 
 ## Presentación integrada de los retos 1 y 2
 
-Se revisa un solo proyecto, un repositorio y la misma farmacia publicada. No se entregan ZIP separados por reto. La aplicación MVC conserva y amplía el catálogo, carrito, identidad, accesibilidad y navegación del trabajo inicial, incorporando API, persistencia relacional, autenticación y permisos.
+Se revisa un solo proyecto, un repositorio y la misma farmacia publicada. El entregable obligatorio es un único ZIP integrado `Reto2_Olmedo_Elkin.zip`, generado con `powershell -File scripts/crear-reto2.ps1 -Nombre Reto2_Olmedo_Elkin.zip`. Incluye frontend, backend, migraciones, pruebas y documentación; excluye .env, bases, respaldos, certificados y dependencias instaladas. La aplicación MVC conserva y amplía el catálogo, carrito, identidad, accesibilidad y navegación del trabajo inicial, incorporando API, persistencia relacional, autenticación y permisos.
 
 La [guía del recorrido conjunto](docs/RECORRIDO-RETOS-1-Y-2.md) indica qué mostrar como cliente, administrador y repartidor, las órdenes de la mascota y cómo repetir la grabación con `npm run test:journey`. El recorrido usa una base temporal y desactiva correos y cobros comerciales; las capturas y videos se guardan como evidencias locales, fuera del repositorio.
 
@@ -180,20 +190,18 @@ Ejecuta npm test para verificar juntos los dos grupos de pruebas con bases tempo
 
 La evaluación se hace sobre el código y el sitio completos. Los secretos, bases comerciales, certificados y respaldos privados permanecen fuera del repositorio. El Reto 3 espera el framework asignado; no se cambia la tecnología actual.
 
-## Evidencias
+## Preparación de la defensa
 
-[Pruebas y publicación actuales](docs/APPS-INSTALABLES-2026-11-01.md). El material auxiliar y los informes históricos retirados tienen respaldo local privado del propietario; las mascotas activas y el código de negocio se conservan.
+La [guía de defensa y requisitos](docs/DEFENSA-RETO-2.md) relaciona cada requisito con su implementación y propone un recorrido de cliente, administrador y repartidor. Describe MVC, acceso a datos, Observer, middleware e inyección de dependencias con ejemplos reales del proyecto.
 
-### Reparto integrado (0.2.0)
+La administración ofrece **Configuración y datos** para seleccionar cualquier tabla, ver sus campos autorizados y abrir su gestión. Productos, precios, stock, promociones, usuarios, tarifas y parámetros fiscales se modifican desde sus formularios. Las variables de infraestructura y los secretos se configuran en el host y se mantienen fuera del navegador.
 
-El repartidor dispone de **Ver ruta en la app**, **Iniciar recorrido**, **Llegué al destino**, llamada y **Pedido entregado**, con confirmación del cierre. El inicio solicita GPS; la app instalada conserva el seguimiento nativo con los permisos del teléfono. El mapa y la línea se muestran dentro de la app y la web; no abren Google Maps para navegar. Sin un punto del cliente se confirma un destino de navegación, sólo en memoria. Un único repartidor activo recibe automáticamente los pedidos a domicilio nuevos y los antiguos al confirmarlos/prepararlos. Con cero o varios activos se conserva la asignación administrativa. Asignar no confirma el pedido, no prueba su pago y no autoriza salir antes de prepararlo.
+El acceso con un nombre breve se provisiona una vez sobre el administrador activo configurado por ADMIN_EMAIL. ADMIN_LOGIN_PASSWORD_HASH permite establecer un hash bcrypt privado; el provisionador revoca sus sesiones, audita la operación y evita restablecer la contraseña en despliegues posteriores con la misma configuración. El registro de clientes conserva su política de contraseñas y confirmación de correo.
 
-[Implementación, revisión de seguridad y comparación con PLIEGO](docs/REPARTO-Y-REVISION-2026-11-03.md).
+## Reparto en el navegador
 
-### Actualización de ruta automática (0.4.0)
+El repartidor dispone de mapa integrado, ruta desde su ubicación, inicio de recorrido, llegada, llamada y confirmación mediante código del comprador. Un único repartidor activo recibe automáticamente los pedidos a domicilio que cumplen sus requisitos. La asignación conserva la validación de pago, preparación y estado.
 
-Al abrir Ver ruta en la app se solicita la ubicación actual, también para consultar un pedido que todavía no ha salido. No se muestran campos de latitud/longitud ni se requiere confirmar un punto manual. Cuando falta el GPS de destino, el backend busca la dirección guardada con Nominatim: sólo acepta resultados específicos que coinciden con la calle o lugar y el cantón en Ecuador. Una calle se indica como aproximada; no se sustituye una dirección desconocida por el centro de la ciudad. Si el permiso se deniega se permite reintentar desde Usar mi ubicación; si no hay resultado o es ambiguo, la farmacia debe precisar la dirección. La captura continua del reparto comienza con Iniciar recorrido y conserva los controles existentes.
+La captura continua empieza al iniciar el recorrido y requiere GPS autorizado. La ruta se vuelve a calcular con posiciones recientes; un navegador suspendido o un teléfono apagado no envía ubicación. El checkout pasa a retiro cuando no puede localizar el destino y exige confirmar de nuevo.
 
-La búsqueda usa únicamente la dirección, provincia y cantón, sin nombre, teléfono, correo o productos. Caché de proceso y deduplicación, máximo una búsqueda cada 1,1 segundos y hasta cinco búsquedas pendientes. GEOCODING_ORIGIN permite cambiar el servicio compatible desde el backend sin actualizar la app. No hay autocompletado ni búsqueda periódica cuando la dirección no se encontró. El permiso de ubicación del sistema sigue siendo necesario.
-
-La administración incluye segundo factor opcional con autenticador y recuperación, historial de acciones y alertas de lotes. [Guía operativa y de seguridad](docs/COMPRA-SEGURIDAD-Y-PRIVACIDAD.md).
+Los informes, auditorías y guías anteriores se conservan para trazabilidad. Las instrucciones de instalación nativa contenidas en documentos históricos ya no describen la distribución actual.

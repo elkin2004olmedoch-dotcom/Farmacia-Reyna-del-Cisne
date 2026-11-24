@@ -2,10 +2,10 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
 // The order also satisfies every foreign key in the two Prisma schemas.
-const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','adminMfa','sesionWeb','registroPendiente','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','facturaPedido','entrega','pago','pagoPractica','direccionGuardada','favorito','resenaProducto','entregaIncidencia','auditoriaAdmin','semilla','revisionCatalogo']);
+const MODELS=Object.freeze(['usuario','emailVerification','passwordReset','adminMfa','adminMfaRecuperacion','sesionWeb','registroPendiente','sesionMovil','producto','proveedor','configuracionFiscal','configuracionEmisor','secuenciaFactura','zonaEntrega','zonaEntregaTarifa','pedido','pedidoDetalle','promocion','pedidoEstado','lote','pedidoDetalleLote','movimientoInventario','movimientoLote','facturaPedido','entrega','pago','pagoPractica','direccionGuardada','favorito','resenaProducto','entregaIncidencia','auditoriaAdmin','semilla','revisionCatalogo']);
 // The destination keeps its own trigger-maintained catalog marker.
 const countedModels=MODELS.filter(model=>model!=='revisionCatalogo');
-const privateActions=new Set(['emailVerification','passwordReset','sesionWeb','adminMfa','registroPendiente']);
+const privateActions=new Set(['emailVerification','passwordReset','sesionWeb','adminMfa','adminMfaRecuperacion','registroPendiente']);
 const INITIAL_FISCAL=Object.freeze({id:'iva-general-inicial',tarifaGeneral:15,inicioVigencia:'2024-04-01T05:00:00.000Z',referenciaNormativa:'Ley de Régimen Tributario Interno, art. 65; Decreto Ejecutivo 198; Circular SRI NAC-DGECCGC25-00000006 (vigencia 2026).',actorId:null});
 const INITIAL_DEFAULTS=Object.freeze({
   configuracionFiscal:INITIAL_FISCAL,
@@ -54,7 +54,7 @@ async function readSnapshot(source){
     // Transient browser capabilities do not cross environments; read only owner IDs.
     for(const model of MODELS){
       let options;
-      if(privateActions.has(model))options={select:{usuarioId:true,...(model==='sesionWeb'?{id:true}:{})}};
+      if(privateActions.has(model))options={select:{usuarioId:true,...(['sesionWeb','adminMfaRecuperacion'].includes(model)?{id:true}:{}),...(model==='adminMfa'?{enabled:true}:{})}};
       if(model==='revisionCatalogo')options={select:{id:true}};
       snapshot[model]=await tx[model].findMany(options);
     }
@@ -62,11 +62,11 @@ async function readSnapshot(source){
   },{maxWait:10000,timeout:120000});
 }
 function assertSnapshotRelations(snapshot){
-  if(snapshot.adminMfa?.length)fail('SOURCE_MFA_ACTIVE','El origen tiene un segundo factor configurado. Transfiere la base con un respaldo completo; el importador no desactiva ni copia secretos MFA entre entornos.');
+  if(snapshot.adminMfa?.some(row=>row.enabled!==false))fail('SOURCE_MFA_ACTIVE','El origen tiene un segundo factor configurado. Transfiere la base con un respaldo completo; el importador no desactiva ni copia secretos MFA entre entornos.');
   const ids={};
   for(const model of MODELS){
     if(!Array.isArray(snapshot[model]))fail('SOURCE_DATA','La base local no contiene todas las entidades esperadas.');
-    const keys=snapshot[model].map(row=>privateActions.has(model)&&model!=='sesionWeb'?row.usuarioId:row.id);
+    const keys=snapshot[model].map(row=>model==='movimientoLote'?row.movimientoId:privateActions.has(model)&&!['sesionWeb','adminMfaRecuperacion'].includes(model)?row.usuarioId:row.id);
     ids[model]=new Set(keys);
     if(ids[model].size!==snapshot[model].length || keys.some(id=>typeof id!=='string' || !id))fail('SOURCE_DATA','La base local contiene identificadores inválidos.');
   }
@@ -96,7 +96,9 @@ function assertSnapshotRelations(snapshot){
       const detail=snapshot.pedidoDetalle.find(detail=>detail.id===row.detalleId),lot=snapshot.lote.find(lot=>lot.id===row.loteId);
       return detail && lot && detail.productoId===lot.productoId;
     })
-    && snapshot.movimientoInventario.every(row=>ids.producto.has(row.productoId) && (row.actorId==null || ids.usuario.has(row.actorId)) && (row.pedidoId==null || ids.pedido.has(row.pedidoId)) && (row.loteId==null || snapshot.lote.some(lot=>lot.id===row.loteId && lot.productoId===row.productoId)))
+    && snapshot.movimientoInventario.every(row=>ids.producto.has(row.productoId) && (row.actorId==null || ids.usuario.has(row.actorId)) && (row.pedidoId==null || ids.pedido.has(row.pedidoId)))
+    && snapshot.movimientoLote.every(row=>{const movement=snapshot.movimientoInventario.find(value=>value.id===row.movimientoId),lot=snapshot.lote.find(value=>value.id===row.loteId);return movement&&lot&&movement.productoId===lot.productoId;})
+    && snapshot.adminMfaRecuperacion.every(row=>ids.adminMfa.has(row.usuarioId))
     && snapshot.facturaPedido.every(row=>ids.pedido.has(row.pedidoId) && (row.secuencial==null || snapshot.secuenciaFactura.some(counter=>counter.emisorRuc===row.emisorRuc && counter.ambiente===row.ambiente && counter.establecimiento===row.establecimiento && counter.puntoEmision===row.puntoEmision && counter.ultimo>=row.secuencial)));
   if(!valid)fail('SOURCE_RELATIONS','La base local contiene referencias incompletas. No se transferirán registros.');
 }

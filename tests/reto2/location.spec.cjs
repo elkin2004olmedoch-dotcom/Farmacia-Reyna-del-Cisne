@@ -11,7 +11,7 @@ test('ubicación usa el pin del titular; mapa bajo demanda, teclado y colores co
  await location.locator('summary').focus();await page.keyboard.press('Enter');await expect(frame).not.toHaveAttribute('src');
  await page.getByRole('link',{name:'Visítanos',exact:true}).click();await expect(location).toHaveAttribute('open','');await expect(frame).toHaveAttribute('src',/0\.1200092/);
  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content','#681e2a');
- const manifest=await page.request.get('/store.webmanifest');expect((await manifest.json()).theme_color).toBe('#681e2a');
+ await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content','#681e2a');
  expect(await page.locator('#inicio').evaluate(n=>getComputedStyle(n).backgroundColor)).toBe('rgb(104, 30, 42)');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
  await page.screenshot({path:info.outputPath('ubicacion-paleta.png'),fullPage:true});

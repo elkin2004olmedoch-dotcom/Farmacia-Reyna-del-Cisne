@@ -64,16 +64,17 @@ async function createDriver(input,user){
  const {password,...data}=input,passwordHash=await bcrypt.hash(password,12);
  return transaction(async tx=>{await actor(tx,user,['admin']);return tx.usuario.create({data:{...data,passwordHash,role:'repartidor'},select:driverSelect});});
 }
+async function retireDriverTx(tx,id){
+ if(await tx.entrega.count({where:{repartidorId:id,estado:{in:['en_camino','en_destino']}}}))fail('DRIVER_HAS_ACTIVE_DELIVERY','Finaliza o cancela las entregas en curso antes de desactivar.');
+ await tx.entrega.updateMany({where:{repartidorId:id,estado:'asignada'},data:{repartidorId:null,version:{increment:1},...GPS_CLEAR,codigoEntregaNonce:null,codigoIntentos:0,codigoBloqueadoHasta:null}});
+ await sessions.revokeTx(tx,{usuarioId:id});
+}
 async function setDriverActive(id,activo,user){
  return transaction(async tx=>{
   await actor(tx,user,['admin']);
   const driver=await tx.usuario.findFirst({where:{id,role:'repartidor'}});if(!driver)notFound();
   if(driver.activo===activo)return Object.fromEntries(Object.keys(driverSelect).map(k=>[k,driver[k]]));
-  if(!activo){
-   if(await tx.entrega.count({where:{repartidorId:id,estado:{in:['en_camino','en_destino']}}}))fail('DRIVER_HAS_ACTIVE_DELIVERY','Finaliza o cancela las entregas en curso antes de desactivar.');
-   await tx.entrega.updateMany({where:{repartidorId:id,estado:'asignada'},data:{repartidorId:null,version:{increment:1},...GPS_CLEAR,codigoEntregaNonce:null,codigoIntentos:0,codigoBloqueadoHasta:null}});
-   await sessions.revokeTx(tx,{usuarioId:id});
-  }
+  if(!activo)await retireDriverTx(tx,id);
   return tx.usuario.update({where:{id},data:{activo,tokenVersion:{increment:1}},select:driverSelect});
  });
 }
@@ -207,4 +208,4 @@ async function incidence(id,input,user){
  });
 }
 const purgeExpiredLocations=(now=new Date())=>db.entrega.updateMany({where:{recibidaAt:{lt:new Date(now.getTime()-15*60000)}},data:POSITION_CLEAR});
-module.exports={shippingSnapshot,zones,saveZone,drivers,autoAssign,createDriver,setDriverActive,list,find,claimTracking,releaseTracking,assign,changeState,setLocation,clearLocation,tracking,incidence,purgeExpiredLocations};
+module.exports={shippingSnapshot,zones,saveZone,drivers,autoAssign,createDriver,setDriverActive,retireDriverTx,list,find,claimTracking,releaseTracking,assign,changeState,setLocation,clearLocation,tracking,incidence,purgeExpiredLocations};

@@ -74,6 +74,7 @@ test('una sesión de otra cuenta no se aplica ni revela su perfil, incluso cambi
   const state=await mockSession(context);await pendingAccount(page);const source=await sourcePage(context);
   const other={...user,id:'otra-cuenta',nombre:'Otra Identidad',email:'otra@example.ec'};await setSession(context,state,other);
   await page.locator('#verification-email').fill(other.email);
+  await page.locator('#verification-email').blur();
   const baseline=state.me,finished=page.waitForEvent('requestfinished',{predicate:request=>new URL(request.url()).pathname==='/api/auth/me'});
   await signalFrom(source);await finished;await flush(page);
   expect(state.me).toBe(baseline+1);await assertAnonymous(page);await expect(page.locator('#email-pending-panel')).toBeVisible();
@@ -141,7 +142,7 @@ test('la confirmación que llega durante una consulta anónima se comprueba desp
 });
 
 for(const [role,next,destination]of [
-  ['admin','checkout.html','admin.html'],['admin','instalar-admin.html','instalar-admin.html'],
+  ['admin','checkout.html','admin.html'],['admin','instalar-admin.html','admin.html'],
   ['admin','entregas.html?pedido=fixture','entregas.html?pedido=fixture'],['repartidor','checkout.html','entregas.html'],
   ['repartidor','entregas.html?pedido=fixture','entregas.html?pedido=fixture'],['user','https://ajeno.invalid','cuenta.html'],
 ])test('sincronizar '+role+' conserva el destino permitido '+destination+' desde '+next,async({page,context})=>{

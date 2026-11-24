@@ -19,7 +19,14 @@ const only = fields => (req,res,next)=> {
 };
 const password=body('password').isString().bail().custom(value=>Buffer.byteLength(value,'utf8')<=72 && value.length>=10 && /\p{L}/u.test(value) && /\d/.test(value)).withMessage('Usa al menos 10 caracteres, una letra y un número; máximo 72 bytes.');
 const register=[only(['nombre','email','telefono','cedula','password']),text('nombre',2,80).custom(ec.validName),body('email').isString().bail().trim().toLowerCase().custom(ec.validEmail),body('telefono').isString().bail().custom(ec.normalizePhone).customSanitizer(ec.normalizePhone),body('cedula').isString().bail().trim().custom(ec.validCedula),password,validated];
-const login=[only(['email','password']),body('email').isString().bail().trim().toLowerCase().custom(ec.validEmail),body('password').isString().bail().isLength({min:1,max:128}).custom(value=>Buffer.byteLength(value,'utf8')<=72),validated];
+function loginIdentifier(req,res,next){
+  const fields=['email','username'].filter(key=>Object.hasOwn(req.body,key));
+  if(fields.length!==1)throw new AppError(422,'VALIDATION_ERROR','Escribe un usuario o correo electrónico.',[{field:'email',message:'Completa un único identificador de acceso.'}]);
+  req.body.email=req.body[fields[0]];
+  delete req.body.username;
+  next();
+}
+const login=[only(['email','username','password']),loginIdentifier,body('email').isString().bail().trim().toLowerCase().custom(value=>ec.validEmail(value)||ec.normalizeUsername(value)!==null).withMessage('Escribe un usuario o correo válido.'),body('password').isString().bail().isLength({min:1,max:128}).custom(value=>Buffer.byteLength(value,'utf8')<=72),validated];
 const verifyEmail=[only(['token']),body('token').isString().bail().matches(/^[A-Za-z0-9_-]{43}$/),validated];
 const resendVerification=[only(['email']),body('email').isString().bail().trim().toLowerCase().custom(ec.validEmail),validated];
 const resetPassword=[only(['token','password']),body('token').isString().bail().matches(/^[A-Za-z0-9_-]{43}$/),password,validated];

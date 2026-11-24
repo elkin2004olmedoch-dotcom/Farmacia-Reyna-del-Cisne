@@ -12,7 +12,7 @@ if (Test-Path -LiteralPath $archivePath) {
 }
 Add-Type -AssemblyName System.IO.Compression
 Add-Type -AssemblyName System.IO.Compression.FileSystem
-$entries = @('frontend', 'server', 'mobile', '.github', 'assets', 'js', 'data', 'scripts', 'tests', 'docs', 'index.html', 'catalogo.html', 'producto.html', 'comparar.html', 'cuenta.html', 'checkout.html', 'pedidos.html', 'ayuda.html', 'service-worker.js', 'robots.txt', 'render.yaml', 'package.json', 'package-lock.json', '.env.example', '.gitignore', 'README.md')
+$entries = @('frontend', 'server', '.github', 'assets', 'js', 'data', 'scripts', 'tests', 'docs', 'index.html', 'catalogo.html', 'producto.html', 'comparar.html', 'cuenta.html', 'checkout.html', 'pedidos.html', 'ayuda.html', 'service-worker.js', 'robots.txt', 'render.yaml', 'package.json', 'package-lock.json', '.env.example', '.gitignore', 'README.md')
 $files = foreach ($entry in $entries) {
   $entryPath = Join-Path $projectRoot $entry
   if (Test-Path -LiteralPath $entryPath -PathType Container) { Get-ChildItem -LiteralPath $entryPath -File -Recurse -Force }

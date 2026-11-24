@@ -26,9 +26,9 @@ module.exports = config=> {
       res.status(201).json({ok:true,data:await session(req,res,{...user,tokenVersion:0})});
     },
     async login(req,res) {
-      const user=await users.findByEmail(req.input.email);
+      const user=await users.findByLogin(req.input.email);
       const valid=await bcrypt.compare(req.input.password,user?.passwordHash || dummyHash);
-      if (!user || !valid || !user.activo) throw new AppError(401,'INVALID_CREDENTIALS','Correo o contraseña incorrectos.');
+      if (!user || !valid || !user.activo) throw new AppError(401,'INVALID_CREDENTIALS','Usuario o contraseña incorrectos.');
       if(verification.requiresVerification(user,config.requireVerifiedRegistration&&user.role==='user'))throw new AppError(403,'EMAIL_NOT_VERIFIED','Confirma tu correo antes de iniciar sesión. Puedes solicitar otro enlace.');
       const challenge=user.role==='admin'?await require('../models/admin-mfa.cjs').challenge(user,config):null;
       if(challenge){res.json({ok:true,data:{mfaRequired:true,challenge}});return;}

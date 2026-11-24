@@ -2,6 +2,10 @@ import {request} from './api.js';
 import './ecuador.js';
 export const administration={
   summary:()=>request('/admin/resumen'),
+  resources:()=>request('/admin/recursos'),
+  resourceTable:(name,page=1)=>request(`/admin/tablas?tabla=${encodeURIComponent(name)}&page=${page}&pageSize=20`),
+  user:id=>request('/admin/usuarios/'+encodeURIComponent(id)),
+  saveUser:(values,id)=>request('/admin/usuarios'+(id?'/'+encodeURIComponent(id):''),{method:id?'PUT':'POST',body:values}),
   table:(name,page=1)=>request(['proveedores','lotes','movimientos','auditoria'].includes(name)?`/admin/${name==='movimientos'?'inventario/movimientos':name}?page=${page}&pageSize=20`:`/admin/tablas?tabla=${encodeURIComponent(name)}&page=${page}&pageSize=20`),
   async products(){const items=[];let page=1,total=Infinity;while(items.length<total){const data=await request(`/admin/tablas?tabla=productos&page=${page++}&pageSize=100`);items.push(...data.items);total=data.total;if(!data.items.length)break;}return items;},
   saveProduct:(values,id)=>request('/productos'+(id?'/'+encodeURIComponent(id):''),{method:id?'PUT':'POST',body:values}),
@@ -64,6 +68,13 @@ export function adminFormIssues(form) {
     if(!V.validEmail(values.email))issues.email='Escribe un correo electrónico válido.';
     if(!V.normalizePhone(values.telefono))issues.telefono='Usa un teléfono de Ecuador: 09XXXXXXXX, fijo con código de área o +593.';
     if(!/\p{L}/u.test(values.direccion || ''))issues.direccion='Indica calle, numeración o s/n y referencia.';
+  }
+  if(form.id==='user-form'){
+    if(!V.validName(values.nombre))issues.nombre='Escribe un nombre válido de 2 a 80 caracteres.';
+    if(values.username && !V.normalizeUsername(values.username))issues.username='Usa de 3 a 40 caracteres y comienza con una letra ASCII.';
+    if(!V.validEmail(values.email))issues.email='Escribe un correo válido.';
+    if(!V.normalizePhone(values.telefono))issues.telefono='Escribe un teléfono ecuatoriano válido.';
+    if((form.elements.password.required || values.password) && (values.password.length<10 || new TextEncoder().encode(values.password).length>72 || !/\p{L}/u.test(values.password) || !/\d/.test(values.password)))issues.password='Usa al menos 10 caracteres con letra y número, hasta 72 bytes.';
   }
   if(form.id==='lot-form' && values.vencimiento && values.vencimiento<ecuadorToday())issues.vencimiento='No puedes ingresar un lote vencido. La fecha se compara con hoy en Ecuador.';
   if(form.id==='fiscal-form'){

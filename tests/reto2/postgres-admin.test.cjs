@@ -1,0 +1,34 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const {randomUUID,randomBytes}=require('node:crypto');
+const fs=require('node:fs'),path=require('node:path'),os=require('node:os');
+const {execFileSync}=require('node:child_process');
+
+test('PostgreSQL aislado cubre recursos y serializa CAS y retiro del último administrador',{skip:!process.env.PHARMACY_TEST_DATABASE_URL,timeout:120000},async t=>{
+ const url=new URL(process.env.PHARMACY_TEST_DATABASE_URL),meta=JSON.parse(fs.readFileSync(process.env.PHARMACY_TEST_POSTGRES_META,'utf8'));
+ assert.equal(url.hostname,'127.0.0.1');assert.equal(url.port,String(meta.port));assert.equal(url.username,'farmacia_test');assert.equal(url.password,'');assert.equal(url.pathname,'/farmacia_test');
+ const {PrismaClient,Prisma}=require('../../node_modules/.prisma-farmacia-postgresql'),control=new PrismaClient({datasources:{db:{url:url.href}}});
+ const database='farmacia_test_admin_'+randomUUID().replaceAll('-','');await control.$executeRawUnsafe('CREATE DATABASE "'+database+'"');url.pathname='/'+database;
+ const directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-pg-admin-')),source=path.resolve(__dirname,'../../server/prisma/postgresql'),schema=path.join(directory,'schema.prisma');
+ fs.copyFileSync(path.join(source,'schema.prisma'),schema);fs.cpSync(path.join(source,'migrations'),path.join(directory,'migrations'),{recursive:true});
+ const env={};for(const key of ['SystemRoot','PATH','Path','TEMP','TMP','USERPROFILE','LOCALAPPDATA','NODE_OPTIONS'])if(process.env[key])env[key]=process.env[key];
+ Object.assign(env,{NODE_ENV:'test',DATABASE_URL:url.href,JWT_SECRET:randomBytes(48).toString('hex'),CORS_ORIGIN:'http://localhost:3000',UPLOAD_DIR:path.join(directory,'uploads'),IMAGE_STORAGE:'local',EMAIL_VERIFICATION_ENABLED:'false',CUSTOMER_REGISTRATION_REQUIRE_EMAIL:'false'});
+ execFileSync(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy','--schema',schema],{env,stdio:'pipe',windowsHide:true});
+ Object.assign(process.env,env);require('dotenv').config=()=>({parsed:{}});
+ const db=require('../../server/models/db.cjs'),api=require('supertest')(require('../../server/app.cjs')()),jwt=require('jsonwebtoken');
+ t.after(async()=>{await db.$disconnect();await control.$disconnect();});
+ const data=(role,label)=>({nombre:label,email:randomUUID()+'@example.ec',telefono:'+593991234567',passwordHash:'synthetic',role});
+ const first=await db.usuario.create({data:data('admin','Admin Uno')}),second=await db.usuario.create({data:data('admin','Admin Dos')});
+ const headers=user=>({Authorization:'Bearer '+jwt.sign({version:user.tokenVersion,epoch:user.tokenEpoch??null},env.JWT_SECRET,{subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'})});
+ const auth=headers(first),resources=(await api.get('/api/admin/recursos').set(auth).expect(200)).body.data;
+ assert.deepEqual(resources.map(item=>item.model).sort(),Prisma.dmmf.datamodel.models.map(model=>model.name).sort());
+ for(const resource of resources)await api.get('/api/admin/tablas').set(auth).query({tabla:resource.key,pageSize:1}).expect(200);
+ const created=(await api.post('/api/admin/usuarios').set(auth).send({nombre:'Cuenta PG',username:'cuenta_pg',email:'cuenta-pg@example.ec',telefono:'0991234567',password:'CuentaPostgres2026!',role:'user',activo:true}).expect(201)).body.data;
+ const outcomes=await Promise.all(['Primera Edición','Segunda Edición'].map(nombre=>api.patch('/api/admin/usuarios/'+created.id).set(auth).send({nombre,esperadoUpdatedAt:created.updatedAt})));
+ assert.deepEqual(outcomes.map(response=>response.status).sort(),[200,409]);
+ const retired=await Promise.all([first,second].map(user=>api.delete('/api/admin/usuarios/'+user.id).set(headers(user)).send({esperadoUpdatedAt:user.updatedAt.toISOString()})));
+ assert.deepEqual(retired.map(response=>response.status).sort(),[204,409]);assert.equal(await db.usuario.count({where:{role:'admin',activo:true}}),1);
+ const remaining=await db.usuario.findFirst({where:{role:'admin',activo:true}});
+ const denied=await api.patch('/api/admin/usuarios/'+remaining.id).set(headers(remaining)).send({role:'user',esperadoUpdatedAt:remaining.updatedAt.toISOString()}).expect(409);
+ assert.equal(denied.body.error.code,'LAST_ADMIN');
+});

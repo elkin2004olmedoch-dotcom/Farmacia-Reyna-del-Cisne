@@ -12,7 +12,7 @@ test('ZIP conserva fuente y .env.example, excluye variantes de secretos y audito
  execFileSync('powershell.exe',['-NoProfile','-ExecutionPolicy','Bypass','-File',path.join(directory,'scripts/crear-reto2.ps1'),'-Nombre','Reto2_Prueba_Segura.zip'],{env,windowsHide:true,stdio:'pipe',timeout:30000});
  const archive=path.join(directory,'entrega/Reto2_Prueba_Segura.zip');
  const listing=execFileSync('powershell.exe',['-NoProfile','-Command','Add-Type -AssemblyName System.IO.Compression.FileSystem; $zip = [IO.Compression.ZipFile]::OpenRead($env:PHARMACY_PACKAGE_ARCHIVE); try { $zip.Entries | ForEach-Object { $_.FullName } } finally { $zip.Dispose() }'],{env:{...env,PHARMACY_PACKAGE_ARCHIVE:archive},windowsHide:true,encoding:'utf8'}).trim().split(/\r?\n/);
- assert(listing.includes('.env.example'));assert(listing.includes('frontend/public.txt'));assert(listing.includes('server/public.txt'));assert(listing.includes('mobile/public.txt'));assert(listing.includes('docs/public.txt'));
+ assert(listing.includes('.env.example'));assert(listing.includes('frontend/public.txt'));assert(listing.includes('server/public.txt'));assert(!listing.some(name=>name.startsWith('mobile/')));assert(listing.includes('docs/public.txt'));
  for(const file of privateFiles){assert(!listing.includes(file),'No debe incluir '+file);assert(fs.statSync(path.join(directory,file)).isFile(),'Debe conservar '+file);}
  assert(!listing.some(name=>name.startsWith('frontend/linked/')),'No publica archivos de una junction');
  const output=path.join(directory,'entrega'),outside=path.join(directory,'outside-output');fs.renameSync(output,output+'-saved');fs.mkdirSync(outside);fs.symlinkSync(outside,output,'junction');

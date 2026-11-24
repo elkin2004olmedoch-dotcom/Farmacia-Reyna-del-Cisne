@@ -107,6 +107,34 @@ test('SKIP_INITIAL_SEED permite migrar una base vacía antes de importar datos p
   assert.deepEqual(calls[2], ['scripts/sync-catalog.cjs']);
 });
 
+test('el alias administrativo se prepara después de migrar sin imprimir el hash privado', () => {
+  const calls=[],messages=[];
+  const hash='$2b$12$'+'A'.repeat(53);
+  const env={...valid(),SKIP_INITIAL_SEED:'true',ADMIN_USERNAME:'administrador',ADMIN_LOGIN_PASSWORD_HASH:hash};
+  runSetup({env,logger:{info:value=>messages.push(value)},run:(command,args,options)=>{calls.push({args,options});return {status:0,stdout:hash};}});
+  assert.equal(calls.length,5);
+  assert.deepEqual(calls[2].args,['scripts/provision-admin.cjs']);
+  assert.equal(calls[2].options.env.ADMIN_LOGIN_PASSWORD_HASH,hash);
+  assert.ok(!messages.join('\n').includes(hash));
+  for(const patch of [{ADMIN_USERNAME:'../admin'},{ADMIN_LOGIN_PASSWORD_HASH:'invalid'}]){
+    let executed=false;
+    assert.throws(()=>runSetup({env:{...env,...patch},logger:{info(){}},run:()=>{executed=true;}}));
+    assert.equal(executed,false);
+  }
+});
+
+test('el respaldo privado se verifica antes de migrar y su fallo detiene el despliegue', () => {
+  const env={...valid(),SUPABASE_SECRET_KEY:'sb_secret_'+'s'.repeat(32),MIGRATION_BACKUP_KEY:Buffer.alloc(32,7).toString('base64'),POSTGRES_BACKUP_BUCKET:'farmacia-respaldos'};
+  const calls=[],messages=[];
+  runSetup({env,logger:{info:value=>messages.push(value)},run:(command,args)=>{calls.push(args);return {status:0,stdout:env.MIGRATION_BACKUP_KEY};}});
+  assert.deepEqual(calls.slice(0,3).map(args=>args[0]),['node_modules/prisma/build/index.js','scripts/snapshot-postgres.cjs','node_modules/prisma/build/index.js']);
+  assert.deepEqual(calls[2].slice(1,3),['migrate','deploy']);
+  assert(!messages.join('\n').includes(env.MIGRATION_BACKUP_KEY));
+  let executed=0;
+  assert.throws(()=>runSetup({env,logger:{info(){}},run:()=>({status:++executed===2?1:0})}),/Verificar respaldo PostgreSQL/);
+  assert.equal(executed,2);
+});
+
 test('fallo de migración detiene seed y frontend sin exponer stderr ni cadenas privadas', () => {
   let calls = 0;
   const secret = valid().DATABASE_URL;
