@@ -32,13 +32,13 @@ Consumir la API desde el frontend con Fetch/async-await, controlando errores y e
 1.1 Frontend MVC (cliente)
 Tu frontend debe estar estructurado en MVC, mínimo:
 
-/frontend/models/ → lógica de datos del lado del cliente (consumo API, estado carrito, etc.)
+/src/models/ → lógica de datos del lado del cliente (consumo API, estado carrito, etc.)
 
-/frontend/views/ → renderizado UI (tarjetas, tabla carrito, formularios, modales, etc.)
+/src/views/ → renderizado UI (tarjetas, tabla carrito, formularios, modales, etc.)
 
-/frontend/controllers/ → control de eventos, navegación, flujos
+/src/controllers/ → control de eventos, navegación, flujos
 
-/frontend/assets/ → CSS, imágenes, íconos
+/src/assets/ → CSS, imágenes, íconos
 
 index.html (semántico y accesible)
 
@@ -47,15 +47,15 @@ index.html (semántico y accesible)
 1.2 Backend MVC (servidor)
 Tu backend debe respetar capas MVC claras:
 
-/server/routes/ → rutas
+/backend/routes/ → rutas
 
-/server/controllers/ → controladores (HTTP)
+/backend/controllers/ → controladores (HTTP)
 
-/server/models/ → capa de acceso a datos (Prisma)
+/backend/models/ → capa de acceso a datos (Prisma)
 
-/server/middleware/ → auth JWT, roles, cors, validaciones, error handler
+/backend/middleware/ → auth JWT, roles, cors, validaciones, error handler
 
-/server/prisma/ → schema, migraciones, seed
+/backend/prisma/ → schema, migraciones, seed
 
 ✅ Se acepta una estructura similar a la que ya tienes, siempre que exista separación real de responsabilidades.
 

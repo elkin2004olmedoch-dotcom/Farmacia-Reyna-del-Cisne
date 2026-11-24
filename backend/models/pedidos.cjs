@@ -5,7 +5,7 @@ const {AppError}=require('../middleware/errors.cjs');
 const {discountWhere,effectivePrice}=require('./prices.cjs');
 const fiscal=require('./fiscal.cjs');
 const inventory=require('./inventario.cjs');
-const {allowsPurchase,restrictionReason}=require('../../frontend/models/pharmacy-policy.js');
+const {allowsPurchase,restrictionReason}=require('../../src/models/pharmacy-policy.js');
 const include={pagoPractica:true,detalles:{include:{lotes:true}},historial:{orderBy:[{createdAt:'asc'},{id:'asc'}]}};
 const transitions={pendiente:['confirmado','cancelado'],confirmado:['preparado','cancelado'],preparado:['entregado','cancelado'],entregado:[],cancelado:[]};
 async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTotalCentavos},{actor,classroom=false}={}) {
@@ -60,7 +60,7 @@ async function create(userId,{carrito,comprador,claveSolicitud,pago,esperadoTota
         cents+=shipping.costoEnvioCentavos;
         baseCents+=Math.round(Number(shipping.envioBaseImponible||0)*100);ivaCents+=Math.round(Number(shipping.envioIvaMonto||0)*100);
         if(pago&&cents!==esperadoTotalCentavos)throw new AppError(409,'CHECKOUT_TOTAL_CHANGED','El total cambió. Revisa productos y envío antes de pagar nuevamente.');
-        const pedido=await tx.pedido.create({data:{...(pago?{pagoPractica:{create:{recorridoAutomatico:automatic,createdAt:now,metodo:pago.metodo,marca:pago.marca||null,totalCentavos:cents}}}:{}),userId,subtotalProductos,...shipping,total:new Prisma.Decimal(cents).div(100),baseImponible:new Prisma.Decimal(baseCents).div(100),ivaMonto:new Prisma.Decimal(ivaCents).div(100),requestKey:claveSolicitud,fingerprint,createdAt:now,updatedAt:now,entrega:comprador.delivery,nombre:comprador.name,email:comprador.email.toLowerCase(),telefono:require('../../frontend/models/ecuador.js').normalizePhone(comprador.phone),documento:'••••••'+comprador.document.slice(-4),provincia:comprador.delivery==='delivery'?comprador.province:null,ciudad:comprador.delivery==='delivery'?comprador.city:null,direccion:comprador.delivery==='delivery'?comprador.address:null,codigoPostal:comprador.delivery==='delivery'?comprador.postalCode || null:null,detalles:{create:details},historial:{create:{estado:'pendiente',actorId:userId,createdAt:now}}},include});
+        const pedido=await tx.pedido.create({data:{...(pago?{pagoPractica:{create:{recorridoAutomatico:automatic,createdAt:now,metodo:pago.metodo,marca:pago.marca||null,totalCentavos:cents}}}:{}),userId,subtotalProductos,...shipping,total:new Prisma.Decimal(cents).div(100),baseImponible:new Prisma.Decimal(baseCents).div(100),ivaMonto:new Prisma.Decimal(ivaCents).div(100),requestKey:claveSolicitud,fingerprint,createdAt:now,updatedAt:now,entrega:comprador.delivery,nombre:comprador.name,email:comprador.email.toLowerCase(),telefono:require('../../src/models/ecuador.js').normalizePhone(comprador.phone),documento:'••••••'+comprador.document.slice(-4),provincia:comprador.delivery==='delivery'?comprador.province:null,ciudad:comprador.delivery==='delivery'?comprador.city:null,direccion:comprador.delivery==='delivery'?comprador.address:null,codigoPostal:comprador.delivery==='delivery'?comprador.postalCode || null:null,detalles:{create:details},historial:{create:{estado:'pendiente',actorId:userId,createdAt:now}}},include});
         await inventory.saleMovements(tx,pedido.detalles,pedido.id,userId);
         await require('./entregas.cjs').autoAssign(tx,pedido);
         return {pedido,replayed:false};

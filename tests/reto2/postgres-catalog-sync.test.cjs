@@ -29,11 +29,11 @@ test('PostgreSQL temporal incorpora las 48 referencias reales una vez y conserva
  const env={};
  for(const key of ['SystemRoot','PATH','Path','TEMP','TMP','USERPROFILE','LOCALAPPDATA','NODE_OPTIONS'])if(process.env[key])env[key]=process.env[key];
  Object.assign(env,{NODE_ENV:'test',DATABASE_URL:url.href,ADMIN_EMAIL:'pg-catalogo@example.ec',ADMIN_PASSWORD:'SyntheticCatalog2026!',JWT_SECRET:randomBytes(48).toString('hex'),CORS_ORIGIN:'http://localhost:3000',IMAGE_STORAGE:'local',UPLOAD_DIR:path.join(directory,'uploads'),EMAIL_VERIFICATION_ENABLED:'false',CUSTOMER_REGISTRATION_REQUIRE_EMAIL:'false'});
- const source=path.join(root,'server/prisma/postgresql'),schema=path.join(directory,'schema.prisma');
+ const source=path.join(root,'backend/prisma/postgresql'),schema=path.join(directory,'schema.prisma');
  fs.copyFileSync(path.join(source,'schema.prisma'),schema);
  fs.cpSync(path.join(source,'migrations'),path.join(directory,'migrations'),{recursive:true});
  execFileSync(process.execPath,[path.join(root,'node_modules/prisma/build/index.js'),'migrate','deploy','--schema',schema],{cwd:directory,env,stdio:'pipe',windowsHide:true});
- execFileSync(process.execPath,[path.join(root,'server/prisma/seed.cjs')],{cwd:root,env,stdio:'pipe',windowsHide:true});
+ execFileSync(process.execPath,[path.join(root,'backend/prisma/seed.cjs')],{cwd:root,env,stdio:'pipe',windowsHide:true});
  Object.assign(process.env,env);
  db=new PrismaClient({datasources:{db:{url:url.href}}});
  assert.equal(await db.producto.count(),18);

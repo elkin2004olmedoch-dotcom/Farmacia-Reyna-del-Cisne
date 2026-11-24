@@ -8,7 +8,7 @@ const {PrismaClient}=require('@prisma/client');
 
 test('019 conserva vínculos de inventario y todos los códigos MFA pendientes al normalizar una base anterior',async t=>{
   const root=path.resolve(__dirname,'../..');
-  const source=path.join(root,'server/prisma');
+  const source=path.join(root,'backend/prisma');
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-normalizacion-'));
   const schema=path.join(directory,'schema.prisma');
   const name='202611230019_relational_normalization';
@@ -30,8 +30,8 @@ test('019 conserva vínculos de inventario y todos los códigos MFA pendientes a
   await db.$executeRawUnsafe('INSERT INTO "Lote" ("id","productoId","numero","vencimiento","stock","costoUnitario","updatedAt") VALUES (\'normal-lot\',\'normal-product\',\'L-1\',\'2090-01-01\',2,1,0)');
   await db.$executeRawUnsafe('INSERT INTO "MovimientoInventario" ("id","productoId","loteId","actorId","tipo","cantidad","motivo") VALUES (\'normal-movement\',\'normal-product\',\'normal-lot\',\'normal-admin\',\'entrada\',2,\'Ingreso de lote histórico\'),(\'normal-untracked\',\'normal-product\',NULL,\'normal-admin\',\'entrada\',8,\'Ingreso sin lote histórico\')');
   await db.$executeRawUnsafe('INSERT INTO "AdminMfa" ("usuarioId","secretCipher","enabled","lastCounter","recoveryHashes","failedAttempts") VALUES (\'normal-admin\',\'cipher-sintetico\',1,123,?,2)',JSON.stringify(['a'.repeat(64),'b'.repeat(64)]));
-  const frontend=path.join(directory,'frontend');fs.mkdirSync(frontend);
-  const {createBackup,restoreBackup}=require('../../server/models/backups.cjs');
+  const frontend=path.join(directory,'src');fs.mkdirSync(frontend);
+  const {createBackup,restoreBackup}=require('../../backend/models/backups.cjs');
   const backup=await createBackup({client:db,backupRoot:path.join(directory,'backups'),frontendRoot:frontend});
   const restoredFile=path.join(directory,'restored-legacy.db');
   await restoreBackup({from:backup.directory,targetDatabase:restoredFile,backupRoot:path.join(directory,'backups'),frontendRoot:frontend,offline:true});

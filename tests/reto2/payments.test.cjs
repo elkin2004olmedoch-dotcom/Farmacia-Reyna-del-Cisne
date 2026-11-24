@@ -6,7 +6,7 @@ const jwt=require('jsonwebtoken');
 const fs=require('node:fs');
 const {app,db,directory}=require('./fixture.cjs');
 let request=require('supertest')(app);
-beforeEach(()=>{request=require('supertest')(require('../../server/app.cjs')());});
+beforeEach(()=>{request=require('supertest')(require('../../backend/app.cjs')());});
 const originalFetch=global.fetch;
 const envNames=['PAYPHONE_ENABLED','PAYPHONE_TOKEN','PAYPHONE_STORE_ID','PAYPHONE_ENVIRONMENT','PAYMENT_PUBLIC_ORIGIN','PAYMENT_API_ORIGIN','TRANSFER_BANK_NAME','TRANSFER_ACCOUNT_TYPE','TRANSFER_ACCOUNT_NUMBER','TRANSFER_ACCOUNT_HOLDER'];
 const originalEnv=Object.fromEntries(envNames.map(name=>[name,process.env[name]]));

@@ -1,8 +1,8 @@
 const {body,param,query,validationResult,matchedData} = require('express-validator');
 const {AppError} = require('./errors.cjs');
 const {validImagePathAsync:validImagePath}=require('./imagevalidation.cjs');
-const ec = require('../../frontend/models/ecuador.js');
-const {ids:sectionIds}=require('../../frontend/models/catalog-sections.js');
+const ec = require('../../src/models/ecuador.js');
+const {ids:sectionIds}=require('../../src/models/catalog-sections.js');
 async function validImage(value){if(!await validImagePath(value))throw new Error('Selecciona una imagen existente o una imagen subida desde el panel.');return true;}
 const plain = value => typeof value==='string' ? value.normalize('NFC').replace(/<[^>]*>/g,'').replace(/[<>\x00-\x1f]/g,'').trim() : value;
 const text = (field,min,max) => body(field).isString().bail().customSanitizer(plain).isLength({min,max});

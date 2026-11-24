@@ -4,7 +4,7 @@ El frontend activo es [Cloudflare Pages](https://farmacia-reyna-del-cisne-prueba
 
 ## Cloudflare
 
-Proyecto farmacia-reyna-del-cisne-pruebas; rama de producción codex/separacion-cloudflare. Build: node scripts/build-pages.cjs. Directorio: dist/pages. El empaquetador publica solo su lista permitida de frontend/ previamente generado con npm run build:frontend. Al cambiar plantillas, genera y versiona las vistas antes de publicar. No publiques la raíz del repositorio. [Separación de capas](SEPARACION_FRONTEND_BACKEND.md).
+Proyecto farmacia-reyna-del-cisne-pruebas; rama de producción codex/separacion-cloudflare. Build: node scripts/build-pages.cjs. Directorio: dist/pages. El empaquetador publica solo su lista permitida de src/ previamente generado con npm run build:frontend. Al cambiar plantillas, genera y versiona las vistas antes de publicar. No publiques la raíz del repositorio. [Separación de capas](SEPARACION_FRONTEND_BACKEND.md).
 
 ## Render
 

@@ -1,6 +1,6 @@
 'use strict';
 const {AppError}=require('../middleware/errors.cjs');
-const {ecuadorPoint}=require('../../frontend/models/ecuador.js');
+const {ecuadorPoint}=require('../../src/models/ecuador.js');
 const fail=(code,message,status=409)=>{throw new AppError(status,code,message);};
 const point=(lat,lon)=>typeof lat==='number' && typeof lon==='number' && Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat)<=90 && Math.abs(lon)<=180;
 const meters=(a,b)=>{const rad=Math.PI/180,dlat=(b[1]-a[1])*rad,dlon=(b[0]-a[0])*rad,s=Math.sin(dlat/2)**2+Math.cos(a[1]*rad)*Math.cos(b[1]*rad)*Math.sin(dlon/2)**2;return 12742000*Math.asin(Math.min(1,Math.sqrt(s)));};

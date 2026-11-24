@@ -1,7 +1,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const {spawnSync}=require('node:child_process');
-const folder=path.resolve(__dirname,'../server/certificates');
+const folder=path.resolve(__dirname,'../backend/certificates');
 fs.mkdirSync(folder,{recursive:true});
 const key=path.join(folder,'localhost.key');const cert=path.join(folder,'localhost.crt');
 if(fs.existsSync(key) || fs.existsSync(cert))throw new Error('Ya existen certificados. No se sobrescriben automáticamente.');

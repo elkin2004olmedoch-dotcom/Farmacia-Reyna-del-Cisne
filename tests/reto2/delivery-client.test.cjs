@@ -2,7 +2,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {pathToFileURL}=require('node:url');
 const path=require('node:path');
-const client=()=>import(pathToFileURL(path.resolve('frontend/models/deliveries.js')).href);
+const client=()=>import(pathToFileURL(path.resolve('src/models/deliveries.js')).href);
 
 test('la cotización distingue retiro, tarifa pendiente, gratuidad explícita y envío cobrado',async()=>{
   const {deliveryQuote}=await client();

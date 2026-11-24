@@ -1,6 +1,6 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const mail=require('../../server/models/email-delivery.cjs');
+const mail=require('../../backend/models/email-delivery.cjs');
 const env={NODE_ENV:'production',EMAIL_VERIFICATION_ENABLED:'true',EMAIL_PROVIDER:'brevo',BREVO_API_KEY:'xkeysib-synthetic_not_real_1234567890123456',EMAIL_FROM:'farmacia@example.ec',EMAIL_PUBLIC_ORIGIN:'https://tienda.example.ec'};
 const config=()=>mail.configuration(env,{production:true,origins:[env.EMAIL_PUBLIC_ORIGIN]});
 test('Brevo usa HTTPS, remitente fijo, UUID estable y adjuntos; no envía claves en el contenido',async()=>{

@@ -48,7 +48,7 @@ Los cambios de evaluación se hacen en una copia local con datos sintéticos. La
 | Requisito | Implementación | Comprobación reproducible |
 | --- | --- | --- |
 | MVC en frontend | models consume API y administran estado; views renderizan; controllers coordinan eventos | tests/reto2/frontend.spec.cjs y admin-data.spec.cjs |
-| MVC en backend | routes → middleware → controllers → models → Prisma | server/routes/index.cjs y tests/reto2/api.test.cjs |
+| MVC en backend | routes → middleware → controllers → models → Prisma | backend/routes/index.cjs y tests/reto2/api.test.cjs |
 | Persistencia relacional | Usuario, Producto, Pedido y PedidoDetalle con claves y restricciones, más entidades operativas | ambos esquemas y tests/reto2/normalization-migration.test.cjs |
 | CRUD seguro | GET público y POST/PUT/PATCH/DELETE de producto con rol admin; baja lógica | tests/reto2/api.test.cjs y product-patch.test.cjs |
 | JWT y roles | login por usuario o correo, token firmado, expiración, revocación y autorización en servidor | admin-access.test.cjs y security-controls.test.cjs |
@@ -66,10 +66,10 @@ Los cambios de evaluación se hacen en una copia local con datos sintéticos. La
 
 | Patrón o práctica | Ejemplo real | Finalidad |
 | --- | --- | --- |
-| MVC | frontend/models, views, controllers y server/routes, controllers, models | Separar representación, interacción y acceso a datos. |
-| Acceso a datos mediante módulos de repositorio | server/models/productos.cjs e inventario.cjs | Concentrar consultas y reglas transaccionales fuera del controlador HTTP. |
+| MVC | src/models, views, controllers y backend/routes, controllers, models | Separar representación, interacción y acceso a datos. |
+| Acceso a datos mediante módulos de repositorio | backend/models/productos.cjs e inventario.cjs | Concentrar consultas y reglas transaccionales fuera del controlador HTTP. |
 | Observer mediante eventos | cambios del carrito notifican a sus vistas; actualización del catálogo mediante eventos compartidos | Mantener vistas sincronizadas sin duplicar estado. |
-| Instancia compartida por módulo | server/models/db.cjs reutiliza PrismaClient | Evitar una conexión nueva por petición y cerrar recursos al terminar. |
+| Instancia compartida por módulo | backend/models/db.cjs reutiliza PrismaClient | Evitar una conexión nueva por petición y cerrar recursos al terminar. |
 | Cadena de middleware | autenticación, roles, validación y error centralizado en las rutas | Componer controles comunes y mantener respuestas coherentes. |
 | Inyección de dependencias | createApp(settings), transporte de correo y funciones de ejecución de setup | Probar errores y escenarios sin enviar correos ni modificar producción. |
 

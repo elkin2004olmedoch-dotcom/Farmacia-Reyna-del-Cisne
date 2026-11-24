@@ -1,8 +1,8 @@
 const fs=require('node:fs');
 const path=require('node:path');
-const {Prisma}=require('../server/models/prisma-client.cjs');
-const {find:findSection}=require('../frontend/models/catalog-sections.js');
-const {validImagePath}=require('../server/middleware/imagevalidation.cjs');
+const {Prisma}=require('../backend/models/prisma-client.cjs');
+const {find:findSection}=require('../src/models/catalog-sections.js');
+const {validImagePath}=require('../backend/middleware/imagevalidation.cjs');
 
 function readCatalog(){return JSON.parse(fs.readFileSync(path.join(__dirname,'../data/catalogo-ampliado.json'),'utf8'));}
 
@@ -20,7 +20,7 @@ function validateCatalog(catalog){
 
 async function syncCatalog({db,catalog=readCatalog()}={}){
   validateCatalog(catalog);
-  db=db||require('../server/models/db.cjs');
+  db=db||require('../backend/models/db.cjs');
   for(let attempt=0;attempt<3;attempt++){
     try{
       return await db.$transaction(async tx=>{
@@ -50,7 +50,7 @@ async function syncCatalog({db,catalog=readCatalog()}={}){
 }
 
 if(require.main===module){
-  const db=require('../server/models/db.cjs');
+  const db=require('../backend/models/db.cjs');
   syncCatalog({db}).then(result=>{
     if(result.reason==='initial-catalog-missing')console.info('La incorporación del catálogo espera la importación de los datos iniciales.');
     else if(result.skipped)console.info('El catálogo ampliado ya está incorporado.');

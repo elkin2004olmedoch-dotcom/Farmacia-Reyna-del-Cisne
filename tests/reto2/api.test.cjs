@@ -202,7 +202,7 @@ test('descuento vigente mayor coincide entre catálogo y pedido, y su snapshot s
   }
 });
 test('precios efectivos respetan límites temporales, vista previa, empate y redondeo de centavos',()=>{
-  const {effectivePrice}=require('../../server/models/prices.cjs');const now=new Date('2029-12-01T05:00:00Z');const product={id:'precio-prueba',precio:7.50,activo:true};
+  const {effectivePrice}=require('../../backend/models/prices.cjs');const now=new Date('2029-12-01T05:00:00Z');const product={id:'precio-prueba',precio:7.50,activo:true};
   const promo=(id,patch={})=>({id,orden:0,activa:true,vistaPrevia:false,descuentoPorcentaje:25,inicio:null,fin:null,...patch});
   const price=effectivePrice(product,[promo('b',{inicio:now}),promo('a',{inicio:now}),promo('c',{descuentoPorcentaje:90,fin:now}),promo('d',{descuentoPorcentaje:90,inicio:new Date(now.getTime()+1)}),promo('e',{descuentoPorcentaje:90,vistaPrevia:true}),promo('f',{descuentoPorcentaje:90,activa:false})],now);
   assert.equal(Number(price.precio),5.63);assert.equal(price.descuentoPorcentaje,25);assert.equal(price.promocionId,'a');
@@ -214,10 +214,10 @@ test('migración commerce conserva pedidos, detalles, campañas y relaciones de 
   const url='file:'+path.join(directory,'legacy-commerce.db').replaceAll('\\','/');
   let legacy=new PrismaClient({datasources:{db:{url}}});
   const root=path.resolve(__dirname,'../..');const env={...process.env,DATABASE_URL:url};
-  const run=(...args)=>execFileSync(process.execPath,['node_modules/prisma/build/index.js','migrate',...args,'--schema','server/prisma/schema.prisma'],{cwd:root,stdio:'pipe',env});
+  const run=(...args)=>execFileSync(process.execPath,['node_modules/prisma/build/index.js','migrate',...args,'--schema','backend/prisma/schema.prisma'],{cwd:root,stdio:'pipe',env});
   const legacyOrder=randomUUID(),legacyDetail=randomUUID(),legacyCampaign=randomUUID(),timestamp='2020-01-02T08:00:00.000Z';
   try {
-    for(const migration of ['202610090001_init','202610090002_seed_marker'])for(const statement of fs.readFileSync(path.join(root,'server/prisma/migrations',migration,'migration.sql'),'utf8').split(';').filter(sql=>sql.trim()))await legacy.$executeRawUnsafe(statement);
+    for(const migration of ['202610090001_init','202610090002_seed_marker'])for(const statement of fs.readFileSync(path.join(root,'backend/prisma/migrations',migration,'migration.sql'),'utf8').split(';').filter(sql=>sql.trim()))await legacy.$executeRawUnsafe(statement);
     // Populate the original schema explicitly: the generated current client may
     // otherwise include newly added defaults in its INSERT/RETURNING columns.
     const oldUser={id:randomUUID(),email:'anterior@example.ec',telefono:'+593979275988'};
@@ -262,7 +262,7 @@ test('resumen ejecutivo exige admin y expone solo indicadores y listas públicas
   for(const privateField of ['passwordHash','fingerprint','requestKey','documento','telefono','email'])assert.ok(!JSON.stringify(data).includes(privateField));
 });
 test('resumen ordena los productos más vendidos por categoría y cuenta confirmados, preparados y entregados',async()=>{
-  const summary=require('../../server/models/admin-summary.cjs');
+  const summary=require('../../backend/models/admin-summary.cjs');
   const user=await db.usuario.create({data:{nombre:'Cliente ranking',email:`ranking-${randomUUID()}@example.ec`,telefono:'0979275988',passwordHash:'hash-test'}});
   const products=[];const orderIds=[];
   try {
@@ -293,7 +293,7 @@ test('resumen ordena los productos más vendidos por categoría y cuenta confirm
   }
 });
 test('resumen usa centavos, seis meses ecuatorianos, vigencia real y límites de alertas y pedidos',async()=>{
-  const summary=require('../../server/models/admin-summary.cjs');
+  const summary=require('../../backend/models/admin-summary.cjs');
   const now=new Date('2030-01-01T04:30:00Z'); // Still December 31 in Ecuador.
   const baseline=await summary(now);
   const products=Array.from({length:12},(_,index)=>({...productInput,id:randomUUID(),nombre:`Auditoría A${String(index+1).padStart(2,'0')}`,stock:index===11?5:0}));
@@ -401,7 +401,7 @@ test('seed repetido y adopción de base anterior preservan ediciones, borrados, 
   const savedPromotions=await db.promocion.findMany({where:{id:{in:initialPromotions.map(promo=>promo.id)}}});
   const savedAdmin=await db.usuario.findUnique({where:{email:process.env.ADMIN_EMAIL}});
   const counts=async()=>Promise.all([db.usuario.count(),db.producto.count(),db.promocion.count(),db.pedido.count(),db.pedidoDetalle.count(),db.semilla.count()]);
-  const runSeed=extra=>execFileSync(process.execPath,['server/prisma/seed.cjs'],{cwd:path.resolve(__dirname,'../..'),stdio:'pipe',env:{...process.env,ADMIN_PASSWORD:'OtraSemilla2026!',...extra}});
+  const runSeed=extra=>execFileSync(process.execPath,['backend/prisma/seed.cjs'],{cwd:path.resolve(__dirname,'../..'),stdio:'pipe',env:{...process.env,ADMIN_PASSWORD:'OtraSemilla2026!',...extra}});
   try {
     await request.put('/api/productos/'+savedProduct.id).set('Authorization',bearer(adminToken)).send({...productInput,nombre:'Semilla editada por administrador',precio:12.34,stock:9,esperadoUpdatedAt:savedProduct.updatedAt.toISOString()}).expect(200);
     await request.delete('/api/productos/'+savedInactive.id).set('Authorization',bearer(adminToken)).expect(204);

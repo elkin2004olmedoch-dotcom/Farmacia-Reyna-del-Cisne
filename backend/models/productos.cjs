@@ -4,8 +4,8 @@ const {AppError}=require('../middleware/errors.cjs');
 const {discountWhere,effectivePrice,priceLots}=require('./prices.cjs');
 const fiscal=require('./fiscal.cjs');
 const {trackedStock,serializable}=require('./inventario.cjs');
-const {allowsPromotion}=require('../../frontend/models/pharmacy-policy.js');
-const {sections}=require('../../frontend/models/catalog-sections.js');
+const {allowsPromotion}=require('../../src/models/pharmacy-policy.js');
+const {sections}=require('../../src/models/catalog-sections.js');
 const search=require('./catalog-search.cjs');
 const recommended=[{createdAt:'asc'},{id:'asc'}];
 async function publicProducts(ids,now,tax){

@@ -34,7 +34,7 @@ function sourceFile(url,root=ROOT){
   let value;
   try{value=decodeURIComponent(url.slice(5).split('?')[0]);}catch{fail('SOURCE_CONFIG','La conexión SQLite local no es válida.');}
   if(!value || value.includes('\0'))fail('SOURCE_CONFIG','La conexión SQLite local no es válida.');
-  return path.isAbsolute(value)?path.resolve(value):path.resolve(root,'server/prisma',value);
+  return path.isAbsolute(value)?path.resolve(value):path.resolve(root,'backend/prisma',value);
 }
 async function configFromEnvironment(env,root=ROOT){
   const file=sourceFile(env.SOURCE_DATABASE_URL || env.DATABASE_URL,root);
@@ -116,7 +116,7 @@ function collectUploads(snapshot){
   return [...refs].sort();
 }
 const contained=(root,target)=>{const relative=path.relative(root,target);return relative!=='' && relative!=='..' && !relative.startsWith('..'+path.sep) && !path.isAbsolute(relative);};
-async function inspectUploadFiles(references,{frontendRoot=path.join(ROOT,'frontend'),sharp=require('sharp')}={}){
+async function inspectUploadFiles(references,{frontendRoot=path.join(ROOT,'src'),sharp=require('sharp')}={}){
   if(!references.length)return [];
   try{
     const frontend=await fs.realpath(frontendRoot);
@@ -140,7 +140,7 @@ async function inspectUploadFiles(references,{frontendRoot=path.join(ROOT,'front
       images.push({reference,buffer});
     }
     return images;
-  }catch{fail('SOURCE_IMAGES','No se pudieron validar las imágenes locales. Deben ser WebP sin metadatos privados, de hasta 2 MB, dentro de frontend/assets/uploads.');}
+  }catch{fail('SOURCE_IMAGES','No se pudieron validar las imágenes locales. Deben ser WebP sin metadatos privados, de hasta 2 MB, dentro de src/assets/uploads.');}
 }
 async function targetCounts(tx){
   const counts={};
@@ -219,7 +219,7 @@ async function runCli({argv=process.argv.slice(2),env=process.env,root=ROOT,log=
     return {source:new SQLiteClient({datasources:{db:{url:config.sourceUrl}},log:[],errorFormat:'minimal'}),target:new PostgresClient({datasources:{db:{url:config.targetUrl}},log:[],errorFormat:'minimal'})};
   })();
   try{
-    const result=await migrate({...clients,apply:options.apply,frontendRoot:path.join(root,'frontend'),storage:storage || (options.apply?require('../server/models/cloudimages.cjs'):undefined)});
+    const result=await migrate({...clients,apply:options.apply,frontendRoot:path.join(root,'src'),storage:storage || (options.apply?require('../backend/models/cloudimages.cjs'):undefined)});
     // Counts are the only data permitted in terminal output.
     log(JSON.stringify(result,null,2));
     return result;

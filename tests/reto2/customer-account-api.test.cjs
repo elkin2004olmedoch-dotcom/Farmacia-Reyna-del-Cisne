@@ -54,6 +54,6 @@ test('alias de dirección limita a cuarenta caracteres en alta, edición e inter
  const saved=(await request.post('/api/cuenta/direcciones').set(headers(a)).send({...address,alias:validAlias}).expect(201)).body.data;
  await request.put('/api/cuenta/direcciones/'+saved.id).set(headers(a)).send({...address,alias:invalidAlias,esperadoUpdatedAt:saved.updatedAt}).expect(422);
  assert.equal((await db.direccionGuardada.findUnique({where:{id:saved.id}})).alias,validAlias);
- const {accountPanels}=await import('../../frontend/views/customer-account.js');let markup='';accountPanels({insertAdjacentHTML(position,html){markup=html;}});
+ const {accountPanels}=await import('../../src/views/customer-account.js');let markup='';accountPanels({insertAdjacentHTML(position,html){markup=html;}});
  assert.match(markup,/<input[^>]*id="saved-alias"[^>]*maxlength="40"/);
 });

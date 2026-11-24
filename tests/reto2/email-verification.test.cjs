@@ -5,8 +5,8 @@ const {AsyncLocalStorage}=require('node:async_hooks');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-const {createEmailVerification,requiresVerification}=require('../../server/models/email-verification.cjs');
-const mail=require('../../server/models/email-delivery.cjs');
+const {createEmailVerification,requiresVerification}=require('../../backend/models/email-verification.cjs');
+const mail=require('../../backend/models/email-delivery.cjs');
 const digest=token=>createHash('sha256').update(token).digest('hex');
 const baseUser=()=>({id:'cliente-sintetico',nombre:'Cliente Prueba',email:'cliente@example.ec',activo:true,emailVerificationRequired:true,emailVerifiedAt:null,tokenVersion:3});
 const env=()=>({NODE_ENV:'production',EMAIL_VERIFICATION_ENABLED:'true',EMAIL_PUBLIC_ORIGIN:'https://tienda.example.ec',RESEND_API_KEY:'re_synthetic_key_not_real_2026',EMAIL_FROM:'confirmar@example.ec'});
@@ -55,8 +55,8 @@ test('configuración desactivada por defecto y activación estricta sin revelar 
 });
 
 test('config principal incluye la opción privada sin leer .env durante la prueba',()=>{
-  const source=fs.readFileSync(path.resolve('server/config.cjs'),'utf8'),module={exports:{}};
-  const sandbox={module,URL,__dirname:path.resolve('server'),process:{env:{...env(),JWT_SECRET:'SyntheticJwtSecret_12345678901234567890',DATABASE_URL:'file:unused.db',CORS_ORIGIN:'https://tienda.example.ec'}},require:name=>name==='node:path'?path:name==='dotenv'?{config(){}}:name==='./models/email-delivery.cjs'?mail:(()=>{throw new Error('Unexpected import');})()};
+  const source=fs.readFileSync(path.resolve('backend/config.cjs'),'utf8'),module={exports:{}};
+  const sandbox={module,URL,__dirname:path.resolve('backend'),process:{env:{...env(),JWT_SECRET:'SyntheticJwtSecret_12345678901234567890',DATABASE_URL:'file:unused.db',CORS_ORIGIN:'https://tienda.example.ec'}},require:name=>name==='node:path'?path:name==='dotenv'?{config(){}}:name==='./models/email-delivery.cjs'?mail:(()=>{throw new Error('Unexpected import');})()};
   vm.runInNewContext(source,sandbox);const config=module.exports();assert.equal(config.emailVerification.enabled,true);assert.equal(config.emailVerification.publicOrigin,'https://tienda.example.ec');
 });
 

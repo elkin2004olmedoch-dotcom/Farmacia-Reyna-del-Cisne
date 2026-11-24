@@ -9,8 +9,8 @@ const bcrypt=require('bcrypt');
 const jwt=require('jsonwebtoken');
 const {PrismaClient}=require('@prisma/client');
 const {db,request,directory}=require('./fixture.cjs');
-const {validImagePath,MAX_BYTES}=require('../../server/middleware/imagevalidation.cjs');
-const {createBackup,validateBackup,restoreBackup,startAutomaticBackups}=require('../../server/models/backups.cjs');
+const {validImagePath,MAX_BYTES}=require('../../backend/middleware/imagevalidation.cjs');
+const {createBackup,validateBackup,restoreBackup,startAutomaticBackups}=require('../../backend/models/backups.cjs');
 let adminToken,userToken,image,uploaded;
 const backups=path.join(directory,'backups');
 test('restaurar conserva preferencias, retira estimaciones y no revive un código de entrega anterior',async()=>{
@@ -43,7 +43,7 @@ test('JPEG, PNG y WebP se decodifican y recodifican sin metadatos con URL local 
     const metadata=await sharp(await fs.readFile(path.join(process.env.UPLOAD_DIR,path.basename(data.imagen)))).metadata();assert.equal(metadata.format,'webp');assert.equal(metadata.exif,undefined);assert.equal(metadata.icc,undefined);
     uploaded=data.imagen;
   }
-  assert.equal(validImagePath('assets/uploads/../../server/prisma/farmacia.db'),false);assert.equal(validImagePath('https://example.ec/foto.webp'),false);assert.equal(validImagePath('assets/uploads/'+randomUUID()+'.webp'),false);
+  assert.equal(validImagePath('assets/uploads/../../backend/prisma/farmacia.db'),false);assert.equal(validImagePath('https://example.ec/foto.webp'),false);assert.equal(validImagePath('assets/uploads/'+randomUUID()+'.webp'),false);
 });
 test('subida rechaza SVG, rutas, base64 inválido, formato falso y dimensiones excesivas',async()=>{
   const cases=[{archivo:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>').toString('base64'),nombreOriginal:'foto.png'},{archivo:image.toString('base64'),nombreOriginal:'../foto.png'},{archivo:'%%INVALID%%',nombreOriginal:'foto.png'},{archivo:image.toString('base64'),nombreOriginal:'foto.jpg'}];

@@ -104,7 +104,7 @@ function targetClient({initial={},failOn,beforeTransaction}={}){
 }
 const emptyCounts=()=>Object.fromEntries(MODELS.filter(model=>model!=='revisionCatalogo').map(model=>[model,0]));
 test('el importador cubre todos los modelos Prisma y no omite futuras entidades de farmacia',async()=>{
- const schema=await fs.readFile(path.resolve(__dirname,'../../server/prisma/schema.prisma'),'utf8');
+ const schema=await fs.readFile(path.resolve(__dirname,'../../backend/prisma/schema.prisma'),'utf8');
  const names=[...schema.matchAll(/^model (\w+) \{/gm)].map(match=>match[1][0].toLowerCase()+match[1].slice(1));
  // La migración siembra Rol y el alta de Usuario genera UsuarioRol en el destino.
  assert.deepEqual([...MODELS,'rol','usuarioRol'].sort(),names.sort());
@@ -256,7 +256,7 @@ test('un fallo tardío revierte todas las entidades en lugar de conservar una co
 test('se rechazan referencias incompletas y rutas de imágenes fuera del directorio canónico',async()=>{
   const broken=fixture();broken.pedido[0].userId='ausente';const target=targetClient();
   await assert.rejects(migrate({source:sourceClient(broken),target,apply:true}),error=>error.code==='SOURCE_RELATIONS');assert.equal(target.transactions,0);
-  for(const bad of ['assets/uploads/../../server/prisma/farmacia.db','assets/uploads/imagen.webp','https://example.ec/imagen.webp','assets/uploads/12345678-1234-1123-8123-123456789abc.webp']){
+  for(const bad of ['assets/uploads/../../backend/prisma/farmacia.db','assets/uploads/imagen.webp','https://example.ec/imagen.webp','assets/uploads/12345678-1234-1123-8123-123456789abc.webp']){
     const snapshot=fixture();snapshot.producto[0].imagen=bad;assert.throws(()=>collectUploads(snapshot),error=>error.code==='SOURCE_IMAGES');
   }
 });
@@ -314,8 +314,8 @@ test('importación en bases temporales conserva versiones antiguas y los trigger
  t.after(async()=>{if(target)await target.$disconnect();await fixture.close();});
  await fs.mkdir(directory);
  const schema=path.join(directory,'schema.prisma');
- await fs.copyFile(path.join(root,'server/prisma/schema.prisma'),schema);
- await fs.cp(path.join(root,'server/prisma/migrations'),path.join(directory,'migrations'),{recursive:true});
+ await fs.copyFile(path.join(root,'backend/prisma/schema.prisma'),schema);
+ await fs.cp(path.join(root,'backend/prisma/migrations'),path.join(directory,'migrations'),{recursive:true});
  const url='file:'+path.join(directory,'target.db').replaceAll('\\','/');
  execFileSync(process.execPath,[path.join(root,'node_modules/prisma/build/index.js'),'migrate','deploy','--schema',schema],{cwd:directory,env:{...process.env,DATABASE_URL:url},stdio:'pipe',windowsHide:true});
  target=new PrismaClient({datasources:{db:{url}}});

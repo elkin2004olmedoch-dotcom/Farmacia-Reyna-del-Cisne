@@ -8,7 +8,7 @@ async function seed() {
   const password=process.env.ADMIN_PASSWORD || '';
   if(password.startsWith('REEMPLAZAR') || password.length<10 || Buffer.byteLength(password)>72 || !/\p{L}/u.test(password) || !/\d/.test(password))throw new Error('Configura ADMIN_PASSWORD con 10 caracteres como mínimo, letra y número (máximo 72 bytes).');
   const email=(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-  if(!require('../../frontend/models/ecuador.js').validEmail(email))throw new Error('Configura ADMIN_EMAIL con un correo válido.');
+  if(!require('../../src/models/ecuador.js').validEmail(email))throw new Error('Configura ADMIN_EMAIL con un correo válido.');
   const products=JSON.parse(fs.readFileSync(path.join(__dirname,'../../data/productos.json'),'utf8'));
   const promos=JSON.parse(fs.readFileSync(path.join(__dirname,'../../data/promociones.json'),'utf8'));
   const existing=await db.usuario.findUnique({where:{email}});

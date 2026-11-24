@@ -6,8 +6,8 @@ La presentación conserva HTML/CSS/JavaScript con MVC, Node.js/Express y Prisma 
 
 | Requisito | Implementación y evidencia reproducible |
 | --- | --- |
-| MVC en cliente | `frontend/models`, `views`, `controllers`, `assets`; `resources.test.cjs` comprueba la separación entre datos, vistas y eventos. |
-| MVC en servidor | `server/routes`, `controllers`, `models`, `middleware`; controladores HTTP separados de Prisma. |
+| MVC en cliente | `src/models`, `views`, `controllers`, `assets`; `resources.test.cjs` comprueba la separación entre datos, vistas y eventos. |
+| MVC en servidor | `backend/routes`, `controllers`, `models`, `middleware`; controladores HTTP separados de Prisma. |
 | Persistencia relacional | `Producto`, `Usuario`, `Pedido` y `PedidoDetalle` y sus relaciones, esquemas/migraciones/seed para SQLite y PostgreSQL. `api.test.cjs` verifica registros y detalles persistidos. |
 | API CRUD de productos | GET público, POST/PUT/DELETE admin, baja lógica para conservar pedidos; pruebas de API y `frontend.spec.cjs`. |
 | Autenticación y roles | JWT Bearer para clientes API y JWT en cookies HttpOnly para la web; admin/user/repartidor comprobados en backend. El registro con correo devuelve 202 y espera confirmación. MFA administrativo opcional añade un desafío antes de entregar sesión. |
@@ -23,7 +23,7 @@ La rúbrica y el título aceptan **SQL Server u otro motor relacional**, mientra
 
 ## Ubicación e identidad
 
-El enlace compartido por el titular, `https://maps.app.goo.gl/HrA5J6Q3H4tuExpTA`, redirige al marcador de **Consulab** en Puerto Quito: `0.1200092,-79.2580379`. La longitud del centro visual del mapa (`-79.2629088`) no es la del local. La fuente pública única es `frontend/models/pharmacy.js`; inicio y retiro usan ese mismo punto. No se inventa una dirección de calle ni se muestra un formulario de coordenadas al cliente.
+El enlace compartido por el titular, `https://maps.app.goo.gl/HrA5J6Q3H4tuExpTA`, redirige al marcador de **Consulab** en Puerto Quito: `0.1200092,-79.2580379`. La longitud del centro visual del mapa (`-79.2629088`) no es la del local. La fuente pública única es `src/models/pharmacy.js`; inicio y retiro usan ese mismo punto. No se inventa una dirección de calle ni se muestra un formulario de coordenadas al cliente.
 
 El mapa se carga al abrir **Visítanos** o su enlace de navegación y se descarga al cerrar. Usa `referrerpolicy="no-referrer"`; el enlace externo conserva `noopener noreferrer`. No solicita GPS para localizar la farmacia. Los datos privados de ubicación de un pedido mantienen sus restricciones anteriores.
 
@@ -33,7 +33,7 @@ Se conservan vino `#681e2a`, rojo `#c61025`, rojo oscuro `#920d1d`, crema `#fff3
 
 ### S1 · Alta · Secretos dentro del ZIP de entrega
 
-**Ubicación:** `scripts/crear-reto2.ps1:36`. La expresión anterior no excluía correctamente variantes como `server/.env.production`. Un archivo privado dentro de las carpetas fuente podía terminar en la entrega compartida. La prueba sintética reprodujo el fallo antes de la corrección; no se utilizaron claves reales.
+**Ubicación:** `scripts/crear-reto2.ps1:36`. La expresión anterior no excluía correctamente variantes como `backend/.env.production`. Un archivo privado dentro de las carpetas fuente podía terminar en la entrega compartida. La prueba sintética reprodujo el fallo antes de la corrección; no se utilizaron claves reales.
 
 **Corrección:** excluir nombres `.env` y `.env.*` en cualquier carpeta, permitiendo únicamente el `.env.example` de raíz, además de los archivos `.env`, bases, certificados y respaldos ya excluidos. `package-security.test.cjs` comprueba contenido del ZIP y conservación de los originales.
 
@@ -53,9 +53,9 @@ Los pagos comerciales sólo se acreditan después de verificar la respuesta del 
 
 Se comprobaron referencias y las rutas de imagen persistidas en Producto y Promocion mediante consulta de sólo lectura. Se retiran cuatro archivos sin uso en su contexto, con respaldo privado:
 
-- `frontend/assets/images/farmacia-5.jpg`: copia sin consumidor MVC; se conserva la imagen de raíz usada por el Reto 1.
-- `frontend/assets/images/farmacia-9.jpg`: copia sin consumidor MVC.
-- `frontend/assets/images/farmacia-fachada-reina.webp`: versión antigua sin consumidor; una comprobación obsoleta del build se cambia al logo activo.
+- `src/assets/images/farmacia-5.jpg`: copia sin consumidor MVC; se conserva la imagen de raíz usada por el Reto 1.
+- `src/assets/images/farmacia-9.jpg`: copia sin consumidor MVC.
+- `src/assets/images/farmacia-fachada-reina.webp`: versión antigua sin consumidor; una comprobación obsoleta del build se cambia al logo activo.
 - `assets/images/farmacia-9.jpg`: sólo se precargaba en el service worker histórico; se retira esa precarga y se actualiza su caché.
 
 Total retirado del repositorio: **901 325 bytes**. No se promete una mejora de TTFB por retirar archivos que no se solicitaban en la tienda. Se conservan las imágenes guardadas en la base, fuentes, logos, atlas y bases de mascotas, auditorías y recursos aún utilizados por las pruebas del Reto 1. El manifiesto de limpieza y los archivos retirados permanecen en `.publish/cleanup/2026-11-03-reto2/`, fuera de la entrega y de Git.

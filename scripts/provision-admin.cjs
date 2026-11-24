@@ -1,5 +1,5 @@
 const {createHash,randomUUID}=require('node:crypto');
-const validation=require('../frontend/models/ecuador.js');
+const validation=require('../src/models/ecuador.js');
 
 function accessConfiguration(env){
   if(!env.ADMIN_USERNAME&&!env.ADMIN_LOGIN_PASSWORD_HASH)return null;
@@ -14,8 +14,8 @@ function accessConfiguration(env){
 async function provisionAdmin({env=process.env}={}){
   const config=accessConfiguration(env);
   if(!config)return {applied:false,configured:false};
-  const db=require('../server/models/db.cjs');
-  const sessions=require('../server/models/sesiones-moviles.cjs');
+  const db=require('../backend/models/db.cjs');
+  const sessions=require('../backend/models/sesiones-moviles.cjs');
   const marker='admin-access-'+createHash('sha256').update(JSON.stringify(config)).digest('hex').slice(0,40);
   try{
     return await sessions.transaction(async tx=>{
@@ -41,8 +41,8 @@ async function provisionAdmin({env=process.env}={}){
 }
 
 if(require.main===module){
-  require('../server/config.cjs')();
-  const db=require('../server/models/db.cjs');
+  require('../backend/config.cjs')();
+  const db=require('../backend/models/db.cjs');
   provisionAdmin().then(result=>console.info(result.applied?'Acceso administrativo configurado.':'La configuración de acceso administrativo ya está revisada.'))
     .catch(()=>{console.error('No se pudo configurar el acceso administrativo. Revisa sus variables privadas y la cuenta existente.');process.exitCode=1;})
     .finally(()=>db.$disconnect());

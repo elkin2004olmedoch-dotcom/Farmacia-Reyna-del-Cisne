@@ -1,6 +1,6 @@
 'use strict';
 const {test,before,after,beforeEach}=require('node:test'),assert=require('node:assert/strict'),{randomUUID}=require('node:crypto');
-const {createFixture}=require('./email-api-fixture.cjs'),{brands,detectBrand}=require('../../frontend/models/card-policy.js');
+const {createFixture}=require('./email-api-fixture.cjs'),{brands,detectBrand}=require('../../src/models/card-policy.js');
 let fixture,api,users;const originalFetch=globalThis.fetch;
 before(async()=>{fixture=createFixture();api=fixture.api(false);globalThis.fetch=()=>{throw new Error('La práctica no usa servicios externos.');};users=[];for(let index=0;index<2;index++){const values={nombre:'Cliente Práctica',email:'practice-'+randomUUID()+'@example.ec',telefono:'0991234567',cedula:'0102030400',password:'PracticePayment2026!'};users.push((await api.post('/api/auth/register').send(values).expect(201)).body.data);}});
 after(async()=>{globalThis.fetch=originalFetch;delete process.env.PAYMENT_PRACTICE_ENABLED;await fixture?.close();});

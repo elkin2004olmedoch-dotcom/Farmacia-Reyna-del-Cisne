@@ -2,8 +2,8 @@ const {test,before,after}=require('node:test');
 const assert=require('node:assert/strict');
 const {randomUUID}=require('node:crypto');
 const {db,request,directory}=require('./fixture.cjs');
-const {inclusiveTax}=require('../../server/models/fiscal.cjs');
-const inventory=require('../../server/models/inventario.cjs');
+const {inclusiveTax}=require('../../backend/models/fiscal.cjs');
+const inventory=require('../../backend/models/inventario.cjs');
 const productInput={nombre:'Producto fiscal sintético',precio:11.50,stock:20,categoria:'bienestar',descripcion:'Fixture aislada para validación fiscal e inventario',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase sintético de prueba'};
 const buyer={name:'Cliente Fiscal',email:'fiscal-cliente@example.ec',phone:'0979275988',documentType:'cedula',document:'0102030400',delivery:'pickup',province:'',city:'',address:'',postalCode:''};
 let adminToken,userToken,adminId;
@@ -63,7 +63,7 @@ test('vigencia ecuatoriana se programa, cambia el desglose y nunca modifica pedi
   const priced=(await request.get('/api/productos/'+created.id).expect(200)).body.data;assert.equal(Number(priced.precio),11.50);assert.equal(priced.ivaPorcentaje,14);
   const next=await order(created.id,3);assert.equal(Number(next.total),34.50);assert.equal(next.detalles[0].ivaPorcentaje,14);
   const stored=await db.pedido.findUnique({where:{id:original.id},include:{detalles:true}});assert.equal(stored.detalles[0].ivaPorcentaje,15);assert.equal(Number(stored.ivaMonto),4.50);
-  const futureConfig=await require('../../server/models/fiscal.cjs').current(db,new Date(Date.now()+3*86400000));assert.equal(futureConfig.tarifaGeneral,13);
+  const futureConfig=await require('../../backend/models/fiscal.cjs').current(db,new Date(Date.now()+3*86400000));assert.equal(futureConfig.tarifaGeneral,13);
   await request.post('/api/admin/configuracion/fiscal').set('Authorization',auth(adminToken)).send({tarifaGeneral:13,inicioVigencia:current.inicioVigencia,referenciaNormativa:'Fecha repetida en la configuración fiscal sintética'}).expect(409);
  } finally {await db.configuracionFiscal.deleteMany({where:{id:{in:[current.id,future.id]}}});}
 });

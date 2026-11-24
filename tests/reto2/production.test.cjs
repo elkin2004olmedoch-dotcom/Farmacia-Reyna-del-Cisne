@@ -88,9 +88,9 @@ test('preparación usa el cliente separado, migraciones y seed; no imprime secre
     return {status: 0, stdout: env.DATABASE_URL + env.ADMIN_PASSWORD, stderr: env.SUPABASE_SERVICE_ROLE_KEY};
   }});
   assert.equal(calls.length, 5);
-  assert.deepEqual(calls[0][1], ['node_modules/prisma/build/index.js', 'generate', '--schema', 'server/prisma/postgresql/schema.prisma']);
+  assert.deepEqual(calls[0][1], ['node_modules/prisma/build/index.js', 'generate', '--schema', 'backend/prisma/postgresql/schema.prisma']);
   assert.deepEqual(calls[1][1].slice(1, 3), ['migrate', 'deploy']);
-  assert.deepEqual(calls[2][1], ['server/prisma/seed.cjs']);
+  assert.deepEqual(calls[2][1], ['backend/prisma/seed.cjs']);
   assert.deepEqual(calls[3][1], ['scripts/sync-catalog.cjs']);
   assert.deepEqual(calls[4][1], ['scripts/build-frontend.cjs']);
   assert.equal(calls[0][2].env.HOST, '0.0.0.0');
@@ -103,7 +103,7 @@ test('SKIP_INITIAL_SEED permite migrar una base vacía antes de importar datos p
   const calls = [];
   runSetup({env: {...valid(), SKIP_INITIAL_SEED: 'true'}, logger: {info() {}}, run: (command, args) => {calls.push(args); return {status: 0};}});
   assert.equal(calls.length, 4);
-  assert.ok(!calls.some(args => args[0] === 'server/prisma/seed.cjs'));
+  assert.ok(!calls.some(args => args[0] === 'backend/prisma/seed.cjs'));
   assert.deepEqual(calls[2], ['scripts/sync-catalog.cjs']);
 });
 
@@ -147,7 +147,7 @@ test('fallo de migración detiene seed y frontend sin exponer stderr ni cadenas 
 });
 
 test('PostgreSQL conserva todos los modelos locales y habilita RLS sin políticas públicas', () => {
-  const prisma = path.resolve(__dirname, '../../server/prisma');
+  const prisma = path.resolve(__dirname, '../../backend/prisma');
   const sqlite = fs.readFileSync(path.join(prisma, 'schema.prisma'), 'utf8');
   const postgres = fs.readFileSync(path.join(prisma, 'postgresql/schema.prisma'), 'utf8');
   assert.equal(postgres.slice(postgres.indexOf('model Producto')).replaceAll('\r\n','\n').trim(), sqlite.slice(sqlite.indexOf('model Producto')).replaceAll('\r\n','\n').trim());
@@ -160,7 +160,7 @@ test('PostgreSQL conserva todos los modelos locales y habilita RLS sin política
 });
 
 test('selección del cliente mantiene SQLite local y usa el cliente PostgreSQL solo para URL remota', () => {
-  const source = fs.readFileSync(path.resolve(__dirname, '../../server/models/prisma-client.cjs'), 'utf8');
+  const source = fs.readFileSync(path.resolve(__dirname, '../../backend/models/prisma-client.cjs'), 'utf8');
   for (const [url, expected] of [['file:./local.db', '@prisma/client'], ['postgresql://test.invalid/database', '../../node_modules/.prisma-farmacia-postgresql'], ['postgres://test.invalid/database', '../../node_modules/.prisma-farmacia-postgresql']]) {
     let selected;
     const context = {process: {env: {DATABASE_URL: url}}, module: {exports: {}}, require: requested => {selected = requested; return {PrismaClient: class {}};}};
@@ -173,7 +173,7 @@ test('precios, cliente y seed usan PostgreSQL aunque el cliente SQLite predeterm
   const {Decimal} = require('@prisma/client/runtime/library');
   const pg = {Prisma: {Decimal, TransactionIsolationLevel: {Serializable: 'Serializable'}}, PrismaClient: class {constructor() {this.provider = 'postgresql';}}};
   const stub = {Prisma: {}, PrismaClient: class {constructor() {throw new Error('Default client not generated');}}};
-  const directory = path.resolve(__dirname, '../../server/models');
+  const directory = path.resolve(__dirname, '../../backend/models');
   const selector = {process: {env: {DATABASE_URL: 'postgresql://synthetic.invalid/test'}}, module: {exports: {}}, require: requested => requested === '@prisma/client' ? stub : pg};
   vm.runInNewContext(fs.readFileSync(path.join(directory, 'prisma-client.cjs'), 'utf8'), selector);
   const selected = selector.module.exports;
@@ -184,14 +184,14 @@ test('precios, cliente y seed usan PostgreSQL aunque el cliente SQLite predeterm
     // against the real isolated database in fiscal-inventory.test.cjs.
     if(requested==='./fiscal.cjs')return {inclusiveTax:()=>({})};
     if(requested==='./inventario.cjs')return {sellableStock:()=>0};
-    if(requested==='../../frontend/models/pharmacy-policy.js')return require('../../frontend/models/pharmacy-policy.js');
+    if(requested==='../../src/models/pharmacy-policy.js')return require('../../src/models/pharmacy-policy.js');
     return stub;
   }};
   vm.runInNewContext(fs.readFileSync(path.join(directory, 'prices.cjs'), 'utf8'), prices);
   const discounted = prices.module.exports.effectivePrice({id: 'p', precio: '4.50', activo: true}, [{id: 'promo', activa: true, vistaPrevia: false, descuentoPorcentaje: 20, orden: 0}]);
   assert.equal(discounted.precio.toFixed(2), '3.60');
   assert.equal(discounted.precioOriginal.toFixed(2), '4.50');
-  const db = {module: {exports: {}}, require: requested => requested === '../diagnostics.cjs' ? require('../../server/diagnostics.cjs') : requested === './prisma-client.cjs' ? selected : stub};
+  const db = {module: {exports: {}}, require: requested => requested === '../diagnostics.cjs' ? require('../../backend/diagnostics.cjs') : requested === './prisma-client.cjs' ? selected : stub};
   vm.runInNewContext(fs.readFileSync(path.join(directory, 'db.cjs'), 'utf8'), db);
   assert.equal(db.module.exports.provider, 'postgresql');
   let isolation;
@@ -214,7 +214,7 @@ test('precios, cliente y seed usan PostgreSQL aunque el cliente SQLite predeterm
       if (requested === '../models/prisma-client.cjs') return selected;
       if (requested === '@prisma/client') return stub;
       if (requested === '../models/db.cjs') return fakeDb;
-      if (requested === '../../frontend/models/ecuador.js') return {validEmail: () => true};
+      if (requested === '../../src/models/ecuador.js') return {validEmail: () => true};
       throw new Error('Unexpected test dependency');
     }
   };
@@ -224,7 +224,7 @@ test('precios, cliente y seed usan PostgreSQL aunque el cliente SQLite predeterm
 });
 
 test('arranque remoto omite respaldos SQLite y el arranque local los conserva', async () => {
-  const source = fs.readFileSync(path.resolve(__dirname, '../../server/index.cjs'), 'utf8');
+  const source = fs.readFileSync(path.resolve(__dirname, '../../backend/index.cjs'), 'utf8');
   for (const [url, expectedBackups] of [['file:./local.db', 1], ['postgresql://test.invalid/database', 0]]) {
     let backupImports = 0, backups = 0, stopped = 0, disconnected = 0, listens = 0, deliveryImports = 0, purges = 0;
     const signals = new Map(), exits = [], errors = [], timers = [];
@@ -239,10 +239,10 @@ test('arranque remoto omite respaldos SQLite y el arranque local los conserva', 
       setTimeout: schedule, setInterval: schedule,
       clearTimeout: timer => {if(timer)timer.cleared = true;}, clearInterval: timer => {if(timer)timer.cleared = true;},
       require: requested => {
-        if (requested === './diagnostics.cjs') return require('../../server/diagnostics.cjs');
+        if (requested === './diagnostics.cjs') return require('../../backend/diagnostics.cjs');
         if (requested === 'node:fs') return {};
         if (requested === 'node:http' || requested === 'node:https') return {createServer: () => server};
-        if (requested === './lifecycle.cjs') return require('../../server/lifecycle.cjs');
+        if (requested === './lifecycle.cjs') return require('../../backend/lifecycle.cjs');
         if (requested === './config.cjs') return () => ({port: 3000, host: '0.0.0.0'});
         if (requested === './app.cjs') return () => ({});
         if (requested === './models/backups.cjs') {backupImports++; return {startAutomaticBackups: async () => {backups++; return {stop: async () => {stopped++;}};}};}

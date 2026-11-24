@@ -4,7 +4,7 @@
 
 ## Identidad del personal y ayuda de reparto
 
-Administración y reparto web comparten la paleta crema/vino del catálogo mediante `frontend/assets/operations.css`, sin duplicar sus modelos ni APIs. Se conservan logos, Goti y los colores de las estadísticas. Tablas, formularios y tarjetas de entrega ofrecen controles principales de al menos 44 píxeles; el mapa conserva la ruta dentro de la app y cerrar su panel devuelve el foco al pedido que lo abrió.
+Administración y reparto web comparten la paleta crema/vino del catálogo mediante `src/assets/operations.css`, sin duplicar sus modelos ni APIs. Se conservan logos, Goti y los colores de las estadísticas. Tablas, formularios y tarjetas de entrega ofrecen controles principales de al menos 44 píxeles; el mapa conserva la ruta dentro de la app y cerrar su panel devuelve el foco al pedido que lo abrió.
 
 El administrador mantiene su panel, métricas, formularios y órdenes con resumen y confirmación/cancelación. En **Entregas y cobertura** configura zonas y coordina repartidores. El repartidor ve **Mis entregas**, sin formularios administrativos. Goti aparece también en esa bandeja con ayuda para actualizar la lista, consultar instrucciones de ruta/ubicación/entrega y abrir el perfil. La ayuda de reparto no modifica precios, promociones, pedidos ni estados; las acciones de entrega siguen pasando por los botones y confirmaciones existentes. Al perder sesión se retiran la mascota, el mapa y los datos privados.
 
@@ -61,7 +61,7 @@ Se mantiene Render Free por elección del propietario. Puede haber suspensión p
 - `npm audit --omit=dev` en raíz y móvil: cero avisos publicados para las dependencias de producción en la consulta realizada. Esto no certifica ausencia de vulnerabilidades ni incluye una auditoría exhaustiva de Leaflet vendorizado.
 - Sin cambios de esquemas/migraciones ni versiones de dependencias npm. Leaflet 1.9.4 es la biblioteca adicional necesaria para el mapa; su licencia se distribuye con la web y el APK.
 
-Referencias de implementación: [asignación](../server/models/entregas.cjs#L51), [proveedor de ruta](../server/models/rutas.cjs#L9), [autorización de la ruta](../server/routes/entregas.cjs#L20), [retirada de posición local](../mobile/src/tracker.js#L22). La evidencia de despliegue y los archivos locales de prueba se conservan en el informe privado de la entrega.
+Referencias de implementación: [asignación](../backend/models/entregas.cjs#L51), [proveedor de ruta](../backend/models/rutas.cjs#L9), [autorización de la ruta](../backend/routes/entregas.cjs#L20), [retirada de posición local](../mobile/src/tracker.js#L22). La evidencia de despliegue y los archivos locales de prueba se conservan en el informe privado de la entrega.
 
 ### Actualización de ruta automática (0.3.0)
 

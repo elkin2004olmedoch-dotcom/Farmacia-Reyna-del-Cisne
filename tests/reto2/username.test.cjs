@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const validation=require('../../frontend/models/ecuador.js');
+const validation=require('../../src/models/ecuador.js');
 
 test('el nombre de usuario usa un identificador normalizado y acotado',()=>{
   assert.equal(validation.normalizeUsername(' Administrador '),'administrador');

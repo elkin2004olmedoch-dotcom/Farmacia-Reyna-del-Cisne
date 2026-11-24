@@ -2,13 +2,13 @@ const {test,after}=require('node:test'),assert=require('node:assert/strict'),bcr
 const {createFixture}=require('./email-api-fixture.cjs');
 const fixture=createFixture(),{db}=fixture;after(()=>fixture.close());
 test('recuperación: nonce hasheado, enlace único, expiración y cierre de sesiones',async()=>{
- const {createPasswordReset}=require('../../server/models/password-reset.cjs'),sent=[];
+ const {createPasswordReset}=require('../../backend/models/password-reset.cjs'),sent=[];
  const resets=createPasswordReset({deliver:async values=>sent.push(values)});
  const admin=await db.usuario.findUnique({where:{email:'email-admin@example.ec'}});
  const user=await db.usuario.create({data:{nombre:'Recuperación Sintética',email:'reset-'+require('node:crypto').randomUUID()+'@example.ec',telefono:'0991234567',passwordHash:admin.passwordHash,role:'repartidor'}});
  const config={...fixture.config,emailVerification:{enabled:true,publicOrigin:'http://localhost:3300'}};
- const old=await require('../../server/models/sesiones-web.cjs').create(user);
- const mobile=await require('../../server/models/sesiones-moviles.cjs').create(user);
+ const old=await require('../../backend/models/sesiones-web.cjs').create(user);
+ const mobile=await require('../../backend/models/sesiones-moviles.cjs').create(user);
  await resets.issue(user.email,config);await resets.issue(user.email,config);await resets.issue('no-existe@example.ec',config);assert.equal(sent.length,1);
  const row=await db.passwordReset.findUnique({where:{usuarioId:user.id}}),token=sent[0].token;
  assert.equal(token.length,43);assert.match(row.tokenHash,/^[a-f0-9]{64}$/);assert.notEqual(row.tokenHash,token);

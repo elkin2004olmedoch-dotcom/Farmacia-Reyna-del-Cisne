@@ -1,7 +1,7 @@
 'use strict';
 const {test,after}=require('node:test'),assert=require('node:assert/strict'),jwt=require('jsonwebtoken'),{randomUUID}=require('node:crypto');
 const fixture=require('./email-api-fixture.cjs').createFixture(),{db,config}=fixture,api=fixture.api(false);
-const orders=require('../../server/models/pedidos.cjs');
+const orders=require('../../backend/models/pedidos.cjs');
 after(()=>fixture.close());
 const token=user=>jwt.sign({version:user.tokenVersion},config.secret,{algorithm:'HS256',subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'});
 let admin,user,product,zone,courier,second;
@@ -11,11 +11,11 @@ test('domicilio se asigna al único repartidor activo sin confirmar ni preparar 
  admin=await db.usuario.findFirst({where:{role:'admin'}});
  user=await db.usuario.create({data:{nombre:buyer.name,email:buyer.email,telefono:'+593979275988',passwordHash:'fixture'}});
  product=await db.producto.create({data:{nombre:'Cuidado Ruta',precio:5,stock:20,categoria:'cuidado',descripcion:'Producto sintético de ruta',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase'}});
- zone=await require('../../server/models/entregas.cjs').saveZone(null,{nombre:'Zona Ruta',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:150,ivaCategoria:'general',fundamentoIva:null,activa:true},admin);
+ zone=await require('../../backend/models/entregas.cjs').saveZone(null,{nombre:'Zona Ruta',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:150,ivaCategoria:'general',fundamentoIva:null,activa:true},admin);
  const noCourier=await make();assert.equal(await db.entrega.count({where:{pedidoId:noCourier.pedido.id}}),0);
  courier=await db.usuario.create({data:{nombre:'Repartidor Único',email:'unico@example.ec',telefono:'+593979275988',passwordHash:'fixture',role:'repartidor'}});
  const {pedido}=await make(),delivery=await db.entrega.findUnique({where:{pedidoId:pedido.id}});assert(delivery);assert.equal(delivery.repartidorId,courier.id);assert.equal(pedido.estado,'pendiente');assert.equal(delivery.estado,'asignada');assert.equal(Number(pedido.total),6.5);
- await assert.rejects(()=>require('../../server/models/entregas.cjs').changeState(delivery.id,{estado:'en_camino',esperadoVersion:delivery.version},courier),error=>error.code==='ORDER_NOT_READY');
+ await assert.rejects(()=>require('../../backend/models/entregas.cjs').changeState(delivery.id,{estado:'en_camino',esperadoVersion:delivery.version},courier),error=>error.code==='ORDER_NOT_READY');
  const confirmed=await orders.updateStatus(noCourier.pedido.id,{estado:'confirmado',esperadoUpdatedAt:noCourier.pedido.updatedAt.toISOString()},admin.id);
  assert.equal((await db.entrega.findUnique({where:{pedidoId:confirmed.pedido.id}})).repartidorId,courier.id);
  second=await db.usuario.create({data:{nombre:'Otro Repartidor',email:'segundo@example.ec',telefono:'+593979275988',passwordHash:'fixture',role:'repartidor'}});
@@ -36,10 +36,10 @@ test('ruta autoriza propietario y rol antes de contactar proveedor, rechaza camp
  await api.post(route).set('Authorization','Bearer '+token(second)).send(body).expect(404);
  await api.post(route).set('Authorization','Bearer '+token(courier)).send({...body,url:'https://127.0.0.1'}).expect(422);
  await api.post(route).set('Authorization','Bearer '+token(courier)).send({latitud:'0.12',longitud:-79.24}).expect(422);
- const geocoder=require('../../server/models/geocoding.cjs'),saved=geocoder.resolve;geocoder.resolve=async()=>{throw new (require('../../server/middleware/errors.cjs').AppError)(409,'ADDRESS_NOT_FOUND','Dirección no encontrada.');};try{const missing=await api.post(route).set('Authorization','Bearer '+token(courier)).send(body).expect(409);assert.equal(missing.body.error.code,'ADDRESS_NOT_FOUND');}finally{geocoder.resolve=saved;}
+ const geocoder=require('../../backend/models/geocoding.cjs'),saved=geocoder.resolve;geocoder.resolve=async()=>{throw new (require('../../backend/middleware/errors.cjs').AppError)(409,'ADDRESS_NOT_FOUND','Dirección no encontrada.');};try{const missing=await api.post(route).set('Authorization','Bearer '+token(courier)).send(body).expect(409);assert.equal(missing.body.error.code,'ADDRESS_NOT_FOUND');}finally{geocoder.resolve=saved;}
 });
 test('proveedor de rutas: GeoJSON real, límites, sin credenciales, sin líneas inventadas y sin respuestas tardías a entregas cerradas',async()=>{
- const {createRouting}=require('../../server/models/rutas.cjs');let calls=0,closed=false,now=0;
+ const {createRouting}=require('../../backend/models/rutas.cjs');let calls=0,closed=false,now=0;
  const item={id:'synthetic',estado:'en_camino',destino:{latitud:0.125,longitud:-79.25}};
  const service=createRouting({find:async()=>({...item,...(closed?{estado:'entregada',destino:null}:{})}),now:()=>now,fetch:async(url,options)=>{
    calls++;assert.equal(new URL(url).hostname,'routing.openstreetmap.de');assert.equal(options.redirect,'error');assert(!options.headers.Authorization);

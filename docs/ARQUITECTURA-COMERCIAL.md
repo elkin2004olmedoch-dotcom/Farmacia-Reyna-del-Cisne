@@ -6,9 +6,9 @@ La aplicación conserva tres capas y el stack HTML/CSS/JavaScript, Node.js/Expre
 
 | Capa | Responsabilidad |
 | --- | --- |
-| Presentación | frontend/controllers coordina eventos y estado; models centraliza HTTP y reglas de interfaz; views renderiza contenido y mensajes. El HTML se genera desde scripts/templates y scripts/build-frontend.cjs. |
-| Aplicación | server/routes y middleware validan sesión, rol y entradas; controllers adapta HTTP; models aplica reglas farmacéuticas, importes, inventario, pedidos, entregas y facturación. |
-| Persistencia | PrismaClient reutilizado y esquemas/migraciones separados en server/prisma y server/prisma/postgresql. Las transacciones preservan consistencia de stock, pedido y factura. |
+| Presentación | src/controllers coordina eventos y estado; models centraliza HTTP y reglas de interfaz; views renderiza contenido y mensajes. El HTML se genera desde scripts/templates y scripts/build-frontend.cjs. |
+| Aplicación | backend/routes y middleware validan sesión, rol y entradas; controllers adapta HTTP; models aplica reglas farmacéuticas, importes, inventario, pedidos, entregas y facturación. |
+| Persistencia | PrismaClient reutilizado y esquemas/migraciones separados en backend/prisma y backend/prisma/postgresql. Las transacciones preservan consistencia de stock, pedido y factura. |
 
 Los esquemas son la fuente de verdad de relaciones y restricciones. Incluyen catálogo y promociones, usuarios/pedidos, proveedores/lotes/movimientos, configuración fiscal/facturas, zonas/tarifas/entregas, sesiones móviles y pagos. La limpieza del repositorio no modifica esos modelos ni datos existentes.
 

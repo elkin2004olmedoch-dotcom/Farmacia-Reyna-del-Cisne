@@ -4,7 +4,7 @@ const {transaction}=require('./sesiones-moviles.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 const prices=require('./prices.cjs');
 const fiscal=require('./fiscal.cjs');
-const {allowsPurchase}=require('../../frontend/models/pharmacy-policy.js');
+const {allowsPurchase}=require('../../src/models/pharmacy-policy.js');
 const addressSelect={id:true,alias:true,provincia:true,ciudad:true,direccion:true,codigoPostal:true,createdAt:true,updatedAt:true};
 const productSelect={id:true,nombre:true,precio:true,stock:true,imagen:true,alt:true,activo:true,soloConsulta:true,requiereReceta:true,controlado:true,biologico:true,cadenaFrio:true,descuentoPorcentaje:true,ivaCategoria:true};
 const productPricing=now=>({...productSelect,promociones:{where:prices.discountWhere(now),select:{id:true,activa:true,vistaPrevia:true,descuentoPorcentaje:true,orden:true,inicio:true,fin:true}},lotes:prices.priceLots(now)});

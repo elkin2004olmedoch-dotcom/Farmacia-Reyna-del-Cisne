@@ -1,7 +1,7 @@
 'use strict';
 const {createHash}=require('node:crypto');
 const mail=require('./email-delivery.cjs');
-const {orderReceiptView}=require('../../frontend/views/receipts.js');
+const {orderReceiptView}=require('../../src/views/receipts.js');
 const {AppError}=require('../middleware/errors.cjs');
 const template=require('./email-template.cjs');
 const money=value=>new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}).format(Number(value||0));

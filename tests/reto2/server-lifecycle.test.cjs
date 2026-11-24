@@ -5,7 +5,7 @@ const {once,EventEmitter}=require('node:events');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
-const {listen,createShutdown}=require('../../server/lifecycle.cjs');
+const {listen,createShutdown}=require('../../backend/lifecycle.cjs');
 
 test('escucha rechaza un puerto ocupado y permite limpiar el arranque',async()=>{
   const first=http.createServer();const second=http.createServer();
@@ -55,7 +55,7 @@ function startup({backupGate,listenGate,timeoutMs=500}={}){
     './models/db.cjs':{$disconnect:async()=>{disconnected++;}},
     './models/entregas.cjs':{purgeExpiredLocations:async()=>{}},
   };
-  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../server/index.cjs'),'utf8'),{
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../../backend/index.cjs'),'utf8'),{
     require:id=>{assert.ok(Object.hasOwn(imports,id),'importación no controlada: '+id);return imports[id];},process,console:{info:()=>{},error:()=>{}},
     setTimeout:(...args)=>{const timer=setTimeout(...args);timers.push(timer);return timer;},clearTimeout,
     setInterval:(...args)=>{const timer=setInterval(...args);timers.push(timer);return timer;},clearInterval,

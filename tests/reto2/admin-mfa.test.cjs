@@ -26,7 +26,7 @@ test('desactivar requiere contraseña y segundo factor; no expone secreto en est
 });
 
 test('los códigos MFA normalizados se consumen una sola vez bajo concurrencia y se revocan al reconfigurar',async()=>{
- const mfa=require('../../server/models/admin-mfa.cjs');
+ const mfa=require('../../backend/models/admin-mfa.cjs');
  let actor=await db.usuario.findUnique({where:{email:credentials.email}});
  const setup=await mfa.setup(actor,credentials.password,config);
  const enabled=await mfa.enable(actor,new OTP.TOTP({secret:setup.secret}).generate(),config);actor=enabled.user;

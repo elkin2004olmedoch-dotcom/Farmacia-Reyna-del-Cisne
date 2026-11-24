@@ -36,13 +36,13 @@ before(async()=>{
   const name='farmacia_test_mobile'+randomUUID().replaceAll('-','');await control.$executeRawUnsafe('CREATE DATABASE "'+name+'"');
   url.pathname='/'+name;databaseUrl=url.href;
  }
- const schemaSource=path.join(root,'server/prisma',postgres?'postgresql':'');
+ const schemaSource=path.join(root,'backend/prisma',postgres?'postgresql':'');
  fs.copyFileSync(path.join(schemaSource,'schema.prisma'),path.join(directory,'schema.prisma'));
  fs.cpSync(path.join(schemaSource,'migrations'),path.join(directory,'migrations'),{recursive:true});
  execFileSync(process.execPath,[path.join(root,'node_modules/prisma/build/index.js'),'migrate','deploy','--schema',path.join(directory,'schema.prisma')],{cwd:directory,env:{...env,DATABASE_URL:databaseUrl},stdio:'pipe',windowsHide:true});
  Object.assign(process.env,env,{DATABASE_URL:databaseUrl});require('dotenv').config=()=>({parsed:{}});
- settings={...require('../../server/config.cjs')(),testAuthLimit:200,testApiLimit:1000};
- db=require('../../server/models/db.cjs');api=supertest(require('../../server/app.cjs')(settings));
+ settings={...require('../../backend/config.cjs')(),testAuthLimit:200,testApiLimit:1000};
+ db=require('../../backend/models/db.cjs');api=supertest(require('../../backend/app.cjs')(settings));
  const passwordHash=await bcrypt.hash(password,4);
  const user=(role,label)=>db.usuario.create({data:{nombre:label,email:label+'@example.ec',telefono:'+593979275988',passwordHash,role}});
  driver=await user('repartidor','mobile-driver');other=await user('repartidor','mobile-other');admin=await user('admin','mobile-admin');buyer=await user('user','mobile-buyer');
@@ -144,7 +144,7 @@ test('solo propio y estados activos admiten reclamo; la web conserva GPS sin pro
 test('limpiar muestras caducadas conserva la propiedad móvil para recuperar la red',async()=>{
  const s=await login(),e=await delivery(),own=await claim(e,s);
  await api.put(route(e)+'/ubicacion').set('Authorization',auth(s)).send(sample(own)).expect(200);
- await require('../../server/models/entregas.cjs').purgeExpiredLocations(new Date(Date.now()+16*60000));
+ await require('../../backend/models/entregas.cjs').purgeExpiredLocations(new Date(Date.now()+16*60000));
  const stored=await db.entrega.findUnique({where:{id:e.id}});assert.equal(stored.sesionSeguimientoId,sessionId(s));assert.equal(stored.latitud,null);
  const current=(await api.get(route(e)).set('Authorization',auth(s)).expect(200)).body.data;assert.equal(current.origenSeguimiento,'app');
  await api.put(route(e)+'/ubicacion').set('Authorization',auth(s)).send(sample(current)).expect(200);
@@ -193,7 +193,7 @@ test('desactivar repartidor revoca sesiones sin cambiar regla de entrega en curs
 });
 test('CORS y límites de autenticación también protegen las nuevas rutas',async()=>{
  await api.post('/api/auth/mobile/login').set('Origin','capacitor://localhost').send({email:driver.email,password}).expect(403);
- const limited=supertest(require('../../server/app.cjs')({...settings,testAuthLimit:2}));
+ const limited=supertest(require('../../backend/app.cjs')({...settings,testAuthLimit:2}));
  for(let i=0;i<2;i++)await limited.post('/api/auth/mobile/login').send({email:driver.email,password:'invalid'}).expect(401);
  await limited.post('/api/auth/mobile/login').send({email:driver.email,password}).expect(429);
  const s=await login();await limited.post('/api/auth/mobile/renew').send({refreshToken:s.refreshToken,nextSecret:secret()}).expect(429);

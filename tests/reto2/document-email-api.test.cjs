@@ -5,7 +5,7 @@ const jwt=require('jsonwebtoken');
 const {randomUUID}=require('node:crypto');
 const {app,db}=require('./fixture.cjs');
 const request=require('supertest');
-const mail=require('../../server/models/email-delivery.cjs');
+const mail=require('../../backend/models/email-delivery.cjs');
 const original=mail.sendMessage;
 after(async()=>{mail.sendMessage=original;await db.$disconnect();});
 test('API de reenvío autentica, impide cambiar destinatario, comprueba propiedad y acepta sólo correo verificado',async()=>{
@@ -13,7 +13,7 @@ test('API de reenvío autentica, impide cambiar destinatario, comprueba propieda
  const token=jwt.sign({version:user.tokenVersion},process.env.JWT_SECRET,{subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'});
  const order=await db.pedido.create({data:{userId:user.id,total:10,entrega:'pickup',nombre:'Prueba',email:'distinto@example.ec',telefono:'0999999999',documento:'••••••1234',requestKey:randomUUID(),fingerprint:'sintetica'}});
  const config={secret:process.env.JWT_SECRET,origins:['http://localhost:3000'],production:false,emailVerification:{enabled:true,publicOrigin:'https://tienda.example.ec',from:'correo@example.ec',apiKey:'re_synthetic_not_real'}};
- const api=request(require('../../server/app.cjs')(config));const path='/api/pedidos/'+order.id+'/correo',auth='Bearer '+token;let sent=[];mail.sendMessage=async body=>{sent.push(body);return {accepted:true};};
+ const api=request(require('../../backend/app.cjs')(config));const path='/api/pedidos/'+order.id+'/correo',auth='Bearer '+token;let sent=[];mail.sendMessage=async body=>{sent.push(body);return {accepted:true};};
  await api.post(path).send({}).expect(401);
  await api.post(path).set('Authorization',auth).send({email:'ajeno@example.ec'}).expect(422);
  await api.post('/api/pedidos/'+randomUUID()+'/correo').set('Authorization',auth).send({}).expect(404);

@@ -4,7 +4,7 @@ function setup(){
  document.hidden=false;document.getElementById=()=>({textContent:''});
  class EventSource{constructor(){sources.push(this);}close(){this.closed=true;}}
  const context={document,window,events,EventSource,apiUrl:path=>path,message:()=>{},setInterval:()=>1,clearInterval:()=>{},setTimeout:callback=>{timers.push(callback);return timers.length;},clearTimeout:()=>{},console};
- let source=fs.readFileSync(path.resolve(__dirname,'../../frontend/controllers/updates.js'),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/export function /g,'function ');
+ let source=fs.readFileSync(path.resolve(__dirname,'../../src/controllers/updates.js'),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/export function /g,'function ');
  vm.runInNewContext(source+'\nglobalThis.watch=watchUpdates;',context);return {document,window,events,sources,timers,watch:context.watch};
 }
 test('una sola conexión compartida se cierra al ocultar y al abandonar la página',()=>{

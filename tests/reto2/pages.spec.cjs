@@ -43,7 +43,7 @@ async function hold(page,predicate){
 }
 
 test('artefacto estático separado conserva rutas, CSP, catálogo real y CORS exacto',async({page,api})=>{
-  for(const route of ['/assets/uploads/00000000-0000-4000-8000-000000000000.webp','/server/index.cjs'])expect((await api.get(STATIC+route)).status()).toBe(404);
+  for(const route of ['/assets/uploads/00000000-0000-4000-8000-000000000000.webp','/backend/index.cjs'])expect((await api.get(STATIC+route)).status()).toBe(404);
   const html=await api.get(STATIC+'/catalogo');expect(html.status()).toBe(200);
   expect(html.headers()['content-security-policy']).toContain(API);
   const allowed=await api.fetch('/api/auth/login',{method:'OPTIONS',headers:{Origin:STATIC,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'authorization,content-type'}});

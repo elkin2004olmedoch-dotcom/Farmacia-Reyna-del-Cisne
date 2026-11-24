@@ -24,7 +24,7 @@ test('las páginas públicas cargan las mascotas y sus sprites sin depender de R
     assert.match(html,/js\/mascota\.js/,`${page} incluye el widget`);
     assert.doesNotMatch(html,/js\/live-site\.js/,`${page} no redirige a Render`);
   }
-  for(const file of ['frontend/controllers/mascota.js','frontend/assets/mascotas/widget.css','frontend/assets/mascotas/widget-responsive.css','frontend/assets/mascotas/sprites/manifest.json','frontend/assets/mascotas/sprites/goti.png','frontend/assets/mascotas/sprites/farmi.png','frontend/assets/mascotas/sprites/boti.png'])
+  for(const file of ['src/controllers/mascota.js','src/assets/mascotas/widget.css','src/assets/mascotas/widget-responsive.css','src/assets/mascotas/sprites/manifest.json','src/assets/mascotas/sprites/goti.png','src/assets/mascotas/sprites/farmi.png','src/assets/mascotas/sprites/boti.png'])
     assert.ok(fs.existsSync(path.join(__dirname,'..',file)),`${file} se publica con Pages`);
 });
 test('activar la URL pública actualiza la configuración sin reactivar una caché retirada',t=>{

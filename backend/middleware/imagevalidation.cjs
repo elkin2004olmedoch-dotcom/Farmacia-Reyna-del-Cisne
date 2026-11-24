@@ -1,7 +1,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const {AppError}=require('./errors.cjs');
-const FRONTEND_ROOT=path.resolve(__dirname,'../../frontend');
+const FRONTEND_ROOT=path.resolve(__dirname,'../../src');
 const UPLOAD_PATTERN=/^assets\/uploads\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.webp$/;
 const IMAGE_PATTERN=/^assets\/images\/[a-z0-9-]+\.(?:jpg|png|webp|svg)$/;
 const MAX_BYTES=2*1024*1024;

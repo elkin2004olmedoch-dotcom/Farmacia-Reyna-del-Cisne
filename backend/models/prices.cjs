@@ -1,7 +1,7 @@
 const {Prisma}=require('./prisma-client.cjs');
 const {inclusiveTax}=require('./fiscal.cjs');
 const {sellableStock,ecuadorDay}=require('./inventario.cjs');
-const {allowsPromotion}=require('../../frontend/models/pharmacy-policy.js');
+const {allowsPromotion}=require('../../src/models/pharmacy-policy.js');
 
 function visibleWhere(now=new Date()) {
   return {activa:true,producto:{activo:true,soloConsulta:false,requiereReceta:false,controlado:false,biologico:false},AND:[{OR:[{inicio:null},{inicio:{lte:now}}]},{OR:[{fin:null},{fin:{gt:now}}]}]};

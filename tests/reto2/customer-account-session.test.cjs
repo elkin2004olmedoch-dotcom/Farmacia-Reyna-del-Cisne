@@ -18,7 +18,7 @@ function harness(file,overrides={}){
  const elements=new Map(),body=new Element('body'),messages=[],auth={user:{id:'account-a',role:'user'}},events=new EventTarget();
  const document={body,createElement:()=>{const node=new Element();body.children.push(node);return node;},getElementById:id=>elements.get(id)||body.children.find(node=>node.id===id&&node.isConnected)||null,querySelectorAll:()=>[]};
  const sandbox={auth,events,document,window:{addEventListener(){}},Event,Option:class extends Element{constructor(text,value){super();this.textContent=text;this.value=value;}},MutationObserver:class{observe(){}disconnect(){}},customerAccount:{favorites:async()=>[],...overrides},cart:{read:()=>({}),write(){}},mergeReorder(){},accountPanels(){},addressList(){},favoritesList(){},reorderView(){},busy:(node,value)=>{node.disabled=value;},message:text=>messages.push(text),confirmAction:async()=>true};
- const source=fs.readFileSync('frontend/controllers/'+file,'utf8').replace(/^import .*;\r?$/gm,'').replace(/^export /gm,'');
+ const source=fs.readFileSync('src/controllers/'+file,'utf8').replace(/^import .*;\r?$/gm,'').replace(/^export /gm,'');
  vm.runInNewContext(source,sandbox,{filename:file});
  return {sandbox,elements,body,messages,auth,events,document,switchUser(){auth.user={id:'account-b',role:'user'};events.dispatchEvent(new Event('session:changed'));}};
 }

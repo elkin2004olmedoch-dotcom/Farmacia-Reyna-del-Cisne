@@ -2,7 +2,7 @@
 const crypto=require('node:crypto');
 const {escape,parseXml}=require('./sri-crypto.cjs');
 const {AppError}=require('../middleware/errors.cjs');
-const EC=require('../../frontend/models/ecuador.js');
+const EC=require('../../src/models/ecuador.js');
 const taxCodes={0:'0',13:'10',14:'3',15:'4'};
 const money=cents=>(cents/100).toFixed(2);
 const cents=value=>Math.round(Number(value)*100);

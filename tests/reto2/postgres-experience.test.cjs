@@ -8,9 +8,9 @@ test('PostgreSQL temporal: cuenta, reseñas, constraints y RLS de las tablas nue
  const name='farmacia_test_experiencia_'+randomUUID().replaceAll('-','');assert.match(name,/^farmacia_test_experiencia_[a-f0-9]+$/);await control.$executeRawUnsafe('CREATE DATABASE "'+name+'"');url.pathname='/'+name;
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-pg-experiencia-')),env={};for(const key of ['SystemRoot','PATH','Path','TEMP','TMP','USERPROFILE','LOCALAPPDATA','NODE_OPTIONS'])if(process.env[key])env[key]=process.env[key];
  Object.assign(env,{NODE_ENV:'test',DATABASE_URL:url.href,JWT_SECRET:randomBytes(48).toString('hex'),CORS_ORIGIN:'http://localhost:3000',ADMIN_EMAIL:'pg-experiencia@example.ec',ADMIN_PASSWORD:'SyntheticPG2026!',UPLOAD_DIR:path.join(directory,'uploads'),IMAGE_STORAGE:'local',EMAIL_VERIFICATION_ENABLED:'false',CUSTOMER_REGISTRATION_REQUIRE_EMAIL:'false'});
- execFileSync(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/postgresql/schema.prisma'],{env,stdio:'pipe',windowsHide:true});
- execFileSync(process.execPath,['server/prisma/seed.cjs'],{env,stdio:'pipe',windowsHide:true});Object.assign(process.env,env);
- const config=require('../../server/config.cjs')(),request=require('supertest')(require('../../server/app.cjs')(config));db=require('../../server/models/db.cjs');
+ execFileSync(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy','--schema','backend/prisma/postgresql/schema.prisma'],{env,stdio:'pipe',windowsHide:true});
+ execFileSync(process.execPath,['backend/prisma/seed.cjs'],{env,stdio:'pipe',windowsHide:true});Object.assign(process.env,env);
+ const config=require('../../backend/config.cjs')(),request=require('supertest')(require('../../backend/app.cjs')(config));db=require('../../backend/models/db.cjs');
  const jwt=require('jsonwebtoken'),headers=user=>({Authorization:'Bearer '+jwt.sign({version:user.tokenVersion},config.secret,{subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'})});
  const make=nombre=>db.usuario.create({data:{nombre,email:randomUUID()+'@example.ec',telefono:'+593991234567',passwordHash:'synthetic-hash'}}),a=await make('Ana Pérez'),b=await make('Luis Mora'),product=await db.producto.findFirst({where:{activo:true}});
  const address={alias:'Casa',provincia:'Pichincha',ciudad:'Puerto Quito',direccion:'Calle principal s/n frente al parque',codigoPostal:'170950'};

@@ -38,7 +38,7 @@ test('PostgreSQL aislado: migraciones, API, entrega, fiscalidad, permisos e impo
   return {client,url:target.href};
  }
  function migrate(provider,databaseUrl){
-  const source=path.join(root,'server/prisma',provider==='postgresql'?'postgresql':'');
+  const source=path.join(root,'backend/prisma',provider==='postgresql'?'postgresql':'');
   const copied=path.join(directory,provider);if(!fs.existsSync(copied)){
    fs.mkdirSync(copied);fs.copyFileSync(path.join(source,'schema.prisma'),path.join(copied,'schema.prisma'));
    fs.cpSync(path.join(source,'migrations'),path.join(copied,'migrations'),{recursive:true});
@@ -51,10 +51,10 @@ test('PostgreSQL aislado: migraciones, API, entrega, fiscalidad, permisos e impo
  const main=await database('api');migrate('postgresql',main.url);
  Object.assign(process.env,env,{DATABASE_URL:main.url});
  require('dotenv').config=()=>({parsed:{}});
- execFileSync(process.execPath,['-e',`require(${JSON.stringify(require.resolve('dotenv'))}).config=()=>({parsed:{}});require(${JSON.stringify(path.join(root,'server/prisma/seed.cjs'))});`],{cwd:directory,env:{...env,DATABASE_URL:main.url},stdio:'pipe',windowsHide:true});
- const db=require('../../server/models/db.cjs');clients.push(db);
- const api=require('supertest')(require('../../server/app.cjs')());
- const sri=require('../../server/models/sri-document.cjs'),sriFixture=require('./sri-fixture.cjs');
+ execFileSync(process.execPath,['-e',`require(${JSON.stringify(require.resolve('dotenv'))}).config=()=>({parsed:{}});require(${JSON.stringify(path.join(root,'backend/prisma/seed.cjs'))});`],{cwd:directory,env:{...env,DATABASE_URL:main.url},stdio:'pipe',windowsHide:true});
+ const db=require('../../backend/models/db.cjs');clients.push(db);
+ const api=require('supertest')(require('../../backend/app.cjs')());
+ const sri=require('../../backend/models/sri-document.cjs'),sriFixture=require('./sri-fixture.cjs');
  let adminAuth,userAuth,driverAuth,otherAuth,product,order,delivery,snapshot;
  const buyer={name:'Cliente PostgreSQL',email:'postgres-user@example.ec',phone:'0979275988',documentType:'cedula',document:'0102030400',delivery:'delivery',province:'Pichincha',city:'Puerto Quito',address:'Avenida Sintetica numero 123',postalCode:'',zonaEntregaId:'puerto-quito'};
  const zone={nombre:'Todo Puerto Quito',provincia:'Pichincha',canton:'Puerto Quito',tarifaCentavos:230,ivaCategoria:'general',fundamentoIva:null,activa:true};

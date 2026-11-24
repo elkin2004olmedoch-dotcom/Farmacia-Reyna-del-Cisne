@@ -1,15 +1,15 @@
 'use strict';
 const {test,after}=require('node:test'),assert=require('node:assert/strict');
 const {randomUUID}=require('node:crypto'),jwt=require('jsonwebtoken'),express=require('express'),supertest=require('supertest');
-const {db}=require('./fixture.cjs'),{errorHandler,AppError}=require('../../server/middleware/errors.cjs');
-const {createBilling}=require('../../server/models/sri.cjs'),crypt=require('../../server/models/sri-crypto.cjs');
+const {db}=require('./fixture.cjs'),{errorHandler,AppError}=require('../../backend/middleware/errors.cjs');
+const {createBilling}=require('../../backend/models/sri.cjs'),crypt=require('../../backend/models/sri-crypto.cjs');
 const fixture=require('./sri-fixture.cjs'),cert=fixture.certificateFixture();
 const captures={receives:0,authorizations:0,signed:null,key:null,mode:'success'},transport={
   async receive(env,xml,key){captures.receives++;captures.signed=xml;captures.key=key;if(captures.mode==='offline')throw new AppError(502,'SRI_UNAVAILABLE','SRI test offline');return {estado:captures.mode==='returned'?'DEVUELTA':'RECIBIDA',mensajes:[]};},
   async authorize(env,key){captures.authorizations++;if(captures.mode==='offline')throw new AppError(502,'SRI_UNAVAILABLE','SRI test offline');return captures.mode==='pending'?{estado:'EN_PROCESO',mensajes:[]}:captures.mode==='denied'?{estado:'NO_AUTORIZADA',mensajes:[]}:{estado:'AUTORIZADA',numeroAutorizacion:key,fechaAutorizacion:new Date('2026-10-11T15:00:00Z'),comprobante:captures.signed,mensajes:[]};}
 };
 const config={secret:process.env.JWT_SECRET},billing=createBilling({db,secret:config.secret,transport});
-const app=express();app.use('/api',require('../../server/routes/sri.cjs')(config,{db,transport}));app.use(errorHandler);const request=supertest(app);
+const app=express();app.use('/api',require('../../backend/routes/sri.cjs')(config,{db,transport}));app.use(errorHandler);const request=supertest(app);
 let admin,user,other,adminToken,userToken,otherToken,product,orderId,invoiceId;
 const token=account=>jwt.sign({version:account.tokenVersion},config.secret,{subject:account.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'1h'});
 const authorization=value=>'Bearer '+value;

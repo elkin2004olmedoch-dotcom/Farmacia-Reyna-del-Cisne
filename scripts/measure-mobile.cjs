@@ -6,7 +6,7 @@ const {trackNetwork,settleNetwork}=require('./browser-network.cjs');
 const root=path.resolve(__dirname,'..');process.chdir(root);
 const args=process.argv.slice(2),label=args.shift()||'sample';
 if(!/^[a-z0-9-]{1,50}$/.test(label))throw new Error('Etiqueta inválida.');
-let frontendRoot=path.join(root,'frontend'),publicOrigin=null,sampleCount=3;
+let frontendRoot=path.join(root,'src'),publicOrigin=null,sampleCount=3;
 for(let i=0;i<args.length;i++){
  if(args[i]==='--frontend-root')frontendRoot=path.resolve(args[++i]);
  else if(args[i]==='--public')publicOrigin='https://farmacia-reyna-del-cisne-pruebas.pages.dev';
@@ -60,7 +60,7 @@ async function measure(origin){
 (async()=>{
  let server,db,origin=publicOrigin;
  try{
-  if(!origin){process.env.IMAGE_STORAGE='local';({db}=require('../tests/reto2/fixture.cjs'));const settings=require('../server/config.cjs')();const app=require('../server/app.cjs')({...settings,frontendRoot});server=app.listen(0,'127.0.0.1');await new Promise(resolve=>server.listening?resolve():server.once('listening',resolve));origin='http://127.0.0.1:'+server.address().port;settings.origins.push(origin);}
+  if(!origin){process.env.IMAGE_STORAGE='local';({db}=require('../tests/reto2/fixture.cjs'));const settings=require('../backend/config.cjs')();const app=require('../backend/app.cjs')({...settings,frontendRoot});server=app.listen(0,'127.0.0.1');await new Promise(resolve=>server.listening?resolve():server.once('listening',resolve));origin='http://127.0.0.1:'+server.address().port;settings.origins.push(origin);}
   const report=await measure(origin),output=path.join(os.tmpdir(),'farmacia-experiencia-rendimiento-'+label+'.json');fs.writeFileSync(output,JSON.stringify(report,null,2));console.log('RESULT '+output);if(report.samples.some(row=>row.errors.length||row.failed.length||row.overflow))throw new Error('La medición encontró errores o desbordamiento.');
  }finally{if(server)await new Promise(resolve=>server.close(resolve));if(db)await db.$disconnect();}
 })().catch(error=>{console.error(error.stack);process.exitCode=1;});

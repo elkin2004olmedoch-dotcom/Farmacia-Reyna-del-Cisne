@@ -1,3 +1,3 @@
-import {mascotaController} from '../frontend/controllers/mascota.js';
+import {mascotaController} from '../src/controllers/mascota.js';
 
 mascotaController();

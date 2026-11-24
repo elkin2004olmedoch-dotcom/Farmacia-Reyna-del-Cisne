@@ -8,7 +8,7 @@ El [CI 41367361651](https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-d
 
 - 313/313 Node con SQLite/PostgreSQL temporales y cero omisiones.
 - 138/138 recorridos de navegador en escritorio y móvil.
-- 22/22 comprobaciones de frontend/API en dominios separados.
+- 22/22 comprobaciones de src/API en dominios separados.
 - 38 pruebas históricas, 16 casos móviles en PostgreSQL temporal y npm audit.
 
 Las pruebas cubren carrito con imágenes, tarifa modificable y cambio de cotización, pedidos, permisos, seguimiento, mapa voluntario y órdenes de Farmi. Se corrigió un refresco duplicado del resumen y se conserva un refresco posterior cuando la primera lectura precede a una escritura. El temporizador de stock se comprueba sin reproducir todos los frames de animación. Las cifras de suites focales se solapan y no se suman como pruebas independientes.

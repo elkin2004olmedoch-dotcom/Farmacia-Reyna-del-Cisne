@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const policy=require('../../frontend/models/pharmacy-policy.js');
+const policy=require('../../src/models/pharmacy-policy.js');
 
 test('un artículo sin restricciones conserva compra y promoción permitidas',()=>{
   const product={requiereReceta:false,controlado:false,biologico:false,cadenaFrio:false};
@@ -18,7 +18,7 @@ test('un producto ausente no se trata como apto para comprar o promocionar',()=>
   assert.equal(policy.requiresProfessionalReview(null),true);assert.equal(policy.allowsPromotion(null),false);assert.ok(policy.restrictionReason(null));
 });
 test('el precio público de un producto restringido no aplica campañas ni descuentos promocionales',()=>{
-  const {effectivePrice}=require('../../server/models/prices.cjs');
+  const {effectivePrice}=require('../../backend/models/prices.cjs');
   const now=new Date(),promotion={id:'campana',activa:true,vistaPrevia:false,descuentoPorcentaje:50,orden:0};
   for(const field of ['requiereReceta','controlado','biologico']){
     const priced=effectivePrice({id:'restringido',precio:10,stock:3,activo:true,descuentoPorcentaje:20,ivaCategoria:'general',lotes:[],[field]:true},[promotion],now);

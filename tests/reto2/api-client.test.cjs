@@ -3,10 +3,10 @@ const assert=require('node:assert/strict');
 const originalFetch=global.fetch;
 global.sessionStorage={getItem:()=>null,removeItem(){}};
 afterEach(()=>{global.fetch=originalFetch;});
-const client=()=>import('../../frontend/models/api.js');
+const client=()=>import('../../src/models/api.js');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 test('fallo de red al salir conserva la sesión visible para poder reintentar',async()=>{
- const {auth}=await import('../../frontend/models/auth.js');auth.save({usuario:{id:'synthetic-user',role:'user'}});
+ const {auth}=await import('../../src/models/auth.js');auth.save({usuario:{id:'synthetic-user',role:'user'}});
  global.fetch=async()=>Response.json({error:{message:'Temporal'}},{status:503});
  await assert.rejects(auth.logout());assert.equal(auth.user.id,'synthetic-user');auth.clear();
 });
@@ -76,14 +76,14 @@ test('retirar ubicación permite completar el DELETE al cerrar sin cookies ni re
 });
 
 test('un registro todavía pendiente consulta sólo su permiso y conserva la sesión visible',async()=>{
-  const {auth}=await import('../../frontend/models/auth.js'),seen=[];
+  const {auth}=await import('../../src/models/auth.js'),seen=[];
   global.fetch=async url=>{seen.push(url);return Response.json({data:{verified:false}},{status:202});};
   assert.equal(await auth.restore({registrationId:'r'.repeat(43),accept:()=>true}),null);
   assert.deepEqual(seen,['/api/auth/registro-pendiente']);
 });
 
 test('un permiso de registro ausente comprueba la cookie sin renovar ni emitir sesión vencida',async()=>{
-  const {auth}=await import('../../frontend/models/auth.js'),{events}=await import('../../frontend/models/events.js'),seen=[];
+  const {auth}=await import('../../src/models/auth.js'),{events}=await import('../../src/models/events.js'),seen=[];
   let expired=0;const count=()=>expired++;events.addEventListener('session:expired',count);
   global.fetch=async url=>{seen.push(url);return url.endsWith('/registro-pendiente')?new Response(null,{status:204}):Response.json({error:{message:'Sin sesión.'}},{status:401});};
   try{
@@ -93,7 +93,7 @@ test('un permiso de registro ausente comprueba la cookie sin renovar ni emitir s
 });
 
 test('una comprobación de registro interrumpida permite reintentar dentro del minuto de recuperación',async t=>{
-  const {auth}=await import('../../frontend/models/auth.js');let finished=false;
+  const {auth}=await import('../../src/models/auth.js');let finished=false;
   global.fetch=async(url,{signal})=>new Promise((_,reject)=>signal.addEventListener('abort',()=>reject(new DOMException('Aborted','AbortError')),{once:true}));
   t.mock.timers.enable({apis:['setTimeout']});
   const result=auth.restore({registrationId:'r'.repeat(43),accept:()=>true}).then(()=>null,error=>error).then(value=>{finished=true;return value;});

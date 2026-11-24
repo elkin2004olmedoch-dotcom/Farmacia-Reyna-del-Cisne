@@ -1,7 +1,7 @@
 'use strict';
 const {test,after}=require('node:test'),assert=require('node:assert/strict');
 const crypto=require('node:crypto');
-const crypt=require('../../server/models/sri-crypto.cjs'),doc=require('../../server/models/sri-document.cjs'),transport=require('../../server/models/sri-transport.cjs');
+const crypt=require('../../backend/models/sri-crypto.cjs'),doc=require('../../backend/models/sri-document.cjs'),transport=require('../../backend/models/sri-transport.cjs');
 const fixture=require('./sri-fixture.cjs'),certificate=fixture.certificateFixture();
 after(()=>certificate.cleanup());
 const date=new Date('2026-10-11T00:30:00Z');

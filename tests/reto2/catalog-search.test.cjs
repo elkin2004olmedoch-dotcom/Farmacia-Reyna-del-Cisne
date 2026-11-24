@@ -17,13 +17,13 @@ if(target){
 const provider=target?'postgresql':'sqlite';
 Object.assign(process.env,{NODE_ENV:'test',DATABASE_URL:target || 'file:'+path.join(directory,'catalog.db').replaceAll('\\','/'),JWT_SECRET:randomBytes(48).toString('hex'),CORS_ORIGIN:'http://localhost:3000',UPLOAD_DIR:path.join(directory,'uploads')});
 // Migrate a copied schema so Prisma cannot discover a repository .env.
-const source=path.join(root,'server/prisma',target?'postgresql':'');
+const source=path.join(root,'backend/prisma',target?'postgresql':'');
 fs.copyFileSync(path.join(source,'schema.prisma'),path.join(directory,'schema.prisma'));
 fs.cpSync(path.join(source,'migrations'),path.join(directory,'migrations'),{recursive:true});
 execFileSync(process.execPath,[path.join(root,'node_modules/prisma/build/index.js'),'migrate','deploy','--schema',path.join(directory,'schema.prisma')],{cwd:directory,env:process.env,stdio:'pipe',windowsHide:true});
 require('dotenv').config=()=>({parsed:{}});
-const db=require('../../server/models/db.cjs');
-const api=require('supertest')(require('../../server/app.cjs')());
+const db=require('../../backend/models/db.cjs');
+const api=require('supertest')(require('../../backend/app.cjs')());
 const ids=items=>items.map(item=>item.id);
 const product=(id,extra={})=>({id,nombre:id,precio:10,stock:10,categoria:'cuidado',descripcion:'Catálogo sintético',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase de prueba',createdAt:new Date('2026-01-01T00:00:00Z'),...extra});
 before(async()=>{

@@ -1,6 +1,6 @@
 const {test,expect,apiToken}=require('./browser-fixture.cjs');
 const AxeBuilder=require('@axe-core/playwright').default;
-const {sections}=require('../../frontend/models/catalog-sections.js');
+const {sections}=require('../../src/models/catalog-sections.js');
 const tinyPNG=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGP4fGkRVsQwtCQAJ4yZwRji18kAAAAASUVORK5CYII=','base64');
 async function closeCartDrawer(page){
   const drawer=page.locator('#cart-drawer');await expect(drawer).toBeVisible();await drawer.locator('[data-cart-close]').first().click();await expect(drawer).toBeHidden();

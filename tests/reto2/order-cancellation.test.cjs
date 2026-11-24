@@ -79,8 +79,8 @@ test('domicilio cancelado limpia destino, seguimiento, nonce e intentos sin soli
  assert.equal(stored.reparto.codigoIntentos,0);assert.equal(stored.reparto.version,2);
 });
 test('sesión revocada durante la operación no autoriza cancelación',async()=>{
- const {order}=await makeOrder(),sessions=require('../../server/models/sesiones-web.cjs'),{row}=await sessions.create(owner);
+ const {order}=await makeOrder(),sessions=require('../../backend/models/sesiones-web.cjs'),{row}=await sessions.create(owner);
  await db.sesionWeb.update({where:{id:row.id},data:{revokedAt:new Date()}});
- await assert.rejects(require('../../server/models/pedidos.cjs').cancelOwn(order.id,{esperadoUpdatedAt:order.updatedAt},{...owner,webSession:row.id}),e=>e.code==='INVALID_TOKEN');
+ await assert.rejects(require('../../backend/models/pedidos.cjs').cancelOwn(order.id,{esperadoUpdatedAt:order.updatedAt},{...owner,webSession:row.id}),e=>e.code==='INVALID_TOKEN');
  assert.equal((await db.pedido.findUnique({where:{id:order.id}})).estado,'pendiente');
 });

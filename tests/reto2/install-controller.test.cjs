@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 test('el navegador retira únicamente registros y cachés de la farmacia sin ofrecer nuevas instalaciones',async t=>{
-  const source=fs.readFileSync('frontend/controllers/install.js','utf8').replace(/^import .*;\r?\n/gm,'');
+  const source=fs.readFileSync('src/controllers/install.js','utf8').replace(/^import .*;\r?\n/gm,'');
   const module=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
   assert.equal(typeof module.retireInstallations,'function');
   const deleted=[],unregistered=[];

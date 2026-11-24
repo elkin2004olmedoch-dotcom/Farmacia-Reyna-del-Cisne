@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 const root=path.resolve(__dirname,'../..');
-const file=path.join(root,'frontend/views/products.js');
+const file=path.join(root,'src/views/products.js');
 const source=fs.readFileSync(file,'utf8').replace(/(from\s+|import\s+)(['"])(\.[^'"]+)\2/g,(_,prefix,quote,specifier)=>prefix+quote+(specifier==='../config.js'?'data:text/javascript;base64,'+Buffer.from('export const productImageUrl=value=>value;').toString('base64'):pathToFileURL(path.resolve(path.dirname(file),specifier)).href)+quote);
 const views=import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 const product=()=>({id:'catalog-test',nombre:'Producto de prueba',categoria:'cuidado',descripcion:'Descripción del catálogo.',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase de prueba',precio:8,precioOriginal:10,descuentoPorcentaje:20,stock:4,ivaPorcentaje:15,laboratorio:'Laboratorio <prueba>',presentacion:'Caja de 20 unidades',principioActivo:'Dato del producto',concentracion:'10 mg',registroSanitario:'REG-PRUEBA',pvpMaximo:10});
@@ -62,7 +62,7 @@ test('referencias de consulta ocultan importes técnicos, stock y compra en tarj
 });
 
 test('favoritos y recompra conservan el precio histórico y ocultan valores comerciales pendientes',async()=>{
-  const {favoritesList,reorderView}=await import(pathToFileURL(path.join(root,'frontend/views/customer-account.js')).href);
+  const {favoritesList,reorderView}=await import(pathToFileURL(path.join(root,'src/views/customer-account.js')).href);
   const target={innerHTML:''};favoritesList(target,[{producto:{...product(),activo:true,soloConsulta:true,precio:17}}]);
   assert.match(target.innerHTML,/Consultar precio y disponibilidad/);assert.doesNotMatch(target.innerHTML,/17[,.]00/);
   reorderView(target,{items:[{productoId:'catalog-test',nombre:'Referencia consultable',soloConsulta:true,stock:5,cantidadPermitida:0,precioAnteriorCentavos:800,precioActualCentavos:1700,incidencias:['SOLO_CONSULTA']}]},{});

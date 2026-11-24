@@ -1,5 +1,5 @@
 const {test,expect,apiToken}=require('./browser-fixture.cjs');
-const {Prisma}=require('../../server/models/prisma-client.cjs');
+const {Prisma}=require('../../backend/models/prisma-client.cjs');
 const AxeBuilder=require('@axe-core/playwright').default;
 async function adminPage(page,request,table){const token=await apiToken(request,'admin-browser@example.ec','AdminBrowser2026!');await page.addInitScript(token=>sessionStorage.setItem('farmacia-mvc-token',token),token);await page.goto('/admin.html?tabla='+table);await expect(page.locator('#admin-area')).toBeVisible();return token;}
 

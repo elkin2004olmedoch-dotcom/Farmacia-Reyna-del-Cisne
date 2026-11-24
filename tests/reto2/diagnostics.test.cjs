@@ -17,7 +17,7 @@ test('diagnóstico optativo mide HTTP y SQL sin registrar parámetros ni secreto
     assert.match(response.headers['server-timing']||'',/express_headers;dur=\d/);
     const privateResponse=await request.get('/api/pedidos');assert.equal(privateResponse.status,401);
     await db.$queryRaw`SELECT ${secret}`;
-    await require('../../server/diagnostics.cjs').connect(db);
+    await require('../../backend/diagnostics.cjs').connect(db);
     const concurrent=await Promise.all([request.get('/api/salud'),request.get('/api/productos?pageSize=4')]);
     assert.notEqual(concurrent[0].headers['x-request-id'],concurrent[1].headers['x-request-id']);
     const events=messages.map(message=>JSON.parse(message));
@@ -47,7 +47,7 @@ test('diagnóstico desactivado no agrega cabeceras ni eventos y la portada no co
 });
 
 test('el arranque diagnóstico escucha sin forzar una conexión Prisma',async()=>{
-  const child=spawn(process.execPath,['server/index.cjs'],{env:{...process.env,PERF_DIAGNOSTICS:'1',PORT:'0',HOST:'127.0.0.1'},stdio:['ignore','pipe','pipe'],windowsHide:true});
+  const child=spawn(process.execPath,['backend/index.cjs'],{env:{...process.env,PERF_DIAGNOSTICS:'1',PORT:'0',HOST:'127.0.0.1'},stdio:['ignore','pipe','pipe'],windowsHide:true});
   const events=[];let pending='';
   try{
     await new Promise((resolve,reject)=>{

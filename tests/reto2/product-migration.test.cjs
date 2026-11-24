@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),os=require('node:os'),{execFileSync}=require('node:child_process'),{randomBytes}=require('node:crypto');
 test('016 y 017 conservan productos históricos y la edición versionada de promociones',async t=>{
- const root=path.resolve(__dirname,'../..'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-migracion-productos-')),schema=path.join(directory,'schema.prisma'),source=path.join(root,'server/prisma'),url='file:'+path.join(directory,'legacy.db').replaceAll('\\','/'),env={};
+ const root=path.resolve(__dirname,'../..'),directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-migracion-productos-')),schema=path.join(directory,'schema.prisma'),source=path.join(root,'backend/prisma'),url='file:'+path.join(directory,'legacy.db').replaceAll('\\','/'),env={};
  for(const key of ['SystemRoot','PATH','Path','TEMP','TMP','USERPROFILE','LOCALAPPDATA','NODE_OPTIONS'])if(process.env[key])env[key]=process.env[key];Object.assign(env,{NODE_ENV:'test',DATABASE_URL:url,JWT_SECRET:randomBytes(48).toString('hex'),CORS_ORIGIN:'http://localhost:3000',IMAGE_STORAGE:'local',EMAIL_VERIFICATION_ENABLED:'false',CUSTOMER_REGISTRATION_REQUIRE_EMAIL:'false'});
  fs.copyFileSync(path.join(source,'schema.prisma'),schema);fs.cpSync(path.join(source,'migrations'),path.join(directory,'migrations'),{recursive:true,filter:file=>!file.includes('202611100016_product_api_sync')&&!file.includes('202611100017_catalog_sections')});
  const migrate=()=>execFileSync(process.execPath,[path.join(root,'node_modules/prisma/build/index.js'),'migrate','deploy','--schema',schema],{env,stdio:'pipe',windowsHide:true});migrate();
@@ -12,7 +12,7 @@ test('016 y 017 conservan productos históricos y la edición versionada de prom
  await legacy.$executeRaw`INSERT INTO "Promocion" ("id","titulo","descripcion","etiqueta","productoId") VALUES ('legacy-promo','Campaña histórica','Descripción histórica','Cuidado','legacy-product')`;
  for(const name of ['202611100016_product_api_sync','202611100017_catalog_sections'])fs.cpSync(path.join(source,'migrations',name),path.join(directory,'migrations',name),{recursive:true});
  migrate();Object.assign(process.env,env);
- const request=require('supertest')(require('../../server/app.cjs')()),jwt=require('jsonwebtoken');db=require('../../server/models/db.cjs');
+ const request=require('supertest')(require('../../backend/app.cjs')()),jwt=require('jsonwebtoken');db=require('../../backend/models/db.cjs');
  const headers={Authorization:'Bearer '+jwt.sign({version:0},env.JWT_SECRET,{subject:'legacy-admin',issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'})};
  const historical=(await request.get('/api/productos/legacy-product').expect(200)).body.data;
  assert.equal(historical.soloConsulta,false);assert.equal(Number(historical.precio),5);assert.equal(historical.stock,10);

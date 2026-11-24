@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {createConsultation}=require('../../server/controllers/consulta-goti.cjs');
+const {createConsultation}=require('../../backend/controllers/consulta-goti.cjs');
 const run=(consult,pregunta,extra={})=>consult({body:{pregunta,...extra}},{json:({data})=>data});
 const generated=plan=>Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(plan)}]}}]});
 

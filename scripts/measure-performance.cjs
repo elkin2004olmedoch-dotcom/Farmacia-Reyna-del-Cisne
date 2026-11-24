@@ -16,7 +16,7 @@ const round=n=>Math.round(n*100)/100;
 (async()=>{
   await new Promise(resolve=>server.listening?resolve():server.once('listening',resolve));
   const base='http://127.0.0.1:'+server.address().port;
-  const connectionStart=performance.now();await require('../server/diagnostics.cjs').connect(db);const connectMs=round(performance.now()-connectionStart);
+  const connectionStart=performance.now();await require('../backend/diagnostics.cjs').connect(db);const connectMs=round(performance.now()-connectionStart);
   const queries=[];for(let i=0;i<5;i++){const t=performance.now();await db.$queryRaw`SELECT 1`;queries.push(round(performance.now()-t));}
   const api=[];
   for(const route of ['/api/productos?pageSize=100','/api/productos?pageSize=4','/api/promociones'])for(let sample=0;sample<3;sample++){

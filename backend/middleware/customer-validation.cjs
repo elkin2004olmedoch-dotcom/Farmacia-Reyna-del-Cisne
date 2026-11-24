@@ -2,7 +2,7 @@
 const {body,param,query}=require('express-validator');
 const V=require('./validation.cjs');
 const {AppError}=require('./errors.cjs');
-const ec=require('../../frontend/models/ecuador.js');
+const ec=require('../../src/models/ecuador.js');
 const identifier=value=>typeof value==='string'&&/^[a-z0-9][a-z0-9-]{0,79}$/.test(value);
 const plain=value=>typeof value==='string'&&!/[<>\x00-\x1f\x7f]/.test(value);
 const only=fields=>(req,res,next)=>{if(!req.body||typeof req.body!=='object'||Array.isArray(req.body)||Object.keys(req.body).some(key=>!fields.includes(key)))throw new AppError(422,'UNEXPECTED_FIELDS','La solicitud contiene campos no permitidos.');next();};

@@ -1,7 +1,7 @@
-const {restrictionReason}=require('../../frontend/models/pharmacy-policy.js');
-const {pharmacy}=require('../../frontend/models/pharmacy.js');
+const {restrictionReason}=require('../../src/models/pharmacy-policy.js');
+const {pharmacy}=require('../../src/models/pharmacy.js');
 const {AppError}=require('../middleware/errors.cjs');
-const {socialReply,serviceReply,productQuestion,asksAboutLastProduct}=require('../../frontend/models/conversacion.mjs');
+const {socialReply,serviceReply,productQuestion,asksAboutLastProduct}=require('../../src/models/conversacion.mjs');
 
 // The model selects topics. Only the pharmacy supplies statements, prices and availability.
 const answers={

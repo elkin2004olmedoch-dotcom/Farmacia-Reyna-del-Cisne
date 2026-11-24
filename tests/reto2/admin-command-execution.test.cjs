@@ -5,10 +5,10 @@ const {pathToFileURL}=require('node:url');
 const path=require('node:path');
 async function executor(){
   // Browser dependencies are injected; run the actual executor without a DOM.
-  let source=fs.readFileSync(path.join(__dirname,'../../frontend/controllers/admin-companion.js'),'utf8');
+  let source=fs.readFileSync(path.join(__dirname,'../../src/controllers/admin-companion.js'),'utf8');
   source=source.replace(/^import .*;\r?$/gm,'');
-  source=source.replaceAll('import.meta.url',JSON.stringify(pathToFileURL(path.resolve(__dirname,'../../frontend/controllers/admin-companion.js')).href));
-  const parser=pathToFileURL(path.resolve(__dirname,'../../frontend/controllers/admin-command.mjs')).href;
+  source=source.replaceAll('import.meta.url',JSON.stringify(pathToFileURL(path.resolve(__dirname,'../../src/controllers/admin-companion.js')).href));
+  const parser=pathToFileURL(path.resolve(__dirname,'../../src/controllers/admin-command.mjs')).href;
   source=`import {interpretAdminCommand,ecuadorCommandDay} from '${parser}';\n${source}`;
   const create=(await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'))).createAdminCommandExecutor;
   return options=>create({deliveryModel:{},...options});

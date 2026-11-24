@@ -1,7 +1,7 @@
 const path = require('node:path');
 const {spawnSync} = require('node:child_process');
 const root = path.resolve(__dirname, '..');
-const schema = 'server/prisma/postgresql/schema.prisma';
+const schema = 'backend/prisma/postgresql/schema.prisma';
 
 function httpsOrigin(value, label) {
   let url;
@@ -39,7 +39,7 @@ function productionEnvironment(input) {
     throw new Error('Configura ADMIN_PASSWORD con al menos 10 caracteres, letra y número, y como máximo 72 bytes.');
   }
   const email = (env.ADMIN_EMAIL || '').trim().toLowerCase();
-  if (!require('../frontend/models/ecuador.js').validEmail(email)) throw new Error('Configura ADMIN_EMAIL con un correo válido.');
+  if (!require('../src/models/ecuador.js').validEmail(email)) throw new Error('Configura ADMIN_EMAIL con un correo válido.');
   env.ADMIN_EMAIL = email;
   if (env.IMAGE_STORAGE !== 'supabase') throw new Error('La instancia gratuita requiere IMAGE_STORAGE=supabase para conservar las imágenes.');
   const storage = httpsOrigin(env.SUPABASE_URL || '', 'SUPABASE_URL');
@@ -60,7 +60,7 @@ function runSetup({env = process.env, run = spawnSync, logger = console} = {}) {
   const steps = [['Generar cliente PostgreSQL', ['node_modules/prisma/build/index.js', 'generate', '--schema', schema]]];
   if (productionEnv.MIGRATION_BACKUP_KEY) steps.push(['Verificar respaldo PostgreSQL previo', ['scripts/snapshot-postgres.cjs']]);
   steps.push(['Aplicar migraciones PostgreSQL', ['node_modules/prisma/build/index.js', 'migrate', 'deploy', '--schema', schema]]);
-  if (productionEnv.SKIP_INITIAL_SEED !== 'true') steps.push(['Preparar catálogo y administrador', ['server/prisma/seed.cjs']]);
+  if (productionEnv.SKIP_INITIAL_SEED !== 'true') steps.push(['Preparar catálogo y administrador', ['backend/prisma/seed.cjs']]);
   if (productionEnv.ADMIN_USERNAME) steps.push(['Configurar acceso administrativo', ['scripts/provision-admin.cjs']]);
   steps.push(['Incorporar referencias verificadas para consulta', ['scripts/sync-catalog.cjs']]);
   steps.push(['Generar frontend', ['scripts/build-frontend.cjs']]);

@@ -10,12 +10,12 @@ process.env.NODE_ENV='test';process.env.CORS_ORIGIN='http://localhost:3300';proc
 process.env.EMAIL_VERIFICATION_ENABLED='false';process.env.CUSTOMER_REGISTRATION_REQUIRE_EMAIL='false';process.env.PAYPHONE_ENABLED='false';
 process.env.UPLOAD_DIR=path.join(directory,'uploads');
 process.env.JWT_SECRET=randomBytes(48).toString('hex');process.env.ADMIN_EMAIL='admin-browser@example.ec';process.env.ADMIN_PASSWORD='AdminBrowser2026!';
-const steps=[['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],['server/prisma/seed.cjs']];
+const steps=[['node_modules/prisma/build/index.js','migrate','deploy','--schema','backend/prisma/schema.prisma'],['backend/prisma/seed.cjs']];
 if(process.env.PHARMACY_BROWSER_EXPANDED_CATALOG==='true')steps.push(['scripts/sync-catalog.cjs']);
 for(const args of steps)execFileSync(process.execPath,args,{env:process.env,stdio:'pipe'});
-const settings={...require('../../server/config.cjs')(),testAuthLimit:200,testApiLimit:2000};
+const settings={...require('../../backend/config.cjs')(),testAuthLimit:200,testApiLimit:2000};
 require('./geocoder-fixture.cjs')();
-const createApp=require('../../server/app.cjs'),db=require('../../server/models/db.cjs'),{Prisma}=require('../../server/models/prisma-client.cjs');
+const createApp=require('../../backend/app.cjs'),db=require('../../backend/models/db.cjs'),{Prisma}=require('../../backend/models/prisma-client.cjs');
 // The role catalog is fixed and inserting each user regenerates its assignment.
 const models=Prisma.dmmf.datamodel.models.filter(model=>!['Rol','UsuarioRol'].includes(model.name)),remaining=[...models],ordered=[];
 while(remaining.length){const next=remaining.find(model=>!remaining.some(child=>child.fields.some(field=>field.kind==='object'&&field.type===model.name&&field.relationFromFields?.length)));if(!next)throw new Error('Revisa las relaciones del fixture temporal.');ordered.push(next.name[0].toLowerCase()+next.name.slice(1));remaining.splice(remaining.indexOf(next),1);}
@@ -31,7 +31,7 @@ app.post('/_test/reset',async(req,res)=>{
 app.use((req,res,next)=>runtime(req,res,next));
 const server=app.listen(3300,'127.0.0.1');
 for(const signal of ['SIGTERM','SIGINT'])process.on(signal,()=>server.close(async()=>{
-  await require('../../server/models/db.cjs').$disconnect();
+  await require('../../backend/models/db.cjs').$disconnect();
   if(path.resolve(directory).startsWith(path.resolve(os.tmpdir())+path.sep+'farmacia-browser-'))fs.rmSync(directory,{recursive:true,force:true});
   process.exit(0);
 }));

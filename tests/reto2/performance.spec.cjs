@@ -109,8 +109,8 @@ test('un atlas lento permite mostrar la mascota de respaldo y después recuperar
 
 test('la imagen principal reserva espacio y prioriza su carga',async({page})=>{
   await page.goto('/');
-  const {sections}=require('../../frontend/models/catalog-sections.js');
-  const metadata=await require('sharp')(require('node:path').resolve(__dirname,'../../frontend',sections[0].imagen)).metadata();
+  const {sections}=require('../../src/models/catalog-sections.js');
+  const metadata=await require('sharp')(require('node:path').resolve(__dirname,'../../src',sections[0].imagen)).metadata();
   const image=page.locator('.ref-store-category img').first();
   await expect(image).toHaveAttribute('src',sections[0].imagen);
   await expect(image).toHaveAttribute('width','320');await expect(image).toHaveAttribute('height','240');await expect(image).toHaveAttribute('fetchpriority','high');await expect(image).not.toHaveAttribute('loading','lazy');

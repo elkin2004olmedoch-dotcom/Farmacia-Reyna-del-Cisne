@@ -1,7 +1,7 @@
 'use strict';
 const {test,after}=require('node:test'),assert=require('node:assert/strict'),jwt=require('jsonwebtoken'),{randomUUID}=require('node:crypto');
 const fixture=require('./email-api-fixture.cjs').createFixture(),{db,config}=fixture,api=fixture.api(false);
-const orders=require('../../server/models/pedidos.cjs'),deliveries=require('../../server/models/entregas.cjs');
+const orders=require('../../backend/models/pedidos.cjs'),deliveries=require('../../backend/models/entregas.cjs');
 const token=user=>'Bearer '+jwt.sign({version:user.tokenVersion},config.secret,{algorithm:'HS256',subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'});
 let admin,buyer,courier,other,zone,product;
 after(()=>fixture.close());
@@ -56,7 +56,7 @@ test('incidencias rechazan repartidor ajeno, texto inválido y resolver otra ent
  await assert.rejects(()=>deliveries.incidence(b.entrega.id,{incidenciaId:incident.id,esperadoVersion:b.entrega.version},courier),error=>error.code==='NOT_FOUND');
 });
 test('estimación sólo usa GPS persistido y se invalida al retirar ubicación o cambiar durante OSRM',async()=>{
- const {pedido,entrega}=await ready(),{createRouting}=require('../../server/models/rutas.cjs');
+ const {pedido,entrega}=await ready(),{createRouting}=require('../../backend/models/rutas.cjs');
  const fetch=async url=>new Response(JSON.stringify({code:'Ok',routes:[{distance:1800,duration:240,geometry:{type:'LineString',coordinates:new URL(url).pathname.split('/').at(-1).split(';').map(point=>point.split(',').map(Number))}}]}));
  const service=createRouting({fetch});
  await service.calculate(entrega.id,courier,{latitud:.12,longitud:-79.24});assert.equal((await deliveries.tracking(pedido.id,buyer)).entrega.estimacion,null);
@@ -77,7 +77,7 @@ test('reasignar rota nonce y permisos; la asignación automática también exige
  assert.match((await deliveries.tracking(pedido.id,buyer)).entrega.codigoEntrega,/^\d{6}$/);
 });
 test('GPS a 12 y 24 segundos conserva la última ventana legítima sin recalcular ni prorrogar su caducidad',async t=>{
- const {pedido,entrega}=await ready(),routing=require('../../server/models/rutas.cjs'),original=routing.calculate;let calls=0;
+ const {pedido,entrega}=await ready(),routing=require('../../backend/models/rutas.cjs'),original=routing.calculate;let calls=0;
  const transport=async url=>{calls++;return new Response(JSON.stringify({code:'Ok',routes:[{distance:1800,duration:240,geometry:{type:'LineString',coordinates:new URL(url).pathname.split('/').at(-1).split(';').map(point=>point.split(',').map(Number))}}]}));};
  routing.calculate=routing.createRouting({fetch:transport,now:()=>Date.now()}).calculate;
  t.after(()=>{routing.calculate=original;});t.mock.timers.enable({apis:['Date'],now:Date.now()});
@@ -102,19 +102,19 @@ test('reasignación manual y automática conservan cierre sin código de una ent
  assert.equal(current.estado,'entregada');
 });
 test('ruta con GPS compartido A e input de navegación B usa A y publica ETA con una sola consulta',async()=>{
- const {pedido,entrega}=await ready(),{createRouting}=require('../../server/models/rutas.cjs'),a={latitud:.1259,longitud:-79.248},b={latitud:.123429,longitud:-79.250469};
+ const {pedido,entrega}=await ready(),{createRouting}=require('../../backend/models/rutas.cjs'),a={latitud:.1259,longitud:-79.248},b={latitud:.123429,longitud:-79.250469};
  await deliveries.setLocation(entrega.id,{...a,precision:10,registradaAt:new Date().toISOString(),esperadoGpsVersion:entrega.gpsVersion},courier);await db.entrega.update({where:{id:entrega.id},data:{estimadaHasta:null}});let calls=0,origin;
  const service=createRouting({fetch:async url=>{calls++;const coordinates=new URL(url).pathname.split('/').at(-1).split(';').map(value=>value.split(',').map(Number));origin=coordinates[0];return new Response(JSON.stringify({code:'Ok',routes:[{distance:800,duration:180,geometry:{type:'LineString',coordinates}}]}));}});
  await service.calculate(entrega.id,courier,b);assert.equal(calls,1);assert.deepEqual(origin,[-79.248,.1259]);const tracking=(await api.get('/api/pedidos/'+pedido.id+'/seguimiento').set('Authorization',token(buyer)).expect(200)).body.data;
  assert.equal(tracking.entrega.estimacion.vigente,true);assert.equal(tracking.entrega.estimacion.fuente,'OSRM · FOSSGIS');assert.equal(tracking.entrega.ubicacion.latitud,a.latitud);
 });
 test('sin GPS compartido válido la navegación B conserva su origen y no publica ETA',async()=>{
- const {pedido,entrega}=await ready(),{createRouting}=require('../../server/models/rutas.cjs'),b={latitud:.123429,longitud:-79.250469};let calls=0;
+ const {pedido,entrega}=await ready(),{createRouting}=require('../../backend/models/rutas.cjs'),b={latitud:.123429,longitud:-79.250469};let calls=0;
  const service=createRouting({fetch:async url=>{calls++;const coordinates=new URL(url).pathname.split('/').at(-1).split(';').map(value=>value.split(',').map(Number));assert.deepEqual(coordinates[0],[-79.250469,.123429]);return new Response(JSON.stringify({code:'Ok',routes:[{distance:800,duration:180,geometry:{type:'LineString',coordinates}}]}));}});
  await service.calculate(entrega.id,courier,b);assert.equal(calls,1);assert.equal((await deliveries.tracking(pedido.id,buyer)).entrega.estimacion,null);
 });
 test('retirar el GPS persistido durante OSRM invalida la ruta y no publica ETA ni repite proveedor',async()=>{
- const {pedido,entrega}=await ready(),{createRouting}=require('../../server/models/rutas.cjs');await deliveries.setLocation(entrega.id,{latitud:.1259,longitud:-79.248,precision:10,registradaAt:new Date().toISOString(),esperadoGpsVersion:entrega.gpsVersion},courier);await db.entrega.update({where:{id:entrega.id},data:{estimadaHasta:null}});let calls=0;
+ const {pedido,entrega}=await ready(),{createRouting}=require('../../backend/models/rutas.cjs');await deliveries.setLocation(entrega.id,{latitud:.1259,longitud:-79.248,precision:10,registradaAt:new Date().toISOString(),esperadoGpsVersion:entrega.gpsVersion},courier);await db.entrega.update({where:{id:entrega.id},data:{estimadaHasta:null}});let calls=0;
  const service=createRouting({fetch:async url=>{calls++;await deliveries.clearLocation(entrega.id,courier);const coordinates=new URL(url).pathname.split('/').at(-1).split(';').map(value=>value.split(',').map(Number));return new Response(JSON.stringify({code:'Ok',routes:[{distance:800,duration:180,geometry:{type:'LineString',coordinates}}]}));}});
  await assert.rejects(()=>service.calculate(entrega.id,courier,{latitud:.123429,longitud:-79.250469}),error=>error.code==='DELIVERY_CHANGED');assert.equal(calls,1);assert.equal((await deliveries.tracking(pedido.id,buyer)).entrega.estimacion,null);
 });

@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const v=require('../../frontend/models/ecuador.js'),cards=require('../../frontend/models/card-policy.js');
+const v=require('../../src/models/ecuador.js'),cards=require('../../src/models/card-policy.js');
 const now=new Date('2026-11-03T12:00:00Z');
 test('formulario de tarjeta: cinco marcas, Luhn, vencimiento y CVV de cada marca',()=>{
  for(const [cardNumber,cvv]of [['4111111111111111','123'],['5555555555554444','123'],['378282246310005','1234'],['30569309025904','123'],['6011111111111117','123']]){

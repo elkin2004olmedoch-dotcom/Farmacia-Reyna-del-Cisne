@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const {randomUUID}=require('node:crypto');
 const jwt=require('jsonwebtoken');
 const {db,request}=require('./fixture.cjs');
-const {Prisma}=require('../../server/models/prisma-client.cjs');
+const {Prisma}=require('../../backend/models/prisma-client.cjs');
 const headers=user=>({Authorization:'Bearer '+jwt.sign({version:user.tokenVersion,epoch:user.tokenEpoch??null},process.env.JWT_SECRET,{subject:user.id,issuer:'farmacia-reina',audience:'farmacia-web',expiresIn:'5m'})});
 const admin=async()=>headers(await db.usuario.findFirst({where:{role:'admin',activo:true}}));
 after(()=>db.$disconnect());

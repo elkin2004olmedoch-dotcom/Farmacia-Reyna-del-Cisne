@@ -5,6 +5,8 @@
 | Enlace | Qué puedes ver |
 | --- | --- |
 | [Abrir la farmacia del aula](https://farmacia-reina-del-cisne-aula.onrender.com/index.html) | Portada pública para presentar el catálogo, comprar e iniciar sesión como cliente o administrador. |
+| [Código del frontend · src/](./src/) | Pantallas, estilos y JavaScript que usa el navegador. |
+| [Código del backend · backend/](./backend/) | Servidor Express, rutas de la API, permisos y acceso a la base de datos. |
 | [Abrir Supabase](https://supabase.com/dashboard/org/chodapgnhwgcvaszlngq) | Panel de la organización. Selecciona el proyecto de la farmacia para consultar sus tablas y relaciones. Requiere acceso a la organización. |
 | [Abrir el servicio de la farmacia en Render](https://dashboard.render.com/web/srv-db5sg2ss728c738t3n6g) | Panel del backend principal con el estado y el historial de despliegues. Requiere acceso al servicio. |
 
@@ -27,17 +29,17 @@ Tres capas: presentación HTML/CSS/JavaScript, aplicación Node.js/Express y per
 
 | Ruta | Uso |
 | --- | --- |
-| frontend/ | Aplicación MVC publicada, catálogo, compra y administración |
-| server/ | API REST, autenticación JWT, roles y reglas de negocio |
-| server/prisma/ | Esquema y migraciones SQLite |
-| server/prisma/postgresql/ | Esquema y migraciones PostgreSQL |
+| src/ | Aplicación MVC publicada, catálogo, compra y administración |
+| backend/ | API REST, autenticación JWT, roles y reglas de negocio |
+| backend/prisma/ | Esquema y migraciones SQLite |
+| backend/prisma/postgresql/ | Esquema y migraciones PostgreSQL |
 | scripts/ | Generación de vistas, distribución y comprobaciones |
 | tests/ | Pruebas con datos sintéticos y bases temporales |
 | assets/, js/ y HTML de raíz | Antecedente académico conservado para test:reto1 |
 
-El HTML de frontend/ se genera desde scripts/build-frontend.cjs y scripts/templates/. Cloudflare publica únicamente la salida de scripts/build-pages.cjs; Render mantiene la API existente. [Arquitectura comercial](docs/ARQUITECTURA-COMERCIAL.md).
+El HTML de src/ se genera desde scripts/build-frontend.cjs y scripts/templates/. Cloudflare publica únicamente la salida de scripts/build-pages.cjs; Render mantiene la API existente. [Arquitectura comercial](docs/ARQUITECTURA-COMERCIAL.md).
 
-La ubicación pública y el enlace de retiro usan el mismo marcador de Consulab compartido por el titular, definido en `frontend/models/pharmacy.js`. Abrir **Visítanos** carga el mapa; cerrar la sección lo descarga. Se mantienen los colores vino, rojo y crema. [Revisión y preparación del Reto 2](docs/REVISION-RETO-2-2026-11-03.md).
+La ubicación pública y el enlace de retiro usan el mismo marcador de Consulab compartido por el titular, definido en `src/models/pharmacy.js`. Abrir **Visítanos** carga el mapa; cerrar la sección lo descarga. Se mantienen los colores vino, rojo y crema. [Revisión y preparación del Reto 2](docs/REVISION-RETO-2-2026-11-03.md).
 
 El catálogo consulta páginas de 24 productos y conserva búsqueda, filtros y orden en la URL. La cabecera y el catálogo ofrecen sugerencias con imagen y precio, selección por teclado y coincidencias aproximadas identificadas. Las fichas reúnen compra, disponibilidad, retiro/envío y los datos técnicos registrados. [Catálogo y búsqueda](docs/CATALOGO-Y-BUSQUEDA.md).
 
@@ -114,9 +116,9 @@ La ubicación web requiere permiso del usuario y un navegador activo; el seguimi
 
 | Riesgo | Mitigación aplicada y evidencia |
 | --- | --- |
-| Control de acceso deficiente | JWT firmado, expiración, usuario activo y rol comprobados en servidor; autorización de propietario para pedidos y documentos. Un user recibe 403 al crear productos y 401 sin sesión. [Middleware](server/middleware/auth.cjs), [rutas](server/routes/index.cjs) y [pruebas de API](tests/reto2/api.test.cjs). |
-| Fallos criptográficos | Contraseñas con bcrypt y coste 12; no se devuelven hashes ni se guardan contraseñas en claro. Clave de firma fuera de Git y HTTPS en la publicación. [Autenticación](server/controllers/auth.cjs) y [configuración](server/config.cjs). |
-| Inyección y XSS | Listas de campos permitidos, validación/sanitización con express-validator, consultas Prisma parametrizadas y salida de texto escapada. Entradas inesperadas producen 422; errores centralizados no exponen stack en producción. [Validación](server/middleware/validation.cjs), [errores](server/middleware/errors.cjs) y [vistas](frontend/views/common.js). |
+| Control de acceso deficiente | JWT firmado, expiración, usuario activo y rol comprobados en servidor; autorización de propietario para pedidos y documentos. Un user recibe 403 al crear productos y 401 sin sesión. [Middleware](backend/middleware/auth.cjs), [rutas](backend/routes/index.cjs) y [pruebas de API](tests/reto2/api.test.cjs). |
+| Fallos criptográficos | Contraseñas con bcrypt y coste 12; no se devuelven hashes ni se guardan contraseñas en claro. Clave de firma fuera de Git y HTTPS en la publicación. [Autenticación](backend/controllers/auth.cjs) y [configuración](backend/config.cjs). |
+| Inyección y XSS | Listas de campos permitidos, validación/sanitización con express-validator, consultas Prisma parametrizadas y salida de texto escapada. Entradas inesperadas producen 422; errores centralizados no exponen stack en producción. [Validación](backend/middleware/validation.cjs), [errores](backend/middleware/errors.cjs) y [vistas](src/views/common.js). |
 
 CORS admite orígenes exactos, sin comodín en producción. Los formularios tienen labels, foco visible y mensajes accesibles; el catálogo, carrito y modales se operan con teclado. Las pruebas de navegador verifican accesibilidad, adaptación móvil y manejo de red/401/403/500. Los permisos no dependen de ocultar botones en la interfaz.
 
@@ -196,10 +198,10 @@ Las [diez auditorías del Reto 2](docs/AUDITORIAS-RETO-2.md) siguen la rúbrica 
 | Contenido | Dónde comprobarlo en el mismo proyecto |
 | --- | --- |
 | Reto 1: HTML, CSS, JavaScript, adaptación y teclado | Tienda publicada, catálogo, ficha y carrito; pruebas de tests/ |
-| Reto 2: MVC, Fetch, CRUD, JWT, roles y Prisma | frontend/, server/ y tests/reto2/; administración y compra conectadas a la misma API |
+| Reto 2: MVC, Fetch, CRUD, JWT, roles y Prisma | src/, backend/ y tests/reto2/; administración y compra conectadas a la misma API |
 | Identidad y asistentes | Mismo componente animado y atlas para clientes y administración; órdenes de cada rol con confirmación |
 
-Ejecuta npm test para verificar juntos los dos grupos de pruebas con bases temporales; npm run test:browser y la configuración mascot-browser comprueban los recorridos y Chrome/Brave. Los nombres históricos de carpetas y las auditorías se conservan para trazabilidad. El HTML antiguo de raíz documenta la evolución; la aplicación publicada y servida por Express es frontend/.
+Ejecuta npm test para verificar juntos los dos grupos de pruebas con bases temporales; npm run test:browser y la configuración mascot-browser comprueban los recorridos y Chrome/Brave. Los nombres históricos de carpetas y las auditorías se conservan para trazabilidad. El HTML antiguo de raíz documenta la evolución; la aplicación publicada y servida por Express es src/.
 
 La evaluación se hace sobre el código y el sitio completos. Los secretos, bases comerciales, certificados y respaldos privados permanecen fuera del repositorio. El Reto 3 espera el framework asignado; no se cambia la tecnología actual.
 

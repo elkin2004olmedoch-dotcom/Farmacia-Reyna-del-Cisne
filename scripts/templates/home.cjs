@@ -1,5 +1,5 @@
 // Portada de la tienda MVC; independiente del sitio histórico.
-const {pharmacy}=require('../../frontend/models/pharmacy.js');
+const {pharmacy}=require('../../src/models/pharmacy.js');
 const homePage=categories=>`
 <section class="ref-store-intro section-wrap" id="inicio" aria-labelledby="home-title">
   <div><p class="eyebrow">Tu farmacia en Puerto Quito</p><h1 id="home-title">Lo que necesitas<br> para <em>cuidarte.</em></h1></div>

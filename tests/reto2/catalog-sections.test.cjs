@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const {randomUUID}=require('node:crypto');
 const jwt=require('jsonwebtoken');
 const {db,request}=require('./fixture.cjs');
-const policy=require('../../frontend/models/pharmacy-policy.js');
+const policy=require('../../src/models/pharmacy-policy.js');
 const sectionIds=['bienestar','cuidado','bebe','medicamentos','salud-digestiva','dermocosmetica','proteccion-solar','higiene-bucal','cuidado-capilar','higiene-intima','salud-sexual','primeros-auxilios','equipos-medicos','adulto-mayor','cuidado-ocular-nasal','ortopedia'];
 const buyer={name:'Cliente Secciones',email:'secciones@example.ec',phone:'0991234567',documentType:'cedula',document:'0102030400',delivery:'pickup'};
 const input=patch=>({nombre:'Referencia '+randomUUID().slice(0,8),precio:8,stock:5,categoria:'cuidado',descripcion:'Referencia sintética para comprobar el catálogo',imagen:'assets/images/producto-vitaminas.jpg',alt:'Envase sintético de prueba',...patch});
@@ -42,7 +42,7 @@ test('solo consulta bloquea compra y publicidad sin alterar la clasificación sa
  assert.equal(policy.allowsPurchase({precio:10}),true);
  assert.equal(policy.allowsPurchase(null),false);
  assert.equal(policy.allowsPurchase({requiereReceta:true}),false);
- const {effectivePrice}=require('../../server/models/prices.cjs');
+ const {effectivePrice}=require('../../backend/models/prices.cjs');
  const priced=effectivePrice({...consult,descuentoPorcentaje:25},[{id:'consulta-promo',activa:true,vistaPrevia:false,descuentoPorcentaje:50,orden:0}]);
  assert.equal(Number(priced.precio),10);assert.equal(priced.descuentoPorcentaje,0);assert.equal(priced.promocionId,null);
 });

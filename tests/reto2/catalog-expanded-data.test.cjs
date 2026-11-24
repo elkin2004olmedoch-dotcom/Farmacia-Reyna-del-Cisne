@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {createHash}=require('node:crypto');
 const sharp=require('sharp');
-const {ids,sections}=require('../../frontend/models/catalog-sections.js');
+const {ids,sections}=require('../../src/models/catalog-sections.js');
 const root=path.resolve(__dirname,'../..');
 
 test('el catálogo ampliado contiene 48 referencias para consulta con fotografías exactas y fuentes verificables',async()=>{
@@ -20,7 +20,7 @@ test('el catálogo ampliado contiene 48 referencias para consulta con fotografí
     assert.ok(ids.includes(product.categoria));assert.equal(product.requiereReceta,false);
     for(const [field,max] of [['nombre',120],['laboratorio',120],['presentacion',120],['descripcion',500],['alt',250]])assert.ok(typeof product[field]==='string'&&product[field].length>=2&&product[field].length<=max,product.id+': '+field);
     assert.match(product.imagen,/^assets\/images\/producto-catalogo-[a-z0-9-]+\.webp$/);
-    const photo=fs.readFileSync(path.join(root,'frontend',product.imagen));
+    const photo=fs.readFileSync(path.join(root,'src',product.imagen));
     const source=sources.find(item=>item.id===product.id);assert.ok(source,product.id+': fuente');
     assert.equal(source.nombre,product.nombre);assert.equal(source.presentacion,product.presentacion);assert.equal(source.laboratorio,product.laboratorio);assert.equal(source.imagen,product.imagen);
     for(const field of ['fuenteProducto','fuenteImagen','fuenteEmpresa'])assert.equal(new URL(source[field]).protocol,'https:');
@@ -32,5 +32,5 @@ test('el catálogo ampliado contiene 48 referencias para consulta con fotografí
       assert.equal(product.ivaCategoria,'cero');assert.ok(product.fundamentoIva.length>=8);
     }
   }
-  for(const section of sections){assert.ok(section.imagen);assert.ok(fs.existsSync(path.join(root,'frontend',section.imagen)),section.id+': foto de sección');}
+  for(const section of sections){assert.ok(section.imagen);assert.ok(fs.existsSync(path.join(root,'src',section.imagen)),section.id+': foto de sección');}
 });

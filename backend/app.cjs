@@ -19,7 +19,7 @@ module.exports=function createApp(settings=require('./config.cjs')()) {
   app.get('/api/salud',rateLimit({windowMs:60*1000,limit:60,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'HEALTH_RATE_LIMIT','Espera antes de comprobar la disponibilidad.'))}),require('./controllers/salud.cjs'));
   const apiLimit=process.env.NODE_ENV==='test' && !settings.production && Number.isInteger(settings.testApiLimit) && settings.testApiLimit>0?settings.testApiLimit:300;
   app.use('/api',rateLimit({windowMs:60*1000,limit:apiLimit,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'RATE_LIMIT','Demasiadas solicitudes. Espera un minuto.'))}));
-  app.locals.frontendRoot=settings.frontendRoot || path.join(__dirname,'../frontend');
+  app.locals.frontendRoot=settings.frontendRoot || path.join(__dirname,'../src');
   const {authenticate,roles}=require('./middleware/auth.cjs');
   app.post('/api/admin/imagenes',authenticate(settings),roles('admin'),rateLimit({windowMs:60*1000,limit:10,standardHeaders:'draft-8',legacyHeaders:false,handler:(req,res,next)=>next(new AppError(429,'IMAGE_RATE_LIMIT','Espera un minuto antes de subir más imágenes.'))}),express.json({limit:'3mb',strict:true}),require('./middleware/imagevalidation.cjs').imageValidation,require('./controllers/imagenes.cjs'));
   app.use('/api',require('./routes/sri.cjs')(settings));

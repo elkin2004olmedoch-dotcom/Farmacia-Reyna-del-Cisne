@@ -1,6 +1,6 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const parser=()=>import('../../frontend/controllers/admin-command.mjs');
+const parser=()=>import('../../src/controllers/admin-command.mjs');
 const products=[{id:'curitas',nombre:'Curitas clásicas',activo:true,updatedAt:'2026-10-01T12:00:00Z'}];
 
 test('Goti administra las nuevas secciones y el modo consulta sin exigir un precio comercial',async()=>{

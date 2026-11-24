@@ -37,15 +37,15 @@ let apiServer,staticServer;
 async function close(server){if(server)await new Promise(resolve=>{server.close(resolve);server.closeAllConnections();});}
 async function cleanup(){
   await Promise.all([close(staticServer),close(apiServer)]);
-  const db=require('../../server/models/db.cjs');await db.$disconnect();
+  const db=require('../../backend/models/db.cjs');await db.$disconnect();
   if(path.resolve(directory).startsWith(path.resolve(os.tmpdir())+path.sep+'farmacia-pages-'))fs.rmSync(directory,{recursive:true,force:true});
 }
 async function start(){
-  for(const args of [['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],['server/prisma/seed.cjs']])execFileSync(process.execPath,args,{env:process.env,stdio:'pipe'});
+  for(const args of [['node_modules/prisma/build/index.js','migrate','deploy','--schema','backend/prisma/schema.prisma'],['backend/prisma/seed.cjs']])execFileSync(process.execPath,args,{env:process.env,stdio:'pipe'});
   await buildPages({output,apiOrigin,allowLocal:true});
   const rules=headerRules(path.join(output,'_headers'));
-  const settings={...require('../../server/config.cjs')(),testAuthLimit:200,testApiLimit:2000};
-  require('./geocoder-fixture.cjs')();apiServer=require('../../server/app.cjs')(settings).listen(3302,'127.0.0.1');
+  const settings={...require('../../backend/config.cjs')(),testAuthLimit:200,testApiLimit:2000};
+  require('./geocoder-fixture.cjs')();apiServer=require('../../backend/app.cjs')(settings).listen(3302,'127.0.0.1');
   const app=express();app.disable('x-powered-by');
   const {createProxy}=await import(require('node:url').pathToFileURL(path.join(output,'_worker.js')).href);
   const proxy=createProxy();

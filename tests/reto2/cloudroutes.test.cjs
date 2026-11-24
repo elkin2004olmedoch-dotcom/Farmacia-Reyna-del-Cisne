@@ -11,7 +11,7 @@ const envKeys=['IMAGE_STORAGE','SUPABASE_URL','SUPABASE_SECRET_KEY','SUPABASE_SE
 const originalEnv=Object.fromEntries(envKeys.map(key=>[key,process.env[key]]));
 process.env.IMAGE_STORAGE='local';
 const {db,directory}=require('./fixture.cjs');
-const createApp=require('../../server/app.cjs');
+const createApp=require('../../backend/app.cjs');
 const objects=new Map();const remoteRequests=[];
 const secret='mock-cloud-routes-service-secret';
 const modernSecret='sb_secret_synthetic-cloud-routes-key';

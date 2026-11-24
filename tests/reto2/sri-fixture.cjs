@@ -1,7 +1,7 @@
 'use strict';
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {spawnSync}=require('node:child_process');
-const {opensslPath}=require('../../server/models/sri-crypto.cjs');
+const {opensslPath}=require('../../backend/models/sri-crypto.cjs');
 function certificateFixture(){
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-sri-synthetic-')),password='SyntheticP12TestOnly!';
   const run=args=>{const result=spawnSync(opensslPath(),args,{encoding:'utf8',timeout:12000,maxBuffer:1048576,windowsHide:true,env:{...process.env,FARMACIA_SYNTHETIC_PASSWORD:password}});if(result.status!==0)throw new Error('Synthetic certificate generation failed');};

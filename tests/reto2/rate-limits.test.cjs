@@ -2,8 +2,8 @@ const {test,after}=require('node:test');
 const assert=require('node:assert/strict');
 const supertest=require('supertest');
 const {db}=require('./fixture.cjs');
-const createApp=require('../../server/app.cjs');
-const settings=require('../../server/config.cjs')();
+const createApp=require('../../backend/app.cjs');
+const settings=require('../../backend/config.cjs')();
 after(()=>db.$disconnect());
 test('aumentar intentos en el servidor temporal del navegador no cambia el límite de producción',async()=>{
   const app=createApp({...settings,production:true,testAuthLimit:200,testApiLimit:2000});const request=supertest(app);

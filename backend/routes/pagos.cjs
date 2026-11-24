@@ -11,7 +11,7 @@ module.exports=config=>{
  router.get('/pagos/checkout-configuracion',auth,buyer,controller.checkoutConfiguration);
  router.get('/pedidos/:id/pago',auth,buyer,V.id,V.validated,controller.find);
  router.post('/pedidos/:id/pago/practica',auth,buyer,limit(),V.id,V.validated,(req,res,next)=>{
-  const body=req.body,brands=require('../../frontend/models/card-policy.js').brands;
+  const body=req.body,brands=require('../../src/models/card-policy.js').brands;
   if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).some(key=>!['metodo','marca'].includes(key))||!['card','transfer'].includes(body.metodo)||body.metodo==='card'&&(typeof body.marca!=='string'||!Object.hasOwn(brands,body.marca))||body.metodo==='transfer'&&body.marca!=null)throw new AppError(422,'INVALID_PRACTICE_PAYMENT','Selecciona tarjeta y marca reconocida, o transferencia. No envíes números de tarjeta ni otros datos.');
   req.practiceInput={metodo:body.metodo,marca:body.metodo==='card'?body.marca:null};next();
  },controller.practice);

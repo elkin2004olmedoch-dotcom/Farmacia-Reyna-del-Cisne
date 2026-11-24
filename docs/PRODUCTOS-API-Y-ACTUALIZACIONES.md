@@ -55,7 +55,7 @@ El formulario abandona la comprobación al cerrarse y evita consultas simultáne
 
 ## Secciones y referencias para consulta
 
-El registro compartido de `frontend/models/catalog-sections.js` define las 16 secciones y conserva los códigos `bienestar`, `cuidado` y `bebe`. El recurso `GET /api/productos/filtros` añade `categorias` con identificador, nombre, descripción, imagen y total de referencias activas. `GET /api/productos?categoria=<identificador>` combina la sección con búsqueda, laboratorio, presentación, orden y paginación. Los totales incluyen las fichas para consulta.
+El registro compartido de `src/models/catalog-sections.js` define las 16 secciones y conserva los códigos `bienestar`, `cuidado` y `bebe`. El recurso `GET /api/productos/filtros` añade `categorias` con identificador, nombre, descripción, imagen y total de referencias activas. `GET /api/productos?categoria=<identificador>` combina la sección con búsqueda, laboratorio, presentación, orden y paginación. Los totales incluyen las fichas para consulta.
 
 La migración `202611100017_catalog_sections` añade `Producto.soloConsulta` con valor predeterminado `false` en ambos motores. Las 48 referencias nuevas se incorporan con `soloConsulta=true` y valores técnicos cero de precio y stock. La tienda muestra **Consultar precio y disponibilidad**. El carrito, Goti, favoritos, comparación y recompra respetan el estado. La creación de pedidos devuelve `409 PRODUCT_CONSULTATION_ONLY` antes de reservar existencias o registrar un pago. Las campañas y los avisos de stock bajo aplican sus filtros correspondientes.
 

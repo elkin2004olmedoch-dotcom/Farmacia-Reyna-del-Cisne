@@ -1,7 +1,7 @@
 'use strict';
 const {randomUUID,createHash}=require('node:crypto');
 const template=require('./email-template.cjs');
-const {validEmail}=require('../../frontend/models/ecuador.js');
+const {validEmail}=require('../../src/models/ecuador.js');
 const ENDPOINT='https://api.resend.com/emails';
 const TOKEN=/^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 const escape=template.escape;

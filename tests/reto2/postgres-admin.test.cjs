@@ -9,13 +9,13 @@ test('PostgreSQL aislado cubre recursos y serializa CAS y retiro del último adm
  assert.equal(url.hostname,'127.0.0.1');assert.equal(url.port,String(meta.port));assert.equal(url.username,'farmacia_test');assert.equal(url.password,'');assert.equal(url.pathname,'/farmacia_test');
  const {PrismaClient,Prisma}=require('../../node_modules/.prisma-farmacia-postgresql'),control=new PrismaClient({datasources:{db:{url:url.href}}});
  const database='farmacia_test_admin_'+randomUUID().replaceAll('-','');await control.$executeRawUnsafe('CREATE DATABASE "'+database+'"');url.pathname='/'+database;
- const directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-pg-admin-')),source=path.resolve(__dirname,'../../server/prisma/postgresql'),schema=path.join(directory,'schema.prisma');
+ const directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-pg-admin-')),source=path.resolve(__dirname,'../../backend/prisma/postgresql'),schema=path.join(directory,'schema.prisma');
  fs.copyFileSync(path.join(source,'schema.prisma'),schema);fs.cpSync(path.join(source,'migrations'),path.join(directory,'migrations'),{recursive:true});
  const env={};for(const key of ['SystemRoot','PATH','Path','TEMP','TMP','USERPROFILE','LOCALAPPDATA','NODE_OPTIONS'])if(process.env[key])env[key]=process.env[key];
  Object.assign(env,{NODE_ENV:'test',DATABASE_URL:url.href,JWT_SECRET:randomBytes(48).toString('hex'),CORS_ORIGIN:'http://localhost:3000',UPLOAD_DIR:path.join(directory,'uploads'),IMAGE_STORAGE:'local',EMAIL_VERIFICATION_ENABLED:'false',CUSTOMER_REGISTRATION_REQUIRE_EMAIL:'false'});
  execFileSync(process.execPath,['node_modules/prisma/build/index.js','migrate','deploy','--schema',schema],{env,stdio:'pipe',windowsHide:true});
  Object.assign(process.env,env);require('dotenv').config=()=>({parsed:{}});
- const db=require('../../server/models/db.cjs'),api=require('supertest')(require('../../server/app.cjs')()),jwt=require('jsonwebtoken');
+ const db=require('../../backend/models/db.cjs'),api=require('supertest')(require('../../backend/app.cjs')()),jwt=require('jsonwebtoken');
  t.after(async()=>{await db.$disconnect();await control.$disconnect();});
  const data=(role,label)=>({nombre:label,email:randomUUID()+'@example.ec',telefono:'+593991234567',passwordHash:'synthetic',role});
  const first=await db.usuario.create({data:data('admin','Admin Uno')}),second=await db.usuario.create({data:data('admin','Admin Dos')});

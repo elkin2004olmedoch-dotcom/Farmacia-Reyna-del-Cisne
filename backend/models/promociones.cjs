@@ -3,7 +3,7 @@ const {visibleWhere,discountWhere,effectivePrice,priceLots}=require('./prices.cj
 const fiscal=require('./fiscal.cjs');
 const {AppError}=require('../middleware/errors.cjs');
 const {serializable}=require('./inventario.cjs');
-const {allowsPromotion}=require('../../frontend/models/pharmacy-policy.js');
+const {allowsPromotion}=require('../../src/models/pharmacy-policy.js');
 async function save(data,id,expectedUpdatedAt){
   return db.$transaction(async tx=>{
     const current=id?await tx.promocion.findUnique({where:{id}}):null;

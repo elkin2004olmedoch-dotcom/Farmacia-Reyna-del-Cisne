@@ -21,16 +21,16 @@ function createFixture(){
   function removeDirectory(){if(fs.existsSync(directory))fs.rmSync(checkedDirectory(),{recursive:true,force:true});}
   const database=postgres || 'file:'+path.join(checkedDirectory(),'email.db').replaceAll('\\','/');
   const isolated={SystemRoot:process.env.SystemRoot,PATH:process.env.PATH,TEMP:tempRoot,TMP:tempRoot,NODE_ENV:'test',DATABASE_URL:database,JWT_SECRET:randomBytes(48).toString('hex'),CORS_ORIGIN:'http://localhost:3300',ADMIN_EMAIL:'email-admin@example.ec',ADMIN_PASSWORD:'SyntheticEmailAdmin2026!',UPLOAD_DIR:path.join(directory,'uploads'),IMAGE_STORAGE:'local',PAYPHONE_ENABLED:'false',EMAIL_VERIFICATION_ENABLED:'false',PERF_DIAGNOSTICS:'0',RENDER:'false'};
-  const source=path.join(root,'server/prisma',postgres?'postgresql':''),schema=path.join(checkedDirectory(),'schema');
+  const source=path.join(root,'backend/prisma',postgres?'postgresql':''),schema=path.join(checkedDirectory(),'schema');
   let db;
   try{
     fs.mkdirSync(schema);fs.copyFileSync(path.join(source,'schema.prisma'),path.join(schema,'schema.prisma'));fs.cpSync(path.join(source,'migrations'),path.join(schema,'migrations'),{recursive:true});
     execFileSync(process.execPath,[path.join(root,'node_modules/prisma/build/index.js'),'migrate','deploy','--schema',path.join(schema,'schema.prisma')],{cwd:checkedDirectory(),env:isolated,stdio:'pipe',windowsHide:true});
-    const seedCode=`require(${JSON.stringify(require.resolve('dotenv'))}).config=()=>({parsed:{}});require(${JSON.stringify(path.join(root,'server/prisma/seed.cjs'))});`;
+    const seedCode=`require(${JSON.stringify(require.resolve('dotenv'))}).config=()=>({parsed:{}});require(${JSON.stringify(path.join(root,'backend/prisma/seed.cjs'))});`;
     execFileSync(process.execPath,['-e',seedCode],{cwd:checkedDirectory(),env:isolated,stdio:'pipe',windowsHide:true});
     Object.assign(process.env,isolated);require('dotenv').config=()=>({parsed:{}});
-    require('./geocoder-fixture.cjs')();db=require('../../server/models/db.cjs');const config=require('../../server/config.cjs')();
-    const mail=require('../../server/models/email-delivery.cjs'),createApp=require('../../server/app.cjs'),supertest=require('supertest');
+    require('./geocoder-fixture.cjs')();db=require('../../backend/models/db.cjs');const config=require('../../backend/config.cjs')();
+    const mail=require('../../backend/models/email-delivery.cjs'),createApp=require('../../backend/app.cjs'),supertest=require('supertest');
     const enabled=mail.configuration({NODE_ENV:'test',EMAIL_VERIFICATION_ENABLED:'true',EMAIL_PUBLIC_ORIGIN:'http://localhost:3300',EMAIL_FROM:'confirmar@example.ec',RESEND_API_KEY:'re_synthetic_email_api_not_real'},{origins:config.origins});
     function api(verification=true){return supertest(createApp({...config,testAuthLimit:1000,testApiLimit:10000,emailVerification:verification?enabled:config.emailVerification}));}
     return {db,config,api,provider:postgres?'postgresql':'sqlite',directory,async close(){await db.$disconnect();removeDirectory();}};

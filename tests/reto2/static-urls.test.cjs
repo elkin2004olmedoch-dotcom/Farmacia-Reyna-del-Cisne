@@ -28,7 +28,7 @@ test('tarjetas, ficha y campañas resuelven uploads sin cambiar la imagen persis
   const nodes=new Map(['product-detail','promotions-note','promotions-list'].map(id=>[id,{innerHTML:'',textContent:''}]));
   const restore=globals({staticUrlResolver:value=>{assert.equal(value,upload);return remote;},document:{getElementById:id=>nodes.get(id)}});
   try{
-    const views=await load('frontend/views/products.js',{'../config.js':configStub});
+    const views=await load('src/views/products.js',{'../config.js':configStub});
     const item=product();
     assert.ok(views.productCard(item).includes('src="'+remote+'"'));
     views.productView(item);assert.ok(nodes.get('product-detail').innerHTML.includes('src="'+remote+'"'));
@@ -42,7 +42,7 @@ test('la vista previa administrativa resuelve uploads y conserva vacío oculto',
   const image={hidden:true,src:'',removeAttribute(name){delete this[name];}};
   const restore=globals({staticUrlResolver:value=>{assert.equal(value,upload);return remote;},document:{getElementById:()=>image}});
   try{
-    const {imagePreviewView}=await load('frontend/views/admin.js',{'../config.js':configStub});
+    const {imagePreviewView}=await load('src/views/admin.js',{'../config.js':configStub});
     imagePreviewView('product',upload);assert.equal(image.src,remote);assert.equal(image.hidden,false);
     imagePreviewView('promotion','');assert.equal(image.hidden,true);assert.equal(image.src,undefined);
   }finally{restore();}
@@ -54,7 +54,7 @@ test('ampliar una imagen usa el mismo origen remoto sin alterar el producto',asy
   const dialog={querySelector:()=>image,showModal(){this.open=true;}};
   const restore=globals({staticUrlResolver:value=>{assert.equal(value,upload);return remote;},staticUrlProduct:item,location:{search:'?id='+item.id},document:{getElementById:id=>({'product-detail':target,'detail-quantity':quantity,'image-dialog':dialog})[id]}});
   try{
-    const {productController}=await load('frontend/controllers/catalog.js',{
+    const {productController}=await load('src/controllers/catalog.js',{
       './customer-account.js':'export const connectFavorites=()=>{};',
       './reviews.js':'export const reviewsController=()=>{};',
       '../config.js':configStub,
@@ -75,7 +75,7 @@ test('navegación marca la página actual con URL .html, limpia y raíz',async()
   const element={addEventListener(){}};
   const restore=globals({location:{pathname:'/'},document:{body:{dataset:{page:'home'}},getElementById:id=>id==='admin-nav-overlay'?null:element,querySelectorAll:selector=>selector==='.shop-nav a'?links:[],addEventListener(){}}});
   try{
-    const {layoutController}=await load('frontend/controllers/layout.js',{
+    const {layoutController}=await load('src/controllers/layout.js',{
       './predictive-search.js':'export const predictiveSearch=()=>{};',
       '../models/auth.js':'export const auth={user:null};',
       '../models/cart.js':'export const cart={read:()=>({})};',
@@ -101,7 +101,7 @@ test('inicio registra recuperación antes de leer productos y no bloquea campañ
     watch(refresh){timeline.push('watch');const update=async()=>{try{await refresh();}catch(_){}};watchers.push(update);return update;},
   },document:{getElementById:id=>id==='featured-products'?target:notes},sessionStorage:{getItem:()=>null}});
   try{
-    const {homeController}=await load('frontend/controllers/catalog.js',{
+    const {homeController}=await load('src/controllers/catalog.js',{
       './customer-account.js':'export const connectFavorites=()=>{};',
       './reviews.js':'export const reviewsController=()=>{};',
       '../config.js':configStub,

@@ -40,10 +40,10 @@ test('web: canje de sesión anterior y cookies Secure en producción',async()=>{
  await api.post('/api/auth/web/exchange').set('Authorization','Bearer '+token).send({}).expect(403);
  const exchanged=await api.post('/api/auth/web/exchange').set(web).set('Authorization','Bearer '+token).send({}).expect(200);
  assert.equal(exchanged.body.data.token,undefined);await api.get('/api/auth/me').set('Cookie',cookie(exchanged)).expect(200);
- const {names,options}=require('../../server/models/sesiones-web.cjs');
+ const {names,options}=require('../../backend/models/sesiones-web.cjs');
  assert.equal(names({production:true}).access,'__Host-farmacia-access');assert.equal(options({production:true}).secure,true);
  await api.get('/api/auth/me').set('Cookie',cookie(exchanged)).set('Authorization','Bearer invalid').expect(401);
- const secure=require('supertest')(require('../../server/app.cjs')({...fixture.config,production:true,origins:['https://farmacia.example']}));
+ const secure=require('supertest')(require('../../backend/app.cjs')({...fixture.config,production:true,origins:['https://farmacia.example']}));
  const login=await secure.post('/api/auth/login').set({'X-Farmacia-Web':'1',Origin:'https://farmacia.example'}).send({email:'email-admin@example.ec',password:'SyntheticEmailAdmin2026!'}).expect(200);
  for(const value of login.headers['set-cookie']){assert.match(value,/^__Host-farmacia-/);assert.match(value,/; Secure;/);assert.match(value,/; HttpOnly;/);assert.doesNotMatch(value,/Domain=/i);}
  const owner=legacy.body.data.usuario.id;

@@ -35,7 +35,7 @@
 - La aceptación sería que siempre se vean los resultados de la última búsqueda.
 - Estas pruebas permiten decidir qué parte del controlador merece simplificarse.
 
-**Referencias.** [Controlador del catálogo](../frontend/controllers/catalog.js) y [prueba en navegador](../tests/reto2/frontend.spec.cjs).
+**Referencias.** [Controlador del catálogo](../src/controllers/catalog.js) y [prueba en navegador](../tests/reto2/frontend.spec.cjs).
 
 ## 2. MVC en el backend
 
@@ -68,7 +68,7 @@
 - Si la demora resulta importante, se puede procesar el aviso en segundo plano.
 - La aceptación sería conservar un pedido, un descuento de stock y un aviso trazable.
 
-**Referencias.** [Controlador](../server/controllers/pedidos.cjs), [modelo](../server/models/pedidos.cjs) y [pruebas de pedidos](../tests/reto2/api.test.cjs).
+**Referencias.** [Controlador](../backend/controllers/pedidos.cjs), [modelo](../backend/models/pedidos.cjs) y [pruebas de pedidos](../tests/reto2/api.test.cjs).
 
 ## 3. Base de datos relacional y Prisma
 
@@ -101,7 +101,7 @@
 - Para pedidos, comparar el tiempo de búsqueda por cliente con distintos volúmenes.
 - Un ensayo de restauración debe cotejar cantidades, totales y relaciones recuperadas.
 
-**Referencias.** [Normalización](NORMALIZACION.md), [esquema PostgreSQL](../server/prisma/postgresql/schema.prisma) y [pruebas de migración](../tests/reto2/postgres-normalization.test.cjs).
+**Referencias.** [Normalización](NORMALIZACION.md), [esquema PostgreSQL](../backend/prisma/postgresql/schema.prisma) y [pruebas de migración](../tests/reto2/postgres-normalization.test.cjs).
 
 ## 4. API REST de productos
 
@@ -134,7 +134,7 @@
 - Medir el listado con el volumen de productos previsto para el negocio.
 - Usar esos resultados para fijar un tamaño de página adecuado para móvil.
 
-**Referencias.** [Rutas](../server/routes/index.cjs), [casos de API](../tests/reto2/api.test.cjs) y [CRUD desde el navegador](../tests/reto2/frontend.spec.cjs).
+**Referencias.** [Rutas](../backend/routes/index.cjs), [casos de API](../tests/reto2/api.test.cjs) y [CRUD desde el navegador](../tests/reto2/frontend.spec.cjs).
 
 ## 5. Autenticación JWT y sesión
 

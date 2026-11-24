@@ -34,7 +34,7 @@ function buildPages({output=defaultOutput,apiOrigin=process.env.PUBLIC_API_ORIGI
   // Only these generated output locations may be replaced. Never operate on the source tree.
   if(fs.existsSync(output)){if(fs.lstatSync(output).isSymbolicLink())throw new Error('La salida no puede ser un enlace.');fs.rmSync(output,{recursive:true,force:true});}
   fs.mkdirSync(output,{recursive:true});
-  const frontend=path.join(root,'frontend');noLinks(frontend,root);
+  const frontend=path.join(root,'src');noLinks(frontend,root);
   const read=relative=>{const file=path.join(frontend,relative);noLinks(file,frontend);return fs.readFileSync(file);};
   let files=0,bytes=0,maxFileBytes=0;
   const write=(relative,content)=>{
@@ -46,7 +46,7 @@ function buildPages({output=defaultOutput,apiOrigin=process.env.PUBLIC_API_ORIGI
   for(const file of pages)write(file,read(file));
   write('app-worker.js',read('app-worker.js'));
   function copy(directory){
-    for(const entry of fs.readdirSync(path.join(root,'frontend',directory),{withFileTypes:true})){
+    for(const entry of fs.readdirSync(path.join(root,'src',directory),{withFileTypes:true})){
       if(entry.name.startsWith('.') || entry.isSymbolicLink() || entry.name==='uploads')continue;
       const relative=directory+'/'+entry.name;
       if(entry.isDirectory()){copy(relative);continue;}

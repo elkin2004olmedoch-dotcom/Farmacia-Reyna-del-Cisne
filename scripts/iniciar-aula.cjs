@@ -27,20 +27,20 @@ async function start(){
     PAYMENT_PRACTICE_ENABLED:'true',PAYPHONE_ENABLED:'false',PRACTICE_FULFILLMENT_ENABLED:'true'
   });
   for(const args of [
-    ['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],
-    ['server/prisma/seed.cjs'],['scripts/provision-admin.cjs'],['scripts/sync-catalog.cjs']
+    ['node_modules/prisma/build/index.js','migrate','deploy','--schema','backend/prisma/schema.prisma'],
+    ['backend/prisma/seed.cjs'],['scripts/provision-admin.cjs'],['scripts/sync-catalog.cjs']
   ])execFileSync(process.execPath,args,{stdio:'inherit'});
-  const db=require('../server/models/db.cjs');
+  const db=require('../backend/models/db.cjs');
   const localZone=await db.zonaEntrega.findUniqueOrThrow({where:{id:'puerto-quito'},select:{version:true,tarifaCentavos:true}});
   if(localZone.tarifaCentavos===null){
     const admin=await db.usuario.findUniqueOrThrow({where:{email:env.ADMIN_EMAIL},select:{id:true,tokenVersion:true}});
-    await require('../server/models/entregas.cjs').saveZone('puerto-quito',{tarifaCentavos:0,esperadoVersion:localZone.version},admin);
+    await require('../backend/models/entregas.cjs').saveZone('puerto-quito',{tarifaCentavos:0,esperadoVersion:localZone.version},admin);
   }
   const supplier=await db.proveedor.create({data:{nombre:'Distribuidora del aula',ruc:'0102030400001',email:'proveedor@aula.invalid',telefono:'+593990000000',direccion:'Bodega de práctica del aula'}});
   await db.usuario.create({data:{nombre:'Cliente',username:'cliente',email:'cliente@aula.invalid',telefono:'0990000000',role:'user',passwordHash:customerHash}});
   const app=express();
   app.post('/api/auth/register',(_req,res)=>res.status(403).json({ok:false,error:{code:'CLASS_ACCOUNTS',message:'Entra con la cuenta de cliente asignada.'}}));
-  const pharmacy=require('../server/app.cjs')();
+  const pharmacy=require('../backend/app.cjs')();
   pharmacy.locals.classroom=true;
   // Tarifario académico para la primera compra del catálogo inicial del aula.
   const products=await db.producto.findMany({where:{activo:true},select:{id:true,categoria:true}});
@@ -48,7 +48,7 @@ async function start(){
   pharmacy.locals.tarifaAula={proveedorId:supplier.id,precios:new Map(products.map(p=>[p.id,coursePrices[p.categoria]??2.15]))};
   app.use(pharmacy);
   const server=require('node:http').createServer(app);
-  const {listen,createShutdown}=require('../server/lifecycle.cjs');
+  const {listen,createShutdown}=require('../backend/lifecycle.cjs');
   const stop=createShutdown(server,{stop:async()=>{},disconnect:()=>db.$disconnect()});
   for(const signal of ['SIGINT','SIGTERM'])process.once(signal,()=>stop().then(()=>process.exit(0)));
   await listen(server,port,env.HOST);

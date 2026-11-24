@@ -1,8 +1,8 @@
 'use strict';
 const {test,after}=require('node:test'),assert=require('node:assert/strict');
-const request=require('supertest'),mail=require('../../server/models/email-delivery.cjs');
+const request=require('supertest'),mail=require('../../backend/models/email-delivery.cjs');
 const {db}=require('./fixture.cjs');
-const createApp=require('../../server/app.cjs'),base=require('../../server/config.cjs')();
+const createApp=require('../../backend/app.cjs'),base=require('../../backend/config.cjs')();
 const values={nombre:'Cliente Obligatorio',email:'obligatorio@example.ec',telefono:'0991234567',cedula:'0102030400',password:'VerificarPrimero2026!'};
 const original=mail.sendVerification;
 after(async()=>{mail.sendVerification=original;await db.$disconnect();});

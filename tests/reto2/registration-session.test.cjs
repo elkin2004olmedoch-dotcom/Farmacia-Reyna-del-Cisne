@@ -3,7 +3,7 @@ const {test,before,after,beforeEach}=require('node:test');
 const assert=require('node:assert/strict');
 const {randomUUID,createHash}=require('node:crypto');
 const {createFixture}=require('./email-api-fixture.cjs');
-const mail=require('../../server/models/email-delivery.cjs');
+const mail=require('../../backend/models/email-delivery.cjs');
 const originalSend=mail.sendVerification;
 const web={'X-Farmacia-Web':'1',Origin:'http://localhost:3300'};
 const cookies=response=>(response.headers['set-cookie']||[]).map(value=>value.split(';')[0]).join('; ');

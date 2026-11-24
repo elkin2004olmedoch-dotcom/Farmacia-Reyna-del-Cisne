@@ -1,6 +1,6 @@
 const {test,after}=require('node:test'),assert=require('node:assert/strict'),{randomUUID}=require('node:crypto');
 const {createFixture}=require('./email-api-fixture.cjs');
-const fixture=createFixture(),{db}=fixture,api=fixture.api(false),geo=require('../../server/models/geocoding.cjs'),original=geo.resolve;
+const fixture=createFixture(),{db}=fixture,api=fixture.api(false),geo=require('../../backend/models/geocoding.cjs'),original=geo.resolve;
 after(async()=>{geo.resolve=original;await fixture.close();});
 let user,product,order;
 const buyer={name:'Cliente Nacional',email:'nacional@example.ec',phone:'0991234567',documentType:'cedula',document:'0102030400',delivery:'delivery',province:'Azuay',city:'Cuenca',address:'Avenida Solano numero 123',postalCode:'010101',zonaEntregaId:'ecuador-nacional',esperadoTarifaVersion:1};
@@ -17,13 +17,13 @@ test('cobertura nacional gratuita: dirección resuelta, total correcto y destino
  geo.resolve=async()=>{throw new Error('No debe repetirse la búsqueda en un replay.');};await api.post('/api/pedidos').set(headers()).send(payload).expect(200);
 });
 test('destino no localizado: indica retiro antes de crear el pedido, sin stock ni cobro de envío',async()=>{
- const {AppError}=require('../../server/middleware/errors.cjs');geo.resolve=async()=>{throw new AppError(409,'ADDRESS_NOT_FOUND','No encontrado.');};
+ const {AppError}=require('../../backend/middleware/errors.cjs');geo.resolve=async()=>{throw new AppError(409,'ADDRESS_NOT_FOUND','No encontrado.');};
  const before=await db.pedido.count(),stock=(await db.producto.findUnique({where:{id:product.id}})).stock;
  const res=await api.post('/api/entregas/verificar-destino').set(headers()).send({province:buyer.province,city:buyer.city,address:'Calle desconocida numero 999',zonaEntregaId:buyer.zonaEntregaId}).expect(200);assert.equal(res.body.data.delivery,'pickup');assert.match(res.body.data.message,/retiro/i);
  const failed=await api.post('/api/pedidos').set(headers()).send(input()).expect(409);assert.equal(failed.body.error.code,'DELIVERY_PICKUP_REQUIRED');assert.equal(await db.pedido.count(),before);assert.equal((await db.producto.findUnique({where:{id:product.id}})).stock,stock);
 });
 test('cobertura valida las 24 provincias y rechaza puntos extranjeros y campos imprevistos',async()=>{
- const v=require('../../frontend/models/ecuador.js'),zone={alcance:'nacional',activa:true};for(const province of v.provinces)assert.equal(v.matchesDeliveryZone(zone,{province,city:'Cantón de prueba'}),true);
+ const v=require('../../src/models/ecuador.js'),zone={alcance:'nacional',activa:true};for(const province of v.provinces)assert.equal(v.matchesDeliveryZone(zone,{province,city:'Cantón de prueba'}),true);
  assert.equal(v.ecuadorPoint(-.74,-90.3),true);assert.equal(v.ecuadorPoint(40.7,-74),false);
  await api.post('/api/entregas/verificar-destino').send({}).expect(401);
  await api.post('/api/entregas/verificar-destino').set(headers()).send({province:'Colombia',city:'Bogotá',address:buyer.address,zonaEntregaId:buyer.zonaEntregaId}).expect(422);
@@ -31,7 +31,7 @@ test('cobertura valida las 24 provincias y rechaza puntos extranjeros y campos i
  const body=input();Object.assign(body.comprador,{latitudEntrega:40.7,longitudEntrega:-74,consienteUbicacion:true});await api.post('/api/pedidos').set(headers()).send(body).expect(422);
 });
 test('el aula confirma direcciones escritas en diferentes provincias sin proveedor de mapas ni GPS',async()=>{
- const app=require('../../server/app.cjs')(fixture.config);
+ const app=require('../../backend/app.cjs')(fixture.config);
  app.locals.classroom=true;
  const classroom=require('supertest')(app);
  const prior=process.env.PAYMENT_PRACTICE_ENABLED;
@@ -55,7 +55,7 @@ test('el aula confirma direcciones escritas en diferentes provincias sin proveed
  }finally{if(prior===undefined)delete process.env.PAYMENT_PRACTICE_ENABLED;else process.env.PAYMENT_PRACTICE_ENABLED=prior;}
 });
 test('administración cambia la tarifa nacional con versión e historial sin alterar pedidos ni tarifa local',async()=>{
- const model=require('../../server/models/entregas.cjs'),admin=await db.usuario.findFirst({where:{role:'admin'}}),before=await db.zonaEntrega.findUnique({where:{id:'puerto-quito'}}),zone=await db.zonaEntrega.findUnique({where:{id:'ecuador-nacional'}});
+ const model=require('../../backend/models/entregas.cjs'),admin=await db.usuario.findFirst({where:{role:'admin'}}),before=await db.zonaEntrega.findUnique({where:{id:'puerto-quito'}}),zone=await db.zonaEntrega.findUnique({where:{id:'ecuador-nacional'}});
  const updated=await model.saveZone(zone.id,{nombre:zone.nombre,provincia:zone.provincia,canton:zone.canton,tarifaCentavos:300,ivaCategoria:'general',fundamentoIva:null,activa:true,esperadoVersion:zone.version},admin);
  assert.equal(updated.alcance,'nacional');assert.equal(updated.version,2);assert.equal((await db.zonaEntregaTarifa.findFirst({where:{zonaEntregaId:zone.id,version:2}})).alcance,'nacional');
  assert.equal((await db.pedido.findUnique({where:{id:order.id}})).costoEnvioCentavos,0);assert.deepEqual(await db.zonaEntrega.findUnique({where:{id:'puerto-quito'}}),before);

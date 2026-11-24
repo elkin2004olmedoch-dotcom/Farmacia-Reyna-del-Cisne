@@ -1,4 +1,4 @@
-const {sections}=require('../../frontend/models/catalog-sections.js');
+const {sections}=require('../../src/models/catalog-sections.js');
 const catalogPage=`<div class="catalog-heading"><div><p class="eyebrow">Tu farmacia en línea</p><h1>Un cuidado para cada día.</h1><p class="shop-lead">Encuentra lo que necesitas por nombre, laboratorio o presentación.</p></div><a href="comparar.html" class="text-link">Comparar productos →</a></div>
 <div class="mvc-catalog"><aside class="mvc-filters" aria-label="Filtros del catálogo"><form id="catalog-filter-form">
 <div class="catalog-filter"><label for="catalog-search">Buscar productos</label><input id="catalog-search" name="q" type="search" maxlength="100" placeholder="Nombre, laboratorio…" autocomplete="off"><button type="submit" class="button button-primary">Buscar</button></div>

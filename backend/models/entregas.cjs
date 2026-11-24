@@ -24,7 +24,7 @@ async function actor(tx,user,allowed) {
 async function shippingSnapshot(tx,buyer,tax,now,destination=null) {
  if(buyer.delivery!=='delivery')return {costoEnvioCentavos:0};
  const zone=typeof buyer.zonaEntregaId==='string'?await tx.zonaEntrega.findUnique({where:{id:buyer.zonaEntregaId}}):null;
- if(!require('../../frontend/models/ecuador.js').matchesDeliveryZone(zone,buyer))fail('DELIVERY_OUTSIDE_COVERAGE','Selecciona una cobertura activa que corresponda a tu dirección en Ecuador.');
+ if(!require('../../src/models/ecuador.js').matchesDeliveryZone(zone,buyer))fail('DELIVERY_OUTSIDE_COVERAGE','Selecciona una cobertura activa que corresponda a tu dirección en Ecuador.');
  if(buyer.esperadoTarifaVersion!==zone.version)fail('DELIVERY_RATE_CHANGED','La tarifa de entrega cambió. Revisa el importe actualizado antes de confirmar nuevamente.');
  if(zone.tarifaCentavos===null)fail('DELIVERY_RATE_PENDING','La tarifa de entrega aún no está configurada. Coordina con la farmacia o elige retiro.');
  const fiscal=inclusiveTax(zone.tarifaCentavos,zone.ivaCategoria==='cero'?0:tax.tarifaGeneral);

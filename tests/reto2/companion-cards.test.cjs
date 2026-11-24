@@ -12,7 +12,7 @@ async function moduleAt(relative,{strip=false}={}){
   return import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 }
 async function customer(options={}){
-  const {createCustomerCommandExecutor}=await import(pathToFileURL(path.resolve('frontend/controllers/customer-command.mjs')));
+  const {createCustomerCommandExecutor}=await import(pathToFileURL(path.resolve('src/controllers/customer-command.mjs')));
   let items={},current={...product};const pages=[];
   const cart={read:()=>({...items}),add(p,n){items[p.id]=(items[p.id]||0)+n;},remove(id){delete items[id];},clear(){items={};}};
   const catalog={page:async params=>{pages.push(params);return {items:[current],total:1,page:1,pageSize:8};},all:()=>assert.fail('Una búsqueda no debe descargar el catálogo completo'),find:async()=>current};
@@ -20,8 +20,8 @@ async function customer(options={}){
   return {run,cart,pages,setProduct:next=>{current=next;}};
 }
 async function admin(options){
-  const file=path.resolve('frontend/controllers/admin-companion.js');let source=fs.readFileSync(file,'utf8').replace(/^import .*;\r?$/gm,'');
-  source=`import {interpretAdminCommand,ecuadorCommandDay} from '${pathToFileURL(path.resolve('frontend/controllers/admin-command.mjs')).href}';\n${source}`;
+  const file=path.resolve('src/controllers/admin-companion.js');let source=fs.readFileSync(file,'utf8').replace(/^import .*;\r?$/gm,'');
+  source=`import {interpretAdminCommand,ecuadorCommandDay} from '${pathToFileURL(path.resolve('src/controllers/admin-command.mjs')).href}';\n${source}`;
   const {createAdminCommandExecutor}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
   return createAdminCommandExecutor({isAdmin:()=>true,confirm:true,deliveryModel:{},...options});
 }
@@ -92,7 +92,7 @@ function documentFixture(){
   return doc;
 }
 test('tarjetas usan DOM, foto real lazy con dimensiones y fallback, y escapan nombres extensos sin HTML',async()=>{
-  const {appendCompanionCards}=await moduleAt('frontend/controllers/companion-cards.js');const doc=documentFixture(),target=doc.documentElement;
+  const {appendCompanionCards}=await moduleAt('src/controllers/companion-cards.js');const doc=documentFixture(),target=doc.documentElement;
   appendCompanionCards(target,{kind:'products',items:[{...product,nombre:product.nombre+' largo'.repeat(120)}]},doc);
   const image=target.getElementsByTagName('img')[0],link=target.getElementsByTagName('a')[0];
   assert.equal(image.src,product.imagen);assert.equal(image.loading,'lazy');assert.equal(image.width,64);assert.equal(image.height,64);
@@ -102,7 +102,7 @@ test('tarjetas usan DOM, foto real lazy con dimensiones y fallback, y escapan no
   image.dispatchEvent(new Event('error'));assert.equal(image.src,'assets/images/producto-sin-imagen.svg');
 });
 test('tarjetas bloquean fotos/URLs peligrosas y no presentan precio ausente como cero',async()=>{
-  const {appendCompanionCards,safeCompanionHref}=await moduleAt('frontend/controllers/companion-cards.js');const doc=documentFixture(),target=doc.documentElement;
+  const {appendCompanionCards,safeCompanionHref}=await moduleAt('src/controllers/companion-cards.js');const doc=documentFixture(),target=doc.documentElement;
   appendCompanionCards(target,{kind:'products',items:[{...product,imagen:'javascript:alert(1)',precio:null},{...product,id:'../admin'}]},doc);
   assert.equal(target.getElementsByTagName('img').length,1);assert.equal(target.getElementsByTagName('img')[0].src,'assets/images/producto-sin-imagen.svg');assert.match(target.textContent,/Precio por confirmar/);
   for(const href of ['javascript:alert(1)','https://evil.test','//evil.test','admin.html?tabla=usuarios&registro=x','producto.html?id=x&next=//evil.test','producto.html?id=../admin','seguimiento.html?pedido=x#evil'])assert.equal(safeCompanionHref(href),null,href);
@@ -110,7 +110,7 @@ test('tarjetas bloquean fotos/URLs peligrosas y no presentan precio ausente como
   assert.equal(safeCompanionHref('seguimiento.html?pedido='+orderId),'seguimiento.html?pedido='+orderId);
 });
 test('tarjeta restringida informa tanto existencias como atención farmacéutica',async()=>{
-  const {appendCompanionCards}=await moduleAt('frontend/controllers/companion-cards.js');const doc=documentFixture(),target=doc.documentElement;
+  const {appendCompanionCards}=await moduleAt('src/controllers/companion-cards.js');const doc=documentFixture(),target=doc.documentElement;
   appendCompanionCards(target,{kind:'cart',items:[{...product,restricted:true,stock:1,cantidad:2}],subtotalCentavos:1050},doc);
   assert.match(target.textContent,/Stock insuficiente: 1/);assert.match(target.textContent,/atención farmacéutica/);
 });
@@ -128,7 +128,7 @@ test('promoción y zona abren el registro guardado, con identificador distinto a
   await run('modifica zona "zona-prueba": tarifaCentavos=300');const saved=await run('confirmar');assert.equal(saved.actions[0].href,'admin.html?tabla=zonas&registro=zona-prueba');
 });
 test('navegación administrativa encuentra registro fuera de primera página y revalida rol',async()=>{
-  const {findCompanionRecord}=await moduleAt('frontend/controllers/admin.js',{strip:true});const pages=[];
+  const {findCompanionRecord}=await moduleAt('src/controllers/admin.js',{strip:true});const pages=[];
   const found=await findCompanionRecord({table:'productos',record:product.id,allowed:()=>true,load:async(_table,page)=>{pages.push(page);return {items:page===2?[product]:[{id:'otro'}],total:2,pageSize:1,page};}});
   assert.equal(found.page,2);assert.equal(found.record.id,product.id);assert.deepEqual(pages,[1,2]);
   let allowed=true;await assert.rejects(findCompanionRecord({table:'productos',record:product.id,allowed:()=>allowed,load:async()=>{allowed=false;return {items:[product],total:1,pageSize:20};}}),/sesión/);

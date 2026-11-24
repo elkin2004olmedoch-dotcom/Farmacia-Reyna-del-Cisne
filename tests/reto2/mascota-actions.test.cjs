@@ -4,7 +4,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 async function actions(){
-  const file=path.resolve(__dirname,'../../frontend/controllers/mascota.js');
+  const file=path.resolve(__dirname,'../../src/controllers/mascota.js');
   let source=fs.readFileSync(file,'utf8').replace(/^import .*;\r?$/gm,'').replaceAll('import.meta.url',JSON.stringify(pathToFileURL(file).href));
   return (await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'))).activateMascotaAction;
 }

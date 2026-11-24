@@ -10,8 +10,8 @@ test('artefacto publica cliente y proxy API de origen fijo con CSP exacta',async
   assert.ok(result.files>80);
   for(const file of ['index.html','admin.html','checkout.html','pagos.html','404.html','models/api.js','assets/images/logo-reina-del-cisne.png'])assert.ok(fs.existsSync(path.join(output,file)),file);
   for(const file of ['farmacia-5.jpg','farmacia-9.jpg','farmacia-fachada-reina.webp'])assert.ok(!fs.existsSync(path.join(output,'assets/images',file)),file);
-  assert.deepEqual(fs.readdirSync(output).filter(file=>file.endsWith('.html') && file!=='404.html').sort(),fs.readdirSync(path.join('frontend')).filter(file=>file.endsWith('.html')).sort(),'Pages incluye todas las pantallas generadas de la aplicación');
-  for(const file of ['.env','.env.example','server','data','docs','node_modules','assets/uploads','functions'])assert.ok(!fs.existsSync(path.join(output,file)),file);
+  assert.deepEqual(fs.readdirSync(output).filter(file=>file.endsWith('.html') && file!=='404.html').sort(),fs.readdirSync(path.join('src')).filter(file=>file.endsWith('.html')).sort(),'Pages incluye todas las pantallas generadas de la aplicación');
+  for(const file of ['.env','.env.example','backend','data','docs','node_modules','assets/uploads','functions'])assert.ok(!fs.existsSync(path.join(output,file)),file);
   assert.ok(fs.existsSync(path.join(output,'_worker.js')));assert.deepEqual(JSON.parse(fs.readFileSync(path.join(output,'_routes.json'),'utf8')),{version:1,include:['/api/*'],exclude:[]});
   for(const file of ['clase.html','models/classroom.js','controllers/classroom.js','assets/classroom.css'])assert.ok(!fs.existsSync(path.join(output,file)),file);
   assert.equal(fs.readFileSync(path.join(output,'_redirects'),'utf8'),'/clase / 302\n/clase.html / 302\n');
@@ -25,7 +25,7 @@ test('artefacto publica cliente y proxy API de origen fijo con CSP exacta',async
   assert.match(headers,/img-src 'self' data: https:\/\/tile\.openstreetmap\.org https:\/\/api\.example\.test https:\/\/images\.example\.test;/);
   assert.match(headers,/frame-ancestors 'none'/);assert.match(headers,/max-age=0, must-revalidate/);
   assert.ok(!headers.includes('unsafe-inline') && !headers.includes('unsafe-eval'));
-  assert.equal(fs.readFileSync(path.join(output,'index.html'),'utf8'),fs.readFileSync('frontend/index.html','utf8'));
+  assert.equal(fs.readFileSync(path.join(output,'index.html'),'utf8'),fs.readFileSync('src/index.html','utf8'));
   assert.match(fs.readFileSync(path.join(output,'index.html'),'utf8'),/id="featured-products"[^>]*aria-live="polite"[^>]*>Cargando productos/);
 });
 test('build rechaza orígenes inseguros sin incluir credenciales en errores',()=>{
@@ -36,8 +36,8 @@ test('desarrollo requiere loopback explícito y no puede borrar un directorio aj
   const output=path.join(directory,'local');
   assert.throws(()=>buildPages({output,apiOrigin:'http://127.0.0.1:3302'}));
   buildPages({output,apiOrigin:'http://127.0.0.1:3302',allowLocal:true});
-  assert.throws(()=>buildPages({output:path.resolve('frontend'),apiOrigin:'https://api.example.test'}));
-  assert.ok(fs.existsSync('frontend/index.html'));
+  assert.throws(()=>buildPages({output:path.resolve('src'),apiOrigin:'https://api.example.test'}));
+  assert.ok(fs.existsSync('src/index.html'));
 });
 test('una junction en un antecesor no permite reemplazar archivos fuera de la salida',()=>{
   const outside=path.join(directory,'outside'),link=path.join(directory,'junction');

@@ -10,7 +10,7 @@ No hubo coincidencias con los valores privados comparados. Los patrones con apar
 
 | ID | Prioridad y evidencia | Acción |
 | --- | --- | --- |
-| PUB-01 | Baja: entrega/mascotas-v3 y docs/pruebas contenían material de preparación y capturas ajeno al runtime | Archivo local privado y exclusión de futuras salidas en .gitignore; frontend/assets/mascotas se conserva |
+| PUB-01 | Baja: entrega/mascotas-v3 y docs/pruebas contenían material de preparación y capturas ajeno al runtime | Archivo local privado y exclusión de futuras salidas en .gitignore; src/assets/mascotas se conserva |
 | PUB-02 | Media: verify-mobile.yml y verify-mvc.yml se disparaban automáticamente, incluyendo macOS/iOS | Ambos workflows quedan manuales, con permisos de lectura y límites de ejecución; se conservan las pruebas |
 | PUB-03 | Media: pages.yml publicaba toda la raíz y el agente auxiliar tenía un workflow propio | Retirados del árbol actual junto al servicio auxiliar independiente; no se cambia Cloudflare |
 | PUB-04 | Media: render.yaml declaraba autoDeployTrigger commit y solo el origen de Render | Blueprint actualizado a off, plan Free y orígenes exactos de Cloudflare/Render; no se reaplica ni se cambian secretos |

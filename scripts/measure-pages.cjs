@@ -67,7 +67,7 @@ async function measure(options){
     Object.assign(process.env,{NODE_ENV:'test',IMAGE_STORAGE:'local',PERF_DIAGNOSTICS:'0',
       DATABASE_URL:'file:'+path.join(directory,'measure.db').replaceAll('\\','/'),UPLOAD_DIR:path.join(directory,'uploads'),
       JWT_SECRET:randomBytes(48).toString('hex'),ADMIN_EMAIL:'admin-measure@example.ec',ADMIN_PASSWORD:'AdminMeasure2026!',CORS_ORIGIN:'http://127.0.0.1'});
-    for(const args of [['node_modules/prisma/build/index.js','migrate','deploy','--schema','server/prisma/schema.prisma'],['server/prisma/seed.cjs']])execFileSync(process.execPath,args,{env:process.env,stdio:'pipe'});
+    for(const args of [['node_modules/prisma/build/index.js','migrate','deploy','--schema','backend/prisma/schema.prisma'],['backend/prisma/seed.cjs']])execFileSync(process.execPath,args,{env:process.env,stdio:'pipe'});
     let app;
     apiServer=http.createServer((req,res)=>{
       if(mode.name==='offline')return; // Accept HTTP, but deliberately send no headers or body.
@@ -82,8 +82,8 @@ async function measure(options){
     const express=require('express'),staticApp=express();staticApp.disable('x-powered-by');
     staticServer=http.createServer(staticApp);const staticOrigin=await listen(staticServer);
     process.env.CORS_ORIGIN=staticOrigin+','+apiOrigin;
-    const settings={...require('../server/config.cjs')(),frontendRoot:baselineRoot,testAuthLimit:200,testApiLimit:2000};
-    db=require('../server/models/db.cjs');app=require('../server/app.cjs')(settings);
+    const settings={...require('../backend/config.cjs')(),frontendRoot:baselineRoot,testAuthLimit:200,testApiLimit:2000};
+    db=require('../backend/models/db.cjs');app=require('../backend/app.cjs')(settings);
     const connectStart=performance.now();await db.$connect();const connectMs=round(performance.now()-connectStart);
     const artifact=require('./build-pages.cjs').buildPages({output,apiOrigin,allowLocal:true});
     staticApp.use(applyHeaders(path.join(output,'_headers')));

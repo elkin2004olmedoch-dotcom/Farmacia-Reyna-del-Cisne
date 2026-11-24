@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const views=()=>import('../../frontend/views/order-map.js');
+const views=()=>import('../../src/views/order-map.js');
 test('retirar en farmacia apunta al marcador exacto de Consulab compartido por el titular',async()=>{
  const {orderMapData}=await views(),data=orderMapData({id:'retiro',estado:'preparado',entrega:'pickup'}),url=new URL(data.directionsUrl);
  assert.equal(url.origin,'https://www.google.com');assert.equal(url.searchParams.get('query'),'0.1200092,-79.2580379');

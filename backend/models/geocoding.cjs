@@ -36,7 +36,7 @@ function createGeocoder({fetch=globalThis.fetch,now=Date.now}={}){
  return {resolve:search};
 }
 async function prepare(buyer,{classroom=false}={}){
- const ec=require('../../frontend/models/ecuador.js');
+ const ec=require('../../src/models/ecuador.js');
  const zone=typeof buyer.zonaEntregaId==='string'?await require('./db.cjs').zonaEntrega.findUnique({where:{id:buyer.zonaEntregaId}}):null;
  if(!ec.matchesDeliveryZone(zone,buyer))throw problem('DELIVERY_OUTSIDE_COVERAGE','Selecciona una cobertura activa para tu dirección en Ecuador.');
  if(zone.tarifaCentavos===null)throw problem('DELIVERY_RATE_PENDING','La tarifa todavía no está definida. Puedes elegir retiro en farmacia.');

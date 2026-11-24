@@ -3,7 +3,7 @@ const {test,before,after,beforeEach,afterEach}=require('node:test');
 const assert=require('node:assert/strict');
 const {randomUUID,createHash}=require('node:crypto');
 const jwt=require('jsonwebtoken');
-const mail=require('../../server/models/email-delivery.cjs');
+const mail=require('../../backend/models/email-delivery.cjs');
 const {createFixture,postgresTestUrl}=require('./email-api-fixture.cjs');
 const originalSend=mail.sendVerification,originalFetch=globalThis.fetch;
 let fixture,messages;

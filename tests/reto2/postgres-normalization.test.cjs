@@ -15,7 +15,7 @@ test('PostgreSQL aislado migra019 sin perder lotes o códigos y protege consumo 
  const database='farmacia_test_normalizacion_'+randomUUID().replaceAll('-','');
  await control.$executeRawUnsafe('CREATE DATABASE "'+database+'"');url.pathname='/'+database;
  const directory=fs.mkdtempSync(path.join(os.tmpdir(),'farmacia-pg-normalizacion-'));
- const source=path.resolve(__dirname,'../../server/prisma/postgresql');
+ const source=path.resolve(__dirname,'../../backend/prisma/postgresql');
  const schema=path.join(directory,'schema.prisma');
  const name='202611230019_relational_normalization';
  fs.copyFileSync(path.join(source,'schema.prisma'),schema);
@@ -81,9 +81,9 @@ test('PostgreSQL aislado migra019 sin perder lotes o códigos y protege consumo 
  const rls=await db.$queryRaw`SELECT relname,relrowsecurity FROM pg_class WHERE relname IN ('MovimientoLote','AdminMfaRecuperacion')`;
  assert.equal(rls.length,2);assert(rls.every(row=>row.relrowsecurity));
  Object.assign(process.env,env);
- const config=require('../../server/config.cjs')();
- const appDb=require('../../server/models/db.cjs');t.after(()=>appDb.$disconnect());
- const mfa=require('../../server/models/admin-mfa.cjs'),challenge=await mfa.challenge(user,config);
+ const config=require('../../backend/config.cjs')();
+ const appDb=require('../../backend/models/db.cjs');t.after(()=>appDb.$disconnect());
+ const mfa=require('../../backend/models/admin-mfa.cjs'),challenge=await mfa.challenge(user,config);
  const attempts=await Promise.allSettled([mfa.login(challenge,codes[0],config),mfa.login(challenge,codes[0],config)]);
  assert.equal(attempts.filter(result=>result.status==='fulfilled').length,1);
  assert.equal(await db.adminMfaRecuperacion.count({where:{usuarioId:user.id,usedAt:{not:null}}}),1);
