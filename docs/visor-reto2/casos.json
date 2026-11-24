@@ -1,0 +1,293 @@
+[
+  {
+    "id": "mvc-frontend",
+    "title": "MVC en el frontend",
+    "question": "¿Cómo llega un producto del buscador al carrito?",
+    "link": "https://farmacia-reina-del-cisne-aula.onrender.com/catalogo.html?q=Ensure",
+    "label": "Probar el catálogo",
+    "steps": [
+      {
+        "title": "Buscar un producto",
+        "action": "Escribir en el buscador y abrir los resultados.",
+        "result": "La vista presenta la coincidencia que devuelve el catálogo.",
+        "evidence": "catálogo, persistencia, login obligatorio, registro y pedido real (6.2s)",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/frontend.spec.cjs#L15",
+        "image": "producto"
+      },
+      {
+        "title": "Conservar el carrito",
+        "action": "Añadir el producto y recargar la página.",
+        "result": "La cantidad se conserva y el cliente puede continuar la compra.",
+        "evidence": "catálogo, persistencia, login obligatorio, registro y pedido real (6.0s)",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/frontend.spec.cjs#L15",
+        "image": "carrito"
+      }
+    ]
+  },
+  {
+    "id": "mvc-backend",
+    "title": "MVC en el backend",
+    "question": "¿Quién calcula el total y qué se guarda al confirmar?",
+    "link": "https://farmacia-reina-del-cisne-aula.onrender.com/api/productos/vitaminas",
+    "label": "Ver una respuesta del backend",
+    "steps": [
+      {
+        "title": "Confirmar dos unidades",
+        "action": "Enviar el carrito con dos unidades de USD 8,50 al controlador de pedidos.",
+        "result": "HTTP 201 · El modelo guarda USD 17,00 y el detalle con dos unidades.",
+        "evidence": "pedido exige login; el total se calcula en servidor y queda en BD con detalles",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L74"
+      },
+      {
+        "title": "Repetir la confirmación",
+        "action": "Enviar de nuevo la misma solicitud con su clave original.",
+        "result": "HTTP 200 · Se devuelve el mismo pedido y el stock permanece en 8.",
+        "evidence": "pedido exige login; el total se calcula en servidor y queda en BD con detalles",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L74"
+      },
+      {
+        "title": "Comprobar la transacción",
+        "action": "Solicitar más unidades que las disponibles en una de las líneas.",
+        "result": "HTTP 409 · La operación se revierte y el primer producto conserva su stock anterior.",
+        "evidence": "stock insuficiente revierte toda la transacción y evita sobreventa concurrente",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L86"
+      }
+    ]
+  },
+  {
+    "id": "base-de-datos",
+    "title": "Base de datos y Prisma",
+    "question": "¿El pedido y sus detalles siguen relacionados al reconectar?",
+    "link": "https://farmacia-reina-del-cisne-aula.onrender.com/admin.html?tabla=datos&vista=completa",
+    "label": "Abrir las tablas como administrador",
+    "steps": [
+      {
+        "title": "Reconectar Prisma",
+        "action": "Guardar un pedido con detalle y volver a abrir una conexión.",
+        "result": "El pedido, el precio y las existencias siguen vinculados al producto.",
+        "evidence": "usuario, producto editado, promoción, pedido y stock siguen conectados después de reconectar Prisma",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L361"
+      },
+      {
+        "title": "Migrar PostgreSQL",
+        "action": "Aplicar la migración a una base temporal con lotes y códigos anteriores.",
+        "result": "Se conservan lotes, códigos y relaciones verificadas por SQL.",
+        "evidence": "PostgreSQL aislado migra019 sin perder lotes o códigos y protege consumo MFA y relaciones SQL",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/postgres-normalization.test.cjs"
+      }
+    ]
+  },
+  {
+    "id": "api-rest",
+    "title": "API REST de productos",
+    "question": "¿Qué devuelve la API al crear, editar y retirar un producto?",
+    "link": "https://farmacia-reina-del-cisne-aula.onrender.com/api/productos/vitaminas",
+    "label": "Consultar un producto en la API",
+    "steps": [
+      {
+        "title": "Crear",
+        "action": "El administrador envía un producto de USD 7,25 con diez unidades.",
+        "result": "POST → 201 · Prisma registra stock 10.",
+        "evidence": "crear producto requiere JWT y rol admin; user recibe 403",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L35"
+      },
+      {
+        "title": "Editar",
+        "action": "Cambiar el nombre y enviar el nuevo precio.",
+        "result": "PUT → 200 · El nombre guardado es «Producto editado» y el precio es USD 8,50.",
+        "evidence": "edición admin persiste y sanitiza texto",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L48"
+      },
+      {
+        "title": "Retirar",
+        "action": "Dar de baja el producto y volver a consultar su ficha.",
+        "result": "DELETE → 204 · GET → 404. El detalle de la compra anterior conserva USD 8,50.",
+        "evidence": "eliminación lógica impide nuevas compras y conserva detalle/precio histórico",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L244"
+      }
+    ]
+  },
+  {
+    "id": "jwt",
+    "title": "Autenticación JWT",
+    "question": "¿Qué ocurre al iniciar sesión y después de cerrar la cuenta?",
+    "link": "https://farmacia-reina-del-cisne-aula.onrender.com/cuenta.html",
+    "label": "Abrir el ingreso de la farmacia",
+    "steps": [
+      {
+        "title": "Iniciar sesión",
+        "action": "Ingresar con las credenciales de prueba del administrador en la API.",
+        "result": "HTTP 200 · La prueba verifica firma, emisor, audiencia y vencimiento del JWT.",
+        "evidence": "login admin devuelve JWT firmado y no expone hash ni contraseña",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L12"
+      },
+      {
+        "title": "Comprobar el vencimiento",
+        "action": "Solicitar el perfil con una sesión vencida.",
+        "result": "HTTP 401 · El perfil privado queda protegido.",
+        "evidence": "credenciales incorrectas, login user y expiración/revocación se controlan",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L27"
+      },
+      {
+        "title": "Cerrar sesión",
+        "action": "Cerrar la sesión y volver a consultar el perfil con la credencial anterior.",
+        "result": "El token anterior queda revocado. La base conserva los datos de la cuenta.",
+        "evidence": "logout revoca tokens ya emitidos y la BD persiste al abrir otro cliente Prisma",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L437"
+      }
+    ]
+  },
+  {
+    "id": "roles",
+    "title": "Permisos por rol",
+    "question": "¿Qué cambia al usar la misma operación con tres tipos de acceso?",
+    "link": "https://farmacia-reina-del-cisne-aula.onrender.com/admin.html?tabla=pedidos",
+    "label": "Abrir pedidos como administrador",
+    "steps": [
+      {
+        "title": "Sin sesión",
+        "action": "Intentar crear un producto desde una sesión anónima en la base de pruebas.",
+        "result": "HTTP 401 · El servidor exige iniciar sesión.",
+        "evidence": "crear producto requiere JWT y rol admin; user recibe 403",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L35"
+      },
+      {
+        "title": "Con cuenta de cliente",
+        "action": "Repetir la petición con una sesión válida de cliente.",
+        "result": "HTTP 403 · La cuenta carece del permiso de catálogo.",
+        "evidence": "crear producto requiere JWT y rol admin; user recibe 403",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L35"
+      },
+      {
+        "title": "Con cuenta administrativa",
+        "action": "Repetir la petición con la sesión del administrador.",
+        "result": "HTTP 201 · Se crea el producto.",
+        "evidence": "crear producto requiere JWT y rol admin; user recibe 403",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L35"
+      }
+    ]
+  },
+  {
+    "id": "seguridad",
+    "title": "Seguridad de cuentas y formularios",
+    "question": "¿Cómo protege la farmacia las contraseñas y los cambios de perfil?",
+    "link": "https://farmacia-reina-del-cisne-aula.onrender.com/cuenta.html",
+    "label": "Ver el formulario de cuenta",
+    "steps": [
+      {
+        "title": "Registrar una cuenta",
+        "action": "Crear una cuenta en la base temporal e inspeccionar cómo se guarda la contraseña.",
+        "result": "bcrypt con coste 12 · La contraseña se comprueba contra el hash almacenado.",
+        "evidence": "registro ecuatoriano crea usuario con bcrypt y no persiste cédula",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L17"
+      },
+      {
+        "title": "Validar los campos",
+        "action": "Probar el formulario con un correo o teléfono incorrecto.",
+        "result": "HTTP 422 · El servidor rechaza los datos inválidos.",
+        "evidence": "registro rechaza roles inyectados, correo, cédula, teléfono y contraseña inválidos",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/api.test.cjs#L22"
+      },
+      {
+        "title": "Proteger la sesión web",
+        "action": "Probar el cambio de perfil sin la protección de origen y CSRF en la sesión de pruebas.",
+        "result": "HTTP 403 · La cookie se emite con HttpOnly y SameSite=Strict.",
+        "evidence": "web: cookies privadas, CSRF, rotación y revocación inmediata sin exponer JWT",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/web-session.test.cjs#L8"
+      }
+    ]
+  },
+  {
+    "id": "compra",
+    "title": "Frontend y consumo de la API",
+    "question": "¿Una compra aparece como entregada para cliente y administrador?",
+    "link": "https://farmacia-reina-del-cisne-aula.onrender.com/pedidos.html",
+    "label": "Abrir mis pedidos en el aula",
+    "steps": [
+      {
+        "title": "Revisar el carrito",
+        "action": "Añadir Ensure y abrir el resumen de compra.",
+        "result": "El carrito muestra el producto elegido y su imagen.",
+        "evidence": "catálogo, persistencia, login obligatorio, registro y pedido real (6.2s)",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/frontend.spec.cjs#L15",
+        "image": "carrito"
+      },
+      {
+        "title": "Comprar en Cuenca",
+        "action": "Confirmar el pedido de aula con dirección escrita y permiso de GPS denegado.",
+        "result": "Pedido 08c3bc14 · Total USD 12,50 · Envío USD 0,00.",
+        "evidence": "Confirmado → En preparación → En camino → Entregado · 08c3bc14 · $0,00 de envío",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/docs/DEFENSA-RETO-2.md"
+      },
+      {
+        "title": "Ver la entrega",
+        "action": "Esperar el avance, recargar Mis pedidos y consultar el mismo número en administración.",
+        "result": "Cliente y administrador ven el mismo pedido entregado en Cuenca.",
+        "evidence": "Confirmado → En preparación → En camino → Entregado · 08c3bc14 · $0,00 de envío",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/docs/DEFENSA-RETO-2.md",
+        "image": "entrega"
+      }
+    ]
+  },
+  {
+    "id": "accesibilidad",
+    "title": "Accesibilidad por teclado",
+    "question": "¿Se puede usar la ficha con teclado y volver al control correcto?",
+    "link": "https://farmacia-reina-del-cisne-aula.onrender.com/producto.html?id=vitaminas",
+    "label": "Probar la ficha con el teclado",
+    "steps": [
+      {
+        "title": "Abrir y cerrar la imagen",
+        "action": "Enfocar la lupa, pulsar Enter para ampliar y Escape para cerrar.",
+        "result": "La imagen se abre y el foco regresa al botón que la abrió.",
+        "evidence": "detalle, imagen ampliada, cantidades y bloqueo de receta funcionan con teclado (5.4s)",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/customer-accessibility.spec.cjs#L52",
+        "image": "teclado"
+      },
+      {
+        "title": "Validar el formulario",
+        "action": "Avanzar con teclado y enviar un documento inválido.",
+        "result": "El campo queda marcado como inválido y recibe el foco para corregirlo.",
+        "evidence": "carrito, validación ecuatoriana y pedido conservan el desglose de IVA y el foco de teclado (7.9s)",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/customer-accessibility.spec.cjs#L68"
+      },
+      {
+        "title": "Comprobar las pantallas",
+        "action": "Recorrer las vistas en móvil y ejecutar las reglas de Axe configuradas.",
+        "result": "La prueba de las nueve pantallas pasó con controles de foco y ancho.",
+        "evidence": "nueve pantallas accesibles, sin desbordamiento y menú/foco por teclado (19.0s)",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/frontend.spec.cjs#L111"
+      }
+    ]
+  },
+  {
+    "id": "entrega",
+    "title": "Documentación y ZIP",
+    "question": "¿El archivo que se entrega contiene el proyecto y pasa sus pruebas?",
+    "link": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/releases/download/reto2-defensa-aula/Reto2_Olmedo_Elkin.zip",
+    "label": "Descargar el ZIP comprobado",
+    "steps": [
+      {
+        "title": "Inspeccionar el contenido",
+        "action": "Abrir el ZIP y verificar que se incluyan el código y la plantilla de configuración.",
+        "result": "Se comprobó el empaquetado y la exclusión de archivos privados.",
+        "evidence": "ZIP conserva fuente y .env.example, excluye variantes de secretos y auditorías privadas sin borrarlas",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/tests/reto2/package-security.test.cjs"
+      },
+      {
+        "title": "Identificar el archivo",
+        "action": "Calcular la huella del ZIP descargado y compararla con la del archivo probado.",
+        "result": "Coincide SHA-256. La huella completa aparece en el resultado.",
+        "evidence": "669 entradas · 19564086 bytes · SHA-256 538dab1a2475c8d3469f2c4680e30afc0bd943f495f17dcbb0238989ae6a4d27",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/docs/DEFENSA-RETO-2.md"
+      },
+      {
+        "title": "Probar desde cero",
+        "action": "Extraer, instalar, preparar la base y ejecutar la suite de API del ZIP.",
+        "result": "35 aprobadas · 0 fallos · 0 omitidas.",
+        "evidence": "ZIP extraído · instalación, preparación y API con salida 0 · 35 pruebas aprobadas",
+        "source": "https://github.com/elkin2004olmedoch-dotcom/Farmacia-Reyna-del-Cisne/blob/reto2-defensa-aula/README.md"
+      }
+    ]
+  }
+]
